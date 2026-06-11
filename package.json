@@ -1,0 +1,14 @@
+{
+  "name": "opdds-platform",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev:frontend": "npm --prefix public/app run dev",
+    "build:frontend": "npm --prefix public/app run build",
+    "dev:backend": "npm --prefix backend run start:dev",
+    "build:backend": "npm --prefix backend run build",
+    "build": "npm run build:frontend",
+    "prisma:generate": "npm --prefix backend run prisma:generate",
+    "prisma:migrate": "npm --prefix backend run prisma:migrate"
+  }
+}

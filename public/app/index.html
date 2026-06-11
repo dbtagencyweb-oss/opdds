@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>O Poder dos Desacreditados</title>
+    <meta name="description" content="Acolhimento emocional ético. Consciência, Julgamento e Presença.">
+    <meta name="theme-color" content="#18191d">
+
+    <link rel="manifest" href="/manifest.json">
+    <link rel="apple-touch-icon" href="/media/imagens/icones/logo.png">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Inria+Serif:wght@300;400;700&family=Playfair+Display:ital,wght@0,700;0,900;1,400&display=swap" rel="stylesheet">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Playfair Display', 'Inria Serif', 'serif'],
+                    },
+                    colors: {
+                        brand: {
+                            dark: '#101114',
+                            panel: '#18191d',
+                            gold: '#c8a45d'
+                        },
+                        triad: {
+                            lilac: '#c084fc',
+                            cherry: '#fb7185',
+                            green: '#75b798'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #101114; }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #52525b; border-radius: 8px; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+    </style>
+    <link rel="stylesheet" href="/index.css">
+</head>
+<body>
+    <a href="#main" class="skip-link" aria-label="Pular para o conteúdo principal">Pular para o conteúdo</a>
+    <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            const isLocal = ['localhost', '127.0.0.1', '::1'].includes(window.location.hostname);
+
+            if (isLocal) {
+                navigator.serviceWorker.getRegistrations()
+                    .then(registrations => registrations.forEach(registration => registration.unregister()));
+                if (window.caches) {
+                    caches.keys().then(keys => keys.forEach(key => caches.delete(key)));
+                }
+            } else {
+                window.addEventListener('load', () => {
+                    navigator.serviceWorker.register('/service-worker.js')
+                        .then(() => console.log('SW registered'))
+                        .catch(err => console.log('SW failed', err));
+                });
+            }
+        }
+    </script>
+</body>
+</html>

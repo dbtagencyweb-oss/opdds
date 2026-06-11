@@ -1,0 +1,265 @@
+  app/
+	src/data/
+		livro/
+		/manifesto
+			manifesto.ts
+
+		/quebra-de-expectativa
+			diferencial.ts
+			o-desacreditado.ts
+			sobre-o-livro.ts
+		
+		/fundamento-da-obra
+			trialidade.ts
+			autor-ferramenta-conceito.ts
+			triade-fundamental.ts
+			
+		/prefacio
+			prefacio.ts
+			
+		/introducao
+			introducao.ts
+			
+		/pilar-01-reconhecimento
+			p1-manifesto.ts
+			p1-narrativa.ts
+			p1-consciencia.ts
+			p1-julgamento.ts
+			p1-presenca.ts
+			p1-carta-ancora-fecho.ts
+			
+		/pilar-02-familia
+			p2-manifesto.ts
+			p2-narrativa.ts
+			p2-consciencia.ts
+			p2-julgamento.ts
+			p2-presenca.ts
+			p2-carta-ancora-fecho.ts
+			
+		/pilar-03-vinculo
+			p3-manifesto.ts
+			p3-narrativa.ts
+			p3-consciencia.ts
+			p3-julgamento.ts
+			p3-presenca.ts
+			p3-carta-ancora-fecho.ts
+			
+		/pilar-04-luto
+			p4-manifesto.ts
+			p4-narrativa.ts
+			p4-consciencia.ts
+			p4-julgamento.ts
+			p4-presenca.ts
+			p4-carta-ancora-fecho.ts
+			
+		/pilar-05-trabalho
+			p5-manifesto.ts
+			p5-narrativa.ts
+			p5-consciencia.ts
+			p5-julgamento.ts
+			p5-presenca.ts
+			p5-carta-ancora-fecho.ts
+			
+		/pilar-06-relacionamento
+			p6-manifesto.ts
+			p6-narrativa.ts
+			p6-consciencia.ts
+			p6-julgamento.ts
+			p6-presenca.ts
+			p6-carta-ancora-fecho.ts
+			
+		/pilar-07-fuga
+			p7-manifesto.ts
+			p7-narrativa.ts
+			p7-consciencia.ts
+			p7-julgamento.ts
+			p7-presenca.ts
+			p7-carta-ancora-fecho.ts
+			
+		/pilar-08-fe
+			p8-manifesto.ts
+			p8-narrativa.ts
+			p8-consciencia.ts
+			p8-julgamento.ts
+			p8-presenca.ts
+			p8-carta-ancora-fecho.ts
+			
+		/pilar-09-continuidade
+			p9-manifesto.ts
+			p9-narrativa.ts
+			p9-consciencia.ts
+			p9-julgamento.ts
+			p9-presenca.ts
+			p9-carta-ancora-fecho.ts
+			
+		/carta-final
+			carta-final.ts
+			
+		/epilogo
+			epilogo.ts
+			
+		/posfacio
+			posfacio.ts
+		
+		
+  media/
+	downloads/
+		o-poder-dos-desacreditados.pdf
+		
+	imagens/
+		favicon.ico
+		icone.webp
+		logo-opdds-v1.webp
+		logo-opdds-v2.webp
+		capa-app.webp
+		capa-opdds.webp
+	
+	audios/
+		manifesto/
+			boas-vindas.mp3
+			manifedo-dos-desacreditados.mp3
+			
+		   onboarding/
+			01-limites.mp3
+			02-triade-fundamental.mp3
+			03-expectativas.mp3
+			04-quando0nao-usar.mp3
+			05-portas.mp3
+			06-entrada.mp3
+			
+	   home/
+			sobrevivencia.mp3
+			reconstrucao.mp3
+			continuidade.mp3
+			manifesto-da-semana.mp3
+			
+	   livro/
+			/quebra-de-expectativa
+				sobre-o-livro.mp3
+				o-desacreditado.mp3
+				diferencial.mp3
+				
+			/fundamento-da-obra
+				triade-fundamental.mp3
+				autor-ferramenta-conceito.mp3
+				trialidade.mp3
+				
+			/prefacio
+				prefacio.mp3
+			/introducao
+				introducao.mp3
+				
+			/pilar-01-reconhecimento
+				p1-manifesto.mp3
+				p1-narrativa.mp3
+				p1-consciencia.mp3
+				p1-julgamento.mp3
+				p1-presenca.mp3
+				p1-carta-ancora-fecho.mp3
+			
+			/pilar-02-familia
+				p2-manifesto.mp3
+				p2-narrativa.mp3
+				p2-consciencia.mp3
+				p2-julgamento.mp3
+				p2-presenca.mp3
+				p2-carta-ancora-fecho.mp3
+				
+			/pilar-03-vinculo
+				p3-manifesto.mp3
+				p3-narrativa.mp3
+				p3-consciencia.mp3
+				p3-julgamento.mp3
+				p3-presenca.mp3
+				p3-carta-ancora-fecho.mp3
+				
+			/pilar-04-luto
+				p4-manifesto.mp3
+				p4-narrativa.mp3
+				p4-consciencia.mp3
+				p4-julgamento.mp3
+				p4-presenca.mp3
+				p4-carta-ancora-fecho.mp3
+				
+			/pilar-05-trabalho
+				p5-manifesto.mp3
+				p5-narrativa.mp3
+				p5-consciencia.mp3
+				p5-julgamento.mp3
+				p5-presenca.mp3
+				p5-carta-ancora-fecho.mp3
+				
+			/pilar-06-relacionamento
+				p6-manifesto.mp3
+				p6-narrativa.mp3
+				p6-consciencia.mp3
+				p6-julgamento.mp3
+				p6-presenca.mp3
+				p6-carta-ancora-fecho.mp3
+				
+			/pilar-07-fuga
+				p7-manifesto.mp3
+				p7-narrativa.mp3
+				p7-consciencia.mp3
+				p7-julgamento.mp3
+				p7-presenca.mp3
+				p7-carta-ancora-fecho.mp3
+				
+			/pilar-08-fe
+				p8-manifesto.mp3
+				p8-narrativa.mp3
+				p8-consciencia.mp3
+				p8-julgamento.mp3
+				p8-presenca.mp3
+				p8-carta-ancora-fecho.mp3
+				
+			/pilar-09-continuidade
+				p9-manifesto.mp3
+				p9-narrativa.mp3
+				p9-consciencia.mp3
+				p9-julgamento.mp3
+				p9-presenca.mp3
+				p9-carta-ancora-fecho.mp3
+				
+			/carta-final
+				carta-final.mp3
+			/epilogo
+				epilogo.mp3
+			/posfacio
+				posfacio.mp3
+			
+       biblioteca/
+			limiar.mp3
+			raiz.mp3
+			fenda.mp3
+			vazio.mp3
+			peso.mp3
+			projecao.mp3
+			escape.mp3
+			erosao.mp3
+			permanencia.mp3
+			
+	   sessoes/
+			conselhos/
+				culpa.mp3
+				ecaida.mp3
+				luto.mp3
+				desejo.mp3
+				descrenca.mp3
+				solidao.mp3
+				fracasso.mp3
+				ansiedade.mp3
+				pressao.mp3
+			
+			/podcasts
+				cap01-2026.mp3
+				cap02-2026.mp3
+				cap03-2026.mp3
+				cap04-2026.mp3
+				cap05-2026.mp3
+				cap06-2026.mp3
+				
+		
+			
+				
+		

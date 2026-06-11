@@ -1,0 +1,15 @@
+node_modules/
+dist/
+.env
+.env.local
+*.tsbuildinfo
+public/app/dist/
+backend/dist/
+backend/uploads/
+*.zip
+*.cdr
+*.log
+node-*.log
+server-*.log
+api-*.log
+login-api-*.log

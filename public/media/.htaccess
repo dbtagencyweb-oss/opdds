@@ -1,0 +1,5 @@
+<IfModule mod_headers.c>
+    # Permite que o subdomínio app acesse os arquivos
+    Header set Access-Control-Allow-Origin "https://app.opoderdosdesacreditados.online"
+    # Se quiser testar localmente, pode usar "*" temporariamente, mas o acima é mais seguro
+</IfModule>
