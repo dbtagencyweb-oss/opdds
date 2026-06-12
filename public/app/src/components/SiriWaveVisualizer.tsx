@@ -21,7 +21,7 @@ export default function SiriWaveVisualizer({ active, intensity = 1 }: Props) {
         container,
         style: 'ios9',
         width: Math.max(260, Math.round(bounds.width || 520)),
-        height: Math.max(52, Math.round(bounds.height || 58)),
+        height: Math.max(30, Math.round(bounds.height || 34)),
         autostart: true,
         speed: active ? 0.28 : 0.055,
         amplitude: active ? 1.7 * intensity : 0.18,
