@@ -2900,13 +2900,13 @@ button:active {
 
 .pro-player {
   display: grid;
-  grid-template-columns: 58px minmax(260px, 1fr) 156px 64px 64px 44px;
+  grid-template-columns: 68px minmax(360px, 1fr) 156px 64px 68px 44px;
   align-items: center;
   left: 240px;
   right: 0;
   bottom: 0;
   max-width: none;
-  min-height: 104px;
+  min-height: 138px;
   border: 0;
   border-top: 2px solid var(--gold);
   border-radius: 0;
@@ -2914,7 +2914,7 @@ button:active {
     radial-gradient(circle at 18% 0%, rgba(215, 183, 88, 0.12), transparent 28%),
     linear-gradient(145deg, rgba(24, 25, 29, 0.98), rgba(6, 7, 8, 0.98));
   box-shadow: 0 -12px 44px rgba(0, 0, 0, 0.42), 0 -10px 40px rgba(215, 183, 88, 0.09);
-  padding: 16px 28px;
+  padding: 18px 30px;
   backdrop-filter: blur(18px);
 }
 
@@ -2930,9 +2930,9 @@ button:active {
 .player-cover {
   display: grid;
   place-items: center;
-  width: 58px;
-  height: 58px;
-  border-radius: 16px;
+  width: 68px;
+  height: 68px;
+  border-radius: 18px;
   background:
     linear-gradient(145deg, #f0d990, #9d803d);
   color: #090909;
@@ -2952,27 +2952,29 @@ button:active {
   --audio-progress: 0%;
   position: relative;
   overflow: hidden;
-  height: 54px;
-  margin: 8px 0 5px;
-  border: 1px solid rgba(215, 183, 88, 0.12);
-  border-radius: 16px;
+  height: 82px;
+  margin: 10px 0 7px;
+  border: 1px solid rgba(215, 183, 88, 0.18);
+  border-radius: 20px;
   background:
-    linear-gradient(90deg, rgba(215, 183, 88, 0.26) 0 var(--audio-progress), rgba(255, 255, 255, 0.045) var(--audio-progress) 100%),
+    radial-gradient(circle at var(--audio-progress) 50%, rgba(239, 220, 162, 0.16), transparent 18%),
+    linear-gradient(90deg, rgba(215, 183, 88, 0.32) 0 var(--audio-progress), rgba(255, 255, 255, 0.045) var(--audio-progress) 100%),
     #111216;
   box-shadow:
-    inset 6px 6px 14px rgba(0, 0, 0, 0.55),
-    inset -4px -4px 10px rgba(255, 255, 255, 0.035);
+    inset 8px 8px 18px rgba(0, 0, 0, 0.58),
+    inset -5px -5px 12px rgba(255, 255, 255, 0.035),
+    0 0 28px rgba(215, 183, 88, 0.08);
 }
 
 .player-wave-progress::after {
   content: "";
   position: absolute;
-  top: 9px;
-  bottom: 9px;
+  top: 12px;
+  bottom: 12px;
   left: var(--audio-progress);
-  width: 1px;
+  width: 2px;
   background: var(--gold-soft);
-  box-shadow: 0 0 18px rgba(239, 220, 162, 0.72);
+  box-shadow: 0 0 24px rgba(239, 220, 162, 0.82);
   opacity: 0.85;
   pointer-events: none;
 }
@@ -2987,7 +2989,7 @@ button:active {
 }
 
 .player-wave-progress .siriwave-visualizer::before {
-  inset: 6px 18px;
+  inset: 8px 22px;
 }
 
 .player-progress,
@@ -3031,7 +3033,7 @@ button:active {
   display: flex;
   justify-content: space-between;
   color: var(--muted);
-  font-size: 0.75rem;
+  font-size: 0.78rem;
 }
 
 .volume-control {
@@ -3061,8 +3063,8 @@ button:active {
 .siriwave-visualizer {
   position: relative;
   overflow: hidden;
-  width: 132px;
-  height: 54px;
+  width: 168px;
+  height: 82px;
   border: 1px solid rgba(215, 183, 88, 0.12);
   border-radius: 999px;
   background:
@@ -3098,8 +3100,8 @@ button:active {
   inset: 0;
   width: 100% !important;
   height: 100% !important;
-  filter: saturate(1.45) brightness(1.18);
-  transform: scaleY(1.75);
+  filter: saturate(1.55) brightness(1.24);
+  transform: scaleY(2.15);
   transform-origin: center;
 }
 
@@ -3147,8 +3149,8 @@ button:active {
 .player-play {
   display: grid !important;
   place-items: center;
-  width: 64px;
-  height: 64px;
+  width: 68px;
+  height: 68px;
   border-radius: 50% !important;
   border: 3px solid #2b2d32 !important;
   background: linear-gradient(145deg, #f8f8f8, #d8d8d8) !important;
@@ -3190,7 +3192,8 @@ button:active {
 
   .pro-player {
     left: 0;
-    grid-template-columns: 58px minmax(0, 1fr) 140px 64px 64px 44px;
+    grid-template-columns: 62px minmax(0, 1fr) 132px 58px 62px 40px;
+    min-height: 128px;
   }
 }
 
@@ -3306,10 +3309,11 @@ button:active {
   }
 
   .pro-player {
-    grid-template-columns: 44px minmax(0, 1fr) 44px 52px 36px;
+    grid-template-columns: 44px minmax(0, 1fr) 40px 52px 36px;
     gap: 10px;
     bottom: 86px;
     padding: 12px;
+    min-height: 132px;
   }
 
   .player-cover {
@@ -3344,7 +3348,9 @@ button:active {
   }
 
   .player-wave-progress {
-    height: 46px;
+    height: 68px;
+    margin-top: 8px;
+    border-radius: 16px;
   }
 
   .player-wave-progress .siriwave-visualizer {
