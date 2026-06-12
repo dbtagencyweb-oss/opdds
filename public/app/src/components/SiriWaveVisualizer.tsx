@@ -20,11 +20,11 @@ export default function SiriWaveVisualizer({ active, intensity = 1 }: Props) {
       waveRef.current = new SiriWave({
         container,
         style: 'ios9',
-        width: Math.max(120, Math.round(bounds.width || 180)),
-        height: Math.max(68, Math.round(bounds.height || 82)),
+        width: Math.max(260, Math.round(bounds.width || 520)),
+        height: Math.max(52, Math.round(bounds.height || 58)),
         autostart: true,
         speed: active ? 0.28 : 0.055,
-        amplitude: active ? 1.85 * intensity : 0.18,
+        amplitude: active ? 1.7 * intensity : 0.18,
         pixelDepth: 0.08,
         lerpSpeed: 0.08,
         globalCompositeOperation: 'lighter',
@@ -37,8 +37,8 @@ export default function SiriWaveVisualizer({ active, intensity = 1 }: Props) {
         ],
         ranges: {
           noOfCurves: [6, 9],
-          amplitude: [0.95, 2.2],
-          width: [0.055, 0.14],
+          amplitude: [0.9, 2.05],
+          width: [0.035, 0.105],
           speed: [0.14, 0.38],
           offset: [-0.22, 0.22],
           despawnTimeout: [420, 1250],
@@ -58,7 +58,7 @@ export default function SiriWaveVisualizer({ active, intensity = 1 }: Props) {
   }, []);
 
   useEffect(() => {
-    waveRef.current?.setAmplitude(active ? Math.max(1.15, Math.min(3.1, intensity * 1.35)) : 0.18);
+    waveRef.current?.setAmplitude(active ? Math.max(1.05, Math.min(2.85, intensity * 1.22)) : 0.18);
     waveRef.current?.setSpeed(active ? 0.3 : 0.055);
   }, [active, intensity]);
 
