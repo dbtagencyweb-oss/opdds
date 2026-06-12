@@ -77,6 +77,53 @@ export class AdminService {
     });
   }
 
+  async listEvents() {
+    const events = await this.prisma.purchaseEvent.findMany({
+      orderBy: { createdAt: 'desc' },
+      take: 80,
+      select: {
+        id: true,
+        provider: true,
+        eventType: true,
+        externalId: true,
+        processedAt: true,
+        createdAt: true,
+        payload: true,
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+      },
+    });
+
+    return events.map((event) => {
+      const payload = event.payload && typeof event.payload === 'object' && !Array.isArray(event.payload)
+        ? event.payload as Record<string, any>
+        : {};
+
+      return {
+        id: event.id,
+        provider: event.provider,
+        eventType: event.eventType,
+        externalId: event.externalId,
+        processedAt: event.processedAt,
+        createdAt: event.createdAt,
+        user: event.user,
+        email: payload.email || event.user?.email || null,
+        name: payload.name || event.user?.name || null,
+        plan: payload.plan || null,
+        event: payload.event || null,
+        reason: payload.reason || null,
+        affectedEntitlements: payload.affectedEntitlements ?? payload.count ?? null,
+        productKeys: Array.isArray(payload.productKeys) ? payload.productKeys : [],
+        code: payload.code || null,
+      };
+    });
+  }
+
   async grantPlan(userId: string, data: AdminGrantPlanDto) {
     const user = await this.prisma.user.findUnique({ where: { id: userId }, select: { id: true } });
     if (!user) throw new NotFoundException('Leitor não encontrado.');

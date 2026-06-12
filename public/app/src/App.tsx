@@ -42,10 +42,12 @@ import { PRODUCT_KEYS, PRODUCT_LABELS, ProductKey } from './config/products';
 import { hasLocalEntitlement, LocalPlan } from './services/entitlements';
 import { getLocalWorkbookSavedAt, loadLocalWorkbookAnswers, loadLocalWorkbookEntry, saveLocalWorkbookAnswers, saveLocalWorkbookEntry } from './services/workbookStore';
 import {
+  AdminEvent,
   AdminInviteResponse,
   AdminProduct,
   AuthUser,
   createAdminInvite,
+  fetchAdminEvents,
   fetchAdminProducts,
   fetchAdminUsers,
   fetchCurrentUser,
@@ -293,6 +295,37 @@ const planLabels: Record<Plan, string> = {
   vip: 'VIP',
 };
 
+const eventLabels: Record<string, string> = {
+  INVITE_CREATED: 'Convite criado',
+  ACCESS_GRANTED: 'Acesso liberado',
+  RENEWAL_GRANTED: 'Renovacao',
+  ACCESS_REFUNDED: 'Reembolso/chargeback',
+  ACCESS_CANCELED: 'Cancelamento',
+  IGNORED: 'Ignorado',
+  APPROVED_IGNORED: 'Compra ignorada',
+  RENEWAL_IGNORED: 'Renovacao ignorada',
+  PLAN_GRANTED: 'Plano manual',
+  PRODUCT_GRANTED: 'Produto manual',
+  PRODUCT_REVOKED: 'Produto removido',
+};
+
+const eventTone = (eventType: string) => {
+  if (eventType.includes('REFUNDED') || eventType.includes('CANCELED') || eventType.includes('REVOKED')) return 'danger';
+  if (eventType.includes('IGNORED')) return 'muted';
+  if (eventType.includes('GRANTED') || eventType.includes('CREATED')) return 'success';
+  return 'neutral';
+};
+
+const formatDateTime = (value?: string | null) => {
+  if (!value) return '-';
+  return new Date(value).toLocaleString('pt-BR', {
+    day: '2-digit',
+    month: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+};
+
 const pillarCards = [
   { title: 'Reconhecimento', desc: 'O primeiro passo para deixar de pedir licença.', icon: Sparkles, chapter: 2 },
   { title: 'Família', desc: 'Lealdades invisíveis.', icon: Boxes, chapter: 3 },
@@ -489,6 +522,7 @@ export function App() {
   const [accountMessage, setAccountMessage] = useState('');
   const [adminReaders, setAdminReaders] = useState<LocalUserRecord[]>([]);
   const [adminProducts, setAdminProducts] = useState<AdminProduct[]>([]);
+  const [adminEvents, setAdminEvents] = useState<AdminEvent[]>([]);
   const [adminSelectedUserId, setAdminSelectedUserId] = useState('');
   const [adminInvite, setAdminInvite] = useState({ name: '', email: '', plan: 'basic' as Plan, expiresInDays: '' });
   const [adminGrant, setAdminGrant] = useState({ plan: 'vip' as Plan, productKey: PRODUCT_KEYS.workbook, expiresInDays: '' });
@@ -661,15 +695,17 @@ export function App() {
 
   useEffect(() => {
     if (route !== ROUTES.ADMIN || !isAdmin) return;
-    Promise.all([fetchAdminUsers(), fetchAdminProducts()])
-      .then(([users, products]) => {
+    Promise.all([fetchAdminUsers(), fetchAdminProducts(), fetchAdminEvents()])
+      .then(([users, products, events]) => {
         setAdminReaders(users);
         setAdminProducts(products);
+        setAdminEvents(events);
         if (!adminSelectedUserId && users[0]) setAdminSelectedUserId(users[0].id);
       })
       .catch(() => {
         setAdminReaders([]);
         setAdminProducts([]);
+        setAdminEvents([]);
       });
   }, [route, isAdmin]);
 
@@ -841,9 +877,10 @@ export function App() {
   };
 
   const refreshAdminData = async () => {
-    const [users, products] = await Promise.all([fetchAdminUsers(), fetchAdminProducts()]);
+    const [users, products, events] = await Promise.all([fetchAdminUsers(), fetchAdminProducts(), fetchAdminEvents()]);
     setAdminReaders(users);
     setAdminProducts(products);
+    setAdminEvents(events);
     if (!adminSelectedUserId && users[0]) setAdminSelectedUserId(users[0].id);
     return users;
   };
@@ -1877,6 +1914,38 @@ export function App() {
       </section>
 
       {adminMessage && <div className="admin-message">{adminMessage}</div>}
+
+      <section className="admin-events-panel">
+        <div className="admin-section-head">
+          <div>
+            <p className="kicker">Kiwify</p>
+            <h2>Eventos recentes</h2>
+          </div>
+          <Button onClick={refreshAdminData} variant="ghost">Atualizar</Button>
+        </div>
+        <div className="admin-events-list">
+          {adminEvents.length === 0 ? (
+            <div className="empty-state">Nenhum evento recebido ainda.</div>
+          ) : adminEvents.slice(0, 12).map((event) => (
+            <article className="admin-event-row" key={event.id}>
+              <div className="admin-event-main">
+                <span className={`event-badge ${eventTone(event.eventType)}`}>{eventLabels[event.eventType] ?? event.eventType}</span>
+                <strong>{event.email || event.name || 'Sem comprador identificado'}</strong>
+                <small>{event.event || event.provider}{event.externalId ? ` - ${event.externalId.slice(0, 8)}` : ''}</small>
+              </div>
+              <div className="admin-event-meta">
+                <span>{event.plan && planLabels[event.plan as Plan] ? planLabels[event.plan as Plan] : event.plan || '-'}</span>
+                <small>{(event.productKeys || []).slice(0, 3).map((product) => PRODUCT_LABELS[product as ProductKey] ?? product).join(', ') || event.reason || 'sem produtos'}</small>
+              </div>
+              <div className="admin-event-status">
+                <strong>{event.affectedEntitlements ?? '-'}</strong>
+                <small>afetados</small>
+              </div>
+              <time>{formatDateTime(event.createdAt)}</time>
+            </article>
+          ))}
+        </div>
+      </section>
 
       <section className="admin-table">
         <div className="admin-row head">

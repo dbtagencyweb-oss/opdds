@@ -23,6 +23,11 @@ export class AdminController {
     return this.adminService.listProducts();
   }
 
+  @Get('events')
+  listEvents() {
+    return this.adminService.listEvents();
+  }
+
   @Post('invites')
   createInvite(@Body() body: AdminCreateInviteDto) {
     return this.authService.createInvite({ ...body, source: 'ADMIN' });

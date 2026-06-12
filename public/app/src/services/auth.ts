@@ -29,6 +29,23 @@ export type AdminInviteResponse = {
   registerUrl: string;
 };
 
+export type AdminEvent = {
+  id: string;
+  provider: string;
+  eventType: string;
+  externalId?: string | null;
+  processedAt?: string | null;
+  createdAt: string;
+  email?: string | null;
+  name?: string | null;
+  plan?: LocalPlan | string | null;
+  event?: string | null;
+  reason?: string | null;
+  affectedEntitlements?: number | null;
+  productKeys?: string[];
+  code?: string | null;
+};
+
 type AuthResponse = {
   access_token: string;
   user: AuthUser;
@@ -175,6 +192,12 @@ export async function fetchAdminProducts() {
   const token = getStoredAuthToken();
   if (!token || token.startsWith('LOCAL_') || accessTokens.includes(token)) return [];
   return apiRequest<AdminProduct[]>('/api/admin/products', { token });
+}
+
+export async function fetchAdminEvents() {
+  const token = getStoredAuthToken();
+  if (!token || token.startsWith('LOCAL_') || accessTokens.includes(token)) return [];
+  return apiRequest<AdminEvent[]>('/api/admin/events', { token });
 }
 
 export async function createAdminInvite(input: { email: string; name?: string; plan: LocalPlan; expiresInDays?: number }) {

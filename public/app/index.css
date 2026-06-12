@@ -2289,6 +2289,108 @@ button:active {
   padding: 12px 14px;
 }
 
+.admin-events-panel {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  background: #15161a;
+  overflow: hidden;
+}
+
+.admin-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 18px;
+}
+
+.admin-section-head h2 {
+  margin: 2px 0 0;
+  font-family: "Playfair Display", "Inria Serif", serif;
+  font-size: 1.4rem;
+}
+
+.admin-events-list {
+  display: grid;
+}
+
+.admin-event-row {
+  display: grid;
+  grid-template-columns: minmax(220px, 1.35fr) minmax(190px, 1fr) 80px 92px;
+  gap: 14px;
+  align-items: center;
+  min-height: 74px;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+  padding: 14px 18px;
+}
+
+.admin-event-row:first-child {
+  border-top: 0;
+}
+
+.admin-event-main,
+.admin-event-meta,
+.admin-event-status {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.admin-event-main strong,
+.admin-event-meta span,
+.admin-event-status strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-event-main small,
+.admin-event-meta small,
+.admin-event-status small,
+.admin-event-row time {
+  color: var(--muted);
+  font-size: 0.76rem;
+  line-height: 1.35;
+}
+
+.admin-event-status {
+  text-align: center;
+}
+
+.admin-event-row time {
+  text-align: right;
+}
+
+.event-badge {
+  justify-self: start;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text);
+  padding: 5px 8px;
+  font-size: 0.68rem;
+  font-weight: 850;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.event-badge.success {
+  border-color: rgba(52, 211, 153, 0.28);
+  background: rgba(52, 211, 153, 0.09);
+  color: #8af0c7;
+}
+
+.event-badge.danger {
+  border-color: rgba(255, 116, 116, 0.28);
+  background: rgba(255, 116, 116, 0.09);
+  color: #ff9a9a;
+}
+
+.event-badge.muted {
+  color: var(--muted);
+}
+
 .admin-product-chips {
   display: flex;
   flex-wrap: wrap;
@@ -2870,7 +2972,8 @@ button:active {
   }
 
   .admin-row,
-  .admin-row.head {
+  .admin-row.head,
+  .admin-event-row {
     grid-template-columns: 1fr;
     gap: 7px;
   }
@@ -2882,6 +2985,16 @@ button:active {
 
   .admin-row.head {
     display: none;
+  }
+
+  .admin-section-head {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .admin-event-status,
+  .admin-event-row time {
+    text-align: left;
   }
 
   .workbook-hero,
