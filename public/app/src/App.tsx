@@ -362,6 +362,15 @@ const upgradeOffers: Record<UpgradeKey, {
   },
 };
 
+const upgradeActiveProductKeys: Record<UpgradeKey, ProductKey> = {
+  basic: PRODUCT_KEYS.base,
+  workbook: PRODUCT_KEYS.workbook,
+  igent30: PRODUCT_KEYS.igentMind30,
+  igent90: PRODUCT_KEYS.igentMind90,
+  group: PRODUCT_KEYS.group,
+  vip: PRODUCT_KEYS.vip,
+};
+
 const eventLabels: Record<string, string> = {
   INVITE_CREATED: 'Convite criado',
   ACCESS_GRANTED: 'Acesso liberado',
@@ -664,9 +673,8 @@ export function App() {
   const hasOrderBump = hasWorkbookAccess || hasMindAccess || hasGroupAccess;
   const isAdmin = authUser?.role === 'ADMIN';
   const currentProducts = (authUser?.products?.length ? authUser.products : Object.values(PRODUCT_KEYS).filter((productKey) => hasLocalEntitlement(plan, productKey as ProductKey)));
-  const availableUpgradeEntries = Object.entries(upgradeOffers).filter(([, offer]) =>
-    !offer.productKeys.some((productKey) => currentProducts.includes(productKey)),
-  );
+  const upgradeEntries = Object.entries(upgradeOffers) as Array<[UpgradeKey, typeof upgradeOffers[UpgradeKey]]>;
+  const lockedUpgradeCount = upgradeEntries.filter(([key]) => !currentProducts.includes(upgradeActiveProductKeys[key])).length;
 
   const filteredChapters = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
@@ -939,8 +947,8 @@ export function App() {
     setUpgradeModal(null);
   };
 
-  const hasUpgradeOffer = (offer: typeof upgradeOffers[UpgradeKey]) =>
-    offer.productKeys.some((productKey) => currentProducts.includes(productKey));
+  const hasUpgradeOffer = (key: UpgradeKey) =>
+    currentProducts.includes(upgradeActiveProductKeys[key]);
 
   const openUpgrade = (key: UpgradeKey) => {
     playClick('soft');
@@ -1984,26 +1992,28 @@ export function App() {
             <p className="kicker">Upgrades</p>
             <h2>Continue expandindo sua jornada</h2>
           </div>
-          <span>{availableUpgradeEntries.length} disponivel(is)</span>
+          <span>{lockedUpgradeCount} bloqueado(s)</span>
         </div>
         <div className="upgrade-grid">
-          {availableUpgradeEntries.length === 0 ? (
-            <article className="upgrade-card active">
-              <p className="kicker">Acesso completo</p>
-              <h3>Todos os modulos principais estao liberados.</h3>
-              <span>Seu painel ja reconhece livro, Diario, iGentMIND e grupo.</span>
-            </article>
-          ) : availableUpgradeEntries.map(([key, offer]) => (
-            <article className="upgrade-card" key={key}>
-              <p className="kicker">{offer.eyebrow}</p>
+          {upgradeEntries.map(([key, offer]) => {
+            const isActiveOffer = hasUpgradeOffer(key);
+            return (
+            <article className={`upgrade-card ${isActiveOffer ? 'active' : 'locked'}`} key={key}>
+              <div className="upgrade-card-top">
+                <p className="kicker">{offer.eyebrow}</p>
+                <span className={`upgrade-lock ${isActiveOffer ? 'active' : 'locked'}`}>
+                  <Lock size={15} />
+                </span>
+              </div>
               <h3>{offer.title}</h3>
               <span>{offer.description}</span>
               <div className="upgrade-card-foot">
                 <strong>{offer.price}</strong>
-                <button onClick={() => openUpgrade(key as UpgradeKey)}>Ver detalhes</button>
+                <button onClick={() => openUpgrade(key)}>{isActiveOffer ? 'Liberado' : 'Ver detalhes'}</button>
               </div>
             </article>
-          ))}
+            );
+          })}
         </div>
       </section>
     </div>
@@ -2153,7 +2163,7 @@ export function App() {
   const UpgradeModal = () => {
     if (!upgradeModal) return null;
     const offer = upgradeOffers[upgradeModal];
-    const alreadyActive = hasUpgradeOffer(offer);
+    const alreadyActive = hasUpgradeOffer(upgradeModal);
 
     return (
       <div className="upgrade-modal-backdrop" role="dialog" aria-modal="true" aria-label={offer.title}>

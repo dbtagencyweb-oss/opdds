@@ -2375,6 +2375,7 @@ button:active {
 }
 
 .upgrade-card {
+  position: relative;
   display: grid;
   gap: 10px;
   min-height: 188px;
@@ -2385,7 +2386,52 @@ button:active {
 }
 
 .upgrade-card.active {
-  border-color: rgba(52, 211, 153, 0.28);
+  border-color: rgba(52, 211, 153, 0.46);
+  background:
+    radial-gradient(circle at 92% 12%, rgba(52, 211, 153, 0.12), transparent 32%),
+    rgba(10, 16, 14, 0.72);
+  box-shadow: 0 0 22px rgba(52, 211, 153, 0.08), inset 0 0 0 1px rgba(52, 211, 153, 0.08);
+}
+
+.upgrade-card.locked {
+  border-color: rgba(255, 70, 86, 0.28);
+  background:
+    radial-gradient(circle at 92% 12%, rgba(255, 70, 86, 0.09), transparent 32%),
+    rgba(13, 10, 12, 0.72);
+}
+
+.upgrade-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.upgrade-card-top .kicker {
+  margin: 0;
+}
+
+.upgrade-lock {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+}
+
+.upgrade-lock.active {
+  border: 1px solid rgba(52, 211, 153, 0.66);
+  background: rgba(52, 211, 153, 0.12);
+  color: #50f0ad;
+  box-shadow: 0 0 12px rgba(52, 211, 153, 0.52), 0 0 28px rgba(52, 211, 153, 0.18);
+}
+
+.upgrade-lock.locked {
+  border: 1px solid rgba(255, 70, 86, 0.7);
+  background: rgba(255, 70, 86, 0.1);
+  color: #ff5368;
+  box-shadow: 0 0 12px rgba(255, 70, 86, 0.56), 0 0 30px rgba(255, 70, 86, 0.18);
 }
 
 .upgrade-card h3 {
@@ -2421,6 +2467,17 @@ button:active {
   padding: 8px 10px;
   font-size: 0.76rem;
   font-weight: 850;
+}
+
+.upgrade-card.active .upgrade-card-foot button {
+  border-color: rgba(52, 211, 153, 0.36);
+  background: rgba(52, 211, 153, 0.09);
+  color: #8af0c7;
+}
+
+.upgrade-card.locked .upgrade-card-foot button {
+  border-color: rgba(255, 70, 86, 0.28);
+  background: rgba(255, 70, 86, 0.06);
 }
 
 .account-edit label {
