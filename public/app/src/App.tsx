@@ -326,6 +326,13 @@ const formatDateTime = (value?: string | null) => {
   });
 };
 
+const maskAccessToken = (value?: string | null) => {
+  if (!value) return 'nenhum';
+  if (value.startsWith('OPDDS_')) return `${value.slice(0, 12)}...${value.slice(-4)}`;
+  if (value.startsWith('LOCAL_')) return 'acesso local';
+  return `sessao segura ...${value.slice(-8)}`;
+};
+
 const pillarCards = [
   { title: 'Reconhecimento', desc: 'O primeiro passo para deixar de pedir licença.', icon: Sparkles, chapter: 2 },
   { title: 'Família', desc: 'Lealdades invisíveis.', icon: Boxes, chapter: 3 },
@@ -1197,6 +1204,43 @@ export function App() {
     </aside>
   );
 
+  const BottomNavigation = () => {
+    const items = [
+      { id: ROUTES.HOME, label: 'InÃ­cio', icon: Home },
+      { id: ROUTES.READER, label: 'Livro', icon: BookOpen },
+      { id: ROUTES.IGENT, label: 'iGent', icon: Zap },
+      { id: ROUTES.WORKBOOK, label: 'DiÃ¡rio', icon: FileText },
+      { id: ROUTES.SETTINGS, label: 'Conta', icon: User },
+    ];
+
+    return (
+      <nav className="bottom-nav" aria-label="NavegaÃ§Ã£o principal">
+        {items.map((item) => {
+          const Icon = item.icon;
+          const locked = isRouteLocked(item.id);
+          const active = route === item.id || (item.id === ROUTES.READER && route === ROUTES.BOOK);
+          return (
+            <button
+              key={item.id}
+              className={active ? 'active' : ''}
+              onClick={() => {
+                if (locked) {
+                  navigate(ROUTES.HOME);
+                  return;
+                }
+                navigate(item.id);
+              }}
+              title={locked ? `${item.label} bloqueado` : item.label}
+            >
+              {locked ? <Lock size={19} /> : <Icon size={19} />}
+              <span>{item.label}</span>
+            </button>
+          );
+        })}
+      </nav>
+    );
+  };
+
   const HomeView = () => {
     if (!hasReaderAccess) {
       return (
@@ -1804,8 +1848,11 @@ export function App() {
           <p className="kicker">Assinatura</p>
           <h2>{planLabels[plan]}</h2>
           <div className="setting-row"><span>Status</span><strong>Ativo</strong></div>
-          <div className="setting-row"><span>Token</span><strong>{localStorage.getItem('opd_token') ?? 'nenhum'}</strong></div>
+          <div className="setting-row"><span>Acesso</span><strong>{maskAccessToken(localStorage.getItem('opd_token'))}</strong></div>
           <div className="setting-row"><span>Recorrência</span><strong>{hasMindAccess || hasGroupAccess ? 'Preparada' : 'Não ativa'}</strong></div>
+          <button className="token-copy-button" onClick={() => navigator.clipboard?.writeText(localStorage.getItem('opd_token') || '')}>
+            Copiar chave de sessão
+          </button>
         </article>
 
         <article className="account-card">
@@ -2006,6 +2053,7 @@ export function App() {
         {Navigation()}
         <main id="main" className="app-main">{renderMain()}</main>
       </div>
+      {BottomNavigation()}
       {audioState.currentUrl && (
         <div className="audio-dock pro-player">
           <div className="player-glow" />

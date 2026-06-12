@@ -858,12 +858,24 @@ body::selection {
   align-items: center;
   justify-content: space-between;
   gap: 18px;
+  min-width: 0;
   border-bottom: 1px solid var(--line);
   padding: 14px 0;
 }
 
 .setting-row span {
+  flex: 0 0 auto;
   color: var(--muted);
+}
+
+.setting-row strong {
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  color: #f2eee7;
+  text-align: right;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .setting-row button {
@@ -872,6 +884,17 @@ body::selection {
   background: var(--surface-2);
   color: var(--text);
   padding: 8px 12px;
+}
+
+.token-copy-button {
+  justify-self: start;
+  border: 1px solid rgba(215, 183, 88, 0.22);
+  border-radius: 999px;
+  background: rgba(215, 183, 88, 0.07);
+  color: var(--gold-soft);
+  padding: 9px 12px;
+  font-size: 0.78rem;
+  font-weight: 850;
 }
 
 .settings-panel.subtle {
@@ -1426,6 +1449,42 @@ button:active {
   background: rgba(215, 183, 88, 0.12);
   color: var(--gold-soft);
   box-shadow: inset 2px 0 0 var(--gold);
+}
+
+.bottom-nav {
+  position: fixed;
+  left: 12px;
+  right: 12px;
+  bottom: 12px;
+  z-index: 44;
+  display: none;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 6px;
+  border: 1px solid rgba(215, 183, 88, 0.2);
+  border-radius: 18px;
+  background: rgba(11, 12, 15, 0.9);
+  box-shadow: 0 20px 54px rgba(0, 0, 0, 0.48), inset 0 1px rgba(255, 255, 255, 0.04);
+  padding: 7px;
+  backdrop-filter: blur(18px);
+}
+
+.bottom-nav button {
+  display: grid;
+  place-items: center;
+  gap: 3px;
+  min-width: 0;
+  min-height: 54px;
+  border: 0;
+  border-radius: 13px;
+  background: transparent;
+  color: #a8aab5;
+  font-size: 0.68rem;
+  font-weight: 820;
+}
+
+.bottom-nav button.active {
+  background: linear-gradient(145deg, rgba(215, 183, 88, 0.22), rgba(215, 183, 88, 0.08));
+  color: var(--gold-soft);
 }
 
 .app-body {
@@ -2910,8 +2969,12 @@ button:active {
     padding-top: 36px;
   }
 
+  .bottom-nav {
+    display: grid;
+  }
+
   .app-page {
-    padding-bottom: 148px;
+    padding-bottom: 178px;
   }
 
   .pillar-row {
@@ -3007,6 +3070,7 @@ button:active {
   .pro-player {
     grid-template-columns: 44px minmax(0, 1fr) 44px 52px 36px;
     gap: 10px;
+    bottom: 86px;
     padding: 12px;
   }
 
