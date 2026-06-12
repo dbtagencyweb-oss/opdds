@@ -295,6 +295,73 @@ const planLabels: Record<Plan, string> = {
   vip: 'VIP',
 };
 
+type UpgradeKey = 'basic' | 'workbook' | 'igent30' | 'igent90' | 'group' | 'vip';
+
+const upgradeOffers: Record<UpgradeKey, {
+  title: string;
+  eyebrow: string;
+  description: string;
+  price: string;
+  checkoutUrl: string;
+  plan: Plan;
+  productKeys: ProductKey[];
+}> = {
+  basic: {
+    title: 'Livro interativo + audios',
+    eyebrow: 'Upgrade de leitura',
+    description: 'Desbloqueia capitulos no app, biblioteca, sessoes de audio e leitura guiada estilo Kindle.',
+    price: 'R$ 27',
+    checkoutUrl: 'https://pay.kiwify.com.br/cJ4T7JR',
+    plan: 'basic',
+    productKeys: [PRODUCT_KEYS.base],
+  },
+  workbook: {
+    title: 'Diario dos Desacreditados',
+    eyebrow: 'Workbook',
+    description: 'Area para escrever, salvar reflexoes e atravessar os pilares com perguntas guiadas.',
+    price: 'R$ 17',
+    checkoutUrl: 'https://pay.kiwify.com.br/sT7TVjJ',
+    plan: 'workbook',
+    productKeys: [PRODUCT_KEYS.workbook],
+  },
+  igent30: {
+    title: 'iGentMIND - 30 dias',
+    eyebrow: 'Mentor de leitura',
+    description: 'Conselheiro motivador que cruza sentimentos, pilares e trechos do livro para orientar sua proxima leitura.',
+    price: 'R$ 27',
+    checkoutUrl: 'https://pay.kiwify.com.br/3rj0NbN',
+    plan: 'igent30',
+    productKeys: [PRODUCT_KEYS.igentMind30],
+  },
+  igent90: {
+    title: 'iGentMIND - Mentor Psicanalitico',
+    eyebrow: 'Mentoria estendida',
+    description: 'Acesso ampliado ao iGentMIND, com recomendacoes por tema, pilar e estado emocional.',
+    price: 'R$ 67',
+    checkoutUrl: 'https://pay.kiwify.com.br/yYaKNrk',
+    plan: 'igent90',
+    productKeys: [PRODUCT_KEYS.igentMind90],
+  },
+  group: {
+    title: 'Comunidade Viva dos Desacreditados',
+    eyebrow: 'Grupo de apoio',
+    description: 'Acesso ao grupo/comunidade para continuidade, apoio e acompanhamento da jornada.',
+    price: 'R$ 197',
+    checkoutUrl: 'https://pay.kiwify.com.br/SHxtsOn',
+    plan: 'group',
+    productKeys: [PRODUCT_KEYS.group],
+  },
+  vip: {
+    title: 'Pacote completo OPDDS',
+    eyebrow: 'Acesso total',
+    description: 'Livro interativo, audios, Diario, iGentMIND e grupo em um unico pacote.',
+    price: 'Pacote',
+    checkoutUrl: 'https://pay.kiwify.com.br/yYaKNrk',
+    plan: 'vip',
+    productKeys: [PRODUCT_KEYS.base, PRODUCT_KEYS.workbook, PRODUCT_KEYS.igentMind90, PRODUCT_KEYS.group, PRODUCT_KEYS.vip],
+  },
+};
+
 const eventLabels: Record<string, string> = {
   INVITE_CREATED: 'Convite criado',
   ACCESS_GRANTED: 'Acesso liberado',
@@ -535,6 +602,7 @@ export function App() {
   const [adminGrant, setAdminGrant] = useState({ plan: 'vip' as Plan, productKey: PRODUCT_KEYS.workbook, expiresInDays: '' });
   const [adminResult, setAdminResult] = useState<AdminInviteResponse | null>(null);
   const [adminMessage, setAdminMessage] = useState('');
+  const [upgradeModal, setUpgradeModal] = useState<UpgradeKey | null>(null);
   const [token, setToken] = useState('');
   const [tokenError, setTokenError] = useState('');
   const [authMode, setAuthMode] = useState<'register' | 'login'>('register');
@@ -596,6 +664,9 @@ export function App() {
   const hasOrderBump = hasWorkbookAccess || hasMindAccess || hasGroupAccess;
   const isAdmin = authUser?.role === 'ADMIN';
   const currentProducts = (authUser?.products?.length ? authUser.products : Object.values(PRODUCT_KEYS).filter((productKey) => hasLocalEntitlement(plan, productKey as ProductKey)));
+  const availableUpgradeEntries = Object.entries(upgradeOffers).filter(([, offer]) =>
+    !offer.productKeys.some((productKey) => currentProducts.includes(productKey)),
+  );
 
   const filteredChapters = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
@@ -865,6 +936,21 @@ export function App() {
     localStorage.setItem('opd_plan', nextPlan);
     setPlan(nextPlan);
     setAuthUser((current) => current ? { ...current, plan: nextPlan } : current);
+    setUpgradeModal(null);
+  };
+
+  const hasUpgradeOffer = (offer: typeof upgradeOffers[UpgradeKey]) =>
+    offer.productKeys.some((productKey) => currentProducts.includes(productKey));
+
+  const openUpgrade = (key: UpgradeKey) => {
+    playClick('soft');
+    setUpgradeModal(key);
+  };
+
+  const openUpgradeCheckout = (key: UpgradeKey) => {
+    const offer = upgradeOffers[key];
+    playClick('primary');
+    window.open(offer.checkoutUrl, '_blank', 'noopener,noreferrer');
   };
 
   const saveAccountProfile = () => {
@@ -1089,6 +1175,13 @@ export function App() {
     return false;
   };
 
+  const upgradeForRoute = (routeId: Route): UpgradeKey => {
+    if ([ROUTES.BOOK, ROUTES.LIBRARY, ROUTES.SESSIONS, ROUTES.READER].includes(routeId as any)) return 'basic';
+    if (routeId === ROUTES.WORKBOOK) return 'workbook';
+    if (routeId === ROUTES.IGENT) return 'igent30';
+    return 'vip';
+  };
+
   const AccessView = () => (
     <main className="cover-gate page-enter">
       <div className="cover-orbit" />
@@ -1187,7 +1280,7 @@ export function App() {
               return (
                 <button key={item.id} className={route === item.id ? 'active' : ''} onClick={() => {
                   if (locked) {
-                    navigate(ROUTES.HOME);
+                    openUpgrade(upgradeForRoute(item.id));
                     return;
                   }
                   navigate(item.id);
@@ -1206,15 +1299,15 @@ export function App() {
 
   const BottomNavigation = () => {
     const items = [
-      { id: ROUTES.HOME, label: 'InÃ­cio', icon: Home },
+      { id: ROUTES.HOME, label: 'Inicio', icon: Home },
       { id: ROUTES.READER, label: 'Livro', icon: BookOpen },
       { id: ROUTES.IGENT, label: 'iGent', icon: Zap },
-      { id: ROUTES.WORKBOOK, label: 'DiÃ¡rio', icon: FileText },
+      { id: ROUTES.WORKBOOK, label: 'Diario', icon: FileText },
       { id: ROUTES.SETTINGS, label: 'Conta', icon: User },
     ];
 
     return (
-      <nav className="bottom-nav" aria-label="NavegaÃ§Ã£o principal">
+      <nav className="bottom-nav" aria-label="Navegacao principal">
         {items.map((item) => {
           const Icon = item.icon;
           const locked = isRouteLocked(item.id);
@@ -1225,7 +1318,7 @@ export function App() {
               className={active ? 'active' : ''}
               onClick={() => {
                 if (locked) {
-                  navigate(ROUTES.HOME);
+                  openUpgrade(upgradeForRoute(item.id));
                   return;
                 }
                 navigate(item.id);
@@ -1267,7 +1360,7 @@ export function App() {
               <h2>Livro interativo, áudios e Biblioteca</h2>
               <span>Este ambiente já está preparado para liberar os módulos automaticamente pelo token do checkout.</span>
             </div>
-            <Button onClick={() => unlockOrderBump('basic')} variant="secondary"><Lock size={17} /> Simular app</Button>
+            <Button onClick={() => openUpgrade('basic')} variant="secondary"><Lock size={17} /> Ver upgrade</Button>
           </section>
         </div>
       );
@@ -1335,7 +1428,7 @@ export function App() {
         {hasOrderBump ? (
           <Button onClick={() => navigate(ROUTES.WORKBOOK)} variant="secondary"><FileText size={17} /> Abrir Diário</Button>
         ) : (
-          <Button onClick={() => unlockOrderBump('workbook')}><Zap size={17} /> Simular Diário</Button>
+          <Button onClick={() => openUpgrade('workbook')}><Zap size={17} /> Desbloquear Diario</Button>
         )}
       </section>
     </div>
@@ -1628,20 +1721,23 @@ export function App() {
     </div>
   );
 
-  const LockedView = ({ title }: { title: string }) => (
+  const LockedView = ({ title, offerKey = 'vip' }: { title: string; offerKey?: UpgradeKey }) => (
     <div className="app-page page-enter">
       <section className="locked-panel">
         <div className="mentor-mark"><Lock size={20} /></div>
-        <p className="kicker">Função extra</p>
+        <p className="kicker">Funcao extra</p>
         <h1>{title}</h1>
-        <p>Este recurso faz parte do order bump: iGentMIND + Diário dos Desacreditados. Nesta versão local, você pode simular o desbloqueio para validar a experiência.</p>
-        <Button onClick={() => unlockOrderBump('vip')}><Zap size={17} /> Liberar localmente</Button>
+        <p>Este recurso faz parte de um modulo extra. Voce pode adquirir o produto especifico agora ou testar a liberacao localmente.</p>
+        <div className="locked-actions">
+          <Button onClick={() => openUpgrade(offerKey)}><Zap size={17} /> Ver oferta</Button>
+          <Button onClick={() => unlockOrderBump(upgradeOffers[offerKey].plan)} variant="ghost">Liberar localmente</Button>
+        </div>
       </section>
     </div>
   );
 
   const WorkbookView = () => {
-    if (!hasWorkbookAccess) return <LockedView title="Diário bloqueado" />;
+    if (!hasWorkbookAccess) return <LockedView title="Diario bloqueado" offerKey="workbook" />;
     const savedAt = getLocalWorkbookSavedAt();
     const currentPillar = workbookPillars[workbookPillarIndex] ?? workbookPillars[0];
     const answeredCount = Object.values(workbookAnswers).filter((answer) => answer.trim()).length;
@@ -1759,7 +1855,7 @@ export function App() {
             ) : (
               <>
                 <p>Este painel cruza suas respostas com temas do livro e sugere capitulos, audios e contrapontos.</p>
-                <Button onClick={() => unlockOrderBump('igent30')}><Zap size={17} /> Simular iGent 30 dias</Button>
+                <Button onClick={() => openUpgrade('igent30')}><Zap size={17} /> Desbloquear iGent 30 dias</Button>
               </>
             )}
             <span>{savedAt ? 'Salvo localmente' : 'Salvamento automatico ativo'}</span>
@@ -1880,6 +1976,35 @@ export function App() {
             <Button onClick={logout} variant="ghost">Sair</Button>
           </div>
         </article>
+      </section>
+
+      <section className="upgrade-section">
+        <div className="upgrade-section-head">
+          <div>
+            <p className="kicker">Upgrades</p>
+            <h2>Continue expandindo sua jornada</h2>
+          </div>
+          <span>{availableUpgradeEntries.length} disponivel(is)</span>
+        </div>
+        <div className="upgrade-grid">
+          {availableUpgradeEntries.length === 0 ? (
+            <article className="upgrade-card active">
+              <p className="kicker">Acesso completo</p>
+              <h3>Todos os modulos principais estao liberados.</h3>
+              <span>Seu painel ja reconhece livro, Diario, iGentMIND e grupo.</span>
+            </article>
+          ) : availableUpgradeEntries.map(([key, offer]) => (
+            <article className="upgrade-card" key={key}>
+              <p className="kicker">{offer.eyebrow}</p>
+              <h3>{offer.title}</h3>
+              <span>{offer.description}</span>
+              <div className="upgrade-card-foot">
+                <strong>{offer.price}</strong>
+                <button onClick={() => openUpgrade(key as UpgradeKey)}>Ver detalhes</button>
+              </div>
+            </article>
+          ))}
+        </div>
       </section>
     </div>
   );
@@ -2025,21 +2150,53 @@ export function App() {
     </div>
   );
 
+  const UpgradeModal = () => {
+    if (!upgradeModal) return null;
+    const offer = upgradeOffers[upgradeModal];
+    const alreadyActive = hasUpgradeOffer(offer);
+
+    return (
+      <div className="upgrade-modal-backdrop" role="dialog" aria-modal="true" aria-label={offer.title}>
+        <section className="upgrade-modal">
+          <button className="upgrade-modal-close" onClick={() => setUpgradeModal(null)} title="Fechar"><X size={20} /></button>
+          <p className="kicker">{alreadyActive ? 'Modulo ativo' : offer.eyebrow}</p>
+          <h2>{offer.title}</h2>
+          <p>{alreadyActive ? 'Este produto ja aparece como liberado para sua conta.' : offer.description}</p>
+          <div className="upgrade-price">{offer.price}</div>
+          <div className="upgrade-includes">
+            {offer.productKeys.map((productKey) => (
+              <span key={productKey}>{PRODUCT_LABELS[productKey] ?? productKey}</span>
+            ))}
+          </div>
+          <div className="upgrade-actions">
+            <Button onClick={() => openUpgradeCheckout(upgradeModal)} disabled={alreadyActive}>
+              <DownloadCloud size={17} /> Ir para checkout
+            </Button>
+            <Button onClick={() => unlockOrderBump(offer.plan)} variant="ghost">
+              Liberar localmente
+            </Button>
+          </div>
+          <small>Depois da compra aprovada, a Kiwify envia o webhook e o acesso e liberado automaticamente.</small>
+        </section>
+      </div>
+    );
+  };
+
   const renderMain = () => {
     switch (route) {
       case ROUTES.ACCESS: return AccessView();
       case ROUTES.ONBOARDING: return OnboardingView();
       case ROUTES.HOME: return HomeView();
-      case ROUTES.BOOK: return hasReaderAccess ? BookView() : <LockedView title="Livro interativo bloqueado" />;
-      case ROUTES.LIBRARY: return hasReaderAccess ? LibraryView() : <LockedView title="Biblioteca bloqueada" />;
-      case ROUTES.SESSIONS: return hasReaderAccess ? SessionsView() : <LockedView title="Áudios bloqueados" />;
-      case ROUTES.IGENT: return hasMindAccess ? IGentMindView() : <LockedView title="iGentMIND bloqueado" />;
+      case ROUTES.BOOK: return hasReaderAccess ? BookView() : <LockedView title="Livro interativo bloqueado" offerKey="basic" />;
+      case ROUTES.LIBRARY: return hasReaderAccess ? LibraryView() : <LockedView title="Biblioteca bloqueada" offerKey="basic" />;
+      case ROUTES.SESSIONS: return hasReaderAccess ? SessionsView() : <LockedView title="Audios bloqueados" offerKey="basic" />;
+      case ROUTES.IGENT: return hasMindAccess ? IGentMindView() : <LockedView title="iGentMIND bloqueado" offerKey="igent30" />;
       case ROUTES.FAVORITES: return FavoritesView();
       case ROUTES.WORKBOOK: return WorkbookView();
       case ROUTES.MANIFESTO: return ManifestoView();
       case ROUTES.SETTINGS: return SettingsView();
       case ROUTES.ADMIN: return isAdmin ? AdminView() : <LockedView title="Painel administrativo bloqueado" />;
-      case ROUTES.READER: return hasReaderAccess ? ReaderView() : <LockedView title="Leitor bloqueado" />;
+      case ROUTES.READER: return hasReaderAccess ? ReaderView() : <LockedView title="Leitor bloqueado" offerKey="basic" />;
       default: return HomeView();
     }
   };
@@ -2054,6 +2211,7 @@ export function App() {
         <main id="main" className="app-main">{renderMain()}</main>
       </div>
       {BottomNavigation()}
+      {UpgradeModal()}
       {audioState.currentUrl && (
         <div className="audio-dock pro-player">
           <div className="player-glow" />

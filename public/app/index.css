@@ -2091,6 +2091,96 @@ button:active {
   margin: 0;
 }
 
+.locked-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.upgrade-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  place-items: center;
+  background: rgba(0, 0, 0, 0.68);
+  padding: 18px;
+  backdrop-filter: blur(10px);
+}
+
+.upgrade-modal {
+  position: relative;
+  width: min(520px, 100%);
+  display: grid;
+  gap: 14px;
+  border: 1px solid rgba(215, 183, 88, 0.24);
+  border-radius: 16px;
+  background:
+    radial-gradient(circle at 86% 0%, rgba(215, 183, 88, 0.16), transparent 34%),
+    #16171b;
+  box-shadow: 0 34px 90px rgba(0, 0, 0, 0.58);
+  padding: 26px;
+}
+
+.upgrade-modal-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text);
+}
+
+.upgrade-modal h2 {
+  margin: 0;
+  padding-right: 40px;
+  font-family: "Playfair Display", "Inria Serif", serif;
+  font-size: clamp(1.55rem, 4vw, 2.15rem);
+  line-height: 1.08;
+}
+
+.upgrade-modal p,
+.upgrade-modal small {
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.upgrade-price {
+  justify-self: start;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #f1d98f, #c59a3e);
+  color: #080808;
+  padding: 8px 13px;
+  font-weight: 950;
+}
+
+.upgrade-includes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.upgrade-includes span {
+  border: 1px solid rgba(215, 183, 88, 0.22);
+  border-radius: 999px;
+  background: rgba(215, 183, 88, 0.07);
+  color: var(--gold-soft);
+  padding: 7px 10px;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.upgrade-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
 .workbook-page {
   width: min(1180px, 100%);
   display: grid;
@@ -2247,6 +2337,90 @@ button:active {
   padding: 7px 10px;
   font-size: 0.78rem;
   font-weight: 800;
+}
+
+.upgrade-section {
+  display: grid;
+  gap: 14px;
+  border: 1px solid rgba(215, 183, 88, 0.16);
+  border-radius: 14px;
+  background:
+    radial-gradient(circle at 92% 0%, rgba(215, 183, 88, 0.12), transparent 30%),
+    #15161a;
+  padding: 20px;
+}
+
+.upgrade-section-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.upgrade-section-head h2 {
+  margin: 4px 0 0;
+  font-family: "Playfair Display", "Inria Serif", serif;
+  font-size: 1.42rem;
+}
+
+.upgrade-section-head span {
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.upgrade-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.upgrade-card {
+  display: grid;
+  gap: 10px;
+  min-height: 188px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 12px;
+  background: rgba(10, 11, 14, 0.62);
+  padding: 16px;
+}
+
+.upgrade-card.active {
+  border-color: rgba(52, 211, 153, 0.28);
+}
+
+.upgrade-card h3 {
+  margin: 0;
+  color: #f4efe7;
+  font-size: 1rem;
+  line-height: 1.22;
+}
+
+.upgrade-card span {
+  color: var(--muted);
+  font-size: 0.84rem;
+  line-height: 1.45;
+}
+
+.upgrade-card-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: auto;
+}
+
+.upgrade-card-foot strong {
+  color: var(--gold-soft);
+}
+
+.upgrade-card-foot button {
+  border: 1px solid rgba(215, 183, 88, 0.22);
+  border-radius: 999px;
+  background: rgba(215, 183, 88, 0.08);
+  color: var(--gold-soft);
+  padding: 8px 10px;
+  font-size: 0.76rem;
+  font-weight: 850;
 }
 
 .account-edit label {
@@ -3013,8 +3187,15 @@ button:active {
 
   .diary-shell,
   .workbook-grid,
-  .account-grid {
+  .account-grid,
+  .upgrade-grid {
     grid-template-columns: 1fr;
+  }
+
+  .upgrade-section-head,
+  .upgrade-actions {
+    align-items: stretch;
+    flex-direction: column;
   }
 
   .diary-mind-panel {
