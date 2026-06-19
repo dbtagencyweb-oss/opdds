@@ -1,4 +1,5 @@
 :root {
+  --font-ui: "Arsenal", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --bg: #101114;
   --surface: #18191d;
   --surface-2: #222329;
@@ -21,7 +22,7 @@ body,
 
 body {
   margin: 0;
-  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: var(--font-ui);
   background: var(--bg);
   color: var(--text);
 }
@@ -145,7 +146,7 @@ body::selection {
 .access-brand h1 {
   margin: 0 0 12px;
   max-width: 14ch;
-  font-family: "Inria Serif", Georgia, serif;
+  font-family: var(--font-ui);
   font-size: clamp(2rem, 6vw, 4.2rem);
   line-height: 0.95;
 }
@@ -407,7 +408,7 @@ body::selection {
 
 .home-hero h1 {
   margin: 10px 0 16px;
-  font-family: "Inria Serif", Georgia, serif;
+  font-family: var(--font-ui);
   font-size: clamp(1.9rem, 4vw, 3.2rem);
   line-height: 1.04;
 }
@@ -415,7 +416,7 @@ body::selection {
 .page-heading h1,
 .settings-panel h1 {
   margin: 8px 0 12px;
-  font-family: "Inria Serif", Georgia, serif;
+  font-family: var(--font-ui);
   font-size: clamp(1.75rem, 3vw, 2.55rem);
   line-height: 1.08;
 }
@@ -708,7 +709,7 @@ body::selection {
 .page-copy {
   max-width: 760px;
   margin: 38px auto;
-  font-family: "Inria Serif", Georgia, serif;
+  font-family: var(--font-ui);
   line-height: 1.85;
 }
 
@@ -1224,7 +1225,7 @@ button:active {
 .access-copy h1 {
   margin: 0;
   color: #f5efe4;
-  font-family: "Playfair Display", "Inria Serif", serif;
+  font-family: var(--font-ui);
   font-size: 1.35rem;
   line-height: 1.1;
 }
@@ -1354,7 +1355,7 @@ button:active {
 .account-popover h3 {
   margin: -4px 0 2px;
   color: var(--gold-soft);
-  font-family: "Playfair Display", "Inria Serif", serif;
+  font-family: var(--font-ui);
   font-size: 1.35rem;
 }
 
@@ -1508,7 +1509,7 @@ button:active {
 .manifesto-panel h1 {
   margin: 10px 0 16px;
   max-width: 760px;
-  font-family: "Inria Serif", Georgia, serif;
+  font-family: var(--font-ui);
   font-size: clamp(2rem, 5vw, 4.2rem);
   line-height: 1;
 }
@@ -1680,7 +1681,7 @@ button:active {
 .mind-chat-top h1 {
   margin: 5px 0 0;
   text-align: center;
-  font-family: "Inria Serif", Georgia, serif;
+  font-family: var(--font-ui);
   font-size: clamp(2rem, 4vw, 3.4rem);
 }
 
@@ -1899,7 +1900,7 @@ button:active {
 
 .home-greeting h1 {
   margin: 0 0 6px;
-  font-family: "Inria Serif", Georgia, serif;
+  font-family: var(--font-ui);
   font-size: clamp(2rem, 5vw, 3.2rem);
   line-height: 1.02;
   letter-spacing: 0;
@@ -1929,7 +1930,7 @@ button:active {
 .home-reading-card h2 {
   max-width: 660px;
   margin: 7px 0 3px;
-  font-family: "Inria Serif", Georgia, serif;
+  font-family: var(--font-ui);
   font-size: clamp(1.35rem, 3vw, 2.05rem);
   line-height: 1.1;
   letter-spacing: 0;
@@ -1972,7 +1973,7 @@ button:active {
 .home-state-section h2,
 .workbook-hero h1 {
   margin: 0 0 16px;
-  font-family: "Inria Serif", Georgia, serif;
+  font-family: var(--font-ui);
   font-size: clamp(1.45rem, 3vw, 2rem);
   letter-spacing: 0;
 }
@@ -2044,7 +2045,7 @@ button:active {
 
 .manifesto-card blockquote {
   margin: 12px 0 18px;
-  font-family: "Inria Serif", Georgia, serif;
+  font-family: var(--font-ui);
   font-size: clamp(1.12rem, 3vw, 1.5rem);
   font-style: italic;
   line-height: 1.45;
@@ -2139,7 +2140,7 @@ button:active {
 .upgrade-modal h2 {
   margin: 0;
   padding-right: 40px;
-  font-family: "Playfair Display", "Inria Serif", serif;
+  font-family: var(--font-ui);
   font-size: clamp(1.55rem, 4vw, 2.15rem);
   line-height: 1.08;
 }
@@ -2300,7 +2301,7 @@ button:active {
 .account-hero h1,
 .account-card h2 {
   margin: 4px 0 6px;
-  font-family: "Playfair Display", "Inria Serif", serif;
+  font-family: var(--font-ui);
   letter-spacing: 0;
 }
 
@@ -2359,7 +2360,7 @@ button:active {
 
 .upgrade-section-head h2 {
   margin: 4px 0 0;
-  font-family: "Playfair Display", "Inria Serif", serif;
+  font-family: var(--font-ui);
   font-size: 1.42rem;
 }
 
@@ -2511,7 +2512,7 @@ button:active {
 
 .admin-panel h2 {
   margin: 0;
-  font-family: "Playfair Display", "Inria Serif", serif;
+  font-family: var(--font-ui);
   font-size: 1.35rem;
 }
 
@@ -2597,7 +2598,7 @@ button:active {
 
 .admin-section-head h2 {
   margin: 2px 0 0;
-  font-family: "Playfair Display", "Inria Serif", serif;
+  font-family: var(--font-ui);
   font-size: 1.4rem;
 }
 
@@ -2757,7 +2758,7 @@ button:active {
 .diary-panel h2,
 .diary-mind-panel h2 {
   margin: 4px 0 4px;
-  font-family: "Playfair Display", "Inria Serif", serif;
+  font-family: var(--font-ui);
   font-size: 1.62rem;
   line-height: 1.12;
 }
@@ -2765,7 +2766,7 @@ button:active {
 .diary-panel em {
   display: block;
   color: var(--gold-soft);
-  font-family: "Playfair Display", "Inria Serif", serif;
+  font-family: var(--font-ui);
   font-size: 0.98rem;
   margin-bottom: 16px;
 }
@@ -2784,7 +2785,7 @@ button:active {
   border-radius: 6px;
   background: transparent;
   color: var(--muted);
-  font-family: "Playfair Display", "Inria Serif", serif;
+  font-family: var(--font-ui);
   font-weight: 800;
 }
 
@@ -2829,7 +2830,7 @@ button:active {
 
 .diary-question strong {
   color: #f3efe8;
-  font-family: "Playfair Display", "Inria Serif", serif;
+  font-family: var(--font-ui);
   font-size: 1.05rem;
   line-height: 1.35;
 }
@@ -3449,3 +3450,4 @@ button:active {
     min-height: 340px;
   }
 }
+
