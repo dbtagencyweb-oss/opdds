@@ -6,19 +6,25 @@ import {
   Boxes,
   Brain,
   Briefcase,
+  CheckCircle2,
   ChevronDown,
   ChevronLeft,
   Cloud,
+  Copy,
   DownloadCloud,
   FileText,
   Flame,
   Heart,
+  Headphones,
   Home,
   Library,
   ListMusic,
   Lock,
+  Mail,
   Menu,
+  Moon,
   Music2,
+  NotebookPen,
   Pause,
   Play,
   RotateCcw,
@@ -26,6 +32,7 @@ import {
   Settings,
   Shield,
   Sparkles,
+  Sun,
   User,
   Users,
   Volume2,
@@ -34,13 +41,32 @@ import {
 } from 'lucide-react';
 import { usePagination } from './hooks/usePagination';
 import { accessTokenPlans, accessTokens, bookChapters, onboardingSteps, pdfUrl, workbookPdfUrl } from './data/book';
+import { bookGroups, pillarLetters } from './data/bookStructure';
+import { pdfTextPages } from './data/pdfTextPages';
 import Button from './components/Button';
 import OnboardingModal from './components/OnboardingModal';
 import ReaderShell from './components/ReaderShell';
-import SiriWaveVisualizer from './components/SiriWaveVisualizer';
 import { PRODUCT_KEYS, PRODUCT_LABELS, ProductKey } from './config/products';
+import { useTheme } from './theme/ThemeProvider';
 import { hasLocalEntitlement, LocalPlan } from './services/entitlements';
-import { getLocalWorkbookSavedAt, loadLocalWorkbookAnswers, loadLocalWorkbookEntry, saveLocalWorkbookAnswers, saveLocalWorkbookEntry } from './services/workbookStore';
+import {
+  AudioProgressEntry,
+  LetterMeta,
+  ReaderNote,
+  getLocalWorkbookSavedAt,
+  loadLocalAudioProgress,
+  loadLocalLetterMeta,
+  loadLocalLetters,
+  loadLocalReaderNotes,
+  loadLocalWorkbookAnswers,
+  loadLocalWorkbookEntry,
+  saveLocalAudioProgress,
+  saveLocalLetterMeta,
+  saveLocalLetters,
+  saveLocalReaderNotes,
+  saveLocalWorkbookAnswers,
+  saveLocalWorkbookEntry,
+} from './services/workbookStore';
 import {
   AdminEvent,
   AdminInviteResponse,
@@ -57,7 +83,9 @@ import {
   LocalUserRecord,
   loginAccount,
   registerAccount,
+  requestPasswordReset,
   revokeAdminProduct,
+  resetPassword,
   updateStoredAuthUser,
 } from './services/auth';
 
@@ -71,6 +99,7 @@ const ROUTES = {
   IGENT: 'igent',
   FAVORITES: 'favorites',
   WORKBOOK: 'workbook',
+  LETTERS: 'letters',
   MANIFESTO: 'manifesto',
   SETTINGS: 'settings',
   ADMIN: 'admin',
@@ -90,6 +119,25 @@ type AudioState = {
   playbackRate: number;
 };
 
+type BeforeInstallPromptEvent = Event & {
+  prompt: () => Promise<void>;
+  userChoice: Promise<{ outcome: 'accepted' | 'dismissed'; platform: string }>;
+};
+
+const AUDIO_BAR_COUNT = 18;
+const idleAudioBars = Array.from({ length: AUDIO_BAR_COUNT }, () => 0.08);
+
+const AudioFrequencyBars = ({ values }: { values: number[] }) => (
+  <div className="audio-frequency-bars" aria-hidden="true">
+    {values.map((value, index) => (
+      <span
+        key={index}
+        style={{ '--bar-level': String(Math.max(0.06, Math.min(1, value || 0.08))) } as React.CSSProperties}
+      />
+    ))}
+  </div>
+);
+
 const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max);
 
 const formatTime = (seconds: number) => {
@@ -97,28 +145,6 @@ const formatTime = (seconds: number) => {
   const minutes = Math.floor(seconds / 60);
   const rest = Math.floor(seconds % 60).toString().padStart(2, '0');
   return `${minutes}:${rest}`;
-};
-
-const CHARS_PER_READER_PAGE = 850;
-
-const paginateParagraphs = (content: string[]) => {
-  const generatedPages: string[][] = [];
-  let currentPage: string[] = [];
-  let currentLength = 0;
-
-  content.forEach((paragraph) => {
-    if (currentLength + paragraph.length > CHARS_PER_READER_PAGE && currentPage.length > 0) {
-      generatedPages.push(currentPage);
-      currentPage = [paragraph];
-      currentLength = paragraph.length;
-    } else {
-      currentPage.push(paragraph);
-      currentLength += paragraph.length;
-    }
-  });
-
-  if (currentPage.length > 0) generatedPages.push(currentPage);
-  return generatedPages;
 };
 
 const navGroups = [
@@ -142,6 +168,7 @@ const navGroups = [
     items: [
       { id: ROUTES.FAVORITES, label: 'Favoritos', icon: Heart },
       { id: ROUTES.WORKBOOK, label: 'Diário', icon: FileText },
+      { id: ROUTES.LETTERS, label: 'Minhas cartas', icon: Mail },
       { id: ROUTES.MANIFESTO, label: 'Manifesto', icon: Shield },
       { id: ROUTES.SETTINGS, label: 'Minha conta', icon: User },
       { id: ROUTES.ADMIN, label: 'Admin', icon: Users },
@@ -160,19 +187,19 @@ const journeyStates = [
     title: 'Sobrevivência',
     desc: 'Estou em crise ou tentando não entrar em pânico.',
     audioUrl: '/media/audios/home/sobrevivencia.mp3',
-    chapter: 2,
+    chapter: 8,
   },
   {
     title: 'Reconstrução',
     desc: 'Estou tentando me reerguer sem me violentar.',
     audioUrl: '/media/audios/home/reconstrucao.mp3',
-    chapter: 6,
+    chapter: 11,
   },
   {
     title: 'Continuidade',
     desc: 'Quero manter o equilíbrio depois do impacto.',
     audioUrl: '/media/audios/home/continuidade.mp3',
-    chapter: 10,
+    chapter: 14,
   },
 ];
 
@@ -187,100 +214,100 @@ const workbookPillars = [
   {
     roman: 'I',
     title: 'Reconhecimento',
-    subtitle: 'Onde a negacao cessa.',
-    intro: 'Este pilar pede uma fotografia honesta do agora: o que pesa, o que ainda vive e o que voce vem fingindo nao perceber.',
+    subtitle: 'Onde a negação cessa.',
+    intro: 'Este pilar pede uma fotografia honesta do agora: o que pesa, o que ainda vive e o que você vem fingindo não perceber.',
     questions: [
       'O que em mim precisa ser reconhecido antes de ser consertado?',
-      'Qual parte da minha historia eu ainda tento esconder para parecer forte?',
-      'Que verdade pequena, se aceita hoje, ja diminuiria o peso?',
+      'Qual parte da minha história eu ainda tento esconder para parecer forte?',
+      'Que verdade pequena, se aceita hoje, já diminuiria o peso?',
     ],
   },
   {
     roman: 'II',
-    title: 'Familia',
-    subtitle: 'Lealdades invisiveis.',
-    intro: 'Aqui voce olha para herancas emocionais sem transformar ninguem em vilao. O foco e entender o que foi recebido e o que nao precisa continuar.',
+    title: 'Família',
+    subtitle: 'Lealdades invisíveis.',
+    intro: 'Aqui você olha para heranças emocionais sem transformar ninguém em vilão. O foco é entender o que foi recebido e o que não precisa continuar.',
     questions: [
       'Que papel eu aprendi a ocupar para ser aceito?',
-      'Que culpa nao nasceu em mim, mas ainda dirige minhas escolhas?',
+      'Que culpa não nasceu em mim, mas ainda dirige minhas escolhas?',
       'Qual limite me devolveria dignidade sem apagar minha origem?',
     ],
   },
   {
     roman: 'III',
-    title: 'Vinculo',
-    subtitle: 'A necessidade de pertencer.',
-    intro: 'Pertencer nao deveria custar a sua propria presenca. Este pilar observa onde o medo de perder alguem virou abandono de si.',
+    title: 'Luto',
+    subtitle: 'Quando a ausência permanece.',
+    intro: 'O luto também alcança versões, promessas, lugares e futuros que não aconteceram.',
     questions: [
-      'Onde eu confundo amor com a necessidade de ser escolhido?',
-      'Que relacao me pede para diminuir minha verdade?',
-      'Como eu posso permanecer aberto sem me entregar ao desespero?',
+      'Que ausência eu ainda tento tratar como se não tivesse acontecido?',
+      'O que mudou de forma definitiva e ainda não recebeu despedida?',
+      'Como posso honrar o que existiu sem interromper a minha própria vida?',
     ],
   },
   {
     roman: 'IV',
-    title: 'Luto',
-    subtitle: 'O que nao volta.',
-    intro: 'O luto nao e so sobre morte. E tambem sobre versoes, promessas, lugares e futuros que nao aconteceram.',
+    title: 'Trabalho',
+    subtitle: 'Valor e identidade.',
+    intro: 'Este pilar separa desempenho de existência e utilidade de dignidade.',
     questions: [
-      'O que eu ainda tento trazer de volta, mesmo sabendo que mudou?',
-      'Que parte de mim ficou parada no impacto?',
-      'Qual despedida interna eu preciso escrever para voltar a respirar?',
+      'Onde eu confundo meu valor com aquilo que consigo entregar?',
+      'O que o descanso desperta em mim: culpa, medo ou sensação de inutilidade?',
+      'Como seria trabalhar sem usar desempenho como prova de existência?',
     ],
   },
   {
     roman: 'V',
-    title: 'Trabalho',
-    subtitle: 'Producao versus valor.',
-    intro: 'Este pilar separa desempenho de existencia. Voce vale antes do resultado, embora o mundo tente te convencer do contrario.',
+    title: 'Dor',
+    subtitle: 'Fuga e anestesia.',
+    intro: 'Toda fuga começou tentando proteger alguma parte sua. Aqui você aprende a reconhecer a dor sem virar a própria dor.',
     questions: [
-      'Onde eu uso produtividade para fugir de sentir?',
-      'Que fracasso virou sentenca quando deveria ser informacao?',
-      'Que forma de trabalho respeitaria mais o meu corpo e meu tempo?',
+      'Qual comportamento me anestesia, mas cobra caro depois?',
+      'Que sensação costuma aparecer imediatamente antes da fuga?',
+      'O que me ajudaria a permanecer trinta segundos a mais comigo?',
     ],
   },
   {
     roman: 'VI',
-    title: 'Amor',
-    subtitle: 'Quando a falta vira espelho.',
-    intro: 'Amor sem consciencia pode virar negociacao de abandono. Aqui voce observa desejo, carencia e escolha com mais nitidez.',
+    title: 'Desejo',
+    subtitle: 'Amor e frustração.',
+    intro: 'Aqui você observa desejo, projeção, carência e escolha sem transformar o outro em prova do seu valor.',
     questions: [
       'Que falta eu tento resolver dentro de outra pessoa?',
-      'Onde eu aceito migalhas por medo de atravessar o vazio?',
-      'Como seria escolher sem implorar por validacao?',
+      'Onde intensidade, ansiedade e desejo se confundem para mim?',
+      'O que eu escolheria se não precisasse usar o amor como prova?',
     ],
   },
   {
     roman: 'VII',
-    title: 'Fuga',
-    subtitle: 'Quando escapar parece sobreviver.',
-    intro: 'Toda fuga comeca como protecao. O ponto e perceber quando ela deixa de proteger e passa a roubar direcao.',
+    title: 'Fé',
+    subtitle: 'Sentido e desencanto.',
+    intro: 'Fé não é resposta pronta. É sustentar espaço interno mesmo quando a certeza não vem.',
     questions: [
-      'Qual comportamento me anestesia, mas cobra caro depois?',
-      'De que conversa eu estou fugindo comigo mesmo?',
-      'Qual pausa consciente pode substituir a fuga automatica?',
+      'Em que ponto acreditar começou a parecer perigoso ou ingênuo?',
+      'Que tipo de sentido eu ainda tento forçar para não admitir que não sei?',
+      'O que pode permanecer aberto sem precisar de resposta hoje?',
     ],
   },
   {
     roman: 'VIII',
-    title: 'Fe',
-    subtitle: 'O chao quando a razao falha.',
-    intro: 'Fe aqui nao e resposta pronta. E a escolha de manter um fio de presenca quando a mente perdeu o mapa.',
+    title: 'Escassez',
+    subtitle: 'Medo e sustentação.',
+    intro: 'A falta é uma circunstância, não uma identidade. Este pilar devolve escala ao que parece urgência total.',
     questions: [
-      'O que ainda me sustenta quando ninguem esta vendo?',
-      'Que crenca antiga precisa ser revista, nao descartada?',
-      'Qual gesto concreto de fe cabe no meu dia de hoje?',
+      'O que está faltando de verdade, de forma concreta?',
+      'O que ainda existe e a urgência tem me impedido de enxergar?',
+      'Qual é a próxima ação mínima possível com os recursos de agora?',
     ],
   },
   {
     roman: 'IX',
-    title: 'Continuidade',
-    subtitle: 'Permanecer depois do impacto.',
-    intro: 'Continuidade e o pacto com o proximo passo. Nao precisa ser grandioso; precisa ser possivel e repetivel.',
+    title: 'Vazio',
+    subtitle: 'Presença e continuidade.',
+    intro: 'O vazio não precisa ser preenchido imediatamente. Ele pode se tornar um espaço habitável.',
     questions: [
-      'O que eu preciso manter mesmo quando a motivacao faltar?',
-      'Que sinal mostra que eu estou voltando para mim?',
-      'Qual compromisso pequeno eu assumo pelas proximas 24 horas?',
+      'O que eu tento preencher imediatamente quando o silêncio aparece?',
+      'Como meu corpo reage quando não há resposta nem próxima etapa?',
+      'Que pacto pequeno me ajuda a não desaparecer de mim?',
     ],
   },
 ];
@@ -288,7 +315,7 @@ const workbookPillars = [
 const planLabels: Record<Plan, string> = {
   pdf: 'PDF',
   basic: 'Livro + App',
-  workbook: 'Diario',
+  workbook: 'Diário',
   igent30: 'iGentMIND 30 dias',
   igent90: 'iGentMIND 90 dias',
   group: 'Grupo',
@@ -307,18 +334,18 @@ const upgradeOffers: Record<UpgradeKey, {
   productKeys: ProductKey[];
 }> = {
   basic: {
-    title: 'Livro interativo + audios',
+    title: 'Livro interativo + áudios',
     eyebrow: 'Upgrade de leitura',
-    description: 'Desbloqueia capitulos no app, biblioteca, sessoes de audio e leitura guiada estilo Kindle.',
+    description: 'Desbloqueia capítulos no app, biblioteca, sessões de áudio e leitura guiada estilo Kindle.',
     price: 'R$ 27',
     checkoutUrl: 'https://pay.kiwify.com.br/cJ4T7JR',
     plan: 'basic',
     productKeys: [PRODUCT_KEYS.base],
   },
   workbook: {
-    title: 'Diario dos Desacreditados',
+    title: 'Diário dos Desacreditados',
     eyebrow: 'Workbook',
-    description: 'Area para escrever, salvar reflexoes e atravessar os pilares com perguntas guiadas.',
+    description: 'Área para escrever, salvar reflexões e atravessar os pilares com perguntas guiadas.',
     price: 'R$ 17',
     checkoutUrl: 'https://pay.kiwify.com.br/sT7TVjJ',
     plan: 'workbook',
@@ -327,16 +354,16 @@ const upgradeOffers: Record<UpgradeKey, {
   igent30: {
     title: 'iGentMIND - 30 dias',
     eyebrow: 'Mentor de leitura',
-    description: 'Conselheiro motivador que cruza sentimentos, pilares e trechos do livro para orientar sua proxima leitura.',
+    description: 'Conselheiro motivador que cruza sentimentos, pilares e trechos do livro para orientar sua próxima leitura.',
     price: 'R$ 27',
     checkoutUrl: 'https://pay.kiwify.com.br/3rj0NbN',
     plan: 'igent30',
     productKeys: [PRODUCT_KEYS.igentMind30],
   },
   igent90: {
-    title: 'iGentMIND - Mentor Psicanalitico',
+    title: 'iGentMIND - Mentor Psicanalítico',
     eyebrow: 'Mentoria estendida',
-    description: 'Acesso ampliado ao iGentMIND, com recomendacoes por tema, pilar e estado emocional.',
+    description: 'Acesso ampliado ao iGentMIND, com recomendações por tema, pilar e estado emocional.',
     price: 'R$ 67',
     checkoutUrl: 'https://pay.kiwify.com.br/yYaKNrk',
     plan: 'igent90',
@@ -354,7 +381,7 @@ const upgradeOffers: Record<UpgradeKey, {
   vip: {
     title: 'Pacote completo OPDDS',
     eyebrow: 'Acesso total',
-    description: 'Livro interativo, audios, Diario, iGentMIND e grupo em um unico pacote.',
+    description: 'Livro interativo, áudios, Diário, iGentMIND e grupo em um único pacote.',
     price: 'Pacote',
     checkoutUrl: 'https://pay.kiwify.com.br/yYaKNrk',
     plan: 'vip',
@@ -374,12 +401,12 @@ const upgradeActiveProductKeys: Record<UpgradeKey, ProductKey> = {
 const eventLabels: Record<string, string> = {
   INVITE_CREATED: 'Convite criado',
   ACCESS_GRANTED: 'Acesso liberado',
-  RENEWAL_GRANTED: 'Renovacao',
+  RENEWAL_GRANTED: 'Renovação',
   ACCESS_REFUNDED: 'Reembolso/chargeback',
   ACCESS_CANCELED: 'Cancelamento',
   IGNORED: 'Ignorado',
   APPROVED_IGNORED: 'Compra ignorada',
-  RENEWAL_IGNORED: 'Renovacao ignorada',
+  RENEWAL_IGNORED: 'Renovação ignorada',
   PLAN_GRANTED: 'Plano manual',
   PRODUCT_GRANTED: 'Produto manual',
   PRODUCT_REVOKED: 'Produto removido',
@@ -410,15 +437,15 @@ const maskAccessToken = (value?: string | null) => {
 };
 
 const pillarCards = [
-  { title: 'Reconhecimento', desc: 'O primeiro passo para deixar de pedir licença.', icon: Sparkles, chapter: 2 },
-  { title: 'Família', desc: 'Lealdades invisíveis.', icon: Boxes, chapter: 3 },
-  { title: 'Vínculo', desc: 'A necessidade de pertencer.', icon: Heart, chapter: 4 },
-  { title: 'Luto', desc: 'O que não volta.', icon: Cloud, chapter: 5 },
-  { title: 'Trabalho', desc: 'Produção versus valor.', icon: Briefcase, chapter: 6 },
-  { title: 'Relacionamento', desc: 'Onde a falta vira espelho.', icon: Heart, chapter: 7 },
-  { title: 'Fuga', desc: 'Quando escapar parece sobreviver.', icon: Flame, chapter: 8 },
-  { title: 'Fé', desc: 'O chão quando a razão falha.', icon: Sparkles, chapter: 9 },
-  { title: 'Continuidade', desc: 'Permanecer depois do impacto.', icon: RotateCcw, chapter: 10 },
+  { title: 'Reconhecimento', desc: 'Onde a negação cessa.', icon: Sparkles, chapter: 8 },
+  { title: 'Família', desc: 'Lealdades invisíveis.', icon: Boxes, chapter: 9 },
+  { title: 'Luto', desc: 'Quando a ausência permanece.', icon: Cloud, chapter: 10 },
+  { title: 'Trabalho', desc: 'Quando produzir deixa de significar existir.', icon: Briefcase, chapter: 11 },
+  { title: 'Dor', desc: 'Dor, fuga e anestesia.', icon: Flame, chapter: 12 },
+  { title: 'Desejo', desc: 'Amor, projeção e frustração.', icon: Heart, chapter: 13 },
+  { title: 'Fé', desc: 'Sentido e desencanto.', icon: Sparkles, chapter: 14 },
+  { title: 'Escassez', desc: 'Ver a falta sem se tornar falta.', icon: AlertCircle, chapter: 15 },
+  { title: 'Vazio', desc: 'Presença e continuidade.', icon: RotateCcw, chapter: 16 },
 ];
 
 const mentorTopics = [
@@ -489,12 +516,13 @@ const normalizeForSearch = (value = '') =>
 
 const getChapterKind = (index: number, title = '') => {
   const normalized = normalizeForSearch(title);
+  if (normalized.includes('pilar')) return title.split('—')[0]?.trim() || 'Pilar';
   if (normalized.includes('prefacio')) return 'Prefácio';
   if (normalized.includes('introducao')) return 'Introdução';
   if (normalized.includes('posfacio')) return 'Posfácio';
   if (normalized.includes('epilogo')) return 'Epílogo';
   if (normalized.includes('carta')) return 'Carta final';
-  if (index >= 2 && index <= 10) return `Pilar ${String(index - 1).padStart(2, '0')}`;
+  if (index >= 8 && index <= 16) return `Pilar ${String(index - 7).padStart(2, '0')}`;
   return 'Livro';
 };
 
@@ -517,7 +545,7 @@ const mindGuides: Record<string, {
     opening: 'Culpa tenta te convencer de que uma falha virou identidade. Vamos separar responsabilidade de sentença.',
     firstQuestion: 'Quando você pensa nisso, qual frase mais te acusa por dentro?',
     quickReplies: ['Eu devia ter feito mais', 'Eu estraguei tudo', 'Não consigo me perdoar', 'Tenho medo de repetir'],
-    chapterHint: 2,
+    chapterHint: 8,
     counterpoint: 'Você pode reconhecer um erro sem entregar sua existência inteira para ele.',
     practice: 'Escreva uma frase começando com: “Eu assumo o que cabe a mim, mas não aceito ser reduzido a isso.”',
     keywords: ['culpa', 'julgamento', 'falha', 'perdao', 'acusacao', 'erro', 'sentenca', 'reconhecimento'],
@@ -526,7 +554,7 @@ const mindGuides: Record<string, {
     opening: 'Recaída não é volta ao zero. É um ponto do caminho pedindo mais honestidade, não mais punição.',
     firstQuestion: 'O que você está chamando de recaída: um comportamento, um pensamento ou um cansaço?',
     quickReplies: ['Comportamento', 'Pensamento', 'Cansaço', 'Vergonha de tentar de novo'],
-    chapterHint: 10,
+    chapterHint: 16,
     counterpoint: 'Quem continua depois de cair não perdeu o processo; está aprendendo onde precisa de apoio.',
     practice: 'Escolha um gesto mínimo para as próximas duas horas. Pequeno o bastante para ser cumprido.',
     keywords: ['recaida', 'continuidade', 'cair', 'recomecar', 'processo', 'vergonha', 'permanecer'],
@@ -535,7 +563,7 @@ const mindGuides: Record<string, {
     opening: 'Luto não é só perda de alguém. Às vezes é perda de uma versão sua que não volta.',
     firstQuestion: 'O que exatamente parece não voltar agora?',
     quickReplies: ['Uma pessoa', 'Uma fase da vida', 'Minha confiança', 'A vontade de continuar'],
-    chapterHint: 5,
+    chapterHint: 10,
     counterpoint: 'Aceitar que algo não volta não significa aceitar que nada mais nasce.',
     practice: 'Nomeie a ausência sem brigar com ela. Depois nomeie uma presença pequena que ainda ficou.',
     keywords: ['luto', 'perda', 'ausencia', 'volta', 'despedida', 'vazio', 'saudade'],
@@ -544,7 +572,7 @@ const mindGuides: Record<string, {
     opening: 'Desejo assusta quando parece maior que a coragem. Mas ele também pode revelar vida onde você só via desistência.',
     firstQuestion: 'O que você deseja e tem medo de admitir?',
     quickReplies: ['Mudar de vida', 'Ser escolhido', 'Ir embora', 'Começar algo meu'],
-    chapterHint: 8,
+    chapterHint: 13,
     counterpoint: 'Nem todo desejo é fuga. Alguns são mapas que você ainda não aprendeu a ler.',
     practice: 'Pergunte: “Esse desejo me tira de mim ou me devolve para mim?”',
     keywords: ['desejo', 'fuga', 'mudanca', 'vontade', 'medo', 'ir embora', 'reconstrucao'],
@@ -553,7 +581,7 @@ const mindGuides: Record<string, {
     opening: 'Fé quebrada não é ausência de profundidade. Às vezes é a alma recusando respostas fáceis.',
     firstQuestion: 'O que quebrou primeiro: sua crença, sua confiança ou sua paciência?',
     quickReplies: ['Minha crença', 'Minha confiança', 'Minha paciência', 'Minha esperança'],
-    chapterHint: 9,
+    chapterHint: 14,
     counterpoint: 'Você não precisa fingir certeza para continuar. Presença já é uma forma de fé.',
     practice: 'Respire e diga: “Hoje eu não preciso explicar tudo. Preciso só não me abandonar.”',
     keywords: ['fe', 'esperanca', 'crenca', 'presenca', 'certeza', 'alma', 'sentido'],
@@ -562,7 +590,7 @@ const mindGuides: Record<string, {
     opening: 'Solidão machuca mais quando vira prova de que você não importa. Essa prova é falsa.',
     firstQuestion: 'Sua solidão hoje parece abandono, invisibilidade ou proteção?',
     quickReplies: ['Abandono', 'Invisibilidade', 'Proteção', 'Cansaço de pedir presença'],
-    chapterHint: 4,
+    chapterHint: 9,
     counterpoint: 'Estar sem companhia não confirma que você é impossível de amar.',
     practice: 'Mande uma mensagem simples para alguém seguro ou escreva o que você gostaria de ouvir.',
     keywords: ['solidao', 'vinculo', 'abandono', 'pertencer', 'invisibilidade', 'companhia'],
@@ -571,7 +599,7 @@ const mindGuides: Record<string, {
     opening: 'Fracasso é uma palavra pesada demais para um recorte da sua história.',
     firstQuestion: 'Quem te ensinou a chamar esse momento de fracasso?',
     quickReplies: ['Minha família', 'Comparação', 'Eu mesmo', 'O dinheiro/trabalho'],
-    chapterHint: 6,
+    chapterHint: 11,
     counterpoint: 'Resultado ruim não é identidade ruim. Você é mais amplo que a última tentativa.',
     practice: 'Liste três coisas que você aprendeu sem transformar aprendizado em castigo.',
     keywords: ['fracasso', 'trabalho', 'valor', 'resultado', 'producao', 'comparacao', 'tentativa'],
@@ -580,7 +608,7 @@ const mindGuides: Record<string, {
     opening: 'Ansiedade tenta te sequestrar para um futuro que ainda não aconteceu. Vamos voltar um passo.',
     firstQuestion: 'O medo está apontando para qual cenário?',
     quickReplies: ['Vou perder algo', 'Vão me rejeitar', 'Não vou dar conta', 'Algo ruim vai acontecer'],
-    chapterHint: 2,
+    chapterHint: 8,
     counterpoint: 'Prever desastre não é o mesmo que estar preparado. Preparação começa no corpo presente.',
     practice: 'Solte os ombros, descruze a mandíbula e conte cinco objetos ao seu redor.',
     keywords: ['ansiedade', 'medo', 'futuro', 'desastre', 'corpo', 'presenca', 'controle'],
@@ -589,7 +617,7 @@ const mindGuides: Record<string, {
     opening: 'Pressão vira prisão quando tudo parece urgente e nada parece suficiente.',
     firstQuestion: 'Qual cobrança está falando mais alto agora?',
     quickReplies: ['Ser forte', 'Dar resultado', 'Não decepcionar', 'Resolver tudo hoje'],
-    chapterHint: 10,
+    chapterHint: 16,
     counterpoint: 'Você não precisa carregar como prova de valor aquilo que está te quebrando.',
     practice: 'Escolha uma coisa para adiar sem culpa e uma coisa pequena para concluir.',
     keywords: ['pressao', 'cobranca', 'urgencia', 'valor', 'trabalho', 'continuidade', 'cansaco'],
@@ -597,6 +625,10 @@ const mindGuides: Record<string, {
 };
 
 export function App() {
+  const { darkMode, toggleTheme } = useTheme();
+  const brandLogo = darkMode
+    ? '/media/imagens/brand/lettering_logo_fp.webp'
+    : '/media/imagens/brand/logo_opdds_fd_claro.webp';
   const [route, setRoute] = useState<Route>(ROUTES.ACCESS);
   const [plan, setPlan] = useState<Plan>('vip');
   const [authUser, setAuthUser] = useState<AuthUser | null>(null);
@@ -614,16 +646,24 @@ export function App() {
   const [upgradeModal, setUpgradeModal] = useState<UpgradeKey | null>(null);
   const [token, setToken] = useState('');
   const [tokenError, setTokenError] = useState('');
-  const [authMode, setAuthMode] = useState<'register' | 'login'>('register');
+  const [deferredInstallPrompt, setDeferredInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
+  const [isPwaInstalled, setIsPwaInstalled] = useState(false);
+  const [pwaIntroDismissed, setPwaIntroDismissed] = useState(false);
+  const [pwaMessage, setPwaMessage] = useState('');
+  const [authMode, setAuthMode] = useState<'register' | 'login' | 'forgot' | 'reset'>('register');
   const [authName, setAuthName] = useState('');
   const [authEmail, setAuthEmail] = useState('');
   const [authPassword, setAuthPassword] = useState('');
+  const [authPasswordConfirm, setAuthPasswordConfirm] = useState('');
+  const [passwordResetToken, setPasswordResetToken] = useState('');
   const [authMessage, setAuthMessage] = useState('');
   const [currentChapterIndex, setCurrentChapterIndex] = useState(0);
   const [favorites, setFavorites] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [fontSize, setFontSize] = useState(18);
   const [pageIndex, setPageIndex] = useState(0);
+  const [pdfPage, setPdfPage] = useState(10);
+  const [totalPdfPages, setTotalPdfPages] = useState(286);
   const [audioState, setAudioState] = useState<AudioState>({
     isPlaying: false,
     currentUrl: null,
@@ -633,6 +673,7 @@ export function App() {
     volume: 0.84,
     playbackRate: 1,
   });
+  const [audioFullOpen, setAudioFullOpen] = useState(false);
   const [onboardingStep, setOnboardingStep] = useState(0);
   const [menuOpen, setMenuOpen] = useState(false);
   const [accountMenuOpen, setAccountMenuOpen] = useState(false);
@@ -645,25 +686,28 @@ export function App() {
   const [workbookPrompt, setWorkbookPrompt] = useState(workbookPrompts[0]);
   const [workbookPillarIndex, setWorkbookPillarIndex] = useState(0);
   const [workbookAnswers, setWorkbookAnswers] = useState<Record<string, string>>({});
+  const [letterIndex, setLetterIndex] = useState(0);
+  const [readerLetters, setReaderLetters] = useState<Record<string, string>>({});
+  const [letterMeta, setLetterMeta] = useState<Record<string, LetterMeta>>({});
+  const [readerNotes, setReaderNotes] = useState<ReaderNote[]>([]);
+  const [audioProgressMap, setAudioProgressMap] = useState<Record<string, AudioProgressEntry>>({});
+  const [audioFrequencies, setAudioFrequencies] = useState<number[]>(idleAudioBars);
   const readerName = authUser?.name?.trim() || authName || 'Sobrevivente';
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const sfxRef = useRef<AudioContext | null>(null);
+  const audioAnalysisContextRef = useRef<AudioContext | null>(null);
+  const audioSourceRef = useRef<MediaElementAudioSourceNode | null>(null);
+  const audioAnalyserRef = useRef<AnalyserNode | null>(null);
+  const audioFrequencyDataRef = useRef<Uint8Array | null>(null);
+  const audioSpectrumFrameRef = useRef<number | null>(null);
+  const lastSpectrumTickRef = useRef(0);
   const lastAudioTickRef = useRef(0);
+  const currentAudioUrlRef = useRef<string | null>(null);
 
   const selectedChapter = bookChapters[currentChapterIndex] ?? bookChapters[0];
   const pages = usePagination(selectedChapter.content);
-  const bookPageData = useMemo(() => {
-    let cursor = 0;
-    const chapterPages = bookChapters.map((chapter) => {
-      const pageCount = paginateParagraphs(chapter.content).length;
-      const start = cursor;
-      cursor += pageCount;
-      return { start, pageCount };
-    });
-    return { chapterPages, totalPages: cursor };
-  }, []);
-  const currentGlobalPage = (bookPageData.chapterPages[currentChapterIndex]?.start ?? 0) + pageIndex + 1;
   const readProgress = Math.round(((currentChapterIndex + 1) / Math.max(1, bookChapters.length)) * 100);
+  const pdfReadProgress = Math.round((pdfPage / Math.max(1, totalPdfPages)) * 100);
   const audioProgress = audioState.duration ? (audioState.currentTime / audioState.duration) * 100 : 0;
   const hasPdfAccess = hasLocalEntitlement(plan, PRODUCT_KEYS.pdf);
   const hasReaderAccess = hasLocalEntitlement(plan, PRODUCT_KEYS.base);
@@ -675,6 +719,12 @@ export function App() {
   const currentProducts = (authUser?.products?.length ? authUser.products : Object.values(PRODUCT_KEYS).filter((productKey) => hasLocalEntitlement(plan, productKey as ProductKey)));
   const upgradeEntries = Object.entries(upgradeOffers) as Array<[UpgradeKey, typeof upgradeOffers[UpgradeKey]]>;
   const lockedUpgradeCount = upgradeEntries.filter(([key]) => !currentProducts.includes(upgradeActiveProductKeys[key])).length;
+  const currentGroup = bookGroups.find((group) => group.id === selectedChapter.groupId) ?? bookGroups[0];
+  const writtenLettersCount = pillarLetters.filter((letter) => readerLetters[letter.id]?.trim()).length;
+  const totalAudioTracks = bookChapters.reduce((total, chapter) => total + chapter.audioTracks.length, 0);
+  const heardAudioCount = Object.values(audioProgressMap).filter((entry) => entry.heard).length;
+  const currentPageNote = readerNotes.find((note) => note.page === pdfPage);
+  const currentPillarLetter = selectedChapter.pillar ? pillarLetters[selectedChapter.pillar - 1] : null;
 
   const filteredChapters = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
@@ -706,8 +756,92 @@ export function App() {
     }
   };
 
+  const ensureAudioAnalyser = () => {
+    const audio = audioRef.current;
+    if (!audio) return false;
+
+    try {
+      const AudioContextCtor = window.AudioContext || (window as any).webkitAudioContext;
+      if (!AudioContextCtor) return false;
+      const context = audioAnalysisContextRef.current ?? new AudioContextCtor();
+      audioAnalysisContextRef.current = context;
+
+      if (!audioAnalyserRef.current) {
+        const analyser = context.createAnalyser();
+        analyser.fftSize = 1024;
+        analyser.smoothingTimeConstant = 0.82;
+        audioAnalyserRef.current = analyser;
+        audioFrequencyDataRef.current = new Uint8Array(analyser.frequencyBinCount);
+      }
+
+      if (!audioSourceRef.current && audioAnalyserRef.current) {
+        const source = context.createMediaElementSource(audio);
+        source.connect(audioAnalyserRef.current);
+        audioAnalyserRef.current.connect(context.destination);
+        audioSourceRef.current = source;
+      }
+
+      if (context.state === 'suspended') context.resume().catch(() => {});
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
+  const stopAudioSpectrum = () => {
+    if (audioSpectrumFrameRef.current !== null) {
+      window.cancelAnimationFrame(audioSpectrumFrameRef.current);
+      audioSpectrumFrameRef.current = null;
+    }
+    setAudioFrequencies(idleAudioBars);
+  };
+
+  const startAudioSpectrum = () => {
+    if (!ensureAudioAnalyser()) {
+      setAudioFrequencies(idleAudioBars);
+      return;
+    }
+
+    const tick = (timestamp: number) => {
+      const analyser = audioAnalyserRef.current;
+      const data = audioFrequencyDataRef.current;
+      const audio = audioRef.current;
+      if (!analyser || !data || !audio || audio.paused) {
+        stopAudioSpectrum();
+        return;
+      }
+
+      analyser.getByteFrequencyData(data);
+      if (timestamp - lastSpectrumTickRef.current > 32) {
+        const usableBins = Math.min(data.length - 1, 150);
+        const bars = Array.from({ length: AUDIO_BAR_COUNT }, (_, index) => {
+          const start = Math.floor(2 + (index / AUDIO_BAR_COUNT) ** 1.55 * usableBins);
+          const end = Math.max(start + 1, Math.floor(2 + ((index + 1) / AUDIO_BAR_COUNT) ** 1.55 * usableBins));
+          let total = 0;
+          let peak = 0;
+          for (let bin = start; bin < end; bin += 1) {
+            const value = data[bin] ?? 0;
+            total += value;
+            if (value > peak) peak = value;
+          }
+          const average = total / Math.max(1, end - start);
+          const normalized = Math.min(1, ((average * 0.62 + peak * 0.38) / 142) ** 0.72);
+          return Math.max(0.08, normalized);
+        });
+        setAudioFrequencies(bars);
+        lastSpectrumTickRef.current = timestamp;
+      }
+
+      audioSpectrumFrameRef.current = window.requestAnimationFrame(tick);
+    };
+
+    if (audioSpectrumFrameRef.current !== null) window.cancelAnimationFrame(audioSpectrumFrameRef.current);
+    audioSpectrumFrameRef.current = window.requestAnimationFrame(tick);
+  };
+
   useEffect(() => {
     const audio = new Audio();
+    audio.crossOrigin = 'anonymous';
     audio.volume = audioState.volume;
     audio.playbackRate = audioState.playbackRate;
     audioRef.current = audio;
@@ -717,9 +851,46 @@ export function App() {
       if (now - lastAudioTickRef.current < 240) return;
       lastAudioTickRef.current = now;
       setAudioState((state) => ({ ...state, currentTime: audio.currentTime }));
+      if (now % 3000 < 260 && currentAudioUrlRef.current) {
+        const url = currentAudioUrlRef.current;
+        const duration = audio.duration || 0;
+        const heard = duration > 0 && audio.currentTime / duration > 0.92;
+        setAudioProgressMap((current) => {
+          const next = {
+            ...current,
+            [url]: {
+              heard: current[url]?.heard || heard,
+              currentTime: audio.currentTime,
+              duration,
+              updatedAt: new Date().toISOString(),
+            },
+          };
+          saveLocalAudioProgress(next);
+          return next;
+        });
+      }
     };
     const handleMeta = () => setAudioState((state) => ({ ...state, duration: audio.duration || 0 }));
-    const handleEnd = () => setAudioState((state) => ({ ...state, isPlaying: false, currentTime: 0 }));
+    const handleEnd = () => {
+      const url = currentAudioUrlRef.current;
+      if (url) {
+        setAudioProgressMap((current) => {
+          const next = {
+            ...current,
+            [url]: {
+              heard: true,
+              currentTime: audio.duration || audio.currentTime || 0,
+              duration: audio.duration || 0,
+              updatedAt: new Date().toISOString(),
+            },
+          };
+          saveLocalAudioProgress(next);
+          return next;
+        });
+      }
+      setAudioState((state) => ({ ...state, isPlaying: false, currentTime: 0 }));
+      stopAudioSpectrum();
+    };
 
     audio.addEventListener('timeupdate', handleTime);
     audio.addEventListener('loadedmetadata', handleMeta);
@@ -730,10 +901,15 @@ export function App() {
     const savedPlan = localStorage.getItem('opd_plan') as Plan | null;
     const savedChapter = Number(localStorage.getItem('opd_chapter_index') ?? '0');
     const savedPage = Number(localStorage.getItem('opd_page_index') ?? '0');
+    const savedPdfPage = Number(localStorage.getItem('opd_pdf_page') ?? '10');
     const savedFavorites = JSON.parse(localStorage.getItem('opd_favorites') ?? '[]');
     const onboardingDone = localStorage.getItem('opd_onboarding_done');
     const savedWorkbook = loadLocalWorkbookEntry();
     const savedWorkbookAnswers = loadLocalWorkbookAnswers();
+    const savedLetters = loadLocalLetters();
+    const savedLetterMeta = loadLocalLetterMeta();
+    const savedReaderNotes = loadLocalReaderNotes();
+    const savedAudioProgress = loadLocalAudioProgress();
 
     if (savedAuthUser) {
       setAuthUser(savedAuthUser);
@@ -747,12 +923,24 @@ export function App() {
     if (savedPlan && !savedAuthUser) setPlan(savedPlan);
     if (!Number.isNaN(savedChapter)) setCurrentChapterIndex(clamp(savedChapter, 0, bookChapters.length - 1));
     if (!Number.isNaN(savedPage)) setPageIndex(savedPage);
+    if (!Number.isNaN(savedPdfPage)) setPdfPage(clamp(savedPdfPage, 1, 286));
     if (Array.isArray(savedFavorites)) setFavorites(savedFavorites);
     setWorkbookEntry(savedWorkbook);
     setWorkbookAnswers(savedWorkbookAnswers);
+    setReaderLetters(savedLetters);
+    setLetterMeta(savedLetterMeta);
+    setReaderNotes(savedReaderNotes);
+    setAudioProgressMap(savedAudioProgress);
 
     const params = new URLSearchParams(window.location.search);
     const checkoutToken = params.get('token');
+    const resetToken = params.get('resetToken');
+    if (resetToken) {
+      setPasswordResetToken(resetToken);
+      setAuthMode('reset');
+      setRoute(ROUTES.ACCESS);
+      return;
+    }
     if (checkoutToken) {
       setToken(checkoutToken.trim().toUpperCase());
       setAuthMode('register');
@@ -760,9 +948,11 @@ export function App() {
 
     return () => {
       audio.pause();
+      stopAudioSpectrum();
       audio.removeEventListener('timeupdate', handleTime);
       audio.removeEventListener('loadedmetadata', handleMeta);
       audio.removeEventListener('ended', handleEnd);
+      audioAnalysisContextRef.current?.close().catch(() => {});
     };
   }, [authUser?.id]);
 
@@ -800,6 +990,15 @@ export function App() {
   }, [pageIndex]);
 
   useEffect(() => {
+    localStorage.setItem('opd_pdf_page', String(pdfPage));
+    let activeIndex = 0;
+    bookChapters.forEach((chapter, index) => {
+      if (chapter.pdfPage <= pdfPage) activeIndex = index;
+    });
+    if (activeIndex !== currentChapterIndex) setCurrentChapterIndex(activeIndex);
+  }, [pdfPage]);
+
+  useEffect(() => {
     localStorage.setItem('opd_chapter_index', String(currentChapterIndex));
     setPageIndex(0);
   }, [currentChapterIndex]);
@@ -813,6 +1012,35 @@ export function App() {
       setHomeSlideIndex((index) => (index + 1) % homeSlides.length);
     }, 4800);
     return () => window.clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    const media = window.matchMedia('(display-mode: standalone)');
+    const updateInstalled = () => {
+      setIsPwaInstalled(media.matches || Boolean((window.navigator as any).standalone));
+    };
+    const handleBeforeInstallPrompt = (event: Event) => {
+      event.preventDefault();
+      setDeferredInstallPrompt(event as BeforeInstallPromptEvent);
+    };
+    const handleInstalled = () => {
+      setIsPwaInstalled(true);
+      setDeferredInstallPrompt(null);
+      localStorage.setItem('opd_pwa_intro_dismissed', 'true');
+      setPwaIntroDismissed(true);
+    };
+
+    updateInstalled();
+    setPwaIntroDismissed(localStorage.getItem('opd_pwa_intro_dismissed') === 'true');
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    window.addEventListener('appinstalled', handleInstalled);
+    media.addEventListener?.('change', updateInstalled);
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      window.removeEventListener('appinstalled', handleInstalled);
+      media.removeEventListener?.('change', updateInstalled);
+    };
   }, []);
 
   useEffect(() => {
@@ -833,19 +1061,21 @@ export function App() {
     if (audioState.currentUrl === url) {
       if (audioState.isPlaying) {
         audio.pause();
+        stopAudioSpectrum();
         setAudioState((state) => ({ ...state, isPlaying: false }));
       } else {
-        audio.play().catch(() => {});
+        audio.play().then(startAudioSpectrum).catch(() => {});
         setAudioState((state) => ({ ...state, isPlaying: true }));
       }
       return;
     }
 
     audio.src = url;
+    currentAudioUrlRef.current = url;
     audio.currentTime = 0;
     audio.volume = audioState.volume;
     audio.playbackRate = audioState.playbackRate;
-    audio.play().catch(() => {});
+    audio.play().then(startAudioSpectrum).catch(() => {});
     setAudioState((state) => ({
       ...state,
       isPlaying: true,
@@ -880,6 +1110,9 @@ export function App() {
 
   const closeAudio = () => {
     audioRef.current?.pause();
+    currentAudioUrlRef.current = null;
+    setAudioFullOpen(false);
+    stopAudioSpectrum();
     setAudioState((state) => ({ ...state, isPlaying: false, currentUrl: null, title: null, currentTime: 0, duration: 0 }));
   };
 
@@ -934,10 +1167,93 @@ export function App() {
     }
   };
 
+  const handleForgotPasswordSubmit = async () => {
+    playClick('primary');
+    setAuthMessage('');
+    if (!authEmail.trim()) {
+      setAuthMessage('Informe seu e-mail para receber o link de redefinição.');
+      return;
+    }
+    try {
+      const response = await requestPasswordReset(authEmail);
+      setAuthMessage(response.resetUrl ? `${response.message} Link local: ${response.resetUrl}` : response.message || 'Se este e-mail estiver cadastrado, enviaremos um link de redefinição.');
+    } catch (error: any) {
+      setAuthMessage(error?.message || 'Não foi possível solicitar a redefinição agora.');
+    }
+  };
+
+  const handleResetPasswordSubmit = async () => {
+    playClick('primary');
+    setAuthMessage('');
+    if (authPassword.length < 6) {
+      setAuthMessage('A nova senha precisa ter pelo menos 6 caracteres.');
+      return;
+    }
+    if (authPassword !== authPasswordConfirm) {
+      setAuthMessage('As senhas não conferem.');
+      return;
+    }
+    try {
+      const response = await resetPassword({ token: passwordResetToken, password: authPassword });
+      setPlan(response.user.plan);
+      setAuthUser(response.user);
+      setAccountName(response.user.name || '');
+      setAccountEmail(response.user.email || '');
+      window.history.replaceState({}, document.title, window.location.pathname);
+      navigate(localStorage.getItem('opd_onboarding_done') ? ROUTES.HOME : ROUTES.ONBOARDING);
+    } catch (error: any) {
+      setAuthMessage(error?.message || 'Link inválido, expirado ou já utilizado.');
+    }
+  };
+
   const handleCompleteOnboarding = () => {
     localStorage.setItem('opd_onboarding_done', 'true');
     navigate(ROUTES.HOME);
   };
+
+  const dismissPwaIntro = () => {
+    localStorage.setItem('opd_pwa_intro_dismissed', 'true');
+    setPwaIntroDismissed(true);
+  };
+
+  const handleInstallPwa = async () => {
+    playClick('primary');
+    setPwaMessage('');
+    if (deferredInstallPrompt) {
+      await deferredInstallPrompt.prompt();
+      const choice = await deferredInstallPrompt.userChoice;
+      setDeferredInstallPrompt(null);
+      if (choice.outcome === 'accepted') {
+        dismissPwaIntro();
+        setIsPwaInstalled(true);
+      }
+      return;
+    }
+    setPwaMessage('No iPhone, toque em Compartilhar e depois em Adicionar à Tela de Início.');
+  };
+
+  const PwaInstallIntro = () => (
+    <section className="pwa-install-intro page-enter" role="dialog" aria-label="Instalar aplicativo">
+      <div>
+        <p className="kicker">App de leitura</p>
+        <h1>Instale para ler sem depender do navegador.</h1>
+        <span>O acesso fica mais limpo, com ícone na tela inicial e experiência em tela cheia.</span>
+        {pwaMessage && <small>{pwaMessage}</small>}
+      </div>
+      <div className="pwa-install-actions">
+        <Button onClick={handleInstallPwa}><DownloadCloud size={17} /> Instalar app</Button>
+        <Button onClick={dismissPwaIntro} variant="ghost">Continuar no navegador</Button>
+      </div>
+    </section>
+  );
+
+  const PwaInstallBar = () => (
+    <div className="pwa-install-bar">
+      <span>Instale o app para uma leitura em tela cheia.</span>
+      <button onClick={handleInstallPwa}><DownloadCloud size={15} /> Instalar</button>
+      <button onClick={dismissPwaIntro} title="Ocultar aviso"><X size={15} /></button>
+    </div>
+  );
 
   const unlockOrderBump = (nextPlan: Plan = 'vip') => {
     playClick('primary');
@@ -1050,8 +1366,20 @@ export function App() {
   };
 
   const goToChapter = (index: number) => {
-    setCurrentChapterIndex(clamp(index, 0, bookChapters.length - 1));
+    const safeIndex = clamp(index, 0, bookChapters.length - 1);
+    setCurrentChapterIndex(safeIndex);
+    setPdfPage(bookChapters[safeIndex]?.pdfPage ?? 1);
     navigate(ROUTES.READER);
+  };
+
+  const goToPdfPage = (nextPage: number) => {
+    const safePage = clamp(nextPage, 1, totalPdfPages);
+    setPdfPage(safePage);
+    let activeIndex = 0;
+    bookChapters.forEach((chapter, index) => {
+      if (chapter.pdfPage <= safePage) activeIndex = index;
+    });
+    if (activeIndex !== currentChapterIndex) setCurrentChapterIndex(activeIndex);
   };
 
   const toggleFavorite = (chapterId: string) => {
@@ -1059,6 +1387,61 @@ export function App() {
     setFavorites((current) =>
       current.includes(chapterId) ? current.filter((id) => id !== chapterId) : [...current, chapterId]
     );
+  };
+
+  const togglePageBookmark = () => {
+    playClick('soft');
+    setReaderNotes((current) => {
+      const existing = current.find((note) => note.page === pdfPage);
+      const next = existing
+        ? current.filter((note) => note.page !== pdfPage)
+        : [
+            ...current,
+            {
+              id: `page-${pdfPage}-${Date.now()}`,
+              page: pdfPage,
+              chapterId: selectedChapter.id,
+              title: selectedChapter.title,
+              note: '',
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+            },
+          ];
+      saveLocalReaderNotes(next);
+      return next;
+    });
+  };
+
+  const updateCurrentPageNote = (noteText: string) => {
+    setReaderNotes((current) => {
+      const existing = current.find((note) => note.page === pdfPage);
+      const now = new Date().toISOString();
+      const next = existing
+        ? current.map((note) => note.page === pdfPage ? { ...note, note: noteText, title: selectedChapter.title, chapterId: selectedChapter.id, updatedAt: now } : note)
+        : [
+            ...current,
+            {
+              id: `page-${pdfPage}-${Date.now()}`,
+              page: pdfPage,
+              chapterId: selectedChapter.id,
+              title: selectedChapter.title,
+              note: noteText,
+              createdAt: now,
+              updatedAt: now,
+            },
+          ];
+      saveLocalReaderNotes(next);
+      return next;
+    });
+  };
+
+  const openCurrentPillarLetter = () => {
+    if (!selectedChapter.pillar) {
+      navigate(ROUTES.LETTERS);
+      return;
+    }
+    setLetterIndex(selectedChapter.pillar - 1);
+    navigate(ROUTES.LETTERS);
   };
 
   const handleShareChapter = () => {
@@ -1179,6 +1562,7 @@ export function App() {
     if ([ROUTES.BOOK, ROUTES.LIBRARY, ROUTES.SESSIONS, ROUTES.READER].includes(routeId as any)) return !hasReaderAccess;
     if (routeId === ROUTES.IGENT) return !hasMindAccess;
     if (routeId === ROUTES.WORKBOOK) return !hasWorkbookAccess;
+    if (routeId === ROUTES.LETTERS) return !hasReaderAccess;
     if (routeId === ROUTES.ADMIN) return !isAdmin;
     return false;
   };
@@ -1186,15 +1570,59 @@ export function App() {
   const upgradeForRoute = (routeId: Route): UpgradeKey => {
     if ([ROUTES.BOOK, ROUTES.LIBRARY, ROUTES.SESSIONS, ROUTES.READER].includes(routeId as any)) return 'basic';
     if (routeId === ROUTES.WORKBOOK) return 'workbook';
+    if (routeId === ROUTES.LETTERS) return 'basic';
     if (routeId === ROUTES.IGENT) return 'igent30';
     return 'vip';
   };
 
-  const AccessView = () => (
+  const AccessView = () => {
+    if (authMode === 'forgot' || authMode === 'reset') {
+      const isReset = authMode === 'reset';
+      return (
+        <main className="cover-gate page-enter">
+          <div className="cover-orbit" />
+          <section className="cover-card">
+            <img className="access-brand-logo" src={brandLogo} alt="O Poder dos Desacreditados" />
+            <div className="token-mini">
+              <div className="access-copy">
+                <p className="kicker">Segurança da conta</p>
+                <h1>{isReset ? 'Crie uma nova senha.' : 'Recupere sua senha.'}</h1>
+                <span>{isReset ? 'Digite e confirme sua nova senha para voltar ao app.' : 'Informe seu e-mail e enviaremos um link seguro de redefinição.'}</span>
+              </div>
+              {!isReset && (
+                <label>
+                  <span>E-mail</span>
+                  <input value={authEmail} onChange={(event) => setAuthEmail(event.target.value)} placeholder="voce@email.com" type="email" />
+                </label>
+              )}
+              {isReset && (
+                <>
+                  <label>
+                    <span>Nova senha</span>
+                    <input value={authPassword} onChange={(event) => setAuthPassword(event.target.value)} placeholder="mínimo 6 caracteres" type="password" />
+                  </label>
+                  <label>
+                    <span>Confirmar nova senha</span>
+                    <input value={authPasswordConfirm} onChange={(event) => setAuthPasswordConfirm(event.target.value)} placeholder="repita a nova senha" type="password" />
+                  </label>
+                </>
+              )}
+              {authMessage && <p>{authMessage}</p>}
+              <Button onClick={isReset ? handleResetPasswordSubmit : handleForgotPasswordSubmit} className="cover-primary">
+                {isReset ? 'Redefinir senha' : 'Enviar link por e-mail'}
+              </Button>
+              <button className="cover-link" onClick={() => { setAuthMessage(''); setAuthMode('login'); }}>Voltar para login</button>
+            </div>
+          </section>
+        </main>
+      );
+    }
+
+    return (
     <main className="cover-gate page-enter">
       <div className="cover-orbit" />
       <section className="cover-card">
-        <img className="access-brand-logo" src="/media/imagens/brand/lettering_logo_fp.webp" alt="O Poder dos Desacreditados" />
+        <img className="access-brand-logo" src={brandLogo} alt="O Poder dos Desacreditados" />
         <div className="token-mini">
           <div className="access-copy">
             <p className="kicker">Acesso do leitor</p>
@@ -1230,10 +1658,12 @@ export function App() {
             {authMode === 'register' ? 'Criar acesso' : 'Entrar'}
           </Button>
           {authMode === 'register' && <button className="cover-link" onClick={handleTokenSubmit}>Validar token manualmente</button>}
+          {authMode === 'login' && <button className="cover-link" onClick={() => { setAuthMessage(''); setAuthMode('forgot'); }}>Esqueci minha senha</button>}
         </div>
       </section>
     </main>
-  );
+    );
+  };
 
   const Header = () => (
     <header className="app-header">
@@ -1241,13 +1671,17 @@ export function App() {
         <Menu size={20} />
       </button>
       <div className="brand-lockup">
-        <img src="/media/imagens/brand/lettering_logo_fp.webp" alt="" />
+        <img src={brandLogo} alt="" />
         <div>
           <p>O Poder dos Desacreditados</p>
           <strong>{route === ROUTES.IGENT ? 'iGentMIND' : 'Leitura guiada'}</strong>
         </div>
       </div>
       <div className="header-actions">
+        <button className="theme-toggle-button" onClick={toggleTheme} title={darkMode ? 'Ativar modo claro' : 'Ativar modo escuro'}>
+          {darkMode ? <Sun size={16} /> : <Moon size={16} />}
+          <span>{darkMode ? 'Claro' : 'Escuro'}</span>
+        </button>
         <button className="download-button" onClick={() => window.open(pdfUrl, '_blank')}>
           <DownloadCloud size={16} />
           <span>Baixar Livro</span>
@@ -1276,7 +1710,7 @@ export function App() {
   const Navigation = () => (
     <aside className={`app-sidebar ${menuOpen ? 'open' : ''}`}>
       <div className="sidebar-head">
-        <img src="/media/imagens/brand/lettering_logo_fp.webp" alt="" />
+        <img src={brandLogo} alt="" />
       </div>
       <nav>
         {navGroups.map((group) => (
@@ -1307,15 +1741,15 @@ export function App() {
 
   const BottomNavigation = () => {
     const items = [
-      { id: ROUTES.HOME, label: 'Inicio', icon: Home },
+      { id: ROUTES.HOME, label: 'Início', icon: Home },
       { id: ROUTES.READER, label: 'Livro', icon: BookOpen },
       { id: ROUTES.IGENT, label: 'iGent', icon: Zap },
-      { id: ROUTES.WORKBOOK, label: 'Diario', icon: FileText },
+      { id: ROUTES.WORKBOOK, label: 'Diário', icon: FileText },
       { id: ROUTES.SETTINGS, label: 'Conta', icon: User },
     ];
 
     return (
-      <nav className="bottom-nav" aria-label="Navegacao principal">
+      <nav className="bottom-nav" aria-label="Navegação principal">
         {items.map((item) => {
           const Icon = item.icon;
           const locked = isRouteLocked(item.id);
@@ -1355,7 +1789,7 @@ export function App() {
             <div>
               <p className="kicker">Acesso liberado</p>
               <h2>PDF de O Poder dos Desacreditados</h2>
-              <span>Baixe o livro e volte para destravar app, audios, Diario e iGentMIND quando seu pedido incluir esses modulos.</span>
+              <span>Baixe o livro e volte para destravar app, áudios, Diário e iGentMIND quando seu pedido incluir esses módulos.</span>
             </div>
             <div className="home-card-actions">
               <Button onClick={() => window.open(pdfUrl, '_blank')}><DownloadCloud size={17} /> Baixar PDF</Button>
@@ -1389,13 +1823,38 @@ export function App() {
         </div>
         <div className="home-reading-actions">
           <Button onClick={() => navigate(ROUTES.READER)} className="cover-primary">Ler agora</Button>
-          <Button onClick={() => navigate(ROUTES.LIBRARY)} variant="secondary">Capítulos</Button>
+        <Button onClick={() => navigate(ROUTES.LIBRARY)} variant="secondary">Sumário</Button>
         </div>
         <div className="home-slide-dots">
           {homeSlides.map((slide, index) => (
             <button key={slide} className={index === homeSlideIndex ? 'active' : ''} onClick={() => setHomeSlideIndex(index)} title={`Imagem ${index + 1}`} />
           ))}
         </div>
+      </section>
+
+      <section className="journey-overview">
+        <article className="journey-current">
+          <p className="kicker">{currentGroup.eyebrow}</p>
+          <h2>{currentGroup.title}</h2>
+          <span>{currentGroup.description}</span>
+          <div className="progress-track"><span style={{ width: `${pdfReadProgress}%` }} /></div>
+          <small>Página {pdfPage} de {totalPdfPages} · {pdfReadProgress}% do livro</small>
+        </article>
+        <article>
+          <CheckCircle2 size={20} />
+          <strong>{writtenLettersCount}/{pillarLetters.length}</strong>
+          <span>cartas iniciadas</span>
+        </article>
+        <article>
+          <Headphones size={20} />
+          <strong>{heardAudioCount}/{totalAudioTracks}</strong>
+          <span>áudios ouvidos</span>
+        </article>
+        <article>
+          <NotebookPen size={20} />
+          <strong>{readerNotes.length}</strong>
+          <span>páginas marcadas</span>
+        </article>
       </section>
 
       <section className="home-state-section">
@@ -1431,12 +1890,12 @@ export function App() {
         <div>
           <p className="kicker">Seu nível: {planLabels[plan]}</p>
           <h2>{hasMindAccess ? 'iGentMIND liberado' : hasWorkbookAccess ? 'Diário liberado' : 'Desbloqueie Diário + iGentMIND'}</h2>
-          <span>{hasMindAccess ? 'Seu token libera mentor, perguntas guiadas e workbook editavel.' : hasWorkbookAccess ? 'Seu Diario esta ativo. O proximo nivel libera o mentor iGentMIND.' : 'Simulacao local do upsell: Diario, mentor treinado nos pilares e acesso ao grupo quando contratado.'}</span>
+          <span>{hasMindAccess ? 'Seu token libera mentor, perguntas guiadas e workbook editável.' : hasWorkbookAccess ? 'Seu Diário está ativo. O próximo nível libera o mentor iGentMIND.' : 'Simulação local do upsell: Diário, mentor treinado nos pilares e acesso ao grupo quando contratado.'}</span>
         </div>
         {hasOrderBump ? (
           <Button onClick={() => navigate(ROUTES.WORKBOOK)} variant="secondary"><FileText size={17} /> Abrir Diário</Button>
         ) : (
-          <Button onClick={() => openUpgrade('workbook')}><Zap size={17} /> Desbloquear Diario</Button>
+          <Button onClick={() => openUpgrade('workbook')}><Zap size={17} /> Desbloquear Diário</Button>
         )}
       </section>
     </div>
@@ -1472,7 +1931,7 @@ export function App() {
       <div className="book-buttons">
         <Button onClick={() => navigate(ROUTES.READER)} className="cover-primary"><BookOpen size={19} /> Ler agora</Button>
         <Button onClick={() => window.open(pdfUrl, '_blank')} variant="secondary"><DownloadCloud size={18} /> Baixar livro</Button>
-        <button onClick={() => navigate(ROUTES.LIBRARY)}><Boxes size={17} /> Ver os 9 Pilares</button>
+        <button onClick={() => navigate(ROUTES.LIBRARY)}><Boxes size={17} /> Abrir sumário completo</button>
       </div>
     </div>
   );
@@ -1480,56 +1939,91 @@ export function App() {
   const OnboardingView = () => {
     if (onboardingStep >= onboardingSteps.length) return HomeView();
     const currentStep = onboardingSteps[onboardingStep];
+    const showPwaIntro = !isPwaInstalled && !pwaIntroDismissed;
 
     return (
       <>
-        <OnboardingModal
-          step={onboardingStep + 1}
-          totalSteps={onboardingSteps.length}
-          title={currentStep.title}
-          description={currentStep.description}
-          onPlayAudio={() => handlePlayAudio(currentStep.audioUrl, currentStep.title)}
-          onNext={() => {
-            if (onboardingStep === onboardingSteps.length - 1) handleCompleteOnboarding();
-            else setOnboardingStep((step) => step + 1);
-          }}
-          onSkip={handleCompleteOnboarding}
-          isPlaying={audioState.currentUrl === currentStep.audioUrl && audioState.isPlaying}
-        />
+        {showPwaIntro ? (
+          <PwaInstallIntro />
+        ) : (
+          <OnboardingModal
+            step={onboardingStep + 1}
+            totalSteps={onboardingSteps.length}
+            title={currentStep.title}
+            description={currentStep.description}
+            onPlayAudio={() => handlePlayAudio(currentStep.audioUrl, currentStep.title)}
+            onNext={() => {
+              if (onboardingStep === onboardingSteps.length - 1) handleCompleteOnboarding();
+              else setOnboardingStep((step) => step + 1);
+            }}
+            onSkip={handleCompleteOnboarding}
+            isPlaying={audioState.currentUrl === currentStep.audioUrl && audioState.isPlaying}
+          />
+        )}
         <HomeView />
       </>
     );
   };
 
   const LibraryView = () => (
-    <div className="app-page page-enter">
+    <div className="app-page contents-page page-enter">
       <div className="page-heading">
         <div>
-          <p className="kicker">Biblioteca</p>
-          <h1>Escolha um pilar</h1>
+          <p className="kicker">Índice navegável</p>
+          <h1>Sumário da jornada</h1>
+          <span>Partes, atos, capítulos e pilares organizados como na nova edição.</span>
         </div>
       </div>
       <label className="search-field library-search">
         <Search size={18} />
-        <input value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} placeholder="Buscar pilar..." />
+        <input value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} placeholder="Buscar capítulo, pilar ou tema..." />
       </label>
-      <div className="pillar-list">
-        {pillarCards
-          .filter((pillar) => !searchQuery || `${pillar.title} ${pillar.desc}`.toLowerCase().includes(searchQuery.toLowerCase()))
-          .map((pillar) => {
-            const Icon = pillar.icon;
-            return (
-              <article className="pillar-row" key={pillar.title}>
-                <div className="pillar-icon"><Icon size={22} /></div>
-                <button className="pillar-copy" onClick={() => goToChapter(pillar.chapter)}>
-                  <strong>{pillar.title}</strong>
-                  <span>{pillar.desc}</span>
-                </button>
-                <button className="heart-button" onClick={() => toggleFavorite(`pillar-${pillar.title}`)}><Heart size={19} /></button>
-                <button className="chevron-button" onClick={() => goToChapter(pillar.chapter)}><ChevronDown size={20} /></button>
-              </article>
-            );
-          })}
+      <div className="contents-groups">
+        {bookGroups.map((group) => {
+          const chapters = filteredChapters.filter(({ chapter }) => chapter.groupId === group.id);
+          if (!chapters.length) return null;
+          return (
+            <section className={`contents-group contents-${group.id}`} key={group.id}>
+              <header>
+                <p className="kicker">{group.eyebrow}</p>
+                <h2>{group.title}</h2>
+                <span>{group.description}</span>
+              </header>
+              <div className="contents-chapters">
+                {chapters.map(({ chapter, index }) => (
+                  <article className="contents-chapter" key={chapter.id}>
+                    <button className="contents-main" onClick={() => goToChapter(index)}>
+                      <span className="contents-number">{chapter.roman ?? String(index + 1).padStart(2, '0')}</span>
+                      <span>
+                        <strong>{chapter.title}</strong>
+                        <small>{chapter.summary}</small>
+                      </span>
+                      <ChevronDown size={19} />
+                    </button>
+                    {chapter.sections?.length ? (
+                      <div className="contents-sections">
+                        {chapter.sections.map((section) => <button key={section} onClick={() => goToChapter(index)}>{section}</button>)}
+                      </div>
+                    ) : null}
+                    <div className="contents-quick-actions">
+                      <button onClick={() => goToChapter(index)}><BookOpen size={15} /> Ler</button>
+                      {chapter.audioTracks?.[0] && (
+                        <button onClick={() => handlePlayAudio(chapter.audioTracks[0].url, chapter.title)}>
+                          <Headphones size={15} /> Ouvir
+                        </button>
+                      )}
+                    </div>
+                    {chapter.pillar ? (
+                      <button className="contents-letter-link" onClick={() => { setLetterIndex(chapter.pillar! - 1); navigate(ROUTES.LETTERS); }}>
+                        <Mail size={15} /> Escrever carta deste pilar
+                      </button>
+                    ) : null}
+                  </article>
+                ))}
+              </div>
+            </section>
+          );
+        })}
       </div>
     </div>
   );
@@ -1708,23 +2202,40 @@ export function App() {
         pageIndex={pageIndex}
         setPageIndex={setPageIndex}
         fontSize={fontSize}
-        globalPage={currentGlobalPage}
-        totalBookPages={bookPageData.totalPages}
         chapterPage={pageIndex + 1}
         chapterPageTotal={pages.length}
         chapterIndex={currentChapterIndex}
         chapterTotal={bookChapters.length}
         chapterKind={getChapterKind(currentChapterIndex, selectedChapter.title)}
+        chapterSections={selectedChapter.sections}
         coverImageUrl="/media/imagens/capas/capa-topo.jpg"
-        audioUrl={selectedChapter.audioUrl}
+        audioTracks={selectedChapter.audioTracks}
         pdfUrl={pdfUrl}
+        pdfTextPages={pdfTextPages}
+        pdfCurrentPage={pdfPage}
+        totalPdfPages={totalPdfPages}
+        chapters={bookChapters}
+        onPdfPageChange={goToPdfPage}
+        onPdfDocumentReady={setTotalPdfPages}
+        onSelectChapter={goToChapter}
         playAudio={handlePlayAudio}
+        audioProgress={audioProgressMap}
+        activeAudioUrl={audioState.currentUrl}
+        isAudioPlaying={audioState.isPlaying}
         isFavorite={favorites.includes(selectedChapter.id)}
         onToggleFavorite={() => toggleFavorite(selectedChapter.id)}
+        isPageBookmarked={Boolean(currentPageNote)}
+        pageNote={currentPageNote?.note || ''}
+        readerNotes={readerNotes}
+        onTogglePageBookmark={togglePageBookmark}
+        onPageNoteChange={updateCurrentPageNote}
+        onOpenCurrentLetter={openCurrentPillarLetter}
+        currentLetterTitle={currentPillarLetter?.title}
         onFontIncrease={() => setFontSize((size) => clamp(size + 1, 14, 28))}
         onFontDecrease={() => setFontSize((size) => clamp(size - 1, 14, 28))}
         onOpenPdf={() => window.open(pdfUrl, '_blank')}
         onShare={handleShareChapter}
+        onExitReader={() => navigate(ROUTES.HOME)}
       />
     </div>
   );
@@ -1733,9 +2244,9 @@ export function App() {
     <div className="app-page page-enter">
       <section className="locked-panel">
         <div className="mentor-mark"><Lock size={20} /></div>
-        <p className="kicker">Funcao extra</p>
+        <p className="kicker">Função extra</p>
         <h1>{title}</h1>
-        <p>Este recurso faz parte de um modulo extra. Voce pode adquirir o produto especifico agora ou testar a liberacao localmente.</p>
+        <p>Este recurso faz parte de um módulo extra. Você pode adquirir o produto específico agora ou testar a liberação localmente.</p>
         <div className="locked-actions">
           <Button onClick={() => openUpgrade(offerKey)}><Zap size={17} /> Ver oferta</Button>
           <Button onClick={() => unlockOrderBump(upgradeOffers[offerKey].plan)} variant="ghost">Liberar localmente</Button>
@@ -1745,7 +2256,7 @@ export function App() {
   );
 
   const WorkbookView = () => {
-    if (!hasWorkbookAccess) return <LockedView title="Diario bloqueado" offerKey="workbook" />;
+    if (!hasWorkbookAccess) return <LockedView title="Diário bloqueado" offerKey="workbook" />;
     const savedAt = getLocalWorkbookSavedAt();
     const currentPillar = workbookPillars[workbookPillarIndex] ?? workbookPillars[0];
     const answeredCount = Object.values(workbookAnswers).filter((answer) => answer.trim()).length;
@@ -1765,7 +2276,7 @@ export function App() {
         return `${pillar.roman}. ${pillar.title}\n${answers}`;
       }).join('\n\n---\n\n');
       const blob = new Blob([
-        `Diario dos Desacreditados\n\nPergunta-guia: ${workbookPrompt}\n\n${workbookEntry}\n\n---\n\n${guidedAnswers}`,
+        `Diário dos Desacreditados\n\nPergunta-guia: ${workbookPrompt}\n\n${workbookEntry}\n\n---\n\n${guidedAnswers}`,
       ], { type: 'text/plain;charset=utf-8' });
       const url = URL.createObjectURL(blob);
       const anchor = document.createElement('a');
@@ -1826,7 +2337,7 @@ export function App() {
                   <textarea
                     value={workbookAnswers[`${workbookPillarIndex}-${questionIndex}`] || ''}
                     onChange={(event) => updateAnswer(questionIndex, event.target.value)}
-                    placeholder="Responda sem pressa. O ponto aqui e honestidade, nao performance."
+                    placeholder="Responda sem pressa. O ponto aqui é honestidade, não performance."
                   />
                 </label>
               ))}
@@ -1848,7 +2359,7 @@ export function App() {
             <h2>{hasMindAccess ? 'Leitura do seu momento' : 'Desbloqueie iGentMIND'}</h2>
             {hasMindAccess ? (
               <>
-                <p>{currentText.trim() ? `Pelo que voce escreveu em ${currentPillar.title}, o caminho mais util agora e transformar percepcao em um gesto pequeno.` : 'Escreva uma resposta para eu cruzar seu estado com os pilares do livro.'}</p>
+                <p>{currentText.trim() ? `Pelo que você escreveu em ${currentPillar.title}, o caminho mais útil agora é transformar percepção em um gesto pequeno.` : 'Escreva uma resposta para eu cruzar seu estado com os pilares do livro.'}</p>
                 <div className="mind-tags">
                   <span>{currentPillar.title}</span>
                   <span>{linkedTopic.title}</span>
@@ -1856,17 +2367,17 @@ export function App() {
                 </div>
                 <div className="recommendation-mini">
                   <strong>Trecho sugerido</strong>
-                  <p>{trimExcerpt(bookChapters[workbookPillarIndex]?.summary || selectedChapter.summary, 120)}</p>
+                  <p>{trimExcerpt(bookChapters[workbookPillarIndex + 8]?.summary || selectedChapter.summary, 120)}</p>
                 </div>
                 <Button onClick={() => startMindSession(linkedTopic)}><Zap size={17} /> Conversar com iGentMIND</Button>
               </>
             ) : (
               <>
-                <p>Este painel cruza suas respostas com temas do livro e sugere capitulos, audios e contrapontos.</p>
+                <p>Este painel cruza suas respostas com temas do livro e sugere capítulos, áudios e contrapontos.</p>
                 <Button onClick={() => openUpgrade('igent30')}><Zap size={17} /> Desbloquear iGent 30 dias</Button>
               </>
             )}
-            <span>{savedAt ? 'Salvo localmente' : 'Salvamento automatico ativo'}</span>
+            <span>{savedAt ? 'Salvo localmente' : 'Salvamento automático ativo'}</span>
           </aside>
         </section>
 
@@ -1921,6 +2432,117 @@ export function App() {
             </article>
           ))}
         </div>
+      </div>
+    );
+  };
+
+  const LettersView = () => {
+    const currentLetter = pillarLetters[letterIndex] ?? pillarLetters[0];
+    const writtenCount = pillarLetters.filter((letter) => readerLetters[letter.id]?.trim()).length;
+    const currentMeta = letterMeta[currentLetter.id] ?? {};
+    const updateLetter = (value: string) => {
+      const next = { ...readerLetters, [currentLetter.id]: value };
+      setReaderLetters(next);
+      saveLocalLetters(next);
+    };
+    const updateLetterMeta = (field: keyof LetterMeta, value: string) => {
+      const next = {
+        ...letterMeta,
+        [currentLetter.id]: {
+          ...currentMeta,
+          [field]: value,
+          updatedAt: new Date().toISOString(),
+        },
+      };
+      setLetterMeta(next);
+      saveLocalLetterMeta(next);
+    };
+    const copyCurrentLetter = () => {
+      navigator.clipboard?.writeText(readerLetters[currentLetter.id] || '').catch(() => {});
+      playClick('soft');
+    };
+    const exportLetters = () => {
+      const text = pillarLetters.map((letter) => (
+        `${letter.roman} · ${letter.title}\n${readerLetters[letter.id]?.trim() || '[carta ainda não escrita]'}`
+      )).join('\n\n────────────────────────\n\n');
+      const blob = new Blob([`MINHAS CARTAS DE PRESENÇA\n\n${text}`], { type: 'text/plain;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement('a');
+      anchor.href = url;
+      anchor.download = 'minhas-cartas-de-presenca.txt';
+      anchor.click();
+      URL.revokeObjectURL(url);
+    };
+
+    return (
+      <div className="app-page letters-page page-enter">
+        <section className="letters-hero">
+          <div>
+            <p className="kicker">Caderno de Presença</p>
+            <h1>Minhas cartas</h1>
+            <p>Um espaço íntimo para responder aos pilares com suas próprias palavras. {writtenCount} de {pillarLetters.length} cartas iniciadas.</p>
+          </div>
+          <Button onClick={exportLetters} variant="secondary"><DownloadCloud size={17} /> Exportar cartas</Button>
+        </section>
+
+        <section className="letters-shell">
+          <aside className="letters-index">
+            <p className="kicker">Cartas da jornada</p>
+            {pillarLetters.map((letter, index) => (
+              <button
+                key={letter.id}
+                className={`${letterIndex === index ? 'active' : ''} ${readerLetters[letter.id]?.trim() ? 'written' : ''}`}
+                onClick={() => setLetterIndex(index)}
+              >
+                <span>{letter.roman}</span>
+                <strong>{letter.title}</strong>
+                <small>{readerLetters[letter.id]?.trim() ? 'Em andamento' : 'Ainda em branco'}</small>
+              </button>
+            ))}
+          </aside>
+
+          <article className="letter-editor">
+            <div className="letter-paper">
+              <header>
+                <p className="kicker">{currentLetter.roman === '∞' ? 'Encerramento' : `Pilar ${currentLetter.roman}`}</p>
+                <h2>{currentLetter.title}</h2>
+                <p>{currentLetter.prompt}</p>
+              </header>
+              <div className="letter-mood-grid">
+                <label>
+                  <span>Como cheguei nesta carta?</span>
+                  <input
+                    value={currentMeta.before || ''}
+                    onChange={(event) => updateLetterMeta('before', event.target.value)}
+                    placeholder="Ex.: cansado, confuso, aliviado..."
+                  />
+                </label>
+                <label>
+                  <span>Como saio depois de escrever?</span>
+                  <input
+                    value={currentMeta.after || ''}
+                    onChange={(event) => updateLetterMeta('after', event.target.value)}
+                    placeholder="Ex.: mais leve, ainda mexido..."
+                  />
+                </label>
+              </div>
+              <textarea
+                value={readerLetters[currentLetter.id] || ''}
+                onChange={(event) => updateLetter(event.target.value)}
+                placeholder={currentLetter.starter}
+                aria-label={currentLetter.title}
+              />
+              <footer>
+                <span>Salvamento automático neste dispositivo</span>
+                <strong>— {readerName}</strong>
+              </footer>
+            </div>
+            <div className="letter-actions">
+              {letterIndex < 9 && <Button onClick={() => goToChapter(8 + letterIndex)} variant="ghost"><BookOpen size={17} /> Voltar ao pilar</Button>}
+              <Button onClick={() => setLetterIndex(clamp(letterIndex + 1, 0, pillarLetters.length - 1))}>Próxima carta</Button>
+            </div>
+          </article>
+        </section>
       </div>
     );
   };
@@ -2203,6 +2825,7 @@ export function App() {
       case ROUTES.IGENT: return hasMindAccess ? IGentMindView() : <LockedView title="iGentMIND bloqueado" offerKey="igent30" />;
       case ROUTES.FAVORITES: return FavoritesView();
       case ROUTES.WORKBOOK: return WorkbookView();
+      case ROUTES.LETTERS: return hasReaderAccess ? LettersView() : <LockedView title="Cartas bloqueadas" offerKey="basic" />;
       case ROUTES.MANIFESTO: return ManifestoView();
       case ROUTES.SETTINGS: return SettingsView();
       case ROUTES.ADMIN: return isAdmin ? AdminView() : <LockedView title="Painel administrativo bloqueado" />;
@@ -2214,8 +2837,9 @@ export function App() {
   if (route === ROUTES.ACCESS) return AccessView();
 
   return (
-    <div className="app-shell">
+    <div className={`app-shell ${route === ROUTES.READER ? 'reader-route-shell' : ''} ${audioState.currentUrl ? 'audio-active-shell' : ''}`}>
       {Header()}
+      {!isPwaInstalled && !pwaIntroDismissed && route !== ROUTES.READER && PwaInstallBar()}
       <div className="app-body">
         {Navigation()}
         <main id="main" className="app-main">{renderMain()}</main>
@@ -2223,14 +2847,17 @@ export function App() {
       {BottomNavigation()}
       {UpgradeModal()}
       {audioState.currentUrl && (
-        <div className="audio-dock pro-player">
+        <>
+        <div className="audio-dock pro-player compact-audio-player">
           <div className="player-glow" />
-          <div className="player-cover"><Music2 size={20} /></div>
+          <button className="player-cover" onClick={() => setAudioFullOpen(true)} title="Abrir player completo">
+            <Music2 size={16} />
+          </button>
           <div className="player-info">
             <p>Tocando agora</p>
             <strong>{audioState.title}</strong>
             <div className="player-wave-progress" style={{ '--audio-progress': `${audioProgress || 0}%` } as React.CSSProperties}>
-              <SiriWaveVisualizer active={audioState.isPlaying} intensity={1.05 + audioState.volume * 1.15} />
+              <AudioFrequencyBars values={audioFrequencies} />
             <input
               className="player-progress"
               type="range"
@@ -2243,18 +2870,53 @@ export function App() {
             </div>
             <div className="player-time"><span>{formatTime(audioState.currentTime)}</span><span>{formatTime(audioState.duration)}</span></div>
           </div>
-          <label className="volume-control">
+          <label className="volume-control" style={{ '--volume-progress': `${Math.round(audioState.volume * 100)}%` } as React.CSSProperties}>
             <Volume2 size={18} />
             <input type="range" min="0" max="100" value={Math.round(audioState.volume * 100)} onChange={(event) => changeVolume(Number(event.target.value))} />
           </label>
           <button className="speed-control" onClick={changePlaybackRate} title="Velocidade do áudio">
             {audioState.playbackRate % 1 === 0 ? audioState.playbackRate.toFixed(0) : audioState.playbackRate.toFixed(2).replace(/0$/, '')}x
           </button>
+          <button className="player-expand" onClick={() => setAudioFullOpen(true)} title="Tela cheia"><Sparkles size={18} /></button>
           <button className="player-play" onClick={() => handlePlayAudio(audioState.currentUrl, audioState.title)}>
             {audioState.isPlaying ? <Pause size={22} /> : <Play size={22} fill="currentColor" />}
           </button>
           <button className="player-close" onClick={closeAudio}><X size={22} /></button>
         </div>
+        {audioFullOpen && (
+          <section className="audio-fullscreen-player" role="dialog" aria-modal="true" aria-label="Player de audiobook">
+            <div className="audio-fullscreen-bg" />
+            <button className="audio-full-close" onClick={() => setAudioFullOpen(false)} title="Voltar para barra"><X size={20} /></button>
+            <div className="audio-full-card">
+              <div className="audio-full-cover">
+                <img src="/media/imagens/capas/capa-topo.jpg" alt="" />
+                <div className="audio-orbit one" />
+                <div className="audio-orbit two" />
+              </div>
+              <div className="audio-full-copy">
+                <p className="kicker">Audiobook OPDDS</p>
+                <h2>{audioState.title}</h2>
+                <span>{audioState.isPlaying ? 'Em reprodução' : 'Pausado'} · {formatTime(audioState.currentTime)} de {formatTime(audioState.duration)}</span>
+              </div>
+              <div className="audio-full-visualizer" style={{ '--audio-progress': `${audioProgress || 0}%` } as React.CSSProperties}>
+                <AudioFrequencyBars values={audioFrequencies} />
+                <input className="player-progress" type="range" min="0" max="100" value={audioProgress || 0} onChange={(event) => seekAudio(Number(event.target.value))} aria-label="Progresso do áudio" />
+              </div>
+              <div className="audio-full-time"><span>{formatTime(audioState.currentTime)}</span><span>{formatTime(audioState.duration)}</span></div>
+              <div className="audio-full-controls">
+                <button className="audio-control-soft" onClick={changePlaybackRate}>{audioState.playbackRate % 1 === 0 ? audioState.playbackRate.toFixed(0) : audioState.playbackRate.toFixed(2).replace(/0$/, '')}x</button>
+                <button className="audio-control-main" onClick={() => handlePlayAudio(audioState.currentUrl, audioState.title)}>
+                  {audioState.isPlaying ? <Pause size={30} /> : <Play size={30} fill="currentColor" />}
+                </button>
+                <label className="audio-control-volume" style={{ '--volume-progress': `${Math.round(audioState.volume * 100)}%` } as React.CSSProperties}>
+                  <Volume2 size={18} />
+                  <input type="range" min="0" max="100" value={Math.round(audioState.volume * 100)} onChange={(event) => changeVolume(Number(event.target.value))} />
+                </label>
+              </div>
+            </div>
+          </section>
+        )}
+        </>
       )}
     </div>
   );

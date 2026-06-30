@@ -12,8 +12,8 @@ export type ProductKey = typeof PRODUCT_KEYS[keyof typeof PRODUCT_KEYS];
 
 export const PRODUCT_LABELS: Record<ProductKey, string> = {
   [PRODUCT_KEYS.pdf]: 'PDF do livro',
-  [PRODUCT_KEYS.base]: 'Livro + App + Audios',
-  [PRODUCT_KEYS.workbook]: 'Diario dos Desacreditados',
+  [PRODUCT_KEYS.base]: 'Livro + App + Áudios',
+  [PRODUCT_KEYS.workbook]: 'Diário dos Desacreditados',
   [PRODUCT_KEYS.igentMind30]: 'iGentMIND 30 dias',
   [PRODUCT_KEYS.igentMind90]: 'iGentMIND 90 dias',
   [PRODUCT_KEYS.group]: 'Grupo de apoio',

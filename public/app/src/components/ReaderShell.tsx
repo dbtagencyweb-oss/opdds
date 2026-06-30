@@ -1,20 +1,62 @@
-import { useEffect, useMemo, useState } from 'react';
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Bookmark,
+  BookOpen,
   ChevronLeft,
   ChevronRight,
   DownloadCloud,
-  FileText,
   Headphones,
   Highlighter,
-  MessageCircle,
+  Home,
+  Mail,
+  Maximize2,
+  Menu,
+  Minimize2,
   Minus,
   Plus,
   Share2,
-  Sparkles,
+  StickyNote,
+  Volume2,
+  X,
 } from 'lucide-react';
 
-type MentorLens = 'contraponto' | 'pergunta' | 'ancora';
+const PdfPageCanvas = lazy(() => import('./PdfPageCanvas'));
+
+type ChapterNavItem = {
+  id: string;
+  title: string;
+  summary: string;
+  pdfPage: number;
+  groupId: string;
+  roman?: string;
+};
+
+type AudioTrack = {
+  label: string;
+  url: string;
+};
+
+type AudioProgressEntry = {
+  heard: boolean;
+  currentTime: number;
+  duration: number;
+  updatedAt: string;
+};
+
+type ReaderNoteItem = {
+  id: string;
+  page: number;
+  chapterId: string;
+  title: string;
+  note: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+type TextBlock = {
+  kind: 'heading' | 'subheading' | 'paragraph';
+  text: string;
+};
 
 type Props = {
   title: string;
@@ -24,44 +66,230 @@ type Props = {
   pageIndex: number;
   setPageIndex: (i: number) => void;
   fontSize: number;
-  globalPage?: number;
-  totalBookPages?: number;
   chapterPage?: number;
   chapterPageTotal?: number;
   chapterIndex?: number;
   chapterTotal?: number;
   chapterKind?: string;
+  chapterSections?: string[];
   coverImageUrl?: string;
-  audioUrl?: string | null;
+  audioTracks?: AudioTrack[];
   pdfUrl?: string;
+  pdfTextPages?: readonly string[];
+  pdfCurrentPage: number;
+  totalPdfPages: number;
+  chapters: ChapterNavItem[];
+  onPdfPageChange: (page: number) => void;
+  onPdfDocumentReady: (pages: number) => void;
+  onSelectChapter: (index: number) => void;
   playAudio: (url: string | null, title: string | null) => void;
+  audioProgress?: Record<string, AudioProgressEntry>;
+  activeAudioUrl?: string | null;
+  isAudioPlaying?: boolean;
   isFavorite: boolean;
   onToggleFavorite: () => void;
+  isPageBookmarked?: boolean;
+  pageNote?: string;
+  readerNotes?: ReaderNoteItem[];
+  onTogglePageBookmark?: () => void;
+  onPageNoteChange?: (value: string) => void;
+  onOpenCurrentLetter?: () => void;
+  currentLetterTitle?: string;
   onFontIncrease: () => void;
   onFontDecrease: () => void;
   onOpenPdf: () => void;
   onShare: () => void;
+  onExitReader?: () => void;
 };
 
-const mentorCopy: Record<MentorLens, { label: string; title: string; body: string }> = {
-  contraponto: {
-    label: 'Contraponto',
-    title: 'Olhe de outro ângulo',
-    body:
-      'Antes de aceitar a voz que te diminui, separe fato de sentença. O que aconteceu pode ser real; a conclusão de que você não serve talvez seja só um julgamento antigo tentando parecer verdade.',
-  },
-  pergunta: {
-    label: 'Pergunta',
-    title: 'Leitura ativa',
-    body:
-      'Qual frase deste trecho descreve você sem te esmagar? Marque mentalmente essa frase e volte para ela quando a leitura começar a tocar num ponto sensível.',
-  },
-  ancora: {
-    label: 'Âncora',
-    title: 'Volte para o presente',
-    body:
-      'Respire uma vez antes de avançar. O objetivo desta página não é te consertar; é te devolver presença suficiente para continuar sem se abandonar.',
-  },
+const groupLabels: Record<string, string> = {
+  quebra: 'Quebra de expectativa',
+  fundamentos: 'Fundamentos da obra',
+  acolhimento: 'Acolhimento e orientação',
+  sobrevivencia: 'Ato I · A Sobrevivência',
+  reconstrucao: 'Ato II · A Reconstrução',
+  continuidade: 'Ato III · A Continuidade',
+  encerramento: 'Encerramento',
+};
+
+const cleanLabel = (value = '') => {
+  let repaired = value;
+  try {
+    if (/[Ãâð]/.test(value)) {
+      const bytes = Uint8Array.from(Array.from(value).map((char) => char.charCodeAt(0) & 255));
+      repaired = new TextDecoder('utf-8').decode(bytes);
+    }
+  } catch {
+    repaired = value
+      .replaceAll('Ã¡', 'á')
+      .replaceAll('Ã©', 'é')
+      .replaceAll('Ã­', 'í')
+      .replaceAll('Ã³', 'ó')
+      .replaceAll('Ãº', 'ú')
+      .replaceAll('Ã£', 'ã')
+      .replaceAll('Ãµ', 'õ')
+      .replaceAll('Ã§', 'ç')
+      .replaceAll('Ãª', 'ê')
+      .replaceAll('Ã´', 'ô')
+      .replaceAll('Â·', '·')
+      .replaceAll('â€”', '—')
+      .replaceAll('â€“', '–');
+  }
+
+  const badChar = '[\\uFFFD\\u00EF\\u00BF\\u00BD]';
+  return repaired
+    .replace(new RegExp(`N${badChar}O`, 'g'), 'N\u00c3O')
+    .replace(new RegExp(`n${badChar}o`, 'g'), 'n\u00e3o')
+    .replace(new RegExp(`${badChar}\\s*AUTOAJUDA`, 'g'), '\u00c9 AUTOAJUDA')
+    .replace(new RegExp(`${badChar}\\s*autoajuda`, 'g'), '\u00e9 autoajuda')
+    .replace(new RegExp(`EXPERI${badChar}NCIA`, 'g'), 'EXPERI\u00caNCIA')
+    .replace(new RegExp(`experi${badChar}ncia`, 'g'), 'experi\u00eancia')
+    .replace(new RegExp(`${badChar}ncora pr${badChar}tica`, 'gi'), '\u00c2ncora pr\u00e1tica')
+    .replace(new RegExp(`${badChar}NCORA PR${badChar}TICA`, 'g'), '\u00c2NCORA PR\u00c1TICA')
+    .replace(new RegExp(`pr${badChar}tica`, 'g'), 'pr\u00e1tica')
+    .replace(new RegExp(`Pr${badChar}tica`, 'g'), 'Pr\u00e1tica')
+    .replace(new RegExp(`Presen${badChar}a`, 'g'), 'Presen\u00e7a')
+    .replace(new RegExp(`presen${badChar}a`, 'g'), 'presen\u00e7a')
+    .replace(new RegExp(`Consci${badChar}ncia`, 'g'), 'Consci\u00eancia')
+    .replace(new RegExp(`consci${badChar}ncia`, 'g'), 'consci\u00eancia')
+    .replace(new RegExp(`Tr${badChar}ade`, 'g'), 'Tr\u00edade')
+    .replace(new RegExp(`TR${badChar}ADE`, 'g'), 'TR\u00cdADE');
+};
+
+const pageMarkerPattern = /^[-–—]\s*\d+\s*[-–—]\s*/;
+
+const compactSpacedHeading = (line: string) => {
+  const clean = line.trim();
+  const withoutSpaces = clean.replace(/\s+/g, '');
+  const uppercaseCount = clean.match(/[A-ZÁÀÂÃÉÊÍÓÔÕÚÇ]/g)?.length ?? 0;
+  if (withoutSpaces.length < 4 || uppercaseCount < 4) return clean;
+  if (/^[A-ZÁÀÂÃÉÊÍÓÔÕÚÇ](?:\s+[A-ZÁÀÂÃÉÊÍÓÔÕÚÇ]){3,}/.test(clean) || clean.includes('  ')) {
+    return clean
+      .split(/\s{2,}/)
+      .map((chunk) => chunk.replace(/\s+/g, ''))
+      .join(' ');
+  }
+  return clean;
+};
+
+const isDecorativeOrLooseMarker = (line: string) =>
+  /^([IVXLCDM]+|\d+)$/.test(line.trim());
+
+const normalizePdfHeading = (line: string) => {
+  const clean = line.trim();
+  const withoutSpaces = clean.replace(/\s+/g, '');
+  const uppercaseCount = clean.match(/\p{Lu}/gu)?.length ?? 0;
+  if (withoutSpaces.length < 4 || uppercaseCount < 4) return clean.replace(/\s+/g, ' ');
+
+  const looksLetterSpaced = /^\p{Lu}(?:\s+\p{Lu}){3,}/u.test(clean) || /\s{2,}/.test(clean);
+  if (!looksLetterSpaced) return clean.replace(/\s+/g, ' ');
+
+  return repairExtractedHeading(clean
+    .split(/\s{2,}/)
+    .map((chunk) => chunk.replace(/\s+/g, ''))
+    .filter(Boolean)
+    .join(' '));
+};
+
+const repairExtractedHeading = (value: string) => {
+  const normalized = cleanLabel(value).replace(/\s+/g, ' ').trim();
+  const compact = normalized
+    .normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '')
+    .replace(/\s+/g, '')
+    .toUpperCase();
+
+  const fixes: Record<string, string> = {
+    PILARI: 'PILAR I',
+    PILARII: 'PILAR II',
+    PILARIII: 'PILAR III',
+    PILARIV: 'PILAR IV',
+    PILARV: 'PILAR V',
+    PILARVI: 'PILAR VI',
+    PILARVII: 'PILAR VII',
+    PILARVIII: 'PILAR VIII',
+    PILARIX: 'PILAR IX',
+    TRIADEDA: 'TRÍADE DA',
+    OSPILARES: 'OS PILARES',
+    TRIADEDAATOIOSPILARES: 'TRÍADE DO ATO I · OS PILARES',
+    MANIFESTODEABERTURA: 'MANIFESTO DE ABERTURA',
+    ANCORAPRATICA: 'ÂNCORA PRÁTICA',
+    PORQUEESTELIVRONAOEAUTOAJUDA: 'POR QUE ESTE LIVRO NÃO É AUTOAJUDA',
+    PORQUEESTELIVRONAOAUTOAJUDA: 'POR QUE ESTE LIVRO NÃO É AUTOAJUDA',
+  };
+
+  return fixes[compact] ?? normalized;
+};
+
+const normalizeAudioLookup = (value = '') =>
+  cleanLabel(value)
+    .normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '')
+    .toLowerCase();
+
+const sectionAudioLabel = (section: string) => {
+  const normalized = normalizeAudioLookup(section);
+  if (normalized.includes('limiar')) return 'manifesto';
+  if (normalized.includes('manifesto')) return 'manifesto';
+  if (normalized.includes('narrativa')) return 'narrativa';
+  if (normalized.includes('consciencia')) return 'consciencia';
+  if (normalized.includes('julgamento')) return 'julgamento';
+  if (normalized.includes('presenca')) return 'presenca';
+  if (normalized.includes('carta') || normalized.includes('fecho')) return 'carta';
+  return '';
+};
+
+const isHeadingLine = (line: string) => {
+  const clean = line.trim();
+  if (!clean || clean.length > 88) return false;
+  const letters = clean.replace(/[^A-Za-zÁÀÂÃÉÊÍÓÔÕÚÇáàâãéêíóôõúç]/g, '');
+  if (letters.length < 4) return false;
+  const lowerLetters = letters.replace(/[^a-záàâãéêíóôõúç]/g, '').length;
+  return lowerLetters / letters.length < 0.28;
+};
+
+const parsePdfTextBlocks = (text: string): TextBlock[] => {
+  const normalized = text
+    .replace(/\uFB01/g, 'fi')
+    .replace(/\uFB02/g, 'fl')
+    .replace(/-\n(?=\p{Ll})/gu, '')
+    .replace(/\r/g, '');
+
+  const blocks: TextBlock[] = [];
+  let paragraph: string[] = [];
+
+  const flushParagraph = () => {
+    const value = paragraph.join(' ').replace(/\s+/g, ' ').trim();
+    if (value) blocks.push({ kind: 'paragraph', text: value });
+    paragraph = [];
+  };
+
+  normalized.split('\n').forEach((rawLine) => {
+    let line = rawLine.trim();
+    if (!line) {
+      flushParagraph();
+      return;
+    }
+
+    line = line.replace(pageMarkerPattern, '').replace(/^—\s*\d+\s*—\s*/, '').trim();
+    if (!line) return;
+    if (isDecorativeOrLooseMarker(line)) return;
+
+    const heading = repairExtractedHeading(normalizePdfHeading(line));
+    if (heading.length > 2 && (isHeadingLine(line) || isHeadingLine(heading))) {
+      flushParagraph();
+      const kind = heading.length <= 18 ? 'subheading' : 'heading';
+      const previous = blocks[blocks.length - 1];
+      if (previous?.kind === kind) previous.text = repairExtractedHeading(`${previous.text} ${heading}`.replace(/\s+/g, ' ').trim());
+      else blocks.push({ kind, text: heading });
+      return;
+    }
+
+    paragraph.push(line.replace(/\s+/g, ' '));
+  });
+
+  flushParagraph();
+  return blocks;
 };
 
 export default function ReaderShell({
@@ -72,174 +300,566 @@ export default function ReaderShell({
   pageIndex,
   setPageIndex,
   fontSize,
-  globalPage,
-  totalBookPages,
   chapterPage,
   chapterPageTotal,
-  chapterIndex,
-  chapterTotal,
+  chapterIndex = 0,
+  chapterTotal = 1,
   chapterKind = 'Livro',
+  chapterSections = [],
   coverImageUrl,
-  audioUrl,
+  audioTracks = [],
   pdfUrl,
+  pdfTextPages = [],
+  pdfCurrentPage,
+  totalPdfPages,
+  chapters,
+  onPdfPageChange,
+  onPdfDocumentReady,
+  onSelectChapter,
   playAudio,
+  audioProgress = {},
+  activeAudioUrl = null,
+  isAudioPlaying = false,
   isFavorite,
   onToggleFavorite,
+  isPageBookmarked = false,
+  pageNote = '',
+  readerNotes = [],
+  onTogglePageBookmark,
+  onPageNoteChange,
+  onOpenCurrentLetter,
+  currentLetterTitle,
   onFontIncrease,
   onFontDecrease,
   onOpenPdf,
   onShare,
+  onExitReader,
 }: Props) {
-  const [mode, setMode] = useState<'text' | 'pdf'>('text');
-  const [lens, setLens] = useState<MentorLens>('contraponto');
-  const currentPage = pages[pageIndex] ?? [];
-  const progress = Math.round(((pageIndex + 1) / Math.max(1, pages.length)) * 100);
-  const bookProgress = totalBookPages && globalPage ? Math.round((globalPage / totalBookPages) * 100) : progress;
+  const [mode, setMode] = useState<'edition' | 'text'>('text');
+  const [contentsOpen, setContentsOpen] = useState(false);
+  const [notesOpen, setNotesOpen] = useState(false);
+  const [notesTab, setNotesTab] = useState<'current' | 'all'>('current');
+  const [letterSpacing, setLetterSpacing] = useState(0);
+  const [lineHeight, setLineHeight] = useState(1.45);
+  const [pdfZoom, setPdfZoom] = useState(1);
+  const [pdfFullscreen, setPdfFullscreen] = useState(false);
+  const [isNarratingPage, setIsNarratingPage] = useState(false);
+  const [activeNarrationChar, setActiveNarrationChar] = useState<number | null>(null);
+  const readerShellRef = useRef<HTMLElement | null>(null);
+  const narrationRef = useRef<SpeechSynthesisUtterance | null>(null);
+  const legacyTextPage = pages[pageIndex] ?? [];
+  const pdfProgress = Math.round((pdfCurrentPage / Math.max(1, totalPdfPages)) * 100);
+  const heardInChapter = audioTracks.filter((track) => audioProgress[track.url]?.heard).length;
+  const displayTitle = cleanLabel(title);
+  const displaySummary = cleanLabel(summary || '');
+  const displayChapterKind = cleanLabel(chapterKind);
+  const displayCurrentLetterTitle = cleanLabel(currentLetterTitle || '');
+  const sortedReaderNotes = useMemo(
+    () => [...readerNotes].filter((note) => note.note.trim() || note.page === pdfCurrentPage).sort((a, b) => b.updatedAt.localeCompare(a.updatedAt)),
+    [pdfCurrentPage, readerNotes],
+  );
+  const pdfTextBlocks = useMemo(
+    () => parsePdfTextBlocks(pdfTextPages[pdfCurrentPage - 1] || ''),
+    [pdfCurrentPage, pdfTextPages],
+  );
+  const textBlocks = pdfTextBlocks.length
+    ? pdfTextBlocks
+    : legacyTextPage.map((text) => ({ kind: 'paragraph' as const, text: cleanLabel(text) }));
 
-  const pageLead = useMemo(() => {
-    const text = currentPage.join(' ');
-    return text.length > 210 ? `${text.slice(0, 210).trim()}...` : text;
-  }, [currentPage]);
+  const narrationData = useMemo(() => {
+    let cursor = 0;
+    const ranges: Array<{ blockIndex: number; wordIndex: number; start: number; end: number }> = [];
+    const text = textBlocks.map((block, blockIndex) => {
+      const cleanText = block.text.replace(/\s+/g, ' ').trim();
+      let wordIndex = 0;
+      for (const match of cleanText.matchAll(/\S+/g)) {
+        ranges.push({
+          blockIndex,
+          wordIndex,
+          start: cursor + match.index,
+          end: cursor + match.index + match[0].length,
+        });
+        wordIndex += 1;
+      }
+      cursor += cleanText.length + 2;
+      return cleanText;
+    }).join('\n\n');
+    return { text, ranges };
+  }, [textBlocks]);
+
+  const activeNarrationWord = useMemo(() => {
+    if (activeNarrationChar === null) return null;
+    return narrationData.ranges.find((range) => activeNarrationChar >= range.start && activeNarrationChar < range.end) ?? null;
+  }, [activeNarrationChar, narrationData]);
+
+  const groupedChapters = useMemo(() => {
+    return chapters.reduce<Array<{ id: string; label: string; items: Array<ChapterNavItem & { index: number }> }>>((groups, chapter, index) => {
+      let group = groups.find((item) => item.id === chapter.groupId);
+      if (!group) {
+        group = { id: chapter.groupId, label: groupLabels[chapter.groupId] ?? 'Livro', items: [] };
+        groups.push(group);
+      }
+      group.items.push({ ...chapter, index });
+      return groups;
+    }, []);
+  }, [chapters]);
 
   useEffect(() => {
     document.documentElement.lang = 'pt-BR';
   }, []);
 
-  const goPrevious = () => setPageIndex(Math.max(0, pageIndex - 1));
-  const goNext = () => setPageIndex(Math.min(Math.max(0, pages.length - 1), pageIndex + 1));
+  const stopPageNarration = () => {
+    window.speechSynthesis?.cancel();
+    narrationRef.current = null;
+    setIsNarratingPage(false);
+    setActiveNarrationChar(null);
+  };
+
+  const startPageNarration = () => {
+    if (!narrationData.text.trim() || !('speechSynthesis' in window)) return;
+    stopPageNarration();
+    const utterance = new SpeechSynthesisUtterance(narrationData.text);
+    utterance.lang = 'pt-BR';
+    utterance.rate = 0.92;
+    utterance.pitch = 0.92;
+    utterance.onboundary = (event) => {
+      if (event.name === 'word' || event.charLength) setActiveNarrationChar(event.charIndex);
+    };
+    utterance.onend = () => {
+      narrationRef.current = null;
+      setIsNarratingPage(false);
+      setActiveNarrationChar(null);
+    };
+    utterance.onerror = () => {
+      narrationRef.current = null;
+      setIsNarratingPage(false);
+      setActiveNarrationChar(null);
+    };
+    narrationRef.current = utterance;
+    setIsNarratingPage(true);
+    window.speechSynthesis.speak(utterance);
+  };
+
+  const togglePageNarration = () => {
+    if (isNarratingPage) stopPageNarration();
+    else startPageNarration();
+  };
+
+  const renderNarrationText = (block: TextBlock, blockIndex: number) => {
+    let wordIndex = 0;
+    return block.text.split(/(\s+)/).map((token, tokenIndex) => {
+      if (!token.trim()) return token;
+      const currentWordIndex = wordIndex;
+      wordIndex += 1;
+      const active = activeNarrationWord?.blockIndex === blockIndex && activeNarrationWord.wordIndex === currentWordIndex;
+      return (
+        <span className={active ? 'narration-word active' : 'narration-word'} key={`${blockIndex}-${tokenIndex}`}>
+          {token}
+        </span>
+      );
+    });
+  };
+
+  useEffect(() => stopPageNarration, [pdfCurrentPage]);
+
+  useEffect(() => {
+    const onFullscreenChange = () => {
+      const fullscreenElement = document.fullscreenElement || (document as any).webkitFullscreenElement;
+      setPdfFullscreen(Boolean(fullscreenElement));
+    };
+    document.addEventListener('fullscreenchange', onFullscreenChange);
+    document.addEventListener('webkitfullscreenchange', onFullscreenChange as EventListener);
+    return () => {
+      document.removeEventListener('fullscreenchange', onFullscreenChange);
+      document.removeEventListener('webkitfullscreenchange', onFullscreenChange as EventListener);
+    };
+  }, []);
+
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'ArrowLeft') onPdfPageChange(Math.max(1, pdfCurrentPage - 1));
+      if (event.key === 'ArrowRight') onPdfPageChange(Math.min(totalPdfPages, pdfCurrentPage + 1));
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [onPdfPageChange, pdfCurrentPage, totalPdfPages]);
+
+  const selectChapter = (index: number) => {
+    onSelectChapter(index);
+    setContentsOpen(false);
+  };
+
+  const togglePdfFullscreen = async () => {
+    const target = (readerShellRef.current || document.documentElement) as HTMLElement & {
+      webkitRequestFullscreen?: (options?: FullscreenOptions) => Promise<void> | void;
+    };
+    if (!target) return;
+    try {
+      const fullscreenElement = document.fullscreenElement || (document as any).webkitFullscreenElement;
+      if (fullscreenElement) {
+        if (document.exitFullscreen) {
+          await document.exitFullscreen();
+        } else if ((document as any).webkitExitFullscreen) {
+          await (document as any).webkitExitFullscreen();
+        }
+      } else {
+        if (target.requestFullscreen) {
+          await target.requestFullscreen({ navigationUI: 'hide' });
+        } else if (target.webkitRequestFullscreen) {
+          await target.webkitRequestFullscreen({ navigationUI: 'hide' });
+        }
+      }
+    } catch {
+      setPdfFullscreen((value) => !value);
+    }
+  };
 
   return (
-    <section className="reader-stage">
-      <div className="reader-topbar">
-        <div className="min-w-0">
-          <p className="kicker">{chapterLabel}</p>
-          <h2 className="reader-title">{title}</h2>
-        </div>
+    <section ref={readerShellRef} className={`reader-stage immersive-reader ${mode === 'text' ? 'reader-clean-mode' : ''} ${contentsOpen ? 'contents-open' : ''} ${pdfFullscreen ? 'native-fullscreen' : ''}`}>
+      <div className="reader-bookbar">
+        <button className="reader-index-trigger" onClick={() => setContentsOpen(true)} title="Abrir índice">
+          <Menu size={21} />
+          <span>
+            <small>{chapterLabel}</small>
+            <strong>{displayTitle}</strong>
+          </span>
+        </button>
 
         <div className="reader-actions" aria-label="Controles do leitor">
           <div className="segmented-control" role="tablist" aria-label="Modo de leitura">
+            <button className={mode === 'edition' ? 'active' : ''} onClick={() => setMode('edition')}>
+              <BookOpen size={16} />
+              <span>Edição</span>
+            </button>
             <button className={mode === 'text' ? 'active' : ''} onClick={() => setMode('text')}>
               <Highlighter size={16} />
               <span>Texto</span>
             </button>
-            <button className={mode === 'pdf' ? 'active' : ''} onClick={() => setMode('pdf')}>
-              <FileText size={16} />
-              <span>PDF</span>
-            </button>
           </div>
-          <button className="icon-button" onClick={onToggleFavorite} title={isFavorite ? 'Remover favorito' : 'Adicionar favorito'}>
-            <Bookmark size={18} fill={isFavorite ? 'currentColor' : 'none'} />
+          {mode === 'text' && (
+            <div className="reader-format-controls" aria-label="Ajustes do texto">
+              <button onClick={onFontDecrease} title="Diminuir texto"><Minus size={15} /></button>
+              <span>{fontSize}px</span>
+              <button onClick={onFontIncrease} title="Aumentar texto"><Plus size={15} /></button>
+              <button onClick={() => setLetterSpacing((value) => value >= 1.2 ? 0 : Number((value + 0.2).toFixed(1)))}>Kerning {letterSpacing.toFixed(1)}</button>
+              <button onClick={() => setLineHeight((value) => value >= 1.9 ? 1.35 : Number((value + 0.1).toFixed(2)))}>Linha {lineHeight.toFixed(2)}</button>
+            </div>
+          )}
+          {mode === 'edition' && (
+            <div className="reader-format-controls" aria-label="Zoom do PDF">
+              <button onClick={() => setPdfZoom((value) => Math.max(0.8, Number((value - 0.1).toFixed(2))))}>−</button>
+              <span>{Math.round(pdfZoom * 100)}%</span>
+              <button onClick={() => setPdfZoom((value) => Math.min(1.8, Number((value + 0.1).toFixed(2))))}>+</button>
+              <button onClick={togglePdfFullscreen} title={pdfFullscreen ? 'Sair da tela cheia' : 'Tela cheia'}>
+                {pdfFullscreen ? <Minimize2 size={15} /> : <Maximize2 size={15} />}
+              </button>
+            </div>
+          )}
+          <button
+            className={`icon-button reader-page-bookmark-button ${isPageBookmarked ? 'active' : ''}`}
+            onClick={onTogglePageBookmark}
+            title={isPageBookmarked ? 'Remover marcação da página' : 'Marcar página'}
+          >
+            <Bookmark size={18} fill={isPageBookmarked ? 'currentColor' : 'none'} />
           </button>
-          <button className="icon-button" onClick={onShare} title="Compartilhar capítulo">
-            <Share2 size={18} />
+          <button className="icon-button" onClick={onShare} title="Compartilhar capítulo"><Share2 size={18} /></button>
+          <button
+            className={`icon-button reader-notes-button ${pageNote.trim() ? 'has-note' : ''}`}
+            onClick={() => {
+              setNotesTab('current');
+              setNotesOpen(true);
+            }}
+            title="Minhas anotações"
+          >
+            <StickyNote size={18} />
           </button>
-          <button className="icon-button" onClick={onOpenPdf} title="Baixar PDF">
-            <DownloadCloud size={18} />
-          </button>
+          <button className="icon-button" onClick={onOpenPdf} title="Baixar PDF"><DownloadCloud size={18} /></button>
         </div>
       </div>
 
-      {mode === 'text' ? (
-        <div className="reader-grid">
-          <article className="kindle-surface">
-            <div className="book-meta">
-              <span>Página {globalPage ?? pageIndex + 1} de {totalBookPages ?? Math.max(1, pages.length)}</span>
-              <span>{chapterKind} · {chapterPage ?? pageIndex + 1}/{chapterPageTotal ?? Math.max(1, pages.length)}</span>
-              <span>{bookProgress}% do livro</span>
-            </div>
-
-            {pageIndex === 0 && (
-              <div className="chapter-coverlet">
-                <div
-                  className="chapter-cover-art"
-                  style={coverImageUrl ? { backgroundImage: `linear-gradient(180deg, rgba(6, 7, 8, 0.08), rgba(6, 7, 8, 0.76)), url(${coverImageUrl})` } : undefined}
-                />
-                <div className="chapter-cover-copy">
-                  <p className="kicker">{chapterKind}</p>
-                  <h1>{title}</h1>
-                  <span>Seção {(chapterIndex ?? 0) + 1} de {chapterTotal ?? 1}</span>
-                </div>
-              </div>
-            )}
-
-            <div className="page-copy" style={{ fontSize: `${fontSize}px` }}>
-              {currentPage.map((paragraph, index) => (
-                <p key={`${pageIndex}-${index}`}>{paragraph}</p>
-              ))}
-            </div>
-
-            <div className="reader-footer">
-              <button className="page-button" onClick={goPrevious} disabled={pageIndex === 0} title="Página anterior">
-                <ChevronLeft size={20} />
-              </button>
-              <div className="progress-track reader-global-progress" aria-label={`Progresso do livro ${bookProgress}%`}>
-                <span style={{ width: `${bookProgress}%` }} />
-              </div>
-              <button className="page-button" onClick={goNext} disabled={pageIndex >= pages.length - 1} title="Próxima página">
-                <ChevronRight size={20} />
-              </button>
-            </div>
-          </article>
-
-          <aside className="mentor-panel" aria-label="Mentor de leitura">
-            <div className="mentor-header">
-              <div className="mentor-mark">
-                <Sparkles size={18} />
-              </div>
+      {notesOpen && (
+        <div className="reader-notes-backdrop" onClick={() => setNotesOpen(false)}>
+          <aside className="reader-notes-popover" onClick={(event) => event.stopPropagation()} role="dialog" aria-modal="true" aria-label="Minhas anotações">
+            <header>
               <div>
-                <p className="kicker">Mentor de leitura</p>
-                <h3>Contrapontos para continuar</h3>
+                <p className="kicker">Painel do leitor</p>
+                <h2>Minhas anotações</h2>
               </div>
+              <button onClick={() => setNotesOpen(false)} title="Fechar anotações"><X size={20} /></button>
+            </header>
+            <div className="reader-notes-tabs">
+              <button className={notesTab === 'current' ? 'active' : ''} onClick={() => setNotesTab('current')}>Página atual</button>
+              <button className={notesTab === 'all' ? 'active' : ''} onClick={() => setNotesTab('all')}>Minhas anotações</button>
             </div>
-
-            <div className="mentor-tabs">
-              {(Object.keys(mentorCopy) as MentorLens[]).map((item) => (
-                <button key={item} className={lens === item ? 'active' : ''} onClick={() => setLens(item)}>
-                  {mentorCopy[item].label}
-                </button>
-              ))}
-            </div>
-
-            <div className="mentor-card">
-              <p className="mentor-card-title">{mentorCopy[lens].title}</p>
-              <p>{mentorCopy[lens].body}</p>
-            </div>
-
-            <div className="mentor-card quiet">
-              <p className="mentor-card-title">Trecho em foco</p>
-              <p>{pageLead || summary || 'Escolha uma página para receber um contraponto de leitura.'}</p>
-            </div>
-
-            <div className="reader-toolrow">
-              <button className="tool-button" onClick={onFontDecrease} title="Diminuir fonte">
-                <Minus size={16} />
-              </button>
-              <span>{fontSize}px</span>
-              <button className="tool-button" onClick={onFontIncrease} title="Aumentar fonte">
-                <Plus size={16} />
-              </button>
-              {audioUrl && (
-                <button className="listen-button" onClick={() => playAudio(audioUrl, title)}>
-                  <Headphones size={16} />
-                  Ouvir
-                </button>
-              )}
-            </div>
-
-            <button className="mentor-message" type="button">
-              <MessageCircle size={16} />
-              Perguntar ao mentor
-            </button>
+            {notesTab === 'current' ? (
+              <section className="reader-note-editor">
+                <span>Página {pdfCurrentPage}</span>
+                <textarea
+                  value={pageNote}
+                  onChange={(event) => onPageNoteChange?.(event.target.value)}
+                  placeholder="Anote uma frase, um incômodo ou uma lembrança para voltar depois..."
+                  aria-label="Nota da página atual"
+                />
+                <small>A anotação fica salva e vinculada a esta página.</small>
+              </section>
+            ) : (
+              <section className="reader-notes-list">
+                {sortedReaderNotes.length ? sortedReaderNotes.map((note) => (
+                  <button
+                    key={note.id}
+                    onClick={() => {
+                      onPdfPageChange(note.page);
+                      setNotesTab('current');
+                    }}
+                  >
+                    <small>Página {note.page} · {cleanLabel(note.title)}</small>
+                    <strong>{note.note.trim() || 'Página marcada sem texto'}</strong>
+                  </button>
+                )) : (
+                  <p>Nenhuma anotação salva ainda.</p>
+                )}
+              </section>
+            )}
           </aside>
         </div>
+      )}
+
+      {displayCurrentLetterTitle && (
+      <div className="reader-quick-tools">
+          <button onClick={onOpenCurrentLetter}>
+            <Mail size={16} />
+            {displayCurrentLetterTitle}
+          </button>
+      </div>
+      )}
+
+      <div className={`reader-contents-backdrop ${contentsOpen ? 'show' : ''}`} onClick={() => setContentsOpen(false)} />
+      <aside className={`reader-contents-drawer ${contentsOpen ? 'open' : ''}`} aria-label="Índice do livro">
+        <header>
+          <div>
+            <p className="kicker">O Poder dos Desacreditados</p>
+            <h2>Índice</h2>
+          </div>
+          <button onClick={() => setContentsOpen(false)} title="Fechar índice"><X size={22} /></button>
+        </header>
+        <nav>
+          {groupedChapters.map((group) => (
+            <section key={group.id}>
+              <p>{group.label}</p>
+              {group.items.map((chapter) => (
+                <button
+                  key={chapter.id}
+                  className={chapter.index === chapterIndex ? 'active' : ''}
+                  onClick={() => selectChapter(chapter.index)}
+                >
+                  <small>{chapter.roman ? `Pilar ${chapter.roman}` : `Página ${chapter.pdfPage}`}</small>
+                  <strong>{cleanLabel(chapter.title)}</strong>
+                </button>
+              ))}
+            </section>
+          ))}
+        </nav>
+      </aside>
+
+      {mode === 'edition' ? (
+        <div className={`pdf-reader-shell ${pdfFullscreen ? 'pdf-fullscreen-shell' : ''}`}>
+          <div className="pdf-reader-meta">
+            <span>Página {pdfCurrentPage} de {totalPdfPages}</span>
+            <span>{displayChapterKind} · seção {chapterIndex + 1}/{chapterTotal}</span>
+            <span>{pdfProgress}% do livro</span>
+          </div>
+
+          <div className="pdf-page-stage">
+            {pdfUrl ? (
+              <Suspense fallback={<div className="pdf-page-status">Preparando a edição completa...</div>}>
+                <PdfPageCanvas url={pdfUrl} page={pdfCurrentPage} zoom={pdfZoom} onDocumentReady={onPdfDocumentReady} />
+              </Suspense>
+            ) : (
+              <div className="pdf-page-status">PDF não disponível.</div>
+            )}
+          </div>
+
+          <div className="reader-view-controls pdf-zoom-controls">
+            <button onClick={() => setPdfZoom((value) => Math.max(0.8, Number((value - 0.1).toFixed(2))))}>−</button>
+            <span>Zoom {Math.round(pdfZoom * 100)}%</span>
+            <button onClick={() => setPdfZoom((value) => Math.min(1.8, Number((value + 0.1).toFixed(2))))}>+</button>
+            <button
+              className="reader-fullscreen-toggle"
+              onClick={() => setPdfFullscreen((value) => !value)}
+              title={pdfFullscreen ? 'Sair da tela cheia' : 'Tela cheia'}
+              aria-label={pdfFullscreen ? 'Sair da tela cheia' : 'Tela cheia'}
+            >
+              {pdfFullscreen ? <Minimize2 size={17} /> : <Maximize2 size={17} />}
+            </button>
+          </div>
+
+          {audioTracks.length > 0 && (
+            <div className="reader-audio-chapters">
+              <span><Headphones size={17} /> Ouvir esta parte {heardInChapter > 0 ? `· ${heardInChapter}/${audioTracks.length} ouvidos` : ''}</span>
+              <div>
+                {audioTracks.map((track) => (
+                  <button
+                    key={track.url}
+                    className={activeAudioUrl === track.url && isAudioPlaying ? 'active-audio' : ''}
+                    onClick={() => playAudio(track.url, `${displayTitle} · ${cleanLabel(track.label)}`)}
+                  >
+                    {cleanLabel(track.label)}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className="reader-reflection-panel">
+            <div>
+              <p className="kicker">Minha marca nesta página</p>
+              <h3>Página {pdfCurrentPage}</h3>
+            </div>
+            <textarea
+              value={pageNote}
+              onChange={(event) => onPageNoteChange?.(event.target.value)}
+              placeholder="Anote uma frase, um incômodo ou uma lembrança para voltar depois..."
+              aria-label="Nota da página atual"
+            />
+          </div>
+
+          <div className="pdf-reader-navigation">
+            <button
+              className="page-button"
+              onClick={() => onPdfPageChange(Math.max(1, pdfCurrentPage - 1))}
+              disabled={pdfCurrentPage <= 1}
+              title="Página anterior"
+            >
+              <ChevronLeft size={21} />
+            </button>
+            <div>
+              <div className="progress-track reader-global-progress">
+                <span style={{ width: `${pdfProgress}%` }} />
+              </div>
+              <small>{displayTitle}</small>
+            </div>
+            <button
+              className="page-button"
+              onClick={() => onPdfPageChange(Math.min(totalPdfPages, pdfCurrentPage + 1))}
+              disabled={pdfCurrentPage >= totalPdfPages}
+              title="Próxima página"
+            >
+              <ChevronRight size={21} />
+            </button>
+          </div>
+        </div>
       ) : (
-        <div className="pdf-frame">
-          {pdfUrl ? (
-            <iframe title={`PDF ${title}`} src={pdfUrl} />
-          ) : (
-            <div>PDF não disponível</div>
+        <>
+        <div className="reader-chapter-strip">
+          {chapterSections.length > 0 && (
+            <div className="reader-section-tabs compact">
+              {chapterSections.map((section, index) => {
+                const audioLabel = sectionAudioLabel(section);
+                const sectionTrack = audioLabel
+                  ? audioTracks.find((track) => normalizeAudioLookup(track.label).includes(audioLabel))
+                  : null;
+                const active = Boolean(sectionTrack && activeAudioUrl === sectionTrack.url && isAudioPlaying);
+                return (
+                  <button
+                    key={`${section}-${index}`}
+                    className={active ? 'active-audio' : ''}
+                    onClick={() => sectionTrack && playAudio(sectionTrack.url, `${displayTitle} · ${cleanLabel(sectionTrack.label)}`)}
+                    title={sectionTrack ? `Ouvir ${cleanLabel(sectionTrack.label)}` : cleanLabel(section)}
+                  >
+                    <span>{index + 1}</span>
+                    {cleanLabel(section)}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+          {audioTracks.length > 0 && chapterSections.length === 0 && (
+            <div className="reader-strip-audio">
+              <strong><Headphones size={16} /> Ouvir esta parte</strong>
+              {audioTracks.map((track) => (
+                <button
+                  key={track.url}
+                  className={activeAudioUrl === track.url && isAudioPlaying ? 'active-audio' : ''}
+                  onClick={() => playAudio(track.url, `${displayTitle} · ${cleanLabel(track.label)}`)}
+                >
+                  {cleanLabel(track.label)}
+                </button>
+              ))}
+            </div>
           )}
         </div>
+        <article className="kindle-surface reader-text-surface">
+          {isPageBookmarked && (
+            <div className="reader-page-bookmark-ribbon" aria-hidden="true">
+              <Bookmark fill="currentColor" size={42} />
+            </div>
+          )}
+          <div className="book-meta">
+            <span>Página {pdfCurrentPage} de {totalPdfPages}</span>
+            <span>{displayChapterKind}</span>
+            <span>{pdfProgress}% do livro</span>
+          </div>
+          <div className="chapter-coverlet">
+            <div className="chapter-cover-art" style={coverImageUrl ? { backgroundImage: `linear-gradient(180deg, rgba(6,7,8,.08), rgba(6,7,8,.76)), url(${coverImageUrl})` } : undefined} />
+            <div className="chapter-cover-copy">
+              <p className="kicker">{displayChapterKind}</p>
+              <h1>{displayTitle}</h1>
+              <span>Texto extraído da página {pdfCurrentPage} da edição completa</span>
+            </div>
+          </div>
+          <div className="reader-narration-controls">
+            <button onClick={togglePageNarration} className={isNarratingPage ? 'active' : ''}>
+              <Volume2 size={15} />
+              {isNarratingPage ? 'Parar narração' : 'Narrar página'}
+            </button>
+          </div>
+          <div className="page-copy pdf-text-copy" style={{ fontSize: `${fontSize}px`, letterSpacing: `${letterSpacing}px`, lineHeight }}>
+            {textBlocks.length ? textBlocks.map((block, index) => {
+              if (block.kind === 'heading') return <h2 key={`${pdfCurrentPage}-${index}`}>{renderNarrationText(block, index)}</h2>;
+              if (block.kind === 'subheading') return <h3 key={`${pdfCurrentPage}-${index}`}>{renderNarrationText(block, index)}</h3>;
+              return <p key={`${pdfCurrentPage}-${index}`}>{renderNarrationText(block, index)}</p>;
+            }) : (
+              <p>Não foi possível extrair texto desta página. Use o modo Edição para visualizar a página original.</p>
+            )}
+          </div>
+          <div className="reader-text-note-panel">
+            <div>
+              <p className="kicker">Minha marca nesta página</p>
+              <h3>Página {pdfCurrentPage}</h3>
+            </div>
+            <textarea
+              value={pageNote}
+              onChange={(event) => onPageNoteChange?.(event.target.value)}
+              placeholder="Anote uma frase, um incômodo ou uma lembrança para voltar depois..."
+              aria-label="Nota da página atual"
+            />
+          </div>
+          <div className="reader-text-tools">
+            <button onClick={onFontDecrease}><Minus size={16} /></button>
+            <span>{fontSize}px</span>
+            <button onClick={onFontIncrease}><Plus size={16} /></button>
+            <button onClick={() => setLetterSpacing((value) => value >= 1.2 ? 0 : Number((value + 0.2).toFixed(1)))}>Kerning {letterSpacing.toFixed(1)}</button>
+            <button onClick={() => setLineHeight((value) => value >= 1.9 ? 1.35 : Number((value + 0.1).toFixed(2)))}>Linha {lineHeight.toFixed(2)}</button>
+            {displaySummary && <small>{displaySummary}</small>}
+          </div>
+          <div className="pdf-reader-navigation">
+            <button className="page-button" onClick={() => onPdfPageChange(Math.max(1, pdfCurrentPage - 1))} disabled={pdfCurrentPage <= 1}><ChevronLeft size={21} /></button>
+            <div className="reader-nav-divider" aria-hidden="true" />
+            <button className="page-button" onClick={() => onPdfPageChange(Math.min(totalPdfPages, pdfCurrentPage + 1))} disabled={pdfCurrentPage >= totalPdfPages}><ChevronRight size={21} /></button>
+          </div>
+          <div className="reader-page-progress-footer">
+            <span>{pdfProgress}% do livro</span>
+            <strong>Página {pdfCurrentPage} de {totalPdfPages}</strong>
+            <div className="progress-track reader-global-progress"><span style={{ width: `${pdfProgress}%` }} /></div>
+          </div>
+        </article>
+        {onExitReader && (
+          <button className="reader-footer-exit-button" onClick={onExitReader} title="Voltar ao menu principal">
+            <Home size={16} />
+            <span>Voltar ao menu</span>
+          </button>
+        )}
+        </>
       )}
     </section>
   );

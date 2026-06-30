@@ -3,7 +3,8 @@ import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
 import { PrismaService } from '../prisma/prisma.service';
-import { CreateInviteDto, LoginDto, RegisterDto } from './auth.dto';
+import { CreateInviteDto, ForgotPasswordDto, LoginDto, RegisterDto, ResetPasswordDto } from './auth.dto';
+import { MailService } from './mail.service';
 
 type AccessPlan = 'pdf' | 'basic' | 'workbook' | 'igent30' | 'igent90' | 'group' | 'vip';
 
@@ -22,10 +23,19 @@ export class AuthService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
+    private readonly mailService: MailService,
   ) {}
 
   private createCode() {
     return `OPDDS_${crypto.randomBytes(8).toString('hex').toUpperCase()}`;
+  }
+
+  private hashResetToken(token: string) {
+    return crypto.createHash('sha256').update(token).digest('hex');
+  }
+
+  private getAppUrl() {
+    return (process.env.APP_URL || 'http://127.0.0.1:5173').replace(/\/$/, '');
   }
 
   private normalizePlan(plan?: string | null): AccessPlan {
@@ -140,6 +150,85 @@ export class AuthService {
 
     const ok = await bcrypt.compare(data.password, user.passwordHash);
     if (!ok) throw new UnauthorizedException('Credenciais inválidas.');
+
+    return this.sign(user);
+  }
+
+  async forgotPassword(data: ForgotPasswordDto) {
+    const email = data.email.toLowerCase();
+    const user = await this.prisma.user.findUnique({ where: { email } });
+
+    const genericResponse = {
+      ok: true,
+      message: 'Se este e-mail estiver cadastrado, enviaremos um link de redefinição.',
+    };
+
+    if (!user) return genericResponse;
+
+    const token = crypto.randomBytes(32).toString('hex');
+    const tokenHash = this.hashResetToken(token);
+    const expiresAt = new Date(Date.now() + 30 * 60 * 1000);
+
+    await this.prisma.passwordResetToken.create({
+      data: {
+        userId: user.id,
+        tokenHash,
+        expiresAt,
+      },
+    });
+
+    const resetUrl = `${this.getAppUrl()}/?resetToken=${encodeURIComponent(token)}`;
+    const delivery = await this.mailService.sendPasswordResetEmail({
+      to: user.email,
+      name: user.name,
+      resetUrl,
+    });
+
+    if (!delivery.delivered && process.env.NODE_ENV !== 'production') {
+      return {
+        ...genericResponse,
+        resetUrl,
+      };
+    }
+
+    return genericResponse;
+  }
+
+  async resetPassword(data: ResetPasswordDto) {
+    const tokenHash = this.hashResetToken(data.token);
+    const resetToken = await this.prisma.passwordResetToken.findUnique({
+      where: { tokenHash },
+      include: { user: true },
+    });
+
+    if (!resetToken || resetToken.usedAt || resetToken.expiresAt.getTime() < Date.now()) {
+      throw new BadRequestException('Link de redefinição inválido ou expirado.');
+    }
+
+    const passwordHash = await bcrypt.hash(data.password, 10);
+
+    const user = await this.prisma.$transaction(async (tx) => {
+      const updated = await tx.user.update({
+        where: { id: resetToken.userId },
+        data: { passwordHash },
+      });
+
+      await tx.passwordResetToken.update({
+        where: { id: resetToken.id },
+        data: { usedAt: new Date() },
+      });
+
+      await tx.passwordResetToken.updateMany({
+        where: {
+          userId: resetToken.userId,
+          usedAt: null,
+          id: { not: resetToken.id },
+        },
+        data: { usedAt: new Date() },
+      });
+
+      return updated;
+    });
 
     return this.sign(user);
   }

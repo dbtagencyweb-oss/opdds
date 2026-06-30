@@ -174,6 +174,20 @@ export async function loginAccount(input: { email: string; password: string }) {
   }
 }
 
+export async function requestPasswordReset(email: string) {
+  return withTimeout(apiRequest<{ ok: boolean; message: string; resetUrl?: string }>('/api/auth/forgot-password', {
+    method: 'POST',
+    body: JSON.stringify({ email }),
+  }));
+}
+
+export async function resetPassword(input: { token: string; password: string }) {
+  return persistAuth(await withTimeout(apiRequest<AuthResponse>('/api/auth/reset-password', {
+    method: 'POST',
+    body: JSON.stringify(input),
+  })));
+}
+
 export async function fetchCurrentUser() {
   const token = getStoredAuthToken();
   if (!token || token.startsWith('LOCAL_') || accessTokens.includes(token)) return getStoredAuthUser();

@@ -9,6 +9,11 @@ type Props = {
 export default function SiriWaveVisualizer({ active, intensity = 1 }: Props) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const waveRef = useRef<SiriWave | null>(null);
+  const activeRef = useRef(active);
+
+  useEffect(() => {
+    activeRef.current = active;
+  }, [active]);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -22,9 +27,9 @@ export default function SiriWaveVisualizer({ active, intensity = 1 }: Props) {
         style: 'ios9',
         width: Math.max(260, Math.round(bounds.width || 520)),
         height: Math.max(30, Math.round(bounds.height || 34)),
-        autostart: true,
-        speed: active ? 0.28 : 0.055,
-        amplitude: active ? 1.7 * intensity : 0.18,
+        autostart: active,
+        speed: active ? 0.28 : 0,
+        amplitude: active ? 1.7 * intensity : 0.08,
         pixelDepth: 0.08,
         lerpSpeed: 0.08,
         globalCompositeOperation: 'lighter',
@@ -58,8 +63,19 @@ export default function SiriWaveVisualizer({ active, intensity = 1 }: Props) {
   }, []);
 
   useEffect(() => {
-    waveRef.current?.setAmplitude(active ? Math.max(1.05, Math.min(2.85, intensity * 1.22)) : 0.18);
-    waveRef.current?.setSpeed(active ? 0.3 : 0.055);
+    if (!waveRef.current) return;
+    if (active) {
+      waveRef.current.start();
+      waveRef.current.setAmplitude(Math.max(1.05, Math.min(2.85, intensity * 1.22)));
+      waveRef.current.setSpeed(0.3);
+      return;
+    }
+
+    waveRef.current.setAmplitude(0.08);
+    waveRef.current.setSpeed(0);
+    window.setTimeout(() => {
+      if (!activeRef.current) waveRef.current?.stop();
+    }, 180);
   }, [active, intensity]);
 
   return <div ref={containerRef} className={`siriwave-visualizer ${active ? 'active' : ''}`} aria-hidden="true" />;

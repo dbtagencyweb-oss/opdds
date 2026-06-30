@@ -14,7 +14,7 @@ export default function Button({ children, className = '', variant = 'primary', 
   return (
     <button
       type={type}
-      className={`inline-flex items-center justify-center gap-2 rounded-lg px-4 py-3 font-semibold transition duration-200 ${styles[variant] ?? styles.primary} ${className}`}
+      className={`opdds-button opdds-button-${variant} inline-flex items-center justify-center gap-2 rounded-lg px-4 py-3 font-semibold transition duration-200 ${styles[variant] ?? styles.primary} ${className}`}
       {...rest}
     >
       {children}
