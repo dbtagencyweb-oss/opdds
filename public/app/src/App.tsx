@@ -140,6 +140,40 @@ const AudioFrequencyBars = ({ values }: { values: number[] }) => (
   </div>
 );
 
+const PasswordField = ({
+  label,
+  value,
+  onChange,
+  placeholder,
+  visible,
+  onToggle,
+  autoComplete = 'current-password',
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  placeholder: string;
+  visible: boolean;
+  onToggle: () => void;
+  autoComplete?: string;
+}) => (
+  <label>
+    <span>{label}</span>
+    <div className="password-input-wrap">
+      <input
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        placeholder={placeholder}
+        type={visible ? 'text' : 'password'}
+        autoComplete={autoComplete}
+      />
+      <button type="button" onClick={onToggle} aria-label={visible ? 'Ocultar senha' : 'Mostrar senha'}>
+        {visible ? <EyeOff size={18} /> : <Eye size={18} />}
+      </button>
+    </div>
+  </label>
+);
+
 const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max);
 
 const formatTime = (seconds: number) => {
@@ -1585,38 +1619,6 @@ export function App() {
     return 'vip';
   };
 
-  const PasswordField = ({
-    label,
-    value,
-    onChange,
-    placeholder,
-    visible,
-    onToggle,
-  }: {
-    label: string;
-    value: string;
-    onChange: (value: string) => void;
-    placeholder: string;
-    visible: boolean;
-    onToggle: () => void;
-  }) => (
-    <label>
-      <span>{label}</span>
-      <div className="password-input-wrap">
-        <input
-          value={value}
-          onChange={(event) => onChange(event.target.value)}
-          placeholder={placeholder}
-          type={visible ? 'text' : 'password'}
-          autoComplete={label.toLowerCase().includes('nova') ? 'new-password' : 'current-password'}
-        />
-        <button type="button" onClick={onToggle} aria-label={visible ? 'Ocultar senha' : 'Mostrar senha'}>
-          {visible ? <EyeOff size={18} /> : <Eye size={18} />}
-        </button>
-      </div>
-    </label>
-  );
-
   const AccessView = () => {
     if (authMode === 'forgot' || authMode === 'reset') {
       const isReset = authMode === 'reset';
@@ -1646,6 +1648,7 @@ export function App() {
                     placeholder="minimo 6 caracteres"
                     visible={showAuthPassword}
                     onToggle={() => setShowAuthPassword((current) => !current)}
+                    autoComplete="new-password"
                   />
                   <PasswordField
                     label="Confirmar nova senha"
@@ -1654,6 +1657,7 @@ export function App() {
                     placeholder="repita a nova senha"
                     visible={showAuthPasswordConfirm}
                     onToggle={() => setShowAuthPasswordConfirm((current) => !current)}
+                    autoComplete="new-password"
                   />
                 </>
               )}
@@ -1700,6 +1704,7 @@ export function App() {
             placeholder="minimo 6 caracteres"
             visible={showAuthPassword}
             onToggle={() => setShowAuthPassword((current) => !current)}
+            autoComplete={authMode === 'login' ? 'current-password' : 'new-password'}
           />
           {authMode === 'register' && (
             <label>
