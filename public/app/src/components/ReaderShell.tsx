@@ -101,6 +101,7 @@ type Props = {
   onOpenPdf: () => void;
   onShare: () => void;
   onExitReader?: () => void;
+  showNarrationButton?: boolean;
 };
 
 const groupLabels: Record<string, string> = {
@@ -335,6 +336,7 @@ export default function ReaderShell({
   onOpenPdf,
   onShare,
   onExitReader,
+  showNarrationButton = true,
 }: Props) {
   const [mode, setMode] = useState<'edition' | 'text'>('text');
   const [contentsOpen, setContentsOpen] = useState(false);
@@ -769,9 +771,6 @@ export default function ReaderShell({
                     key={`${section}-${index}`}
                     className={`reader-section-audio-tab ${expanded ? 'expanded' : ''} ${active ? 'active-audio' : ''}`}
                     onClickCapture={() => setActiveAudioTab(index)}
-                    onClick={() => sectionTrack && playAudio(sectionTrack.url, `${displayTitle} · ${cleanLabel(sectionTrack.label)}`)}
-                    onMouseEnter={() => setExpandedAudioTab(index)}
-                    onMouseLeave={() => setExpandedAudioTab((current) => current === index ? null : current)}
                     onFocus={() => setExpandedAudioTab(index)}
                     title={sectionTrack ? `Ouvir ${cleanLabel(sectionTrack.label)}` : tabLabel}
                   >
@@ -781,10 +780,6 @@ export default function ReaderShell({
                       onClick={(event) => {
                         event.stopPropagation();
                         setExpandedAudioTab((current) => current === index ? null : index);
-                        if (sectionTrack && expanded) {
-                          setActiveAudioTab(index);
-                          playAudio(sectionTrack.url, `${displayTitle} - ${cleanLabel(sectionTrack.label)}`);
-                        }
                       }}
                     >
                       <span>{index + 1}</span>
@@ -843,12 +838,18 @@ export default function ReaderShell({
               <span>Texto extraído da página {pdfCurrentPage} da edição completa</span>
             </div>
           </div>
+          {showNarrationButton && (
           <div className="reader-narration-controls">
-            <button onClick={togglePageNarration} className={isNarratingPage ? 'active' : ''}>
+            <button
+              onClick={togglePageNarration}
+              className={isNarratingPage ? 'active' : ''}
+              title={isNarratingPage ? 'Parar narração' : 'Narrar página'}
+              aria-label={isNarratingPage ? 'Parar narração' : 'Narrar página'}
+            >
               <Volume2 size={15} />
-              {isNarratingPage ? 'Parar narração' : 'Narrar página'}
             </button>
           </div>
+          )}
           <div className="page-copy pdf-text-copy" style={{ fontSize: `${fontSize}px`, letterSpacing: `${letterSpacing}px`, lineHeight }}>
             {textBlocks.length ? textBlocks.map((block, index) => {
               if (block.kind === 'heading') return <h2 key={`${pdfCurrentPage}-${index}`}>{renderNarrationText(block, index)}</h2>;

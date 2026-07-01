@@ -722,6 +722,10 @@ export function App() {
     return localStorage.getItem('opd_pwa_intro_dismissed') === 'true';
   });
   const [pwaMessage, setPwaMessage] = useState('');
+  const [showReaderNarrationButton, setShowReaderNarrationButton] = useState(() => {
+    if (typeof window === 'undefined') return true;
+    return localStorage.getItem('opd_show_reader_narration') !== 'false';
+  });
   const [authMode, setAuthMode] = useState<'register' | 'login' | 'forgot' | 'reset'>('register');
   const [authName, setAuthName] = useState('');
   const [authEmail, setAuthEmail] = useState('');
@@ -2499,6 +2503,7 @@ export function App() {
         onOpenPdf={() => window.open(pdfUrl, '_blank')}
         onShare={handleShareChapter}
         onExitReader={() => navigate(ROUTES.HOME)}
+        showNarrationButton={showReaderNarrationButton}
       />
     </div>
   );
@@ -2851,6 +2856,22 @@ export function App() {
               <span key={product}>{PRODUCT_LABELS[product as ProductKey] ?? product}</span>
             ))}
           </div>
+        </article>
+
+        <article className="account-card">
+          <p className="kicker">Leitura</p>
+          <h2>Preferências</h2>
+          <label className="setting-toggle-row">
+            <span>Mostrar narração da página</span>
+            <input
+              type="checkbox"
+              checked={showReaderNarrationButton}
+              onChange={(event) => {
+                setShowReaderNarrationButton(event.target.checked);
+                localStorage.setItem('opd_show_reader_narration', String(event.target.checked));
+              }}
+            />
+          </label>
         </article>
 
         <article className="account-card account-edit">
