@@ -116,6 +116,7 @@ const ROUTES = {
 
 type Route = typeof ROUTES[keyof typeof ROUTES];
 type Plan = LocalPlan;
+type AdminSection = 'overview' | 'readers' | 'book' | 'kiwify' | 'plans' | 'copy';
 
 type AudioState = {
   isPlaying: boolean;
@@ -690,6 +691,7 @@ export function App() {
   const [adminGrant, setAdminGrant] = useState({ plan: 'vip' as Plan, productKey: PRODUCT_KEYS.workbook, expiresInDays: '' });
   const [adminResult, setAdminResult] = useState<AdminInviteResponse | null>(null);
   const [adminMessage, setAdminMessage] = useState('');
+  const [adminSection, setAdminSection] = useState<AdminSection>('overview');
   const [bookPageOverrides, setBookPageOverrides] = useState<Record<number, string>>({});
   const [upgradeModal, setUpgradeModal] = useState<UpgradeKey | null>(null);
   const [token, setToken] = useState('');
@@ -2801,12 +2803,64 @@ export function App() {
       <div className="page-heading">
         <div>
           <p className="kicker">Admin</p>
-          <h1>Controle de membros</h1>
+          <h1>Painel de controle</h1>
         </div>
         <span className="plan-badge">{adminReaders.length} leitor(es)</span>
       </div>
 
-      <section className="admin-control-grid">
+      <nav className="admin-module-nav" aria-label="Modulos do admin">
+        {[
+          { id: 'overview', label: 'Visao geral', icon: Home },
+          { id: 'readers', label: 'Leitores', icon: Users },
+          { id: 'book', label: 'Livro', icon: BookOpen },
+          { id: 'kiwify', label: 'Kiwify', icon: Zap },
+          { id: 'plans', label: 'Planos', icon: Lock },
+          { id: 'copy', label: 'Copys', icon: NotebookPen },
+        ].map((item) => {
+          const Icon = item.icon;
+          return (
+            <button
+              key={item.id}
+              className={adminSection === item.id ? 'active' : ''}
+              onClick={() => setAdminSection(item.id as AdminSection)}
+            >
+              <Icon size={17} />
+              <span>{item.label}</span>
+            </button>
+          );
+        })}
+      </nav>
+
+      {adminMessage && <div className="admin-message">{adminMessage}</div>}
+
+      {adminSection === 'overview' && (
+        <section className="admin-overview-grid">
+          <article className="account-card admin-stat-card">
+            <p className="kicker">Leitores</p>
+            <strong>{adminReaders.length}</strong>
+            <span>Contas cadastradas no app</span>
+          </article>
+          <article className="account-card admin-stat-card">
+            <p className="kicker">Livro</p>
+            <strong>{adminBookPages.length}</strong>
+            <span>Paginas com revisao editorial</span>
+          </article>
+          <article className="account-card admin-stat-card">
+            <p className="kicker">Kiwify</p>
+            <strong>{adminEvents.length}</strong>
+            <span>Eventos recentes sincronizados</span>
+          </article>
+          <article className="account-card admin-stat-card">
+            <p className="kicker">Produtos</p>
+            <strong>{adminProducts.length}</strong>
+            <span>Produtos ativos para liberar</span>
+          </article>
+        </section>
+      )}
+
+      {adminSection === 'readers' && (
+      <>
+      <section className="admin-control-grid single">
         <article className="account-card admin-panel">
           <p className="kicker">Novo convite</p>
           <h2>Criar acesso manual</h2>
@@ -2839,41 +2893,75 @@ export function App() {
             </div>
           )}
         </article>
-
-        <article className="account-card admin-panel">
-          <p className="kicker">Acesso manual</p>
-          <h2>Liberar produto ou plano</h2>
-          <label>
-            <span>Leitor</span>
-            <select value={adminSelectedUserId} onChange={(event) => setAdminSelectedUserId(event.target.value)}>
-              {adminReaders.map((reader) => <option key={reader.id} value={reader.id}>{reader.name || reader.email}</option>)}
-            </select>
-          </label>
-          <div className="admin-inline">
-            <label>
-              <span>Plano</span>
-              <select value={adminGrant.plan} onChange={(event) => setAdminGrant((current) => ({ ...current, plan: event.target.value as Plan }))}>
-                {Object.entries(planLabels).map(([key, label]) => <option key={key} value={key}>{label}</option>)}
-              </select>
-            </label>
-            <label>
-              <span>Validade em dias</span>
-              <input value={adminGrant.expiresInDays} onChange={(event) => setAdminGrant((current) => ({ ...current, expiresInDays: event.target.value }))} placeholder="30, 90..." inputMode="numeric" />
-            </label>
-          </div>
-          <Button onClick={handleGrantAdminPlan}>Aplicar plano</Button>
-          <label>
-            <span>Produto avulso</span>
-            <select value={adminGrant.productKey} onChange={(event) => setAdminGrant((current) => ({ ...current, productKey: event.target.value }))}>
-              {adminProducts.map((product) => <option key={product.key} value={product.key}>{product.name}</option>)}
-            </select>
-          </label>
-          <Button onClick={handleGrantAdminProduct} variant="secondary">Liberar produto</Button>
-        </article>
       </section>
 
-      {adminMessage && <div className="admin-message">{adminMessage}</div>}
+      <section className="admin-table">
+        <div className="admin-row head">
+          <span>Leitor</span>
+          <span>Plano</span>
+          <span>Produtos</span>
+          <span>Cadastro</span>
+        </div>
+        {adminReaders.length === 0 ? (
+          <div className="empty-state">Nenhum leitor cadastrado localmente ainda.</div>
+        ) : adminReaders.map((reader) => (
+          <div className="admin-row" key={reader.id}>
+            <div>
+              <strong>{reader.name}</strong>
+              <small>{reader.email}</small>
+            </div>
+            <span>{planLabels[reader.plan]}</span>
+            <div className="admin-product-chips">
+              {(reader.products || []).map((product) => (
+                <button key={product} onClick={() => handleRevokeAdminProduct(reader.id, product)} title="Remover produto">
+                  {PRODUCT_LABELS[product as ProductKey] ?? product}
+                  <X size={12} />
+                </button>
+              ))}
+            </div>
+            <span>{reader.createdAt ? new Date(reader.createdAt).toLocaleDateString('pt-BR') : 'local'}</span>
+          </div>
+        ))}
+      </section>
+      </>
+      )}
 
+      {adminSection === 'plans' && (
+        <section className="admin-control-grid single">
+          <article className="account-card admin-panel">
+            <p className="kicker">Planos e produtos</p>
+            <h2>Liberar acesso manual</h2>
+            <label>
+              <span>Leitor</span>
+              <select value={adminSelectedUserId} onChange={(event) => setAdminSelectedUserId(event.target.value)}>
+                {adminReaders.map((reader) => <option key={reader.id} value={reader.id}>{reader.name || reader.email}</option>)}
+              </select>
+            </label>
+            <div className="admin-inline">
+              <label>
+                <span>Plano</span>
+                <select value={adminGrant.plan} onChange={(event) => setAdminGrant((current) => ({ ...current, plan: event.target.value as Plan }))}>
+                  {Object.entries(planLabels).map(([key, label]) => <option key={key} value={key}>{label}</option>)}
+                </select>
+              </label>
+              <label>
+                <span>Validade em dias</span>
+                <input value={adminGrant.expiresInDays} onChange={(event) => setAdminGrant((current) => ({ ...current, expiresInDays: event.target.value }))} placeholder="30, 90..." inputMode="numeric" />
+              </label>
+            </div>
+            <Button onClick={handleGrantAdminPlan}>Aplicar plano</Button>
+            <label>
+              <span>Produto avulso</span>
+              <select value={adminGrant.productKey} onChange={(event) => setAdminGrant((current) => ({ ...current, productKey: event.target.value }))}>
+                {adminProducts.map((product) => <option key={product.key} value={product.key}>{product.name}</option>)}
+              </select>
+            </label>
+            <Button onClick={handleGrantAdminProduct} variant="secondary">Liberar produto</Button>
+          </article>
+        </section>
+      )}
+
+      {adminSection === 'book' && (
       <section className="admin-book-editor">
         <div className="admin-section-head">
           <div>
@@ -2960,7 +3048,9 @@ export function App() {
           </article>
         </div>
       </section>
+      )}
 
+      {adminSection === 'kiwify' && (
       <section className="admin-events-panel">
         <div className="admin-section-head">
           <div>
@@ -2992,35 +3082,25 @@ export function App() {
           ))}
         </div>
       </section>
+      )}
 
-      <section className="admin-table">
-        <div className="admin-row head">
-          <span>Leitor</span>
-          <span>Plano</span>
-          <span>Produtos</span>
-          <span>Cadastro</span>
-        </div>
-        {adminReaders.length === 0 ? (
-          <div className="empty-state">Nenhum leitor cadastrado localmente ainda.</div>
-        ) : adminReaders.map((reader) => (
-          <div className="admin-row" key={reader.id}>
-            <div>
-              <strong>{reader.name}</strong>
-              <small>{reader.email}</small>
-            </div>
-            <span>{planLabels[reader.plan]}</span>
-            <div className="admin-product-chips">
-              {(reader.products || []).map((product) => (
-                <button key={product} onClick={() => handleRevokeAdminProduct(reader.id, product)} title="Remover produto">
-                  {PRODUCT_LABELS[product as ProductKey] ?? product}
-                  <X size={12} />
+      {adminSection === 'copy' && (
+        <section className="admin-copy-grid">
+          <article className="account-card admin-panel">
+            <p className="kicker">Copys</p>
+            <h2>Central de textos comerciais</h2>
+            <p>Modulo preparado para organizar anuncios, headlines, e-mails, WhatsApp, pagina de vendas e variacoes A/B.</p>
+            <div className="admin-copy-list">
+              {['Anuncios', 'Headlines', 'E-mails', 'WhatsApp', 'Pagina de vendas', 'Onboarding'].map((item) => (
+                <button key={item} type="button">
+                  <NotebookPen size={16} />
+                  <span>{item}</span>
                 </button>
               ))}
             </div>
-            <span>{reader.createdAt ? new Date(reader.createdAt).toLocaleDateString('pt-BR') : 'local'}</span>
-          </div>
-        ))}
-      </section>
+          </article>
+        </section>
+      )}
     </div>
   );
 
