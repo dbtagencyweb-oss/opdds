@@ -71,17 +71,20 @@ import {
 } from './services/workbookStore';
 import {
   AdminBookPageSummary,
+  AdminBookAudioSummary,
   AdminEvent,
   AdminInviteResponse,
   AdminProduct,
   AuthUser,
   createAdminInvite,
   fetchAdminBookPageHistory,
+  fetchAdminBookAudio,
   fetchAdminBookPages,
   fetchAdminEvents,
   fetchAdminProducts,
   fetchAdminUsers,
   fetchCurrentUser,
+  fetchPublishedAudioTracks,
   fetchPublishedBookPages,
   getStoredAuthUser,
   grantAdminPlan,
@@ -89,6 +92,7 @@ import {
   LocalUserRecord,
   loginAccount,
   publishAdminBookPage,
+  publishAdminBookAudio,
   registerAccount,
   requestPasswordReset,
   revokeAdminProduct,
@@ -557,6 +561,12 @@ const normalizeForSearch = (value = '') =>
     .replace(/\s+/g, ' ')
     .trim();
 
+const audioTrackKey = (value = '') =>
+  normalizeForSearch(value)
+    .replace(/^(p\d+\s*)?/, '')
+    .replace(/\s+/g, '-')
+    .trim();
+
 const getChapterKind = (index: number, title = '') => {
   const normalized = normalizeForSearch(title);
   if (normalized.includes('pilar')) return title.split('—')[0]?.trim() || 'Pilar';
@@ -682,10 +692,15 @@ export function App() {
   const [adminProducts, setAdminProducts] = useState<AdminProduct[]>([]);
   const [adminEvents, setAdminEvents] = useState<AdminEvent[]>([]);
   const [adminBookPages, setAdminBookPages] = useState<AdminBookPageSummary[]>([]);
+  const [adminBookAudio, setAdminBookAudio] = useState<AdminBookAudioSummary[]>([]);
   const [adminBookPageHistory, setAdminBookPageHistory] = useState<any[]>([]);
   const [adminBookPageNumber, setAdminBookPageNumber] = useState(1);
   const [adminBookPageTitle, setAdminBookPageTitle] = useState('');
   const [adminBookPageContent, setAdminBookPageContent] = useState('');
+  const [adminAudioChapterId, setAdminAudioChapterId] = useState(bookChapters[0]?.id || '');
+  const [adminAudioSectionKey, setAdminAudioSectionKey] = useState('');
+  const [adminAudioLabel, setAdminAudioLabel] = useState('');
+  const [adminAudioUrl, setAdminAudioUrl] = useState('');
   const [adminSelectedUserId, setAdminSelectedUserId] = useState('');
   const [adminInvite, setAdminInvite] = useState({ name: '', email: '', plan: 'basic' as Plan, expiresInDays: '' });
   const [adminGrant, setAdminGrant] = useState({ plan: 'vip' as Plan, productKey: PRODUCT_KEYS.workbook, expiresInDays: '' });
@@ -693,6 +708,7 @@ export function App() {
   const [adminMessage, setAdminMessage] = useState('');
   const [adminSection, setAdminSection] = useState<AdminSection>('overview');
   const [bookPageOverrides, setBookPageOverrides] = useState<Record<number, string>>({});
+  const [bookAudioOverrides, setBookAudioOverrides] = useState<Record<string, { chapterId: string; sectionKey: string; label: string; url: string }>>({});
   const [upgradeModal, setUpgradeModal] = useState<UpgradeKey | null>(null);
   const [token, setToken] = useState('');
   const [tokenError, setTokenError] = useState('');
@@ -788,6 +804,14 @@ export function App() {
     [bookPageOverrides],
   );
 
+  const selectedChapterAudioTracks = useMemo(
+    () => selectedChapter.audioTracks.map((track) => {
+      const key = `${selectedChapter.id}:${audioTrackKey(track.label)}`;
+      return bookAudioOverrides[key] ? { label: bookAudioOverrides[key].label, url: bookAudioOverrides[key].url } : track;
+    }),
+    [bookAudioOverrides, selectedChapter],
+  );
+
   const filteredChapters = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
     return bookChapters
@@ -803,6 +827,21 @@ export function App() {
   const adminCurrentPageSource = useMemo(
     () => pdfTextPages[adminBookPageNumber - 1] || '',
     [adminBookPageNumber],
+  );
+
+  const adminAudioChapter = useMemo(
+    () => bookChapters.find((chapter) => chapter.id === adminAudioChapterId) ?? bookChapters[0],
+    [adminAudioChapterId],
+  );
+
+  const adminAudioTracksForChapter = useMemo(
+    () => adminAudioChapter?.audioTracks || [],
+    [adminAudioChapter],
+  );
+
+  const adminCurrentAudioSummary = useMemo(
+    () => adminBookAudio.find((track) => track.chapterId === adminAudioChapterId && track.sectionKey === adminAudioSectionKey),
+    [adminAudioChapterId, adminAudioSectionKey, adminBookAudio],
   );
 
   const playClick = (kind: keyof typeof sensoryClicks = 'soft') => {
@@ -1055,13 +1094,32 @@ export function App() {
   }, []);
 
   useEffect(() => {
+    fetchPublishedAudioTracks()
+      .then((tracks) => {
+        setBookAudioOverrides(
+          tracks.reduce<Record<string, { chapterId: string; sectionKey: string; label: string; url: string }>>((acc, track) => {
+            acc[`${track.chapterId}:${track.sectionKey}`] = {
+              chapterId: track.chapterId,
+              sectionKey: track.sectionKey,
+              label: track.label,
+              url: track.url,
+            };
+            return acc;
+          }, {}),
+        );
+      })
+      .catch(() => setBookAudioOverrides({}));
+  }, []);
+
+  useEffect(() => {
     if (route !== ROUTES.ADMIN || !isAdmin) return;
-    Promise.all([fetchAdminUsers(), fetchAdminProducts(), fetchAdminEvents(), fetchAdminBookPages()])
-      .then(([users, products, events, bookPages]) => {
+    Promise.all([fetchAdminUsers(), fetchAdminProducts(), fetchAdminEvents(), fetchAdminBookPages(), fetchAdminBookAudio()])
+      .then(([users, products, events, bookPages, bookAudio]) => {
         setAdminReaders(users);
         setAdminProducts(products);
         setAdminEvents(events);
         setAdminBookPages(bookPages);
+        setAdminBookAudio(bookAudio);
         if (!adminSelectedUserId && users[0]) setAdminSelectedUserId(users[0].id);
       })
       .catch(() => {
@@ -1069,8 +1127,23 @@ export function App() {
         setAdminProducts([]);
         setAdminEvents([]);
         setAdminBookPages([]);
+        setAdminBookAudio([]);
       });
   }, [route, isAdmin]);
+
+  useEffect(() => {
+    const firstTrack = adminAudioTracksForChapter[0];
+    if (!adminAudioSectionKey || !adminAudioTracksForChapter.some((track) => audioTrackKey(track.label) === adminAudioSectionKey)) {
+      setAdminAudioSectionKey(firstTrack ? audioTrackKey(firstTrack.label) : '');
+    }
+  }, [adminAudioSectionKey, adminAudioTracksForChapter]);
+
+  useEffect(() => {
+    const baseTrack = adminAudioTracksForChapter.find((track) => audioTrackKey(track.label) === adminAudioSectionKey);
+    const published = adminCurrentAudioSummary?.latestPublished;
+    setAdminAudioLabel(published?.label || baseTrack?.label || '');
+    setAdminAudioUrl(published?.url || baseTrack?.url || '');
+  }, [adminAudioSectionKey, adminAudioTracksForChapter, adminCurrentAudioSummary]);
 
   useEffect(() => {
     if (route !== ROUTES.ADMIN || !isAdmin) return;
@@ -1391,11 +1464,12 @@ export function App() {
   };
 
   const refreshAdminData = async () => {
-    const [users, products, events, bookPages] = await Promise.all([fetchAdminUsers(), fetchAdminProducts(), fetchAdminEvents(), fetchAdminBookPages()]);
+    const [users, products, events, bookPages, bookAudio] = await Promise.all([fetchAdminUsers(), fetchAdminProducts(), fetchAdminEvents(), fetchAdminBookPages(), fetchAdminBookAudio()]);
     setAdminReaders(users);
     setAdminProducts(products);
     setAdminEvents(events);
     setAdminBookPages(bookPages);
+    setAdminBookAudio(bookAudio);
     if (!adminSelectedUserId && users[0]) setAdminSelectedUserId(users[0].id);
     return users;
   };
@@ -1486,6 +1560,22 @@ export function App() {
     );
   };
 
+  const refreshBookAudioContent = async () => {
+    const [adminAudio, publishedAudio] = await Promise.all([fetchAdminBookAudio(), fetchPublishedAudioTracks()]);
+    setAdminBookAudio(adminAudio);
+    setBookAudioOverrides(
+      publishedAudio.reduce<Record<string, { chapterId: string; sectionKey: string; label: string; url: string }>>((acc, track) => {
+        acc[`${track.chapterId}:${track.sectionKey}`] = {
+          chapterId: track.chapterId,
+          sectionKey: track.sectionKey,
+          label: track.label,
+          url: track.url,
+        };
+        return acc;
+      }, {}),
+    );
+  };
+
   const handleSaveBookPageDraft = async () => {
     setAdminMessage('');
     try {
@@ -1511,6 +1601,22 @@ export function App() {
       setAdminMessage(`Pagina ${adminBookPageNumber} publicada no modo leitura.`);
     } catch (error: any) {
       setAdminMessage(error?.message || 'Nao foi possivel publicar a pagina.');
+    }
+  };
+
+  const handlePublishBookAudio = async () => {
+    setAdminMessage('');
+    try {
+      await publishAdminBookAudio({
+        chapterId: adminAudioChapterId,
+        sectionKey: adminAudioSectionKey,
+        label: adminAudioLabel,
+        url: adminAudioUrl,
+      });
+      await refreshBookAudioContent();
+      setAdminMessage('Audio publicado para esta secao.');
+    } catch (error: any) {
+      setAdminMessage(error?.message || 'Nao foi possivel publicar o audio.');
     }
   };
 
@@ -2366,7 +2472,7 @@ export function App() {
         chapterKind={getChapterKind(currentChapterIndex, selectedChapter.title)}
         chapterSections={selectedChapter.sections}
         coverImageUrl="/media/imagens/capas/capa-topo.jpg"
-        audioTracks={selectedChapter.audioTracks}
+        audioTracks={selectedChapterAudioTracks}
         pdfUrl={pdfUrl}
         pdfTextPages={mergedPdfTextPages}
         pdfCurrentPage={pdfPage}
@@ -3047,6 +3153,64 @@ export function App() {
             </div>
           </article>
         </div>
+        <article className="account-card admin-panel admin-audio-editor">
+          <div className="admin-section-head compact">
+            <div>
+              <p className="kicker">Audios do capitulo</p>
+              <h2>Titulos e arquivos</h2>
+            </div>
+            <span>{adminBookAudio.length} audio(s) editados</span>
+          </div>
+          <div className="admin-control-grid">
+            <label>
+              <span>Capitulo</span>
+              <select value={adminAudioChapterId} onChange={(event) => setAdminAudioChapterId(event.target.value)}>
+                {bookChapters.map((chapter) => (
+                  <option key={chapter.id} value={chapter.id}>{repairMojibake(chapter.title)}</option>
+                ))}
+              </select>
+            </label>
+            <label>
+              <span>Secao / faixa</span>
+              <select value={adminAudioSectionKey} onChange={(event) => setAdminAudioSectionKey(event.target.value)}>
+                {adminAudioTracksForChapter.map((track) => (
+                  <option key={audioTrackKey(track.label)} value={audioTrackKey(track.label)}>{repairMojibake(track.label)}</option>
+                ))}
+              </select>
+            </label>
+          </div>
+          <label>
+            <span>Titulo exibido</span>
+            <input value={adminAudioLabel} onChange={(event) => setAdminAudioLabel(event.target.value)} placeholder="Ex.: Manifesto de abertura" />
+          </label>
+          <label>
+            <span>Arquivo ou URL do audio</span>
+            <input value={adminAudioUrl} onChange={(event) => setAdminAudioUrl(event.target.value)} placeholder="/media/audios/livro/pilar-01-reconhecimento/p1-manifesto.wav" />
+          </label>
+          <div className="workbook-actions">
+            <Button onClick={() => adminAudioUrl && handlePlayAudio(adminAudioUrl, adminAudioLabel || 'Preview do audio')} variant="secondary">Testar audio</Button>
+            <Button onClick={handlePublishBookAudio}>Publicar audio</Button>
+          </div>
+          <div className="admin-book-history">
+            <strong>Historico desta faixa</strong>
+            {!adminCurrentAudioSummary?.history?.length ? (
+              <small>Nenhuma substituicao publicada ainda.</small>
+            ) : adminCurrentAudioSummary.history.slice(0, 5).map((revision) => (
+              <button
+                key={revision.id || `${revision.url}-${revision.version}`}
+                type="button"
+                onClick={() => {
+                  setAdminAudioLabel(revision.label);
+                  setAdminAudioUrl(revision.url);
+                }}
+              >
+                <span>v{revision.version || 1} - {revision.label}</span>
+                <small>{formatDateTime(revision.createdAt)}</small>
+              </button>
+            ))}
+          </div>
+          <small>Use um caminho do app ou uma URL publica. Upload direto fica como proximo passo sobre esta mesma estrutura.</small>
+        </article>
       </section>
       )}
 

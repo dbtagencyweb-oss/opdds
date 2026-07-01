@@ -48,3 +48,21 @@ export class AdminBookPageContentDto {
   @IsString()
   content!: string;
 }
+
+export class AdminBookAudioDto {
+  @IsString()
+  @MaxLength(80)
+  chapterId!: string;
+
+  @IsString()
+  @MaxLength(80)
+  sectionKey!: string;
+
+  @IsString()
+  @MaxLength(120)
+  label!: string;
+
+  @IsString()
+  @MaxLength(500)
+  url!: string;
+}

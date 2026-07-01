@@ -6470,27 +6470,91 @@ html.light .reader-format-controls span {
   margin: 0;
 }
 
-.reader-section-tabs.compact button {
+.reader-section-audio-tab {
   min-height: 34px;
-  gap: 7px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 999px;
-  padding: 0 11px 0 7px;
   background: transparent;
-  border-color: rgba(255, 255, 255, 0.1);
   color: rgba(244, 242, 236, 0.72);
-  font-size: 0.72rem;
-  font-weight: 800;
+  overflow: hidden;
+  transition: border-color 0.18s ease, background 0.18s ease, color 0.18s ease;
 }
 
-.reader-section-tabs.compact button span {
+.reader-section-audio-trigger,
+.reader-section-audio-play {
+  min-height: 32px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+}
+
+.reader-section-audio-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0 7px;
+  font-size: 0.72rem;
+  font-weight: 850;
+}
+
+.reader-section-audio-trigger strong {
+  max-width: 0;
+  opacity: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  transition: max-width 0.2s ease, opacity 0.16s ease;
+}
+
+.reader-section-audio-tab.expanded .reader-section-audio-trigger strong,
+.reader-section-audio-tab:hover .reader-section-audio-trigger strong,
+.reader-section-audio-tab:focus-within .reader-section-audio-trigger strong {
+  max-width: 190px;
+  opacity: 1;
+}
+
+.reader-section-audio-play {
+  width: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 2px;
+  border-radius: 999px;
+  background: rgba(215, 183, 88, 0.13);
+  color: #efdca2;
+  transform: scale(0.86);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.16s ease, transform 0.16s ease, background 0.16s ease;
+}
+
+.reader-section-audio-tab.expanded .reader-section-audio-play,
+.reader-section-audio-tab:hover .reader-section-audio-play,
+.reader-section-audio-tab:focus-within .reader-section-audio-play {
+  opacity: 1;
+  pointer-events: auto;
+  transform: scale(1);
+}
+
+.reader-section-audio-play:hover {
+  background: rgba(215, 183, 88, 0.24);
+}
+
+.reader-section-audio-trigger span {
   width: 21px;
   height: 21px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
   font-size: 0.68rem;
   background: rgba(215, 183, 88, 0.14);
   color: rgba(239, 220, 162, 0.76);
 }
 
-.reader-section-tabs.compact button.active-audio {
+.reader-section-audio-tab.active-audio {
   border-color: rgba(215, 183, 88, 0.72);
   background: rgba(215, 183, 88, 0.1);
   color: #efdca2;
@@ -6539,28 +6603,28 @@ html.light .reader-chapter-strip {
   width: min(980px, calc(100% - 32px));
 }
 
-html.light .reader-section-tabs.compact button,
+html.light .reader-section-audio-tab,
 html.light .reader-strip-audio {
   background: rgba(255, 250, 240, 0.84);
   border-color: rgba(35, 31, 25, 0.12);
 }
 
-html.light .reader-section-tabs.compact button,
+html.light .reader-section-audio-tab,
 html.light .reader-strip-audio button {
   color: #4b453b;
 }
 
-html.light .reader-section-tabs.compact button {
+html.light .reader-section-audio-tab {
   background: transparent;
   border-color: rgba(35, 31, 25, 0.12);
 }
 
-html.light .reader-section-tabs.compact button span {
+html.light .reader-section-audio-trigger span {
   background: rgba(200, 164, 93, 0.16);
   color: #8d7040;
 }
 
-html.light .reader-section-tabs.compact button.active-audio {
+html.light .reader-section-audio-tab.active-audio {
   border-color: rgba(141, 112, 64, 0.58);
   background: rgba(200, 164, 93, 0.12);
   color: #5f4820;

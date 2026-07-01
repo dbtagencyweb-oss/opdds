@@ -14,6 +14,7 @@ import {
   Minimize2,
   Minus,
   Plus,
+  Play,
   Share2,
   StickyNote,
   Volume2,
@@ -345,6 +346,8 @@ export default function ReaderShell({
   const [pdfFullscreen, setPdfFullscreen] = useState(false);
   const [isNarratingPage, setIsNarratingPage] = useState(false);
   const [activeNarrationChar, setActiveNarrationChar] = useState<number | null>(null);
+  const [expandedAudioTab, setExpandedAudioTab] = useState<number | null>(null);
+  const [activeAudioTab, setActiveAudioTab] = useState<number | null>(null);
   const readerShellRef = useRef<HTMLElement | null>(null);
   const narrationRef = useRef<SpeechSynthesisUtterance | null>(null);
   const legacyTextPage = pages[pageIndex] ?? [];
@@ -758,17 +761,50 @@ export default function ReaderShell({
                 const sectionTrack = audioLabel
                   ? audioTracks.find((track) => normalizeAudioLookup(track.label).includes(audioLabel))
                   : null;
-                const active = Boolean(sectionTrack && activeAudioUrl === sectionTrack.url && isAudioPlaying);
+                const active = Boolean(sectionTrack && activeAudioUrl === sectionTrack.url && isAudioPlaying && activeAudioTab === index);
+                const expanded = expandedAudioTab === index || active;
+                const tabLabel = cleanLabel(section);
                 return (
-                  <button
+                  <div
                     key={`${section}-${index}`}
-                    className={active ? 'active-audio' : ''}
+                    className={`reader-section-audio-tab ${expanded ? 'expanded' : ''} ${active ? 'active-audio' : ''}`}
+                    onClickCapture={() => setActiveAudioTab(index)}
                     onClick={() => sectionTrack && playAudio(sectionTrack.url, `${displayTitle} · ${cleanLabel(sectionTrack.label)}`)}
-                    title={sectionTrack ? `Ouvir ${cleanLabel(sectionTrack.label)}` : cleanLabel(section)}
+                    onMouseEnter={() => setExpandedAudioTab(index)}
+                    onMouseLeave={() => setExpandedAudioTab((current) => current === index ? null : current)}
+                    onFocus={() => setExpandedAudioTab(index)}
+                    title={sectionTrack ? `Ouvir ${cleanLabel(sectionTrack.label)}` : tabLabel}
                   >
-                    <span>{index + 1}</span>
-                    {cleanLabel(section)}
-                  </button>
+                    <button
+                      type="button"
+                      className="reader-section-audio-trigger"
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        setExpandedAudioTab((current) => current === index ? null : index);
+                        if (sectionTrack && expanded) {
+                          setActiveAudioTab(index);
+                          playAudio(sectionTrack.url, `${displayTitle} - ${cleanLabel(sectionTrack.label)}`);
+                        }
+                      }}
+                    >
+                      <span>{index + 1}</span>
+                      <strong>{tabLabel}</strong>
+                    </button>
+                    {sectionTrack && (
+                      <button
+                        type="button"
+                        className="reader-section-audio-play"
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          setActiveAudioTab(index);
+                          playAudio(sectionTrack.url, `${displayTitle} - ${cleanLabel(sectionTrack.label)}`);
+                        }}
+                        aria-label={`Ouvir ${tabLabel}`}
+                      >
+                        <Play size={13} fill="currentColor" />
+                      </button>
+                    )}
+                  </div>
                 );
               })}
             </div>

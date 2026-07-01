@@ -27,4 +27,28 @@ export class ReaderService {
 
     return Array.from(latestByPage.values());
   }
+
+  async listPublishedAudioTracks() {
+    const revisions = await this.prisma.bookAudioRevision.findMany({
+      orderBy: [{ chapterId: 'asc' }, { sectionKey: 'asc' }, { createdAt: 'desc' }],
+    });
+
+    const latestByTrack = new Map<string, any>();
+    for (const revision of revisions) {
+      const key = `${revision.chapterId}:${revision.sectionKey}`;
+      if (!latestByTrack.has(key)) {
+        latestByTrack.set(key, {
+          chapterId: revision.chapterId,
+          sectionKey: revision.sectionKey,
+          label: revision.label,
+          url: revision.url,
+          version: revision.version,
+          publishedAt: revision.publishedAt,
+          updatedAt: revision.updatedAt,
+        });
+      }
+    }
+
+    return Array.from(latestByTrack.values());
+  }
 }

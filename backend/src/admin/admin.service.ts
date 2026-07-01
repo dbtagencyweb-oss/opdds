@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { AdminBookPageContentDto, AdminGrantPlanDto, AdminGrantProductDto } from './admin.dto';
+import { AdminBookAudioDto, AdminBookPageContentDto, AdminGrantPlanDto, AdminGrantProductDto } from './admin.dto';
 
 type AccessPlan = 'pdf' | 'basic' | 'workbook' | 'igent30' | 'igent90' | 'group' | 'vip';
 
@@ -133,6 +133,15 @@ export class AdminService {
     return (latest?.version ?? 0) + 1;
   }
 
+  private async nextBookAudioVersion(chapterId: string, sectionKey: string) {
+    const latest = await this.prisma.bookAudioRevision.findFirst({
+      where: { chapterId, sectionKey },
+      orderBy: { version: 'desc' },
+      select: { version: true },
+    });
+    return (latest?.version ?? 0) + 1;
+  }
+
   private mapBookRevision(revision: any) {
     return {
       id: revision.id,
@@ -140,6 +149,20 @@ export class AdminService {
       title: revision.title,
       content: revision.content,
       status: revision.status,
+      version: revision.version,
+      publishedAt: revision.publishedAt,
+      createdAt: revision.createdAt,
+      updatedAt: revision.updatedAt,
+    };
+  }
+
+  private mapBookAudioRevision(revision: any) {
+    return {
+      id: revision.id,
+      chapterId: revision.chapterId,
+      sectionKey: revision.sectionKey,
+      label: revision.label,
+      url: revision.url,
       version: revision.version,
       publishedAt: revision.publishedAt,
       createdAt: revision.createdAt,
@@ -207,6 +230,50 @@ export class AdminService {
       },
     });
     return this.mapBookRevision(revision);
+  }
+
+  async listBookAudioRevisions() {
+    const revisions = await this.prisma.bookAudioRevision.findMany({
+      orderBy: [{ chapterId: 'asc' }, { sectionKey: 'asc' }, { createdAt: 'desc' }],
+    });
+
+    const byTrack = new Map<string, { chapterId: string; sectionKey: string; latestPublished: any | null; history: any[] }>();
+    for (const revision of revisions) {
+      const key = `${revision.chapterId}:${revision.sectionKey}`;
+      const current = byTrack.get(key) ?? {
+        chapterId: revision.chapterId,
+        sectionKey: revision.sectionKey,
+        latestPublished: null,
+        history: [],
+      };
+      const mapped = this.mapBookAudioRevision(revision);
+      current.history.push(mapped);
+      if (!current.latestPublished) current.latestPublished = mapped;
+      byTrack.set(key, current);
+    }
+
+    return Array.from(byTrack.values());
+  }
+
+  async publishBookAudio(data: AdminBookAudioDto, createdById?: string) {
+    const chapterId = data.chapterId.trim();
+    const sectionKey = data.sectionKey.trim();
+    const label = data.label.trim();
+    const url = data.url.trim();
+    if (!chapterId || !sectionKey || !label || !url) throw new BadRequestException('Dados do audio incompletos.');
+
+    const revision = await this.prisma.bookAudioRevision.create({
+      data: {
+        chapterId,
+        sectionKey,
+        label,
+        url,
+        version: await this.nextBookAudioVersion(chapterId, sectionKey),
+        createdById,
+        publishedAt: new Date(),
+      },
+    });
+    return this.mapBookAudioRevision(revision);
   }
 
   async grantPlan(userId: string, data: AdminGrantPlanDto) {

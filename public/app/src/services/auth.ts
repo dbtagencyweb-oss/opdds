@@ -65,6 +65,25 @@ export type AdminBookPageSummary = {
   history: BookPageRevision[];
 };
 
+export type BookAudioRevision = {
+  id?: string;
+  chapterId: string;
+  sectionKey: string;
+  label: string;
+  url: string;
+  version?: number;
+  publishedAt?: string | null;
+  createdAt?: string;
+  updatedAt?: string;
+};
+
+export type AdminBookAudioSummary = {
+  chapterId: string;
+  sectionKey: string;
+  latestPublished?: BookAudioRevision | null;
+  history: BookAudioRevision[];
+};
+
 type AuthResponse = {
   access_token: string;
   user: AuthUser;
@@ -294,6 +313,24 @@ export async function saveAdminBookPageDraft(pageNumber: number, input: { title?
 export async function publishAdminBookPage(pageNumber: number, input: { title?: string; content: string }) {
   const token = getStoredAuthToken();
   return apiRequest<BookPageRevision>(`/api/admin/book/pages/${pageNumber}/publish`, {
+    token,
+    method: 'POST',
+    body: JSON.stringify(input),
+  });
+}
+
+export async function fetchPublishedAudioTracks() {
+  return apiRequest<BookAudioRevision[]>('/api/reader/audio-tracks');
+}
+
+export async function fetchAdminBookAudio() {
+  const token = getStoredAuthToken();
+  return apiRequest<AdminBookAudioSummary[]>('/api/admin/book/audio', { token });
+}
+
+export async function publishAdminBookAudio(input: { chapterId: string; sectionKey: string; label: string; url: string }) {
+  const token = getStoredAuthToken();
+  return apiRequest<BookAudioRevision>('/api/admin/book/audio/publish', {
     token,
     method: 'POST',
     body: JSON.stringify(input),

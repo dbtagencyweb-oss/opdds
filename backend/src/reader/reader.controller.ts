@@ -9,4 +9,9 @@ export class ReaderController {
   listPublishedPageContent() {
     return this.readerService.listPublishedPageContent();
   }
+
+  @Get('audio-tracks')
+  listPublishedAudioTracks() {
+    return this.readerService.listPublishedAudioTracks();
+  }
 }
