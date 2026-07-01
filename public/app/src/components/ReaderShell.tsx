@@ -771,7 +771,6 @@ export default function ReaderShell({
                     key={`${section}-${index}`}
                     className={`reader-section-audio-tab ${expanded ? 'expanded' : ''} ${active ? 'active-audio' : ''}`}
                     onClickCapture={() => setActiveAudioTab(index)}
-                    onFocus={() => setExpandedAudioTab(index)}
                     title={sectionTrack ? `Ouvir ${cleanLabel(sectionTrack.label)}` : tabLabel}
                   >
                     <button
