@@ -709,6 +709,7 @@ export function App() {
   const [adminSection, setAdminSection] = useState<AdminSection>('overview');
   const [adminBookTab, setAdminBookTab] = useState<'pages' | 'audio'>('pages');
   const [adminBookSearch, setAdminBookSearch] = useState('');
+  const [adminBookCompareOpen, setAdminBookCompareOpen] = useState(false);
   const [bookPageOverrides, setBookPageOverrides] = useState<Record<number, string>>({});
   const [bookAudioOverrides, setBookAudioOverrides] = useState<Record<string, { chapterId: string; sectionKey: string; label: string; url: string }>>({});
   const [upgradeModal, setUpgradeModal] = useState<UpgradeKey | null>(null);
@@ -3143,8 +3144,39 @@ export function App() {
             <span>Buscar página ou trecho</span>
             <input value={adminBookSearch} onChange={(event) => setAdminBookSearch(event.target.value)} placeholder="Ex.: Pilar I, culpa, página 74..." />
           </label>
+          <Button onClick={() => setAdminBookCompareOpen((value) => !value)} variant="secondary">
+            {adminBookCompareOpen ? 'Ocultar comparação' : 'Comparar com original'}
+          </Button>
           <Button onClick={handleOpenAdminBookPageInReader} variant="ghost">Ver no leitor</Button>
         </div>
+        {adminBookCompareOpen && (
+          <div className="admin-book-compare">
+            <article>
+              <div>
+                <p className="kicker">Original do PDF</p>
+                <strong>Página {adminBookPageNumber}</strong>
+              </div>
+              <div className="admin-book-compare-box">
+                {(adminCurrentPageSource || 'Sem texto extraído para esta página.')
+                  .split(/\n{2,}/)
+                  .filter(Boolean)
+                  .map((paragraph, index) => <p key={`source-${index}`}>{paragraph}</p>)}
+              </div>
+            </article>
+            <article>
+              <div>
+                <p className="kicker">Texto em edição</p>
+                <strong>{adminCurrentBookPage?.latestPublished ? `Publicado v${adminCurrentBookPage.latestPublished.version}` : 'Ainda não publicado'}</strong>
+              </div>
+              <div className="admin-book-compare-box edited">
+                {(adminBookPageContent || 'Sem texto no editor.')
+                  .split(/\n{2,}/)
+                  .filter(Boolean)
+                  .map((paragraph, index) => <p key={`edited-${index}`}>{paragraph}</p>)}
+              </div>
+            </article>
+          </div>
+        )}
         <div className="admin-book-editor-grid">
           <article className="account-card admin-panel">
             <div className="admin-inline">
