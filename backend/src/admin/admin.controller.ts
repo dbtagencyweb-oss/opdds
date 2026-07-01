@@ -1,8 +1,10 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, UseGuards } from '@nestjs/common';
 import { AdminGuard } from '../auth/admin.guard';
 import { AuthService } from '../auth/auth.service';
+import { CurrentUser } from '../auth/current-user.decorator';
+import { AuthenticatedUser } from '../auth/auth.types';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { AdminCreateInviteDto, AdminGrantPlanDto, AdminGrantProductDto } from './admin.dto';
+import { AdminBookPageContentDto, AdminCreateInviteDto, AdminGrantPlanDto, AdminGrantProductDto } from './admin.dto';
 import { AdminService } from './admin.service';
 
 @Controller('admin')
@@ -26,6 +28,34 @@ export class AdminController {
   @Get('events')
   listEvents() {
     return this.adminService.listEvents();
+  }
+
+  @Get('book/pages')
+  listBookPages() {
+    return this.adminService.listBookPageRevisions();
+  }
+
+  @Get('book/pages/:pageNumber')
+  getBookPage(@Param('pageNumber', ParseIntPipe) pageNumber: number) {
+    return this.adminService.getBookPageRevisions(pageNumber);
+  }
+
+  @Post('book/pages/:pageNumber/drafts')
+  saveBookPageDraft(
+    @Param('pageNumber', ParseIntPipe) pageNumber: number,
+    @Body() body: AdminBookPageContentDto,
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
+    return this.adminService.saveBookPageDraft(pageNumber, body, user.id);
+  }
+
+  @Post('book/pages/:pageNumber/publish')
+  publishBookPage(
+    @Param('pageNumber', ParseIntPipe) pageNumber: number,
+    @Body() body: AdminBookPageContentDto,
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
+    return this.adminService.publishBookPage(pageNumber, body, user.id);
   }
 
   @Post('invites')

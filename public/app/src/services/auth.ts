@@ -46,6 +46,25 @@ export type AdminEvent = {
   code?: string | null;
 };
 
+export type BookPageRevision = {
+  id: string;
+  pageNumber: number;
+  title?: string | null;
+  content: string;
+  status: 'DRAFT' | 'PUBLISHED' | string;
+  version: number;
+  publishedAt?: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type AdminBookPageSummary = {
+  pageNumber: number;
+  latestDraft?: BookPageRevision | null;
+  latestPublished?: BookPageRevision | null;
+  history: BookPageRevision[];
+};
+
 type AuthResponse = {
   access_token: string;
   user: AuthUser;
@@ -246,5 +265,37 @@ export async function revokeAdminProduct(userId: string, productKey: string) {
   return apiRequest<LocalUserRecord>(`/api/admin/users/${userId}/products/${encodeURIComponent(productKey)}`, {
     token,
     method: 'DELETE',
+  });
+}
+
+export async function fetchPublishedBookPages() {
+  return apiRequest<Array<{ pageNumber: number; title?: string | null; content: string; version: number; publishedAt?: string | null; updatedAt: string }>>('/api/reader/book-pages');
+}
+
+export async function fetchAdminBookPages() {
+  const token = getStoredAuthToken();
+  return apiRequest<AdminBookPageSummary[]>('/api/admin/book/pages', { token });
+}
+
+export async function fetchAdminBookPageHistory(pageNumber: number) {
+  const token = getStoredAuthToken();
+  return apiRequest<BookPageRevision[]>(`/api/admin/book/pages/${pageNumber}`, { token });
+}
+
+export async function saveAdminBookPageDraft(pageNumber: number, input: { title?: string; content: string }) {
+  const token = getStoredAuthToken();
+  return apiRequest<BookPageRevision>(`/api/admin/book/pages/${pageNumber}/drafts`, {
+    token,
+    method: 'POST',
+    body: JSON.stringify(input),
+  });
+}
+
+export async function publishAdminBookPage(pageNumber: number, input: { title?: string; content: string }) {
+  const token = getStoredAuthToken();
+  return apiRequest<BookPageRevision>(`/api/admin/book/pages/${pageNumber}/publish`, {
+    token,
+    method: 'POST',
+    body: JSON.stringify(input),
   });
 }

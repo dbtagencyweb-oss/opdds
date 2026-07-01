@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { AdminGrantPlanDto, AdminGrantProductDto } from './admin.dto';
+import { AdminBookPageContentDto, AdminGrantPlanDto, AdminGrantProductDto } from './admin.dto';
 
 type AccessPlan = 'pdf' | 'basic' | 'workbook' | 'igent30' | 'igent90' | 'group' | 'vip';
 
@@ -122,6 +122,91 @@ export class AdminService {
         code: payload.code || null,
       };
     });
+  }
+
+  private async nextBookPageVersion(pageNumber: number) {
+    const latest = await this.prisma.bookPageRevision.findFirst({
+      where: { pageNumber },
+      orderBy: { version: 'desc' },
+      select: { version: true },
+    });
+    return (latest?.version ?? 0) + 1;
+  }
+
+  private mapBookRevision(revision: any) {
+    return {
+      id: revision.id,
+      pageNumber: revision.pageNumber,
+      title: revision.title,
+      content: revision.content,
+      status: revision.status,
+      version: revision.version,
+      publishedAt: revision.publishedAt,
+      createdAt: revision.createdAt,
+      updatedAt: revision.updatedAt,
+    };
+  }
+
+  async listBookPageRevisions() {
+    const revisions = await this.prisma.bookPageRevision.findMany({
+      orderBy: [{ pageNumber: 'asc' }, { createdAt: 'desc' }],
+    });
+
+    const byPage = new Map<number, { pageNumber: number; latestDraft: any | null; latestPublished: any | null; history: any[] }>();
+    for (const revision of revisions) {
+      const current = byPage.get(revision.pageNumber) ?? {
+        pageNumber: revision.pageNumber,
+        latestDraft: null,
+        latestPublished: null,
+        history: [],
+      };
+      const mapped = this.mapBookRevision(revision);
+      current.history.push(mapped);
+      if (revision.status === 'DRAFT' && !current.latestDraft) current.latestDraft = mapped;
+      if (revision.status === 'PUBLISHED' && !current.latestPublished) current.latestPublished = mapped;
+      byPage.set(revision.pageNumber, current);
+    }
+
+    return Array.from(byPage.values());
+  }
+
+  async getBookPageRevisions(pageNumber: number) {
+    const revisions = await this.prisma.bookPageRevision.findMany({
+      where: { pageNumber },
+      orderBy: { createdAt: 'desc' },
+    });
+    return revisions.map((revision) => this.mapBookRevision(revision));
+  }
+
+  async saveBookPageDraft(pageNumber: number, data: AdminBookPageContentDto, createdById?: string) {
+    if (!data.content.trim()) throw new BadRequestException('Conteudo da pagina nao informado.');
+    const revision = await this.prisma.bookPageRevision.create({
+      data: {
+        pageNumber,
+        title: data.title?.trim() || null,
+        content: data.content,
+        status: 'DRAFT',
+        version: await this.nextBookPageVersion(pageNumber),
+        createdById,
+      },
+    });
+    return this.mapBookRevision(revision);
+  }
+
+  async publishBookPage(pageNumber: number, data: AdminBookPageContentDto, createdById?: string) {
+    if (!data.content.trim()) throw new BadRequestException('Conteudo da pagina nao informado.');
+    const revision = await this.prisma.bookPageRevision.create({
+      data: {
+        pageNumber,
+        title: data.title?.trim() || null,
+        content: data.content,
+        status: 'PUBLISHED',
+        version: await this.nextBookPageVersion(pageNumber),
+        createdById,
+        publishedAt: new Date(),
+      },
+    });
+    return this.mapBookRevision(revision);
   }
 
   async grantPlan(userId: string, data: AdminGrantPlanDto) {

@@ -70,24 +70,30 @@ import {
   saveLocalWorkbookEntry,
 } from './services/workbookStore';
 import {
+  AdminBookPageSummary,
   AdminEvent,
   AdminInviteResponse,
   AdminProduct,
   AuthUser,
   createAdminInvite,
+  fetchAdminBookPageHistory,
+  fetchAdminBookPages,
   fetchAdminEvents,
   fetchAdminProducts,
   fetchAdminUsers,
   fetchCurrentUser,
+  fetchPublishedBookPages,
   getStoredAuthUser,
   grantAdminPlan,
   grantAdminProduct,
   LocalUserRecord,
   loginAccount,
+  publishAdminBookPage,
   registerAccount,
   requestPasswordReset,
   revokeAdminProduct,
   resetPassword,
+  saveAdminBookPageDraft,
   updateStoredAuthUser,
 } from './services/auth';
 
@@ -674,11 +680,17 @@ export function App() {
   const [adminReaders, setAdminReaders] = useState<LocalUserRecord[]>([]);
   const [adminProducts, setAdminProducts] = useState<AdminProduct[]>([]);
   const [adminEvents, setAdminEvents] = useState<AdminEvent[]>([]);
+  const [adminBookPages, setAdminBookPages] = useState<AdminBookPageSummary[]>([]);
+  const [adminBookPageHistory, setAdminBookPageHistory] = useState<any[]>([]);
+  const [adminBookPageNumber, setAdminBookPageNumber] = useState(1);
+  const [adminBookPageTitle, setAdminBookPageTitle] = useState('');
+  const [adminBookPageContent, setAdminBookPageContent] = useState('');
   const [adminSelectedUserId, setAdminSelectedUserId] = useState('');
   const [adminInvite, setAdminInvite] = useState({ name: '', email: '', plan: 'basic' as Plan, expiresInDays: '' });
   const [adminGrant, setAdminGrant] = useState({ plan: 'vip' as Plan, productKey: PRODUCT_KEYS.workbook, expiresInDays: '' });
   const [adminResult, setAdminResult] = useState<AdminInviteResponse | null>(null);
   const [adminMessage, setAdminMessage] = useState('');
+  const [bookPageOverrides, setBookPageOverrides] = useState<Record<number, string>>({});
   const [upgradeModal, setUpgradeModal] = useState<UpgradeKey | null>(null);
   const [token, setToken] = useState('');
   const [tokenError, setTokenError] = useState('');
@@ -769,6 +781,10 @@ export function App() {
   const heardAudioCount = Object.values(audioProgressMap).filter((entry) => entry.heard).length;
   const currentPageNote = readerNotes.find((note) => note.page === pdfPage);
   const currentPillarLetter = selectedChapter.pillar ? pillarLetters[selectedChapter.pillar - 1] : null;
+  const mergedPdfTextPages = useMemo(
+    () => pdfTextPages.map((text, index) => bookPageOverrides[index + 1] || text),
+    [bookPageOverrides],
+  );
 
   const filteredChapters = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
@@ -776,6 +792,16 @@ export function App() {
       .map((chapter, index) => ({ chapter, index }))
       .filter(({ chapter }) => !query || `${chapter.title} ${chapter.summary}`.toLowerCase().includes(query));
   }, [searchQuery]);
+
+  const adminCurrentBookPage = useMemo(
+    () => adminBookPages.find((page) => page.pageNumber === adminBookPageNumber),
+    [adminBookPageNumber, adminBookPages],
+  );
+
+  const adminCurrentPageSource = useMemo(
+    () => pdfTextPages[adminBookPageNumber - 1] || '',
+    [adminBookPageNumber],
+  );
 
   const playClick = (kind: keyof typeof sensoryClicks = 'soft') => {
     try {
@@ -1014,20 +1040,45 @@ export function App() {
   }, []);
 
   useEffect(() => {
+    fetchPublishedBookPages()
+      .then((pages) => {
+        setBookPageOverrides(
+          pages.reduce<Record<number, string>>((acc, page) => {
+            acc[page.pageNumber] = page.content;
+            return acc;
+          }, {}),
+        );
+      })
+      .catch(() => setBookPageOverrides({}));
+  }, []);
+
+  useEffect(() => {
     if (route !== ROUTES.ADMIN || !isAdmin) return;
-    Promise.all([fetchAdminUsers(), fetchAdminProducts(), fetchAdminEvents()])
-      .then(([users, products, events]) => {
+    Promise.all([fetchAdminUsers(), fetchAdminProducts(), fetchAdminEvents(), fetchAdminBookPages()])
+      .then(([users, products, events, bookPages]) => {
         setAdminReaders(users);
         setAdminProducts(products);
         setAdminEvents(events);
+        setAdminBookPages(bookPages);
         if (!adminSelectedUserId && users[0]) setAdminSelectedUserId(users[0].id);
       })
       .catch(() => {
         setAdminReaders([]);
         setAdminProducts([]);
         setAdminEvents([]);
+        setAdminBookPages([]);
       });
   }, [route, isAdmin]);
+
+  useEffect(() => {
+    if (route !== ROUTES.ADMIN || !isAdmin) return;
+    const revision = adminCurrentBookPage?.latestDraft || adminCurrentBookPage?.latestPublished;
+    setAdminBookPageTitle(revision?.title || '');
+    setAdminBookPageContent(revision?.content || adminCurrentPageSource);
+    fetchAdminBookPageHistory(adminBookPageNumber)
+      .then(setAdminBookPageHistory)
+      .catch(() => setAdminBookPageHistory([]));
+  }, [route, isAdmin, adminBookPageNumber, adminCurrentBookPage, adminCurrentPageSource]);
 
   useEffect(() => {
     localStorage.setItem('opd_page_index', String(pageIndex));
@@ -1338,10 +1389,11 @@ export function App() {
   };
 
   const refreshAdminData = async () => {
-    const [users, products, events] = await Promise.all([fetchAdminUsers(), fetchAdminProducts(), fetchAdminEvents()]);
+    const [users, products, events, bookPages] = await Promise.all([fetchAdminUsers(), fetchAdminProducts(), fetchAdminEvents(), fetchAdminBookPages()]);
     setAdminReaders(users);
     setAdminProducts(products);
     setAdminEvents(events);
+    setAdminBookPages(bookPages);
     if (!adminSelectedUserId && users[0]) setAdminSelectedUserId(users[0].id);
     return users;
   };
@@ -1414,6 +1466,50 @@ export function App() {
     setCurrentChapterIndex(safeIndex);
     setPdfPage(bookChapters[safeIndex]?.pdfPage ?? 1);
     navigate(ROUTES.READER);
+  };
+
+  const refreshBookPageContent = async () => {
+    const [adminPages, publishedPages, history] = await Promise.all([
+      fetchAdminBookPages(),
+      fetchPublishedBookPages(),
+      fetchAdminBookPageHistory(adminBookPageNumber),
+    ]);
+    setAdminBookPages(adminPages);
+    setAdminBookPageHistory(history);
+    setBookPageOverrides(
+      publishedPages.reduce<Record<number, string>>((acc, page) => {
+        acc[page.pageNumber] = page.content;
+        return acc;
+      }, {}),
+    );
+  };
+
+  const handleSaveBookPageDraft = async () => {
+    setAdminMessage('');
+    try {
+      await saveAdminBookPageDraft(adminBookPageNumber, {
+        title: adminBookPageTitle || undefined,
+        content: adminBookPageContent,
+      });
+      await refreshBookPageContent();
+      setAdminMessage(`Rascunho salvo para a pagina ${adminBookPageNumber}.`);
+    } catch (error: any) {
+      setAdminMessage(error?.message || 'Nao foi possivel salvar o rascunho.');
+    }
+  };
+
+  const handlePublishBookPage = async () => {
+    setAdminMessage('');
+    try {
+      await publishAdminBookPage(adminBookPageNumber, {
+        title: adminBookPageTitle || undefined,
+        content: adminBookPageContent,
+      });
+      await refreshBookPageContent();
+      setAdminMessage(`Pagina ${adminBookPageNumber} publicada no modo leitura.`);
+    } catch (error: any) {
+      setAdminMessage(error?.message || 'Nao foi possivel publicar a pagina.');
+    }
   };
 
   const goToPdfPage = (nextPage: number) => {
@@ -2270,7 +2366,7 @@ export function App() {
         coverImageUrl="/media/imagens/capas/capa-topo.jpg"
         audioTracks={selectedChapter.audioTracks}
         pdfUrl={pdfUrl}
-        pdfTextPages={pdfTextPages}
+        pdfTextPages={mergedPdfTextPages}
         pdfCurrentPage={pdfPage}
         totalPdfPages={totalPdfPages}
         chapters={bookChapters}
@@ -2777,6 +2873,93 @@ export function App() {
       </section>
 
       {adminMessage && <div className="admin-message">{adminMessage}</div>}
+
+      <section className="admin-book-editor">
+        <div className="admin-section-head">
+          <div>
+            <p className="kicker">Livro</p>
+            <h2>Editor do modo leitura</h2>
+          </div>
+          <span>{adminBookPages.length} pagina(s) editadas</span>
+        </div>
+        <div className="admin-book-editor-grid">
+          <article className="account-card admin-panel">
+            <div className="admin-inline">
+              <label>
+                <span>Pagina do PDF</span>
+                <input
+                  value={adminBookPageNumber}
+                  min={1}
+                  max={Math.max(totalPdfPages, pdfTextPages.length || 1)}
+                  type="number"
+                  onChange={(event) => setAdminBookPageNumber(clamp(Number(event.target.value) || 1, 1, Math.max(totalPdfPages, pdfTextPages.length || 1)))}
+                />
+              </label>
+              <label>
+                <span>Status</span>
+                <select
+                  value={adminBookPageNumber}
+                  onChange={(event) => setAdminBookPageNumber(Number(event.target.value))}
+                >
+                  {Array.from({ length: Math.max(totalPdfPages, pdfTextPages.length || 1) }, (_, index) => index + 1).map((pageNumber) => {
+                    const page = adminBookPages.find((item) => item.pageNumber === pageNumber);
+                    const label = page?.latestPublished ? 'publicada' : page?.latestDraft ? 'rascunho' : 'original';
+                    return <option key={pageNumber} value={pageNumber}>Pagina {pageNumber} - {label}</option>;
+                  })}
+                </select>
+              </label>
+            </div>
+            <label>
+              <span>Titulo interno opcional</span>
+              <input value={adminBookPageTitle} onChange={(event) => setAdminBookPageTitle(event.target.value)} placeholder="Ex.: Pilar I - Limiar" />
+            </label>
+            <label>
+              <span>Texto da pagina</span>
+              <textarea
+                className="admin-book-textarea"
+                value={adminBookPageContent}
+                onChange={(event) => setAdminBookPageContent(event.target.value)}
+                placeholder="Cole ou corrija aqui o texto que deve aparecer no modo leitura."
+              />
+            </label>
+            <div className="workbook-actions">
+              <Button onClick={handleSaveBookPageDraft} variant="secondary">Salvar rascunho</Button>
+              <Button onClick={handlePublishBookPage}>Publicar no leitor</Button>
+            </div>
+            <small>Publicar cria uma nova versao e substitui o texto desta pagina para todos os leitores.</small>
+          </article>
+
+          <article className="account-card admin-panel admin-book-preview">
+            <p className="kicker">Preview</p>
+            <h3>Pagina {adminBookPageNumber}</h3>
+            <div className="admin-book-preview-box">
+              {(adminBookPageContent || adminCurrentPageSource || 'Sem texto nesta pagina.')
+                .split(/\n{2,}/)
+                .filter(Boolean)
+                .slice(0, 8)
+                .map((paragraph, index) => <p key={index}>{paragraph}</p>)}
+            </div>
+            <div className="admin-book-history">
+              <strong>Historico</strong>
+              {adminBookPageHistory.length === 0 ? (
+                <small>Nenhuma versao salva ainda.</small>
+              ) : adminBookPageHistory.slice(0, 6).map((revision) => (
+                <button
+                  key={revision.id}
+                  type="button"
+                  onClick={() => {
+                    setAdminBookPageTitle(revision.title || '');
+                    setAdminBookPageContent(revision.content);
+                  }}
+                >
+                  <span>v{revision.version} - {revision.status === 'PUBLISHED' ? 'publicada' : 'rascunho'}</span>
+                  <small>{formatDateTime(revision.createdAt)}</small>
+                </button>
+              ))}
+            </div>
+          </article>
+        </div>
+      </section>
 
       <section className="admin-events-panel">
         <div className="admin-section-head">

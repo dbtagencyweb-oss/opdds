@@ -1,4 +1,4 @@
-import { IsEmail, IsIn, IsInt, IsOptional, IsString, Min } from 'class-validator';
+import { IsEmail, IsIn, IsInt, IsOptional, IsString, MaxLength, Min } from 'class-validator';
 
 const plans = ['pdf', 'basic', 'workbook', 'igent30', 'igent90', 'group', 'vip'] as const;
 
@@ -37,4 +37,14 @@ export class AdminGrantProductDto {
   @IsInt()
   @Min(1)
   expiresInDays?: number;
+}
+
+export class AdminBookPageContentDto {
+  @IsOptional()
+  @IsString()
+  @MaxLength(180)
+  title?: string;
+
+  @IsString()
+  content!: string;
 }
