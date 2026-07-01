@@ -707,6 +707,8 @@ export function App() {
   const [adminResult, setAdminResult] = useState<AdminInviteResponse | null>(null);
   const [adminMessage, setAdminMessage] = useState('');
   const [adminSection, setAdminSection] = useState<AdminSection>('overview');
+  const [adminBookTab, setAdminBookTab] = useState<'pages' | 'audio'>('pages');
+  const [adminBookSearch, setAdminBookSearch] = useState('');
   const [bookPageOverrides, setBookPageOverrides] = useState<Record<number, string>>({});
   const [bookAudioOverrides, setBookAudioOverrides] = useState<Record<string, { chapterId: string; sectionKey: string; label: string; url: string }>>({});
   const [upgradeModal, setUpgradeModal] = useState<UpgradeKey | null>(null);
@@ -847,6 +849,27 @@ export function App() {
     () => adminBookAudio.find((track) => track.chapterId === adminAudioChapterId && track.sectionKey === adminAudioSectionKey),
     [adminAudioChapterId, adminAudioSectionKey, adminBookAudio],
   );
+
+  const adminPublishedPageCount = useMemo(
+    () => adminBookPages.filter((page) => page.latestPublished).length,
+    [adminBookPages],
+  );
+
+  const adminDraftPageCount = useMemo(
+    () => adminBookPages.filter((page) => page.latestDraft).length,
+    [adminBookPages],
+  );
+
+  const adminBookPageOptions = useMemo(() => {
+    const total = Math.max(totalPdfPages, pdfTextPages.length || 1);
+    const query = normalizeForSearch(adminBookSearch);
+    return Array.from({ length: total }, (_, index) => index + 1).filter((pageNumber) => {
+      if (!query) return true;
+      const page = adminBookPages.find((item) => item.pageNumber === pageNumber);
+      const source = `${pageNumber} ${page?.latestDraft?.title || ''} ${page?.latestPublished?.title || ''} ${pdfTextPages[pageNumber - 1] || ''}`;
+      return normalizeForSearch(source).includes(query);
+    });
+  }, [adminBookPages, adminBookSearch, totalPdfPages]);
 
   const playClick = (kind: keyof typeof sensoryClicks = 'soft') => {
     try {
@@ -1622,6 +1645,12 @@ export function App() {
     } catch (error: any) {
       setAdminMessage(error?.message || 'Nao foi possivel publicar o audio.');
     }
+  };
+
+  const handleOpenAdminBookPageInReader = () => {
+    goToPdfPage(adminBookPageNumber);
+    setPageIndex(0);
+    navigate(ROUTES.READER);
   };
 
   const goToPdfPage = (nextPage: number) => {
@@ -3095,7 +3124,26 @@ export function App() {
             <p className="kicker">Livro</p>
             <h2>Editor do modo leitura</h2>
           </div>
-          <span>{adminBookPages.length} pagina(s) editadas</span>
+          <span>{adminPublishedPageCount} publicadas · {adminDraftPageCount} rascunho(s) · {adminBookAudio.length} audio(s)</span>
+        </div>
+        <div className="admin-book-subnav" role="tablist" aria-label="Editor do livro">
+          <button className={adminBookTab === 'pages' ? 'active' : ''} onClick={() => setAdminBookTab('pages')}>
+            <FileText size={16} />
+            Textos
+          </button>
+          <button className={adminBookTab === 'audio' ? 'active' : ''} onClick={() => setAdminBookTab('audio')}>
+            <Headphones size={16} />
+            Áudios
+          </button>
+        </div>
+        {adminBookTab === 'pages' && (
+        <>
+        <div className="admin-book-toolbar">
+          <label>
+            <span>Buscar página ou trecho</span>
+            <input value={adminBookSearch} onChange={(event) => setAdminBookSearch(event.target.value)} placeholder="Ex.: Pilar I, culpa, página 74..." />
+          </label>
+          <Button onClick={handleOpenAdminBookPageInReader} variant="ghost">Ver no leitor</Button>
         </div>
         <div className="admin-book-editor-grid">
           <article className="account-card admin-panel">
@@ -3116,13 +3164,20 @@ export function App() {
                   value={adminBookPageNumber}
                   onChange={(event) => setAdminBookPageNumber(Number(event.target.value))}
                 >
-                  {Array.from({ length: Math.max(totalPdfPages, pdfTextPages.length || 1) }, (_, index) => index + 1).map((pageNumber) => {
+                  {adminBookPageOptions.map((pageNumber) => {
                     const page = adminBookPages.find((item) => item.pageNumber === pageNumber);
                     const label = page?.latestPublished ? 'publicada' : page?.latestDraft ? 'rascunho' : 'original';
                     return <option key={pageNumber} value={pageNumber}>Pagina {pageNumber} - {label}</option>;
                   })}
                 </select>
               </label>
+            </div>
+            <div className="admin-book-status-strip">
+              <span className={adminCurrentBookPage?.latestPublished ? 'published' : 'original'}>
+                {adminCurrentBookPage?.latestPublished ? `Publicada v${adminCurrentBookPage.latestPublished.version}` : 'Original do PDF'}
+              </span>
+              {adminCurrentBookPage?.latestDraft && <span className="draft">Rascunho v{adminCurrentBookPage.latestDraft.version}</span>}
+              <small>{adminCurrentBookPage?.latestPublished?.updatedAt ? `Atualizada em ${formatDateTime(adminCurrentBookPage.latestPublished.updatedAt)}` : 'Sem publicação manual'}</small>
             </div>
             <label>
               <span>Titulo interno opcional</span>
@@ -3174,6 +3229,9 @@ export function App() {
             </div>
           </article>
         </div>
+        </>
+        )}
+        {adminBookTab === 'audio' && (
         <article className="account-card admin-panel admin-audio-editor">
           <div className="admin-section-head compact">
             <div>
@@ -3232,6 +3290,7 @@ export function App() {
           </div>
           <small>Use um caminho do app ou uma URL publica. Upload direto fica como proximo passo sobre esta mesma estrutura.</small>
         </article>
+        )}
       </section>
       )}
 
