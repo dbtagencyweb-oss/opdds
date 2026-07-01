@@ -647,8 +647,14 @@ export function App() {
   const [token, setToken] = useState('');
   const [tokenError, setTokenError] = useState('');
   const [deferredInstallPrompt, setDeferredInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
-  const [isPwaInstalled, setIsPwaInstalled] = useState(false);
-  const [pwaIntroDismissed, setPwaIntroDismissed] = useState(false);
+  const [isPwaInstalled, setIsPwaInstalled] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return window.matchMedia('(display-mode: standalone)').matches || Boolean((window.navigator as any).standalone);
+  });
+  const [pwaIntroDismissed, setPwaIntroDismissed] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return localStorage.getItem('opd_pwa_intro_dismissed') === 'true';
+  });
   const [pwaMessage, setPwaMessage] = useState('');
   const [authMode, setAuthMode] = useState<'register' | 'login' | 'forgot' | 'reset'>('register');
   const [authName, setAuthName] = useState('');
@@ -1233,7 +1239,7 @@ export function App() {
   };
 
   const PwaInstallIntro = () => (
-    <section className="pwa-install-intro page-enter" role="dialog" aria-label="Instalar aplicativo">
+    <section className="pwa-install-intro" role="dialog" aria-label="Instalar aplicativo">
       <div>
         <p className="kicker">App de leitura</p>
         <h1>Instale para ler sem depender do navegador.</h1>
