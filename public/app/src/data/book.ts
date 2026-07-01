@@ -100,19 +100,16 @@ const audioTracksFor = (id: string) => {
   if (id === 'epilogo') return [{ label: 'Epílogo', url: '/media/audios/livro/epilogo/epilogo.mp3' }];
   const base = pillarAudioFolders[id];
   if (!base) return [];
-  const tracks = [
-    { label: 'Manifesto', url: `/media/audios/livro/${base}-manifesto.wav` },
-    { label: 'Narrativa', url: `/media/audios/livro/${base}-narrativa.wav` },
+  return [
+    { label: 'Limiar', url: `/media/audios/livro/${base}-limiar.wav` },
+    { label: 'Manifesto de abertura', url: `/media/audios/livro/${base}-manifesto.wav` },
+    { label: 'Narrativa profunda', url: `/media/audios/livro/${base}-narrativa.wav` },
+    { label: 'Consciência', url: `/media/audios/livro/${base}-conciencia.wav` },
+    { label: 'Julgamento', url: `/media/audios/livro/${base}-julgamento.wav` },
+    { label: 'Presença', url: `/media/audios/livro/${base}-presenca.wav` },
+    { label: 'Âncora prática', url: `/media/audios/livro/${base}-ancora.wav` },
+    { label: 'Fecho do pilar', url: `/media/audios/livro/${base}-carta.wav` },
   ];
-  if (id === 'reconhecimento') {
-    tracks.push(
-      { label: 'Consciência', url: `/media/audios/livro/${base}-conciencia.wav` },
-      { label: 'Julgamento', url: `/media/audios/livro/${base}-julgamento.wav` },
-      { label: 'Presença', url: `/media/audios/livro/${base}-presenca.wav` },
-      { label: 'Carta', url: `/media/audios/livro/${base}-carta.wav` },
-    );
-  }
-  return tracks;
 };
 
 const repairText = (value = '') => {

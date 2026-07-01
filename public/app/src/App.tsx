@@ -851,6 +851,20 @@ export function App() {
     [adminAudioChapterId, adminAudioSectionKey, adminBookAudio],
   );
 
+  const adminDefaultAudioTrack = useMemo(
+    () => adminAudioTracksForChapter.find((track) => audioTrackKey(track.label) === adminAudioSectionKey),
+    [adminAudioSectionKey, adminAudioTracksForChapter],
+  );
+
+  const adminAudioPathWarning = useMemo(() => {
+    const path = adminAudioUrl.trim();
+    if (!path) return '';
+    const validSource = path.startsWith('/media/') || /^https?:\/\//i.test(path);
+    if (!validSource) return 'Use um caminho iniciado por /media/ ou uma URL publica.';
+    if (!/\.(mp3|wav|m4a|ogg)(\?.*)?$/i.test(path)) return 'Confira a extensao: recomendamos .mp3, .wav, .m4a ou .ogg.';
+    return '';
+  }, [adminAudioUrl]);
+
   const adminPublishedPageCount = useMemo(
     () => adminBookPages.filter((page) => page.latestPublished).length,
     [adminBookPages],
@@ -3298,6 +3312,16 @@ export function App() {
             <span>Arquivo ou URL do audio</span>
             <input value={adminAudioUrl} onChange={(event) => setAdminAudioUrl(event.target.value)} placeholder="/media/audios/livro/pilar-01-reconhecimento/p1-manifesto.wav" />
           </label>
+          <div className="admin-media-path-helper">
+            <div>
+              <span>Caminho padrão no cPanel</span>
+              <code>public_html{adminDefaultAudioTrack?.url || '/media/audios/livro/...'}</code>
+            </div>
+            <button type="button" onClick={() => adminDefaultAudioTrack && setAdminAudioUrl(adminDefaultAudioTrack.url)}>
+              Usar caminho padrão
+            </button>
+          </div>
+          {adminAudioPathWarning && <small className="admin-media-warning">{adminAudioPathWarning}</small>}
           <div className="workbook-actions">
             <Button onClick={() => adminAudioUrl && handlePlayAudio(adminAudioUrl, adminAudioLabel || 'Preview do audio')} variant="secondary">Testar audio</Button>
             <Button onClick={handlePublishBookAudio}>Publicar audio</Button>
@@ -3320,7 +3344,7 @@ export function App() {
               </button>
             ))}
           </div>
-          <small>Use um caminho do app ou uma URL publica. Upload direto fica como proximo passo sobre esta mesma estrutura.</small>
+          <small>Suba o arquivo no cPanel dentro de public_html/media e cole aqui o caminho iniciado por /media/.</small>
         </article>
         )}
       </section>

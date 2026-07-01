@@ -231,13 +231,14 @@ const normalizeAudioLookup = (value = '') =>
 
 const sectionAudioLabel = (section: string) => {
   const normalized = normalizeAudioLookup(section);
-  if (normalized.includes('limiar')) return 'manifesto';
+  if (normalized.includes('limiar')) return 'limiar';
   if (normalized.includes('manifesto')) return 'manifesto';
   if (normalized.includes('narrativa')) return 'narrativa';
   if (normalized.includes('consciencia')) return 'consciencia';
   if (normalized.includes('julgamento')) return 'julgamento';
   if (normalized.includes('presenca')) return 'presenca';
-  if (normalized.includes('carta') || normalized.includes('fecho')) return 'carta';
+  if (normalized.includes('ancora')) return 'ancora';
+  if (normalized.includes('carta') || normalized.includes('fecho')) return 'fecho';
   return '';
 };
 
