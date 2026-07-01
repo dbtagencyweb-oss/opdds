@@ -12,6 +12,8 @@ import {
   Cloud,
   Copy,
   DownloadCloud,
+  Eye,
+  EyeOff,
   FileText,
   Flame,
   Heart,
@@ -661,6 +663,8 @@ export function App() {
   const [authEmail, setAuthEmail] = useState('');
   const [authPassword, setAuthPassword] = useState('');
   const [authPasswordConfirm, setAuthPasswordConfirm] = useState('');
+  const [showAuthPassword, setShowAuthPassword] = useState(false);
+  const [showAuthPasswordConfirm, setShowAuthPasswordConfirm] = useState(false);
   const [passwordResetToken, setPasswordResetToken] = useState('');
   const [authMessage, setAuthMessage] = useState('');
   const [currentChapterIndex, setCurrentChapterIndex] = useState(0);
@@ -1581,6 +1585,38 @@ export function App() {
     return 'vip';
   };
 
+  const PasswordField = ({
+    label,
+    value,
+    onChange,
+    placeholder,
+    visible,
+    onToggle,
+  }: {
+    label: string;
+    value: string;
+    onChange: (value: string) => void;
+    placeholder: string;
+    visible: boolean;
+    onToggle: () => void;
+  }) => (
+    <label>
+      <span>{label}</span>
+      <div className="password-input-wrap">
+        <input
+          value={value}
+          onChange={(event) => onChange(event.target.value)}
+          placeholder={placeholder}
+          type={visible ? 'text' : 'password'}
+          autoComplete={label.toLowerCase().includes('nova') ? 'new-password' : 'current-password'}
+        />
+        <button type="button" onClick={onToggle} aria-label={visible ? 'Ocultar senha' : 'Mostrar senha'}>
+          {visible ? <EyeOff size={18} /> : <Eye size={18} />}
+        </button>
+      </div>
+    </label>
+  );
+
   const AccessView = () => {
     if (authMode === 'forgot' || authMode === 'reset') {
       const isReset = authMode === 'reset';
@@ -1603,14 +1639,22 @@ export function App() {
               )}
               {isReset && (
                 <>
-                  <label>
-                    <span>Nova senha</span>
-                    <input value={authPassword} onChange={(event) => setAuthPassword(event.target.value)} placeholder="mínimo 6 caracteres" type="password" />
-                  </label>
-                  <label>
-                    <span>Confirmar nova senha</span>
-                    <input value={authPasswordConfirm} onChange={(event) => setAuthPasswordConfirm(event.target.value)} placeholder="repita a nova senha" type="password" />
-                  </label>
+                  <PasswordField
+                    label="Nova senha"
+                    value={authPassword}
+                    onChange={setAuthPassword}
+                    placeholder="minimo 6 caracteres"
+                    visible={showAuthPassword}
+                    onToggle={() => setShowAuthPassword((current) => !current)}
+                  />
+                  <PasswordField
+                    label="Confirmar nova senha"
+                    value={authPasswordConfirm}
+                    onChange={setAuthPasswordConfirm}
+                    placeholder="repita a nova senha"
+                    visible={showAuthPasswordConfirm}
+                    onToggle={() => setShowAuthPasswordConfirm((current) => !current)}
+                  />
                 </>
               )}
               {authMessage && <p>{authMessage}</p>}
@@ -1649,10 +1693,14 @@ export function App() {
             <span>E-mail</span>
             <input value={authEmail} onChange={(event) => setAuthEmail(event.target.value)} placeholder="voce@email.com" type="email" />
           </label>
-          <label>
-            <span>Senha</span>
-            <input value={authPassword} onChange={(event) => setAuthPassword(event.target.value)} placeholder="mínimo 6 caracteres" type="password" />
-          </label>
+          <PasswordField
+            label="Senha"
+            value={authPassword}
+            onChange={setAuthPassword}
+            placeholder="minimo 6 caracteres"
+            visible={showAuthPassword}
+            onToggle={() => setShowAuthPassword((current) => !current)}
+          />
           {authMode === 'register' && (
             <label>
               <span>Token do checkout</span>

@@ -1406,6 +1406,36 @@ button:active {
   padding: 12px 13px;
 }
 
+.password-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-input-wrap input {
+  width: 100%;
+  padding-right: 48px !important;
+}
+
+.password-input-wrap button {
+  position: absolute;
+  right: 10px;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted);
+}
+
+.password-input-wrap button:hover,
+.password-input-wrap button:focus-visible {
+  color: var(--accent);
+  background: rgba(200, 164, 93, 0.1);
+}
+
 .plan-toggle {
   display: grid;
   grid-template-columns: 1fr 1fr;
