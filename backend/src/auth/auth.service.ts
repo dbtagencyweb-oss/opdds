@@ -178,24 +178,13 @@ export class AuthService {
     });
 
     const resetUrl = `${this.getAppUrl()}/?resetToken=${encodeURIComponent(token)}`;
-    const emailJob = this.mailService.sendPasswordResetEmail({
-      to: user.email,
-      name: user.name,
-      resetUrl,
-    });
-
-    if (process.env.NODE_ENV === 'production') {
-      void emailJob;
-      return genericResponse;
-    }
-
-    const delivery = await emailJob;
-    if (!delivery.delivered && process.env.NODE_ENV !== 'production') {
-      return {
-        ...genericResponse,
+    setImmediate(() => {
+      void this.mailService.sendPasswordResetEmail({
+        to: user.email,
+        name: user.name,
         resetUrl,
-      };
-    }
+      });
+    });
 
     return genericResponse;
   }
