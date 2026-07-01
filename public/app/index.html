@@ -69,8 +69,19 @@
                 }
             } else {
                 window.addEventListener('load', () => {
-                    navigator.serviceWorker.register('/service-worker.js')
-                        .then(() => console.log('SW registered'))
+                    let refreshing = false;
+                    navigator.serviceWorker.addEventListener('controllerchange', () => {
+                        if (refreshing || sessionStorage.getItem('opdds_sw_refreshed') === 'true') return;
+                        refreshing = true;
+                        sessionStorage.setItem('opdds_sw_refreshed', 'true');
+                        window.location.reload();
+                    });
+
+                    navigator.serviceWorker.register('/service-worker.js?v=4')
+                        .then((registration) => {
+                            registration.update();
+                            console.log('SW registered');
+                        })
                         .catch(err => console.log('SW failed', err));
                 });
             }
