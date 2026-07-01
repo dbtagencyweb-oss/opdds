@@ -62,14 +62,20 @@ export class MailService {
       return { delivered: false, resetUrl: input.resetUrl };
     }
 
-    await transport.sendMail({
-      from,
-      to: input.to,
-      subject,
-      text,
-      html,
-    });
+    try {
+      await transport.sendMail({
+        from,
+        to: input.to,
+        subject,
+        text,
+        html,
+      });
 
-    return { delivered: true };
+      return { delivered: true };
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      this.logger.error(`Falha ao enviar e-mail de redefinicao para ${input.to}: ${message}`);
+      return { delivered: false, resetUrl: input.resetUrl };
+    }
   }
 }
