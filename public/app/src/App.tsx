@@ -2940,9 +2940,10 @@ export function App() {
             <div className="saved-items-list">
               <strong>Respostas salvas neste pilar</strong>
               {currentSavedAnswers.length ? currentSavedAnswers.map((item, index) => (
-                <button key={`${item.question}-${index}`} type="button">
-                  <span>Questão {index + 1}</span>
-                  <p>{trimExcerpt(item.answer, 96)}</p>
+                <button className="saved-dialogue-item" key={`${item.question}-${index}`} type="button">
+                  <span>Pergunta {index + 1}</span>
+                  <strong>{item.question}</strong>
+                  <p>{trimExcerpt(item.answer, 120)}</p>
                 </button>
               )) : <small>Nenhuma resposta salva neste pilar ainda.</small>}
             </div>
