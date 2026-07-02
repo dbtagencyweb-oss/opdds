@@ -557,6 +557,9 @@ const repairBrokenPdfCharacters = (value = '') => {
     [new RegExp(`PRESEN${broken}A`, 'g'), 'PRESEN\u00c7A'],
     [new RegExp(`Presen${broken}a`, 'g'), 'Presen\u00e7a'],
     [new RegExp(`presen${broken}a`, 'g'), 'presen\u00e7a'],
+    [new RegExp(`SENSA${broken}O`, 'g'), 'SENSA\u00c7\u00c3O'],
+    [new RegExp(`Sensa${broken}o`, 'g'), 'Sensa\u00e7\u00e3o'],
+    [new RegExp(`sensa${broken}o`, 'g'), 'sensa\u00e7\u00e3o'],
     [new RegExp(`MOTIVA${broken}O`, 'g'), 'MOTIVA\u00c7\u00c3O'],
     [new RegExp(`Motiva${broken}o`, 'g'), 'Motiva\u00e7\u00e3o'],
     [new RegExp(`motiva${broken}o`, 'g'), 'motiva\u00e7\u00e3o'],
@@ -572,6 +575,20 @@ const repairBrokenPdfCharacters = (value = '') => {
     [new RegExp(`RECONSTRU${broken}O`, 'g'), 'RECONSTRU\u00c7\u00c3O'],
     [new RegExp(`Reconstru${broken}o`, 'g'), 'Reconstru\u00e7\u00e3o'],
     [new RegExp(`reconstru${broken}o`, 'g'), 'reconstru\u00e7\u00e3o'],
+    [new RegExp(`FOR${broken}A`, 'g'), 'FOR\u00c7A'],
+    [new RegExp(`For${broken}a`, 'g'), 'For\u00e7a'],
+    [new RegExp(`for${broken}a`, 'g'), 'for\u00e7a'],
+    [new RegExp(`DIF${broken}CIL`, 'g'), 'DIF\u00cdCIL'],
+    [new RegExp(`Dif${broken}cil`, 'g'), 'Dif\u00edcil'],
+    [new RegExp(`dif${broken}cil`, 'g'), 'dif\u00edcil'],
+    [new RegExp(`IMPRESS${broken}O`, 'g'), 'IMPRESS\u00c3O'],
+    [new RegExp(`Impress${broken}o`, 'g'), 'Impress\u00e3o'],
+    [new RegExp(`impress${broken}o`, 'g'), 'impress\u00e3o'],
+    [new RegExp(`N${broken}O`, 'g'), 'N\u00c3O'],
+    [new RegExp(`N${broken}o`, 'g'), 'N\u00e3o'],
+    [new RegExp(`n${broken}o`, 'g'), 'n\u00e3o'],
+    [new RegExp(`J${broken}`, 'g'), 'J\u00c1'],
+    [new RegExp(`j${broken}`, 'g'), 'j\u00e1'],
     [new RegExp(`\u00c2NCORA PR${broken}TICA`, 'g'), '\u00c2NCORA PR\u00c1TICA'],
     [new RegExp(`\u00c2ncora pr${broken}tica`, 'g'), '\u00c2ncora pr\u00e1tica'],
     [new RegExp(`ancora pr${broken}tica`, 'gi'), '\u00e2ncora pr\u00e1tica'],
@@ -596,9 +613,10 @@ const audioTrackKey = (value = '') =>
 
 const compactLetterSpacedLine = (line: string) => {
   const clean = line.trim();
+  if (/[\uFFFD\u00EF\u00BF\u00BD]/.test(clean)) return line.replace(/[ \t]{2,}/g, ' ').trimEnd();
   const lettersOnly = clean.replace(/[^\p{L}]/gu, '');
   if (lettersOnly.length < 4) return line.replace(/[ \t]{2,}/g, ' ').trimEnd();
-  if (/^\p{L}(?:\s+\p{L}){3,}/u.test(clean)) {
+  if (/\s{2,}/.test(clean) && /^\p{L}(?:\s+\p{L}){3,}/u.test(clean)) {
     return clean
       .split(/\s{2,}/)
       .map((chunk) => chunk.replace(/\s+/g, ''))
