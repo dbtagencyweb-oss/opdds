@@ -2859,6 +2859,18 @@ button:active {
   padding: 20px;
 }
 
+.account-sensory-card {
+  border-color: rgba(215, 183, 88, 0.18);
+  background:
+    radial-gradient(circle at 92% 6%, rgba(215, 183, 88, 0.12), transparent 32%),
+    #17181c;
+}
+
+.account-products-card {
+  grid-column: 1 / -1;
+  min-height: 118px;
+}
+
 .product-list {
   display: flex;
   flex-wrap: wrap;
@@ -3034,6 +3046,21 @@ button:active {
 
 .account-edit input:focus {
   border-color: rgba(215, 183, 88, 0.42);
+}
+
+.account-footer {
+  display: grid;
+  justify-items: center;
+  gap: 5px;
+  margin: 28px 0 0;
+  color: var(--muted);
+  font-size: 0.78rem;
+  text-align: center;
+}
+
+.account-footer strong {
+  color: rgba(215, 183, 88, 0.78);
+  font-size: 0.76rem;
 }
 
 .admin-table {

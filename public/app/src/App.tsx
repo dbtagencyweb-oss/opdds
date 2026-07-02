@@ -554,6 +554,7 @@ type MindSavedPlan = {
 };
 
 const MIND_LAST_PLAN_KEY = 'opd_mind_last_plan';
+const APP_VERSION = 'v1.3.0';
 
 const repairMojibake = (value = '') => {
   const text = String(value ?? '');
@@ -3374,35 +3375,10 @@ export function App() {
           <h2>{planLabels[plan]}</h2>
           <div className="setting-row"><span>Status</span><strong>Ativo</strong></div>
           <div className="setting-row"><span>Acesso</span><strong>{maskAccessToken(localStorage.getItem('opd_token'))}</strong></div>
-          <div className="setting-row"><span>Recorrência</span><strong>{hasMindAccess || hasGroupAccess ? 'Preparada' : 'Não ativa'}</strong></div>
+          <div className="setting-row"><span>{'Recorr\u00eancia'}</span><strong>{hasMindAccess || hasGroupAccess ? 'Preparada' : 'N\u00e3o ativa'}</strong></div>
           <button className="token-copy-button" onClick={() => navigator.clipboard?.writeText(localStorage.getItem('opd_token') || '')}>
-            Copiar chave de sessão
+            {'Copiar chave de sess\u00e3o'}
           </button>
-        </article>
-
-        <article className="account-card">
-          <p className="kicker">Produtos liberados</p>
-          <div className="product-list">
-            {currentProducts.map((product) => (
-              <span key={product}>{PRODUCT_LABELS[product as ProductKey] ?? product}</span>
-            ))}
-          </div>
-        </article>
-
-        <article className="account-card">
-          <p className="kicker">Leitura</p>
-          <h2>Preferências</h2>
-          <label className="setting-toggle-row">
-            <span>Mostrar narração da página</span>
-            <input
-              type="checkbox"
-              checked={showReaderNarrationButton}
-              onChange={(event) => {
-                setShowReaderNarrationButton(event.target.checked);
-                localStorage.setItem('opd_show_reader_narration', String(event.target.checked));
-              }}
-            />
-          </label>
         </article>
 
         <article className="account-card account-edit">
@@ -3419,6 +3395,41 @@ export function App() {
           <div className="workbook-actions">
             <Button onClick={saveAccountProfile}>Salvar dados</Button>
             <Button onClick={logout} variant="ghost">Sair</Button>
+          </div>
+        </article>
+
+        <article className="account-card">
+          <p className="kicker">Leitura</p>
+          <h2>{'Prefer\u00eancias'}</h2>
+          <label className="setting-toggle-row">
+            <span>{'Mostrar narra\u00e7\u00e3o da p\u00e1gina'}</span>
+            <input
+              type="checkbox"
+              checked={showReaderNarrationButton}
+              onChange={(event) => {
+                setShowReaderNarrationButton(event.target.checked);
+                localStorage.setItem('opd_show_reader_narration', String(event.target.checked));
+              }}
+            />
+          </label>
+        </article>
+
+        <article className="account-card account-sensory-card">
+          <p className="kicker">{'\u00c1udios sensoriais'}</p>
+          <h2>{'Leitura com presen\u00e7a'}</h2>
+          <p>Use uma trilha curta para preparar o corpo antes de ler, escrever ou ouvir um pilar.</p>
+          <div className="workbook-actions">
+            <Button onClick={() => handlePlayAudio('/media/audios/home/sobrevivencia.mp3', '\u00c1udio sensorial de leitura')} variant="secondary"><Music2 size={16} /> Ouvir agora</Button>
+            <Button onClick={() => navigate(ROUTES.SESSIONS)} variant="ghost">{'Ver sess\u00f5es'}</Button>
+          </div>
+        </article>
+
+        <article className="account-card account-products-card">
+          <p className="kicker">Produtos liberados</p>
+          <div className="product-list">
+            {currentProducts.map((product) => (
+              <span key={product}>{PRODUCT_LABELS[product as ProductKey] ?? product}</span>
+            ))}
           </div>
         </article>
       </section>
@@ -3453,6 +3464,11 @@ export function App() {
           })}
         </div>
       </section>
+
+      <footer className="account-footer">
+        <span>O Poder dos Desacreditados {APP_VERSION}</span>
+        <strong>{'Feito com presen\u00e7a pela Tr\u00edade'}</strong>
+      </footer>
     </div>
   );
 
