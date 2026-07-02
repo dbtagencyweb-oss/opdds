@@ -84,6 +84,25 @@ export type AdminBookAudioSummary = {
   history: BookAudioRevision[];
 };
 
+export type MindChatMessage = {
+  role: 'user' | 'assistant';
+  content: string;
+};
+
+export type MindChatRequest = {
+  sessionId?: string;
+  topic?: string;
+  message: string;
+  messages?: MindChatMessage[];
+  context?: Record<string, unknown>;
+};
+
+export type MindChatResponse = {
+  sessionId: string;
+  message: string;
+  fallback?: boolean;
+};
+
 type AuthResponse = {
   access_token: string;
   user: AuthUser;
@@ -331,6 +350,19 @@ export async function fetchAdminBookAudio() {
 export async function publishAdminBookAudio(input: { chapterId: string; sectionKey: string; label: string; url: string }) {
   const token = getStoredAuthToken();
   return apiRequest<BookAudioRevision>('/api/admin/book/audio/publish', {
+    token,
+    method: 'POST',
+    body: JSON.stringify(input),
+  });
+}
+
+export async function sendMindMessage(input: MindChatRequest) {
+  const token = getStoredAuthToken();
+  if (!token || token.startsWith('LOCAL_') || accessTokens.includes(token)) {
+    throw new Error('Entre com uma conta online para usar o iGentMIND conectado.');
+  }
+
+  return apiRequest<MindChatResponse>('/api/igent/chat', {
     token,
     method: 'POST',
     body: JSON.stringify(input),

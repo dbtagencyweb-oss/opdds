@@ -100,6 +100,7 @@ import {
   revokeAdminProduct,
   resetPassword,
   saveAdminBookPageDraft,
+  sendMindMessage,
   updateStoredAuthUser,
 } from './services/auth';
 
@@ -843,6 +844,8 @@ export function App() {
   const [mindStep, setMindStep] = useState<'select' | 'chat'>('select');
   const [mindInput, setMindInput] = useState('');
   const [mindMessages, setMindMessages] = useState<MindMessage[]>([]);
+  const [mindSessionId, setMindSessionId] = useState<string | undefined>();
+  const [mindLoading, setMindLoading] = useState(false);
   const [homeSlideIndex, setHomeSlideIndex] = useState(0);
   const [workbookEntry, setWorkbookEntry] = useState('');
   const [workbookPrompt, setWorkbookPrompt] = useState(workbookPrompts[0]);
@@ -2049,6 +2052,8 @@ export function App() {
     setActiveMentorTopic(topic);
     setMindStep('chat');
     setMindInput('');
+    setMindSessionId(undefined);
+    setMindLoading(false);
     setMindMessages([
       {
         id: `${topic.id}-intro`,
@@ -2067,13 +2072,57 @@ export function App() {
     handlePlayAudio(topic.audioUrl, topic.title);
   };
 
-  const answerMind = (text: string) => {
+  const buildMindContext = (readerText: string) => {
+    const currentAnswers = workbookPillars[workbookPillarIndex]?.questions
+      .map((question, index) => ({
+        question,
+        answer: workbookAnswers[`${workbookPillarIndex}-${index}`] || '',
+      }))
+      .filter((item) => item.answer.trim())
+      .slice(0, 4);
+
+    return {
+      readerName,
+      topic: activeMentorTopic.title,
+      input: readerText,
+      currentChapter: {
+        id: selectedChapter.id,
+        title: repairMojibake(selectedChapter.title),
+        summary: trimExcerpt(repairMojibake(selectedChapter.summary), 260),
+        pdfPage,
+      },
+      workbook: {
+        currentPillar: workbookPillars[workbookPillarIndex]?.title,
+        freeWriting: trimExcerpt(workbookEntry, 320),
+        answers: currentAnswers,
+      },
+      letters: Object.entries(readerLetters)
+        .filter(([, value]) => value.trim())
+        .slice(-3)
+        .map(([key, value]) => ({ key, excerpt: trimExcerpt(value, 220) })),
+      notes: readerNotes
+        .filter((note) => note.note.trim())
+        .slice(-5)
+        .map((note) => ({ page: note.page, title: note.title, excerpt: trimExcerpt(note.note, 220) })),
+      pageNote: currentPageNote?.note ? trimExcerpt(currentPageNote.note, 260) : '',
+    };
+  };
+
+  const answerMind = async (text: string) => {
     const value = text.trim();
-    if (!value) return;
+    if (!value || mindLoading) return;
     const guide = getMindGuide();
     const recommendations = findMindRecommendations(value, activeMentorTopic);
+    const history = mindMessages
+      .filter((message) => message.text.trim())
+      .slice(-10)
+      .map((message) => ({
+        role: message.from === 'user' ? 'user' as const : 'assistant' as const,
+        content: message.text,
+      }));
     playClick('primary');
     setMindInput('');
+    setMindLoading(true);
     setMindMessages((current) => [
       ...current.map((message) => ({ ...message, replies: undefined })),
       { id: `user-${Date.now()}`, from: 'user', text: value },
@@ -2087,18 +2136,48 @@ export function App() {
         recommendations,
       },
     ]);
+
+    try {
+      const response = await sendMindMessage({
+        sessionId: mindSessionId,
+        topic: activeMentorTopic.title,
+        message: value,
+        messages: history,
+        context: buildMindContext(value),
+      });
+      setMindSessionId(response.sessionId);
+      setMindMessages((current) => {
+        const next = [...current];
+        const lastAgentIndex = next.map((message) => message.from).lastIndexOf('agent');
+        if (lastAgentIndex >= 0) {
+          next[lastAgentIndex] = {
+            ...next[lastAgentIndex],
+            text: response.fallback
+              ? `${response.message}\n\nNo momento, estou usando o modo guiado de seguranÃ§a enquanto a IA conectada nÃ£o responde.`
+              : response.message,
+            recommendations,
+          };
+        }
+        return next;
+      });
+    } catch {
+      // Mantem a resposta local quando o backend ou a IA estiverem indisponiveis.
+    } finally {
+      setMindLoading(false);
+    }
   };
 
   const handleMindQuickReply = (reply: string) => {
-    if (reply === 'Abrir capítulo sugerido') {
+    const normalizedReply = normalizeForSearch(reply);
+    if (normalizedReply.includes('abrir capitulo')) {
       goToChapter(getMindGuide().chapterHint);
       return;
     }
-    if (reply === 'Ouvir apoio') {
+    if (normalizedReply.includes('ouvir apoio')) {
       handlePlayAudio(activeMentorTopic.audioUrl, activeMentorTopic.title);
       return;
     }
-    if (reply === 'Recomeçar triagem') {
+    if (normalizedReply.includes('recomecar triagem')) {
       setMindStep('select');
       setMindMessages([]);
       return;
@@ -2758,8 +2837,9 @@ export function App() {
                 value={mindInput}
                 onChange={(event) => setMindInput(event.target.value)}
                 placeholder="Responda com suas palavras..."
+                disabled={mindLoading}
               />
-              <button type="submit">Enviar</button>
+              <button type="submit" disabled={mindLoading}>{mindLoading ? 'Pensando...' : 'Enviar'}</button>
             </form>
           </section>
         )}
