@@ -2847,13 +2847,15 @@ button:active {
   display: grid;
   grid-template-columns: repeat(2, minmax(260px, 1fr));
   gap: 18px;
-  align-items: start;
+  align-items: stretch;
   grid-auto-flow: dense;
 }
 
 .account-card {
   display: grid;
+  align-content: start;
   gap: 13px;
+  min-height: 178px;
   padding: 20px;
 }
 
@@ -3016,17 +3018,18 @@ button:active {
 
 .account-edit label {
   display: grid;
-  gap: 6px;
+  gap: 5px;
 }
 
 .account-edit input {
   width: 100%;
+  min-height: 42px;
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 9px;
   outline: 0;
   background: #0d0e12;
   color: var(--text);
-  padding: 12px 13px;
+  padding: 10px 13px;
 }
 
 .account-edit input:focus {
