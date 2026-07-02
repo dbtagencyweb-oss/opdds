@@ -2597,8 +2597,85 @@ button:active {
 
 .workbook-actions {
   display: flex;
+  align-items: center;
   gap: 10px;
   flex-wrap: wrap;
+}
+
+.save-feedback {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  color: #8f8d87;
+  font-size: 0.78rem;
+  font-weight: 850;
+}
+
+.save-feedback.saving {
+  color: #d7b758;
+}
+
+.save-feedback.saving::before {
+  width: 12px;
+  height: 12px;
+  margin-right: 7px;
+  border: 2px solid rgba(215, 183, 88, 0.28);
+  border-top-color: #d7b758;
+  border-radius: 50%;
+  content: "";
+  animation: save-spin 720ms linear infinite;
+}
+
+.save-feedback.saved {
+  color: #83c8a2;
+}
+
+.save-feedback.saved::before {
+  margin-right: 6px;
+  content: "✓";
+}
+
+@keyframes save-spin {
+  to { transform: rotate(360deg); }
+}
+
+.saved-items-list {
+  display: grid;
+  gap: 8px;
+  margin-top: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.025);
+  padding: 12px;
+}
+
+.saved-items-list > strong {
+  color: #d7b758;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.saved-items-list button {
+  width: 100%;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.18);
+  color: var(--text);
+  padding: 10px 12px;
+  text-align: left;
+}
+
+.saved-items-list button span,
+.saved-items-list small {
+  color: #97958f;
+  font-size: 0.76rem;
+  font-weight: 800;
+}
+
+.saved-items-list button p {
+  margin: 4px 0 0;
+  color: var(--text);
 }
 
 .account-page,
@@ -7388,6 +7465,13 @@ html.light .reader-footer-exit-button:hover {
 .reader-note-editor span {
   color: #d7b758;
   font-weight: 850;
+}
+
+.save-feedback-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
 }
 
 .reader-note-editor textarea {

@@ -94,6 +94,7 @@ type Props = {
   isPageBookmarked?: boolean;
   pageNote?: string;
   readerNotes?: ReaderNoteItem[];
+  noteSaveStatus?: 'idle' | 'saving' | 'saved';
   onTogglePageBookmark?: () => void;
   onPageNoteChange?: (value: string) => void;
   onOpenCurrentLetter?: () => void;
@@ -395,6 +396,7 @@ export default function ReaderShell({
   isPageBookmarked = false,
   pageNote = '',
   readerNotes = [],
+  noteSaveStatus = 'idle',
   onTogglePageBookmark,
   onPageNoteChange,
   onOpenCurrentLetter,
@@ -674,7 +676,12 @@ export default function ReaderShell({
             </div>
             {notesTab === 'current' ? (
               <section className="reader-note-editor">
-                <span>Página {pdfCurrentPage}</span>
+                <div className="save-feedback-row">
+                  <span>Página {pdfCurrentPage}</span>
+                  <small className={`save-feedback ${noteSaveStatus}`}>
+                    {noteSaveStatus === 'saving' ? 'Salvando...' : noteSaveStatus === 'saved' ? 'Salvo' : pageNote.trim() ? 'Salvo localmente' : 'Aguardando escrita'}
+                  </small>
+                </div>
                 <textarea
                   value={pageNote}
                   onChange={(event) => onPageNoteChange?.(event.target.value)}
@@ -944,6 +951,9 @@ export default function ReaderShell({
             <div>
               <p className="kicker">Minha marca nesta página</p>
               <h3>Página {pdfCurrentPage}</h3>
+              <small className={`save-feedback ${noteSaveStatus}`}>
+                {noteSaveStatus === 'saving' ? 'Salvando...' : noteSaveStatus === 'saved' ? 'Salvo' : pageNote.trim() ? 'Salvo localmente' : 'Digite para salvar'}
+              </small>
             </div>
             <textarea
               value={pageNote}

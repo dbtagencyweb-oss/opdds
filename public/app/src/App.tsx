@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { type Dispatch, type SetStateAction, useEffect, useMemo, useRef, useState } from 'react';
 import {
   AlertCircle,
   AudioLines,
@@ -143,6 +143,8 @@ type AudioQueueItem = {
   chapterTitle: string;
   trackIndex: number;
 };
+
+type SaveFeedback = 'idle' | 'saving' | 'saved';
 
 type BeforeInstallPromptEvent = Event & {
   prompt: () => Promise<void>;
@@ -850,6 +852,9 @@ export function App() {
   const [readerLetters, setReaderLetters] = useState<Record<string, string>>({});
   const [letterMeta, setLetterMeta] = useState<Record<string, LetterMeta>>({});
   const [readerNotes, setReaderNotes] = useState<ReaderNote[]>([]);
+  const [workbookSaveStatus, setWorkbookSaveStatus] = useState<SaveFeedback>('idle');
+  const [letterSaveStatus, setLetterSaveStatus] = useState<SaveFeedback>('idle');
+  const [noteSaveStatus, setNoteSaveStatus] = useState<SaveFeedback>('idle');
   const [audioProgressMap, setAudioProgressMap] = useState<Record<string, AudioProgressEntry>>({});
   const [audioFrequencies, setAudioFrequencies] = useState<number[]>(idleAudioBars);
   const readerName = authUser?.name?.trim() || authName || 'Sobrevivente';
@@ -868,6 +873,7 @@ export function App() {
   const audiobookQueueRef = useRef<AudioQueueItem[]>([]);
   const audioSettingsRef = useRef({ volume: 0.84, playbackRate: 1 });
   const adminBookPageTextareaRef = useRef<HTMLTextAreaElement | null>(null);
+  const saveFeedbackTimersRef = useRef<Record<string, { saved?: number; idle?: number }>>({});
 
   const selectedChapter = bookChapters[currentChapterIndex] ?? bookChapters[0];
   const pages = usePagination(selectedChapter.content);
@@ -1394,6 +1400,19 @@ export function App() {
     playClick('soft');
     setRoute(target);
     setMenuOpen(false);
+  };
+
+  const flashSaveFeedback = (scope: string, setter: Dispatch<SetStateAction<SaveFeedback>>) => {
+    const timers = saveFeedbackTimersRef.current[scope] ?? {};
+    if (timers.saved) window.clearTimeout(timers.saved);
+    if (timers.idle) window.clearTimeout(timers.idle);
+    setter('saving');
+    const saved = window.setTimeout(() => {
+      setter('saved');
+      const idle = window.setTimeout(() => setter('idle'), 1700);
+      saveFeedbackTimersRef.current[scope] = { idle };
+    }, 260);
+    saveFeedbackTimersRef.current[scope] = { saved };
   };
 
   const getNextAudioItem = (url: string | null) => {
@@ -1935,6 +1954,7 @@ export function App() {
             },
           ];
       saveLocalReaderNotes(next);
+      flashSaveFeedback('notes', setNoteSaveStatus);
       return next;
     });
   };
@@ -1958,6 +1978,7 @@ export function App() {
             },
           ];
       saveLocalReaderNotes(next);
+      flashSaveFeedback('notes', setNoteSaveStatus);
       return next;
     });
   };
@@ -2781,6 +2802,7 @@ export function App() {
         isPageBookmarked={Boolean(currentPageNote)}
         pageNote={currentPageNote?.note || ''}
         readerNotes={readerNotes}
+        noteSaveStatus={noteSaveStatus}
         onTogglePageBookmark={togglePageBookmark}
         onPageNoteChange={updateCurrentPageNote}
         onOpenCurrentLetter={openCurrentPillarLetter}
@@ -2845,7 +2867,12 @@ export function App() {
       const next = { ...workbookAnswers, [`${workbookPillarIndex}-${questionIndex}`]: value };
       setWorkbookAnswers(next);
       saveLocalWorkbookAnswers(next);
+      flashSaveFeedback('workbook', setWorkbookSaveStatus);
     };
+
+    const currentSavedAnswers = currentPillar.questions
+      .map((question, index) => ({ question, answer: workbookAnswers[`${workbookPillarIndex}-${index}`] || '' }))
+      .filter((item) => item.answer.trim());
 
     return (
       <div className="app-page workbook-page page-enter">
@@ -2903,8 +2930,21 @@ export function App() {
                 const summary = currentPillar.questions.map((question, index) => `${question}\n${workbookAnswers[`${workbookPillarIndex}-${index}`] || ''}`).join('\n\n');
                 setWorkbookEntry(summary);
                 saveLocalWorkbookEntry(summary);
+                flashSaveFeedback('workbook', setWorkbookSaveStatus);
               }} variant="secondary">Salvar pilar</Button>
               <Button onClick={() => setWorkbookPillarIndex(clamp(workbookPillarIndex + 1, 0, workbookPillars.length - 1))} variant="ghost">Próximo</Button>
+              <span className={`save-feedback ${workbookSaveStatus}`}>
+                {workbookSaveStatus === 'saving' ? 'Salvando...' : workbookSaveStatus === 'saved' ? 'Salvo' : answeredCount ? 'Salvo automaticamente' : 'Aguardando escrita'}
+              </span>
+            </div>
+            <div className="saved-items-list">
+              <strong>Respostas salvas neste pilar</strong>
+              {currentSavedAnswers.length ? currentSavedAnswers.map((item, index) => (
+                <button key={`${item.question}-${index}`} type="button">
+                  <span>Questão {index + 1}</span>
+                  <p>{trimExcerpt(item.answer, 96)}</p>
+                </button>
+              )) : <small>Nenhuma resposta salva neste pilar ainda.</small>}
             </div>
           </article>
 
@@ -2932,7 +2972,7 @@ export function App() {
                 <Button onClick={() => openUpgrade('igent30')}><Zap size={17} /> Desbloquear iGent 30 dias</Button>
               </>
             )}
-            <span>{savedAt ? 'Salvo localmente' : 'Salvamento automático ativo'}</span>
+            <span>{workbookSaveStatus === 'saving' ? 'Salvando...' : workbookSaveStatus === 'saved' ? 'Salvo agora' : savedAt ? 'Salvo localmente' : 'Salvamento automático ativo'}</span>
           </aside>
         </section>
 
@@ -2952,13 +2992,14 @@ export function App() {
                 <p className="kicker">Escrita atual</p>
                 <h2>{workbookPrompt}</h2>
               </div>
-              <span>{savedAt ? `Salvo localmente` : 'Salvamento automático'}</span>
+              <span className={`save-feedback ${workbookSaveStatus}`}>{workbookSaveStatus === 'saving' ? 'Salvando...' : workbookSaveStatus === 'saved' ? 'Salvo' : savedAt ? `Salvo localmente` : 'Salvamento automático'}</span>
             </div>
             <textarea
               value={workbookEntry}
               onChange={(event) => {
                 setWorkbookEntry(event.target.value);
                 saveLocalWorkbookEntry(event.target.value);
+                flashSaveFeedback('workbook', setWorkbookSaveStatus);
               }}
               placeholder="Escreva aqui. Não precisa ficar bonito. Precisa ser honesto o suficiente para você se ouvir."
             />
@@ -2999,6 +3040,7 @@ export function App() {
       const next = { ...readerLetters, [currentLetter.id]: value };
       setReaderLetters(next);
       saveLocalLetters(next);
+      flashSaveFeedback('letters', setLetterSaveStatus);
     };
     const updateLetterMeta = (field: keyof LetterMeta, value: string) => {
       const next = {
@@ -3011,6 +3053,7 @@ export function App() {
       };
       setLetterMeta(next);
       saveLocalLetterMeta(next);
+      flashSaveFeedback('letters', setLetterSaveStatus);
     };
     const copyCurrentLetter = () => {
       navigator.clipboard?.writeText(readerLetters[currentLetter.id] || '').catch(() => {});
@@ -3051,7 +3094,7 @@ export function App() {
               >
                 <span>{letter.roman}</span>
                 <strong>{letter.title}</strong>
-                <small>{readerLetters[letter.id]?.trim() ? 'Em andamento' : 'Ainda em branco'}</small>
+                <small>{readerLetters[letter.id]?.trim() ? trimExcerpt(readerLetters[letter.id], 54) : 'Ainda em branco'}</small>
               </button>
             ))}
           </aside>
@@ -3088,13 +3131,18 @@ export function App() {
                 aria-label={currentLetter.title}
               />
               <footer>
-                <span>Salvamento automático neste dispositivo</span>
+                <span className={`save-feedback ${letterSaveStatus}`}>
+                  {letterSaveStatus === 'saving' ? 'Salvando...' : letterSaveStatus === 'saved' ? 'Carta salva' : readerLetters[currentLetter.id]?.trim() ? 'Salva neste dispositivo' : 'Salvamento automático neste dispositivo'}
+                </span>
                 <strong>— {readerName}</strong>
               </footer>
             </div>
             <div className="letter-actions">
               {letterIndex < 9 && <Button onClick={() => goToChapter(8 + letterIndex)} variant="ghost"><BookOpen size={17} /> Voltar ao pilar</Button>}
-              <Button onClick={() => setLetterIndex(clamp(letterIndex + 1, 0, pillarLetters.length - 1))}>Próxima carta</Button>
+              <Button onClick={() => {
+                flashSaveFeedback('letters', setLetterSaveStatus);
+                setLetterIndex(clamp(letterIndex + 1, 0, pillarLetters.length - 1));
+              }}>{letterSaveStatus === 'saving' ? 'Salvando...' : letterSaveStatus === 'saved' ? 'Salvo' : 'Próxima carta'}</Button>
             </div>
           </article>
         </section>
