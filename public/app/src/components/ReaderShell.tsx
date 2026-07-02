@@ -114,6 +114,15 @@ const groupLabels: Record<string, string> = {
   encerramento: 'Encerramento',
 };
 
+const openingContents: Array<ChapterNavItem & { index: -1; kind: string }> = [
+  { id: 'cover', title: 'Início / Capa', summary: '', pdfPage: 1, groupId: 'inicio', index: -1, kind: 'Livro' },
+  { id: 'opening', title: 'Abertura', summary: '', pdfPage: 4, groupId: 'inicio', index: -1, kind: 'Livro' },
+  { id: 'author-note', title: 'Nota do autor', summary: '', pdfPage: 5, groupId: 'inicio', index: -1, kind: 'Livro' },
+  { id: 'copyright', title: 'Créditos e direitos', summary: '', pdfPage: 7, groupId: 'inicio', index: -1, kind: 'Livro' },
+  { id: 'summary-1', title: 'Sumário', summary: '', pdfPage: 8, groupId: 'inicio', index: -1, kind: 'Livro' },
+  { id: 'summary-2', title: 'Sumário dos pilares', summary: '', pdfPage: 9, groupId: 'inicio', index: -1, kind: 'Livro' },
+];
+
 const cleanLabel = (value = '') => {
   let repaired = value;
   try {
@@ -366,9 +375,10 @@ export default function ReaderShell({
   const narrationRef = useRef<SpeechSynthesisUtterance | null>(null);
   const pdfProgress = Math.round((pdfCurrentPage / Math.max(1, totalPdfPages)) * 100);
   const heardInChapter = audioTracks.filter((track) => audioProgress[track.url]?.heard).length;
-  const displayTitle = cleanLabel(title);
+  const openingEntry = openingContents.find((entry) => entry.pdfPage === pdfCurrentPage && pdfCurrentPage < (chapters[0]?.pdfPage ?? 1));
+  const displayTitle = cleanLabel(openingEntry?.title || title);
   const displaySummary = cleanLabel(summary || '');
-  const displayChapterKind = cleanLabel(chapterKind);
+  const displayChapterKind = cleanLabel(openingEntry?.kind || chapterKind);
   const displayCurrentLetterTitle = cleanLabel(currentLetterTitle || '');
   const sortedReaderNotes = useMemo(
     () => [...readerNotes].filter((note) => note.note.trim() || note.page === pdfCurrentPage).sort((a, b) => b.updatedAt.localeCompare(a.updatedAt)),
@@ -407,7 +417,7 @@ export default function ReaderShell({
   }, [activeNarrationChar, narrationData]);
 
   const groupedChapters = useMemo(() => {
-    return chapters.reduce<Array<{ id: string; label: string; items: Array<ChapterNavItem & { index: number }> }>>((groups, chapter, index) => {
+    const chapterGroups = chapters.reduce<Array<{ id: string; label: string; items: Array<ChapterNavItem & { index: number }> }>>((groups, chapter, index) => {
       let group = groups.find((item) => item.id === chapter.groupId);
       if (!group) {
         group = { id: chapter.groupId, label: groupLabels[chapter.groupId] ?? 'Livro', items: [] };
@@ -416,6 +426,7 @@ export default function ReaderShell({
       group.items.push({ ...chapter, index });
       return groups;
     }, []);
+    return [{ id: 'inicio', label: 'Início e sumário', items: openingContents }, ...chapterGroups];
   }, [chapters]);
 
   useEffect(() => {
@@ -500,6 +511,11 @@ export default function ReaderShell({
 
   const selectChapter = (index: number) => {
     onSelectChapter(index);
+    setContentsOpen(false);
+  };
+
+  const selectPdfPage = (page: number) => {
+    onPdfPageChange(page);
     setContentsOpen(false);
   };
 
@@ -663,8 +679,8 @@ export default function ReaderShell({
               {group.items.map((chapter) => (
                 <button
                   key={chapter.id}
-                  className={chapter.index === chapterIndex ? 'active' : ''}
-                  onClick={() => selectChapter(chapter.index)}
+                  className={chapter.index >= 0 ? (chapter.index === chapterIndex ? 'active' : '') : (chapter.pdfPage === pdfCurrentPage ? 'active' : '')}
+                  onClick={() => chapter.index >= 0 ? selectChapter(chapter.index) : selectPdfPage(chapter.pdfPage)}
                 >
                   <small>{chapter.roman ? `Pilar ${chapter.roman}` : `Página ${chapter.pdfPage}`}</small>
                   <strong>{cleanLabel(chapter.title)}</strong>
