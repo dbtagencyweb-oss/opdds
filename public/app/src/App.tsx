@@ -3330,6 +3330,7 @@ export function App() {
               <button type="button" onClick={() => insertAdminBookPageSnippet('---')}>Linha divisoria</button>
               <button type="button" onClick={() => insertAdminBookPageSnippet('[[espaco:32]]')}>Espaco</button>
               <button type="button" onClick={() => insertAdminBookPageSnippet('[[imagem:/media/imagens/livro/exemplo.jpg|Legenda da imagem]]')}>Imagem</button>
+              <button type="button" onClick={() => insertAdminBookPageSnippet('[[capa:/media/imagens/capas/capa.webp|Capa]]')}>Imagem pagina inteira</button>
             </div>
             <div className="workbook-actions">
               <Button onClick={handleRepairAdminBookPageContent} variant="ghost">Corrigir caracteres</Button>
@@ -3337,7 +3338,7 @@ export function App() {
               <Button onClick={handleSaveBookPageDraft} variant="secondary">Salvar rascunho</Button>
               <Button onClick={handlePublishBookPage}>Publicar no leitor</Button>
             </div>
-            <small>Use linha vazia para novo paragrafo, [br] para quebra dentro do mesmo paragrafo, --- para divisor, [[espaco:32]] para respiro e [[imagem:/media/imagens/livro/exemplo.jpg|Legenda]] para imagem.</small>
+            <small>Use linha vazia para novo paragrafo, [br] para quebra dentro do mesmo paragrafo, --- para divisor, [[espaco:32]] para respiro, [[imagem:/media/imagens/livro/exemplo.jpg|Legenda]] para imagem e [[capa:/media/imagens/capas/capa.webp|Capa]] para pagina inteira.</small>
             <small>Publicar cria uma nova versao e substitui o texto desta pagina para todos os leitores.</small>
           </article>
 

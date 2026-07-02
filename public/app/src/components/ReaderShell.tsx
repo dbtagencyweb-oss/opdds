@@ -55,7 +55,7 @@ type ReaderNoteItem = {
 };
 
 type TextBlock = {
-  kind: 'heading' | 'subheading' | 'paragraph' | 'divider' | 'image' | 'spacer';
+  kind: 'heading' | 'subheading' | 'paragraph' | 'divider' | 'image' | 'image-full' | 'spacer';
   text: string;
   alt?: string;
   size?: number;
@@ -306,6 +306,17 @@ const parsePdfTextBlocks = (text: string): TextBlock[] => {
     if (/^(-{3,}|\*{3,}|_{3,})$/.test(line)) {
       flushParagraph();
       blocks.push({ kind: 'divider', text: '' });
+      return;
+    }
+
+    const fullImageMatch = line.match(/^\[\[(?:capa|imagem-full):(.+?)(?:\|(.*?))?\]\]$/i);
+    if (fullImageMatch) {
+      flushParagraph();
+      blocks.push({
+        kind: 'image-full',
+        text: fullImageMatch[1].trim(),
+        alt: (fullImageMatch[2] || '').trim(),
+      });
       return;
     }
 
@@ -910,6 +921,14 @@ export default function ReaderShell({
               if (block.kind === 'image') {
                 return (
                   <figure className="reader-content-image" key={`${pdfCurrentPage}-${index}`}>
+                    <img src={block.text} alt={block.alt || ''} loading="lazy" />
+                    {block.alt && <figcaption>{block.alt}</figcaption>}
+                  </figure>
+                );
+              }
+              if (block.kind === 'image-full') {
+                return (
+                  <figure className="reader-content-image reader-content-image-full" key={`${pdfCurrentPage}-${index}`}>
                     <img src={block.text} alt={block.alt || ''} loading="lazy" />
                     {block.alt && <figcaption>{block.alt}</figcaption>}
                   </figure>
