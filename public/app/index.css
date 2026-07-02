@@ -2782,7 +2782,7 @@ button:active {
 
 .admin-overview-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
   gap: 14px;
 }
 
@@ -2845,9 +2845,10 @@ button:active {
 
 .account-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(260px, 1fr));
   gap: 18px;
   align-items: start;
+  grid-auto-flow: dense;
 }
 
 .account-card {
@@ -2903,7 +2904,7 @@ button:active {
 
 .upgrade-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: 12px;
 }
 
@@ -3038,12 +3039,12 @@ button:active {
 
 .admin-control-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 18px;
 }
 
 .admin-control-grid.single {
-  grid-template-columns: minmax(0, 640px);
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .admin-panel h2 {
@@ -3176,7 +3177,7 @@ button:active {
 
 .admin-book-compare {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 14px;
 }
 
@@ -3404,12 +3405,12 @@ button:active {
 
 .admin-copy-grid {
   display: grid;
-  grid-template-columns: minmax(0, 720px);
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .admin-copy-list {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 10px;
   margin-top: 12px;
 }
