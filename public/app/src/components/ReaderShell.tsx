@@ -155,7 +155,12 @@ const cleanLabel = (value = '') => {
     .replace(new RegExp(`Consci${badChar}ncia`, 'g'), 'Consci\u00eancia')
     .replace(new RegExp(`consci${badChar}ncia`, 'g'), 'consci\u00eancia')
     .replace(new RegExp(`Tr${badChar}ade`, 'g'), 'Tr\u00edade')
-    .replace(new RegExp(`TR${badChar}ADE`, 'g'), 'TR\u00cdADE');
+    .replace(new RegExp(`TR${badChar}ADE`, 'g'), 'TR\u00cdADE')
+    .replace(new RegExp(`Orienta${badChar}+o`, 'g'), 'Orientação')
+    .replace(new RegExp(`orienta${badChar}+o`, 'g'), 'orientação')
+    .replace(new RegExp(`ORIENTA${badChar}+O`, 'g'), 'ORIENTAÇÃO')
+    .replace(new RegExp(`Reconstru${badChar}+o`, 'g'), 'Reconstrução')
+    .replace(new RegExp(`reconstru${badChar}+o`, 'g'), 'reconstrução');
 };
 
 const pageMarkerPattern = /^[-–—]\s*\d+\s*[-–—]\s*/;
@@ -268,7 +273,7 @@ const parsePdfTextBlocks = (text: string): TextBlock[] => {
   };
 
   normalized.split('\n').forEach((rawLine) => {
-    let line = rawLine.trim();
+    let line = cleanLabel(rawLine.trim());
     if (!line) {
       flushParagraph();
       return;
@@ -277,6 +282,12 @@ const parsePdfTextBlocks = (text: string): TextBlock[] => {
     line = line.replace(pageMarkerPattern, '').replace(/^—\s*\d+\s*—\s*/, '').trim();
     if (!line) return;
     if (isDecorativeOrLooseMarker(line)) return;
+
+    if (/^\d+\.\s+/.test(line)) {
+      flushParagraph();
+      blocks.push({ kind: 'paragraph', text: line.replace(/\s+/g, ' ') });
+      return;
+    }
 
     const heading = repairExtractedHeading(normalizePdfHeading(line));
     if (heading.length > 2 && (isHeadingLine(line) || isHeadingLine(heading))) {
@@ -353,7 +364,6 @@ export default function ReaderShell({
   const [activeAudioTab, setActiveAudioTab] = useState<number | null>(null);
   const readerShellRef = useRef<HTMLElement | null>(null);
   const narrationRef = useRef<SpeechSynthesisUtterance | null>(null);
-  const legacyTextPage = pages[pageIndex] ?? [];
   const pdfProgress = Math.round((pdfCurrentPage / Math.max(1, totalPdfPages)) * 100);
   const heardInChapter = audioTracks.filter((track) => audioProgress[track.url]?.heard).length;
   const displayTitle = cleanLabel(title);
@@ -368,9 +378,7 @@ export default function ReaderShell({
     () => parsePdfTextBlocks(pdfTextPages[pdfCurrentPage - 1] || ''),
     [pdfCurrentPage, pdfTextPages],
   );
-  const textBlocks = pdfTextBlocks.length
-    ? pdfTextBlocks
-    : legacyTextPage.map((text) => ({ kind: 'paragraph' as const, text: cleanLabel(text) }));
+  const textBlocks = pdfTextBlocks.length ? pdfTextBlocks : [];
 
   const narrationData = useMemo(() => {
     let cursor = 0;

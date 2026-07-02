@@ -3172,9 +3172,9 @@ export function App() {
               </div>
               <div className="admin-book-compare-box">
                 {(adminCurrentPageSource || 'Sem texto extraído para esta página.')
-                  .split(/\n{2,}/)
+                  .split(/\n+/)
                   .filter(Boolean)
-                  .map((paragraph, index) => <p key={`source-${index}`}>{paragraph}</p>)}
+                  .map((paragraph, index) => <p key={`source-${index}`}>{repairMojibake(paragraph)}</p>)}
               </div>
             </article>
             <article>
@@ -3184,9 +3184,9 @@ export function App() {
               </div>
               <div className="admin-book-compare-box edited">
                 {(adminBookPageContent || 'Sem texto no editor.')
-                  .split(/\n{2,}/)
+                  .split(/\n+/)
                   .filter(Boolean)
-                  .map((paragraph, index) => <p key={`edited-${index}`}>{paragraph}</p>)}
+                  .map((paragraph, index) => <p key={`edited-${index}`}>{repairMojibake(paragraph)}</p>)}
               </div>
             </article>
           </div>
@@ -3250,10 +3250,10 @@ export function App() {
             <h3>Pagina {adminBookPageNumber}</h3>
             <div className="admin-book-preview-box">
               {(adminBookPageContent || adminCurrentPageSource || 'Sem texto nesta pagina.')
-                .split(/\n{2,}/)
+                .split(/\n+/)
                 .filter(Boolean)
                 .slice(0, 8)
-                .map((paragraph, index) => <p key={index}>{paragraph}</p>)}
+                .map((paragraph, index) => <p key={index}>{repairMojibake(paragraph)}</p>)}
             </div>
             <div className="admin-book-history">
               <strong>Historico</strong>
