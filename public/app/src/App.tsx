@@ -33,6 +33,8 @@ import {
   Search,
   Settings,
   Shield,
+  SkipBack,
+  SkipForward,
   Sparkles,
   Sun,
   User,
@@ -130,6 +132,16 @@ type AudioState = {
   duration: number;
   volume: number;
   playbackRate: number;
+};
+
+type AudioQueueItem = {
+  url: string;
+  title: string;
+  label: string;
+  chapterIndex: number;
+  chapterId: string;
+  chapterTitle: string;
+  trackIndex: number;
 };
 
 type BeforeInstallPromptEvent = Event & {
@@ -850,7 +862,11 @@ export function App() {
   const audioSpectrumFrameRef = useRef<number | null>(null);
   const lastSpectrumTickRef = useRef(0);
   const lastAudioTickRef = useRef(0);
+  const lastAudioPersistRef = useRef(0);
   const currentAudioUrlRef = useRef<string | null>(null);
+  const audioProgressMapRef = useRef<Record<string, AudioProgressEntry>>({});
+  const audiobookQueueRef = useRef<AudioQueueItem[]>([]);
+  const audioSettingsRef = useRef({ volume: 0.84, playbackRate: 1 });
   const adminBookPageTextareaRef = useRef<HTMLTextAreaElement | null>(null);
 
   const selectedChapter = bookChapters[currentChapterIndex] ?? bookChapters[0];
@@ -886,6 +902,43 @@ export function App() {
     }),
     [bookAudioOverrides, selectedChapter],
   );
+
+  const audiobookQueue = useMemo<AudioQueueItem[]>(
+    () => bookChapters.flatMap((chapter, chapterIndex) =>
+      chapter.audioTracks.map((track, trackIndex) => {
+        const key = `${chapter.id}:${audioTrackKey(track.label)}`;
+        const override = bookAudioOverrides[key];
+        const label = override?.label || track.label;
+        return {
+          url: override?.url || track.url,
+          title: `${repairBrokenPdfCharacters(chapter.title)} - ${repairBrokenPdfCharacters(label)}`,
+          label: repairBrokenPdfCharacters(label),
+          chapterIndex,
+          chapterId: chapter.id,
+          chapterTitle: repairBrokenPdfCharacters(chapter.title),
+          trackIndex,
+        };
+      }),
+    ),
+    [bookAudioOverrides],
+  );
+
+  const currentAudioQueueIndex = audioState.currentUrl ? audiobookQueue.findIndex((item) => item.url === audioState.currentUrl) : -1;
+  const currentAudioQueueItem = currentAudioQueueIndex >= 0 ? audiobookQueue[currentAudioQueueIndex] : null;
+  const nextAudioQueueItem = currentAudioQueueIndex >= 0 ? audiobookQueue[currentAudioQueueIndex + 1] ?? null : null;
+  const previousAudioQueueItem = currentAudioQueueIndex > 0 ? audiobookQueue[currentAudioQueueIndex - 1] ?? null : null;
+
+  const latestAudioResume = useMemo(() => {
+    return Object.entries(audioProgressMap)
+      .map(([url, progress]) => {
+        const item = audiobookQueue.find((track) => track.url === url);
+        return item ? { item, progress } : null;
+      })
+      .filter((entry): entry is { item: AudioQueueItem; progress: AudioProgressEntry } =>
+        Boolean(entry && entry.progress.currentTime > 4 && !entry.progress.heard),
+      )
+      .sort((a, b) => b.progress.updatedAt.localeCompare(a.progress.updatedAt))[0] ?? null;
+  }, [audioProgressMap, audiobookQueue]);
 
   const filteredChapters = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
@@ -1061,6 +1114,37 @@ export function App() {
   };
 
   useEffect(() => {
+    audioProgressMapRef.current = audioProgressMap;
+  }, [audioProgressMap]);
+
+  useEffect(() => {
+    audiobookQueueRef.current = audiobookQueue;
+  }, [audiobookQueue]);
+
+  useEffect(() => {
+    audioSettingsRef.current = { volume: audioState.volume, playbackRate: audioState.playbackRate };
+  }, [audioState.volume, audioState.playbackRate]);
+
+  const persistAudioProgress = (url: string | null, currentTime: number, duration: number, forceHeard = false) => {
+    if (!url) return;
+    const heard = forceHeard || (duration > 0 && currentTime / duration > 0.92);
+    setAudioProgressMap((current) => {
+      const next = {
+        ...current,
+        [url]: {
+          heard: current[url]?.heard || heard,
+          currentTime,
+          duration,
+          updatedAt: new Date().toISOString(),
+        },
+      };
+      audioProgressMapRef.current = next;
+      saveLocalAudioProgress(next);
+      return next;
+    });
+  };
+
+  useEffect(() => {
     const audio = new Audio();
     audio.crossOrigin = 'anonymous';
     audio.volume = audioState.volume;
@@ -1072,42 +1156,21 @@ export function App() {
       if (now - lastAudioTickRef.current < 240) return;
       lastAudioTickRef.current = now;
       setAudioState((state) => ({ ...state, currentTime: audio.currentTime }));
-      if (now % 3000 < 260 && currentAudioUrlRef.current) {
-        const url = currentAudioUrlRef.current;
-        const duration = audio.duration || 0;
-        const heard = duration > 0 && audio.currentTime / duration > 0.92;
-        setAudioProgressMap((current) => {
-          const next = {
-            ...current,
-            [url]: {
-              heard: current[url]?.heard || heard,
-              currentTime: audio.currentTime,
-              duration,
-              updatedAt: new Date().toISOString(),
-            },
-          };
-          saveLocalAudioProgress(next);
-          return next;
-        });
+      if (now - lastAudioPersistRef.current > 2600 && currentAudioUrlRef.current) {
+        lastAudioPersistRef.current = now;
+        persistAudioProgress(currentAudioUrlRef.current, audio.currentTime, audio.duration || 0);
       }
     };
     const handleMeta = () => setAudioState((state) => ({ ...state, duration: audio.duration || 0 }));
     const handleEnd = () => {
       const url = currentAudioUrlRef.current;
       if (url) {
-        setAudioProgressMap((current) => {
-          const next = {
-            ...current,
-            [url]: {
-              heard: true,
-              currentTime: audio.duration || audio.currentTime || 0,
-              duration: audio.duration || 0,
-              updatedAt: new Date().toISOString(),
-            },
-          };
-          saveLocalAudioProgress(next);
-          return next;
-        });
+        persistAudioProgress(url, audio.duration || audio.currentTime || 0, audio.duration || 0, true);
+      }
+      const nextItem = getNextAudioItem(url);
+      if (nextItem) {
+        playAudioQueueItem(nextItem, { resume: false, auto: true });
+        return;
       }
       setAudioState((state) => ({ ...state, isPlaying: false, currentTime: 0 }));
       stopAudioSpectrum();
@@ -1333,6 +1396,46 @@ export function App() {
     setMenuOpen(false);
   };
 
+  const getNextAudioItem = (url: string | null) => {
+    if (!url) return null;
+    const queue = audiobookQueueRef.current;
+    const index = queue.findIndex((item) => item.url === url);
+    return index >= 0 ? queue[index + 1] ?? null : null;
+  };
+
+  const getPreviousAudioItem = (url: string | null) => {
+    if (!url) return null;
+    const queue = audiobookQueueRef.current;
+    const index = queue.findIndex((item) => item.url === url);
+    return index > 0 ? queue[index - 1] ?? null : null;
+  };
+
+  const playAudioQueueItem = (item: AudioQueueItem, options: { resume?: boolean; auto?: boolean } = {}) => {
+    const audio = audioRef.current;
+    if (!audio || !item.url) return;
+    if (!options.auto) playClick('primary');
+    const saved = audioProgressMapRef.current[item.url];
+    const resumeAt = options.resume !== false && saved && !saved.heard && saved.currentTime > 4 && (!saved.duration || saved.currentTime < saved.duration - 6)
+      ? saved.currentTime
+      : 0;
+
+    audio.src = item.url;
+    currentAudioUrlRef.current = item.url;
+    audio.currentTime = resumeAt;
+    audio.volume = audioSettingsRef.current.volume;
+    audio.playbackRate = audioSettingsRef.current.playbackRate;
+    audio.play().then(startAudioSpectrum).catch(() => {});
+    setCurrentChapterIndex(item.chapterIndex);
+    setAudioState((state) => ({
+      ...state,
+      isPlaying: true,
+      currentUrl: item.url,
+      title: item.title,
+      currentTime: resumeAt,
+      duration: saved?.duration || 0,
+    }));
+  };
+
   const handlePlayAudio = (url: string | null, title: string | null) => {
     if (!url || !audioRef.current) return;
     playClick('primary');
@@ -1340,6 +1443,7 @@ export function App() {
 
     if (audioState.currentUrl === url) {
       if (audioState.isPlaying) {
+        persistAudioProgress(url, audio.currentTime, audio.duration || audioState.duration || 0);
         audio.pause();
         stopAudioSpectrum();
         setAudioState((state) => ({ ...state, isPlaying: false }));
@@ -1350,9 +1454,19 @@ export function App() {
       return;
     }
 
+    const queueItem = audiobookQueue.find((item) => item.url === url);
+    if (queueItem) {
+      playAudioQueueItem(queueItem, { resume: true, auto: true });
+      return;
+    }
+
+    const saved = audioProgressMapRef.current[url];
+    const resumeAt = saved && !saved.heard && saved.currentTime > 4 && (!saved.duration || saved.currentTime < saved.duration - 6)
+      ? saved.currentTime
+      : 0;
     audio.src = url;
     currentAudioUrlRef.current = url;
-    audio.currentTime = 0;
+    audio.currentTime = resumeAt;
     audio.volume = audioState.volume;
     audio.playbackRate = audioState.playbackRate;
     audio.play().then(startAudioSpectrum).catch(() => {});
@@ -1361,9 +1475,19 @@ export function App() {
       isPlaying: true,
       currentUrl: url,
       title,
-      currentTime: 0,
-      duration: 0,
+      currentTime: resumeAt,
+      duration: saved?.duration || 0,
     }));
+  };
+
+  const playNextAudio = () => {
+    const next = getNextAudioItem(audioState.currentUrl);
+    if (next) playAudioQueueItem(next, { resume: false });
+  };
+
+  const playPreviousAudio = () => {
+    const previous = getPreviousAudioItem(audioState.currentUrl);
+    if (previous) playAudioQueueItem(previous, { resume: true });
   };
 
   const seekAudio = (value: number) => {
@@ -1371,6 +1495,7 @@ export function App() {
     const nextTime = (value / 100) * audioState.duration;
     audioRef.current.currentTime = nextTime;
     setAudioState((state) => ({ ...state, currentTime: nextTime }));
+    persistAudioProgress(audioState.currentUrl, nextTime, audioState.duration);
   };
 
   const changeVolume = (value: number) => {
@@ -1389,6 +1514,9 @@ export function App() {
   };
 
   const closeAudio = () => {
+    if (audioRef.current && audioState.currentUrl) {
+      persistAudioProgress(audioState.currentUrl, audioRef.current.currentTime || audioState.currentTime, audioRef.current.duration || audioState.duration || 0);
+    }
     audioRef.current?.pause();
     currentAudioUrlRef.current = null;
     setAudioFullOpen(false);
@@ -2234,6 +2362,18 @@ export function App() {
           <p className="kicker">Leitura atual</p>
           <h2>{getChapterKind(currentChapterIndex, selectedChapter.title)} - {selectedChapter.title}</h2>
           <span>{trimExcerpt(selectedChapter.summary, 92)}</span>
+          {latestAudioResume && (
+            <div className="home-resume-strip">
+              <Headphones size={16} />
+              <div>
+                <strong>Continuar ouvindo</strong>
+                <small>{latestAudioResume.item.title} - {formatTime(latestAudioResume.progress.currentTime)} de {formatTime(latestAudioResume.progress.duration)}</small>
+              </div>
+              <button onClick={() => playAudioQueueItem(latestAudioResume.item, { resume: true })}>
+                <Play size={13} fill="currentColor" />
+              </button>
+            </div>
+          )}
         </div>
         <div className="home-reading-actions">
           <Button onClick={() => navigate(ROUTES.READER)} className="cover-primary">Ler agora</Button>
@@ -3632,6 +3772,12 @@ export function App() {
               <div className="audio-full-copy">
                 <p className="kicker">Audiobook OPDDS</p>
                 <h2>{audioState.title}</h2>
+                {currentAudioQueueItem && (
+                  <small>
+                    Faixa {currentAudioQueueIndex + 1} de {audiobookQueue.length}
+                    {nextAudioQueueItem ? ` - proxima: ${nextAudioQueueItem.label}` : ' - fim da fila'}
+                  </small>
+                )}
                 <span>{audioState.isPlaying ? 'Em reprodução' : 'Pausado'} · {formatTime(audioState.currentTime)} de {formatTime(audioState.duration)}</span>
               </div>
               <div className="audio-full-visualizer" style={{ '--audio-progress': `${audioProgress || 0}%` } as React.CSSProperties}>
@@ -3640,9 +3786,15 @@ export function App() {
               </div>
               <div className="audio-full-time"><span>{formatTime(audioState.currentTime)}</span><span>{formatTime(audioState.duration)}</span></div>
               <div className="audio-full-controls">
+                <button className="audio-control-soft" onClick={playPreviousAudio} disabled={!previousAudioQueueItem} title="Faixa anterior">
+                  <SkipBack size={18} />
+                </button>
                 <button className="audio-control-soft" onClick={changePlaybackRate}>{audioState.playbackRate % 1 === 0 ? audioState.playbackRate.toFixed(0) : audioState.playbackRate.toFixed(2).replace(/0$/, '')}x</button>
                 <button className="audio-control-main" onClick={() => handlePlayAudio(audioState.currentUrl, audioState.title)}>
                   {audioState.isPlaying ? <Pause size={30} /> : <Play size={30} fill="currentColor" />}
+                </button>
+                <button className="audio-control-soft" onClick={playNextAudio} disabled={!nextAudioQueueItem} title="Proxima faixa">
+                  <SkipForward size={18} />
                 </button>
                 <label className="audio-control-volume" style={{ '--volume-progress': `${Math.round(audioState.volume * 100)}%` } as React.CSSProperties}>
                   <Volume2 size={18} />

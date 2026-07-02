@@ -2263,6 +2263,49 @@ button:active {
   background: var(--gold);
 }
 
+.home-resume-strip {
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr) 34px;
+  align-items: center;
+  gap: 10px;
+  width: min(480px, 100%);
+  margin-top: 14px;
+  border: 1px solid rgba(215, 183, 88, 0.26);
+  border-radius: 999px;
+  background: rgba(5, 6, 8, 0.52);
+  padding: 8px 9px 8px 13px;
+  color: #f4f1e8;
+  backdrop-filter: blur(12px);
+}
+
+.home-resume-strip strong,
+.home-resume-strip small {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.home-resume-strip strong {
+  font-size: 0.78rem;
+}
+
+.home-resume-strip small {
+  color: rgba(244, 241, 232, 0.66);
+  font-size: 0.72rem;
+}
+
+.home-resume-strip button {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: var(--gold);
+  color: #070707;
+}
+
 .home-state-section h2,
 .workbook-hero h1 {
   margin: 0 0 16px;
@@ -5515,8 +5558,15 @@ html.light .volume-control input::-webkit-slider-runnable-track {
 }
 
 .audio-full-copy span,
+.audio-full-copy small,
 .audio-full-time {
   color: #b7b4ad;
+}
+
+.audio-full-copy small {
+  display: block;
+  margin-top: -2px;
+  font-size: 0.78rem;
 }
 
 .audio-full-visualizer {
@@ -5585,6 +5635,11 @@ html.light .volume-control input::-webkit-slider-runnable-track {
   color: #f4f2ec;
   padding: 0 14px;
   font-weight: 850;
+}
+
+.audio-control-soft:disabled {
+  cursor: not-allowed;
+  opacity: 0.36;
 }
 
 .audio-control-volume input {
