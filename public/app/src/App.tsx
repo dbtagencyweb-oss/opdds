@@ -225,8 +225,7 @@ const navGroups = [
 
 const homeSlides = [
   '/media/imagens/capas/capa-topo.jpg',
-  '/media/imagens/capas/capa.jpg',
-  '/media/imagens/capas/capa.png',
+  '/media/imagens/capas/capa.webp',
 ];
 
 const journeyStates = [
@@ -2324,7 +2323,7 @@ export function App() {
 
   const BookView = () => (
     <div className="book-stage page-enter">
-      <img className="book-cover-main" src="/media/imagens/capas/capa.jpg" alt="Capa do livro" />
+      <img className="book-cover-main" src="/media/imagens/capas/capa.webp" alt="Capa do livro" />
       <div className="book-buttons">
         <Button onClick={() => navigate(ROUTES.READER)} className="cover-primary"><BookOpen size={19} /> Ler agora</Button>
         <Button onClick={() => window.open(pdfUrl, '_blank')} variant="secondary"><DownloadCloud size={18} /> Baixar livro</Button>
