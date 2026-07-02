@@ -552,8 +552,36 @@ const repairMojibake = (value = '') => {
   }
 };
 
+const repairBrokenPdfCharacters = (value = '') => {
+  const broken = '[\\uFFFD\\u00EF\\u00BF\\u00BD]+';
+  const replacements: Array<[RegExp, string]> = [
+    [new RegExp(`PRESEN${broken}A`, 'g'), 'PRESEN\u00c7A'],
+    [new RegExp(`Presen${broken}a`, 'g'), 'Presen\u00e7a'],
+    [new RegExp(`presen${broken}a`, 'g'), 'presen\u00e7a'],
+    [new RegExp(`MOTIVA${broken}O`, 'g'), 'MOTIVA\u00c7\u00c3O'],
+    [new RegExp(`Motiva${broken}o`, 'g'), 'Motiva\u00e7\u00e3o'],
+    [new RegExp(`motiva${broken}o`, 'g'), 'motiva\u00e7\u00e3o'],
+    [new RegExp(`ORIENTA${broken}O`, 'g'), 'ORIENTA\u00c7\u00c3O'],
+    [new RegExp(`Orienta${broken}o`, 'g'), 'Orienta\u00e7\u00e3o'],
+    [new RegExp(`orienta${broken}o`, 'g'), 'orienta\u00e7\u00e3o'],
+    [new RegExp(`CONSCI${broken}NCIA`, 'g'), 'CONSCI\u00caNCIA'],
+    [new RegExp(`Consci${broken}ncia`, 'g'), 'Consci\u00eancia'],
+    [new RegExp(`consci${broken}ncia`, 'g'), 'consci\u00eancia'],
+    [new RegExp(`TR${broken}ADE`, 'g'), 'TR\u00cdADE'],
+    [new RegExp(`Tr${broken}ade`, 'g'), 'Tr\u00edade'],
+    [new RegExp(`tr${broken}ade`, 'g'), 'tr\u00edade'],
+    [new RegExp(`RECONSTRU${broken}O`, 'g'), 'RECONSTRU\u00c7\u00c3O'],
+    [new RegExp(`Reconstru${broken}o`, 'g'), 'Reconstru\u00e7\u00e3o'],
+    [new RegExp(`reconstru${broken}o`, 'g'), 'reconstru\u00e7\u00e3o'],
+    [new RegExp(`\u00c2NCORA PR${broken}TICA`, 'g'), '\u00c2NCORA PR\u00c1TICA'],
+    [new RegExp(`\u00c2ncora pr${broken}tica`, 'g'), '\u00c2ncora pr\u00e1tica'],
+    [new RegExp(`ancora pr${broken}tica`, 'gi'), '\u00e2ncora pr\u00e1tica'],
+  ];
+  return replacements.reduce((text, [pattern, replacement]) => text.replace(pattern, replacement), repairMojibake(value));
+};
+
 const normalizeForSearch = (value = '') =>
-  repairMojibake(value)
+  repairBrokenPdfCharacters(value)
     .toLowerCase()
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
@@ -1630,6 +1658,12 @@ export function App() {
     } catch (error: any) {
       setAdminMessage(error?.message || 'Nao foi possivel salvar o rascunho.');
     }
+  };
+
+  const handleRepairAdminBookPageContent = () => {
+    setAdminBookPageTitle((current) => repairBrokenPdfCharacters(current));
+    setAdminBookPageContent((current) => repairBrokenPdfCharacters(current));
+    setAdminMessage('Caracteres corrigidos no editor. Revise antes de publicar.');
   };
 
   const handlePublishBookPage = async () => {
@@ -3174,7 +3208,7 @@ export function App() {
                 {(adminCurrentPageSource || 'Sem texto extraído para esta página.')
                   .split(/\n+/)
                   .filter(Boolean)
-                  .map((paragraph, index) => <p key={`source-${index}`}>{repairMojibake(paragraph)}</p>)}
+                  .map((paragraph, index) => <p key={`source-${index}`}>{repairBrokenPdfCharacters(paragraph)}</p>)}
               </div>
             </article>
             <article>
@@ -3186,7 +3220,7 @@ export function App() {
                 {(adminBookPageContent || 'Sem texto no editor.')
                   .split(/\n+/)
                   .filter(Boolean)
-                  .map((paragraph, index) => <p key={`edited-${index}`}>{repairMojibake(paragraph)}</p>)}
+                  .map((paragraph, index) => <p key={`edited-${index}`}>{repairBrokenPdfCharacters(paragraph)}</p>)}
               </div>
             </article>
           </div>
@@ -3239,6 +3273,7 @@ export function App() {
               />
             </label>
             <div className="workbook-actions">
+              <Button onClick={handleRepairAdminBookPageContent} variant="ghost">Corrigir caracteres</Button>
               <Button onClick={handleSaveBookPageDraft} variant="secondary">Salvar rascunho</Button>
               <Button onClick={handlePublishBookPage}>Publicar no leitor</Button>
             </div>
@@ -3253,7 +3288,7 @@ export function App() {
                 .split(/\n+/)
                 .filter(Boolean)
                 .slice(0, 8)
-                .map((paragraph, index) => <p key={index}>{repairMojibake(paragraph)}</p>)}
+                .map((paragraph, index) => <p key={index}>{repairBrokenPdfCharacters(paragraph)}</p>)}
             </div>
             <div className="admin-book-history">
               <strong>Historico</strong>
