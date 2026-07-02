@@ -543,6 +543,18 @@ type MindRecommendation = {
   audioUrl: string | null;
 };
 
+type MindSavedPlan = {
+  topicId: string;
+  topicTitle: string;
+  source: 'chat' | 'home' | 'workbook' | 'reader';
+  prompt: string;
+  response: string;
+  chapterIndex: number;
+  createdAt: string;
+};
+
+const MIND_LAST_PLAN_KEY = 'opd_mind_last_plan';
+
 const repairMojibake = (value = '') => {
   const text = String(value ?? '');
   if (!/[ÃÂâð]/.test(text)) return text;
@@ -846,6 +858,15 @@ export function App() {
   const [mindMessages, setMindMessages] = useState<MindMessage[]>([]);
   const [mindSessionId, setMindSessionId] = useState<string | undefined>();
   const [mindLoading, setMindLoading] = useState(false);
+  const [pendingMindPrompt, setPendingMindPrompt] = useState('');
+  const [pendingMindSource, setPendingMindSource] = useState<MindSavedPlan['source']>('chat');
+  const [mindSavedPlan, setMindSavedPlan] = useState<MindSavedPlan | null>(() => {
+    try {
+      return JSON.parse(localStorage.getItem(MIND_LAST_PLAN_KEY) || 'null');
+    } catch {
+      return null;
+    }
+  });
   const [homeSlideIndex, setHomeSlideIndex] = useState(0);
   const [workbookEntry, setWorkbookEntry] = useState('');
   const [workbookPrompt, setWorkbookPrompt] = useState(workbookPrompts[0]);
@@ -2046,7 +2067,7 @@ export function App() {
       .map(({ score, ...recommendation }) => recommendation);
   };
 
-  const startMindSession = (topic: typeof mentorTopics[number]) => {
+  const startMindSession = (topic: typeof mentorTopics[number], prompt = '', source: MindSavedPlan['source'] = 'chat') => {
     const guide = getMindGuide(topic);
     const recommendations = findMindRecommendations(topic.title, topic);
     setActiveMentorTopic(topic);
@@ -2054,6 +2075,8 @@ export function App() {
     setMindInput('');
     setMindSessionId(undefined);
     setMindLoading(false);
+    setPendingMindPrompt(prompt);
+    setPendingMindSource(source);
     setMindMessages([
       {
         id: `${topic.id}-intro`,
@@ -2069,6 +2092,7 @@ export function App() {
         recommendations,
       },
     ]);
+    navigate(ROUTES.IGENT);
     handlePlayAudio(topic.audioUrl, topic.title);
   };
 
@@ -2108,11 +2132,33 @@ export function App() {
     };
   };
 
+  const saveMindPlan = (
+    topic: typeof mentorTopics[number],
+    prompt: string,
+    response: string,
+    source: MindSavedPlan['source'],
+  ) => {
+    const guide = getMindGuide(topic);
+    const saved: MindSavedPlan = {
+      topicId: topic.id,
+      topicTitle: topic.title,
+      source,
+      prompt: trimExcerpt(prompt, 240),
+      response: trimExcerpt(response, 520),
+      chapterIndex: guide.chapterHint,
+      createdAt: new Date().toISOString(),
+    };
+    setMindSavedPlan(saved);
+    localStorage.setItem(MIND_LAST_PLAN_KEY, JSON.stringify(saved));
+  };
+
   const answerMind = async (text: string) => {
     const value = text.trim();
     if (!value || mindLoading) return;
     const guide = getMindGuide();
     const recommendations = findMindRecommendations(value, activeMentorTopic);
+    const localResponseText =
+      `${guide.counterpoint}\n\nPlano de presença: ${guide.practice}\n\nPelo que você trouxe, eu buscaria estes pontos do livro primeiro:`;
     const history = mindMessages
       .filter((message) => message.text.trim())
       .slice(-10)
@@ -2130,8 +2176,7 @@ export function App() {
         id: `agent-${Date.now()}`,
         from: 'agent',
         kind: 'plan',
-        text:
-          `${guide.counterpoint}\n\nPlano de presença: ${guide.practice}\n\nPelo que você trouxe, eu buscaria estes pontos do livro primeiro:`,
+        text: localResponseText,
         replies: ['Abrir capítulo sugerido', 'Ouvir apoio', 'Recomeçar triagem'],
         recommendations,
       },
@@ -2146,6 +2191,7 @@ export function App() {
         context: buildMindContext(value),
       });
       setMindSessionId(response.sessionId);
+      saveMindPlan(activeMentorTopic, value, response.message, pendingMindSource);
       setMindMessages((current) => {
         const next = [...current];
         const lastAgentIndex = next.map((message) => message.from).lastIndexOf('agent');
@@ -2161,11 +2207,19 @@ export function App() {
         return next;
       });
     } catch {
+      saveMindPlan(activeMentorTopic, value, localResponseText, pendingMindSource);
       // Mantem a resposta local quando o backend ou a IA estiverem indisponiveis.
     } finally {
       setMindLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (mindStep !== 'chat' || !pendingMindPrompt.trim()) return;
+    const prompt = pendingMindPrompt;
+    window.setTimeout(() => answerMind(prompt), 80);
+    setPendingMindPrompt('');
+  }, [mindStep, pendingMindPrompt]);
 
   const handleMindQuickReply = (reply: string) => {
     const normalizedReply = normalizeForSearch(reply);
@@ -2474,10 +2528,31 @@ export function App() {
               </button>
             </div>
           )}
+          {hasMindAccess && (
+            <div className="home-resume-strip mind-resume-strip">
+              <Brain size={16} />
+              <div>
+                <strong>{mindSavedPlan ? `Continuar iGentMIND - ${mindSavedPlan.topicTitle}` : 'Abrir iGentMIND'}</strong>
+                <small>{mindSavedPlan ? mindSavedPlan.response : 'Cruzar seu ponto atual com o livro e o diario'}</small>
+              </div>
+              <button
+                onClick={() => {
+                  const topic = mentorTopics.find((item) => item.id === mindSavedPlan?.topicId) || activeMentorTopic;
+                  const prompt = mindSavedPlan
+                    ? `Retome esta orientacao: ${mindSavedPlan.response}`
+                    : `Estou na pagina ${pdfPage}, lendo ${selectedChapter.title}. Me ajude a encontrar o proximo gesto.`;
+                  startMindSession(topic, prompt, 'home');
+                }}
+              >
+                <Zap size={13} />
+              </button>
+            </div>
+          )}
         </div>
         <div className="home-reading-actions">
           <Button onClick={() => navigate(ROUTES.READER)} className="cover-primary">Ler agora</Button>
-        <Button onClick={() => navigate(ROUTES.LIBRARY)} variant="secondary">Sumário</Button>
+          <Button onClick={() => navigate(ROUTES.LIBRARY)} variant="secondary">Sumario</Button>
+          {hasMindAccess && <Button onClick={() => startMindSession(activeMentorTopic, `Estou em ${currentGroup.title}. Me ajude a organizar o que ler, ouvir ou escrever agora.`, 'home')} variant="ghost"><Brain size={17} /> iGentMIND</Button>}
         </div>
         <div className="home-slide-dots">
           {homeSlides.map((slide, index) => (
@@ -2756,6 +2831,40 @@ export function App() {
               <p className="kicker">iGentMIND</p>
               <h1>Conselheiro Virtual</h1>
               <span>Escolha o que você está sentindo agora. O agente responde com contraponto, presença e um capítulo sugerido.</span>
+            </section>
+            {mindSavedPlan && (
+              <section className="igent-answer mind-last-plan">
+                <Brain size={22} />
+                <div>
+                  <h2>Continuar de onde parou</h2>
+                  <p>{mindSavedPlan.response}</p>
+                  <div className="mind-replies">
+                    <button onClick={() => startMindSession(
+                      mentorTopics.find((topic) => topic.id === mindSavedPlan.topicId) || activeMentorTopic,
+                      `Retome esta orientacao e me diga o proximo gesto: ${mindSavedPlan.response}`,
+                      'chat',
+                    )}>Retomar conversa</button>
+                    <button onClick={() => goToChapter(mindSavedPlan.chapterIndex)}>Abrir trecho</button>
+                  </div>
+                </div>
+              </section>
+            )}
+            <section className="mind-entry-grid">
+              <button onClick={() => startMindSession(activeMentorTopic, `Estou na pagina ${pdfPage}, lendo ${selectedChapter.title}. Me ajude a entender o que este trecho esta tocando em mim.`, 'reader')}>
+                <BookOpen size={18} />
+                <strong>Conversar sobre a leitura</strong>
+                <span>Usa a pagina e o capitulo atual como contexto.</span>
+              </button>
+              <button onClick={() => startMindSession(activeMentorTopic, workbookEntry.trim() || 'Quero organizar o que escrevi no diario e transformar em um gesto pequeno.', 'workbook')}>
+                <NotebookPen size={18} />
+                <strong>Analisar diario</strong>
+                <span>Cruza escrita, pilar atual e respostas salvas.</span>
+              </button>
+              <button onClick={() => startMindSession(activeMentorTopic, 'Faca uma triagem rapida do meu estado agora e me oriente por uma pergunta de cada vez.', 'chat')}>
+                <Zap size={18} />
+                <strong>Triagem rapida</strong>
+                <span>Comeca com uma conversa curta e objetiva.</span>
+              </button>
             </section>
             <section className="mentor-topic-grid">
               {mentorTopics.map((topic) => {
@@ -3045,7 +3154,13 @@ export function App() {
                   <strong>Trecho sugerido</strong>
                   <p>{trimExcerpt(bookChapters[workbookPillarIndex + 8]?.summary || selectedChapter.summary, 120)}</p>
                 </div>
-                <Button onClick={() => startMindSession(linkedTopic)}><Zap size={17} /> Conversar com iGentMIND</Button>
+                <Button onClick={() => startMindSession(
+                  linkedTopic,
+                  currentText.trim()
+                    ? `Analise minhas respostas do pilar ${currentPillar.title} e me devolva um contraponto com um gesto pratico: ${currentText}`
+                    : `Estou no pilar ${currentPillar.title}. Me ajude a escolher por onde comecar no diario.`,
+                  'workbook',
+                )}><Zap size={17} /> Conversar com iGentMIND</Button>
               </>
             ) : (
               <>

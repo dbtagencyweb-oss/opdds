@@ -1957,6 +1957,49 @@ button:active {
   line-height: 1.65;
 }
 
+.mind-last-plan {
+  max-width: 720px;
+  margin-bottom: 16px;
+}
+
+.mind-entry-grid {
+  width: min(720px, 100%);
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0 auto 18px;
+}
+
+.mind-entry-grid button {
+  display: grid;
+  gap: 8px;
+  min-height: 128px;
+  border: 1px solid rgba(215, 183, 88, 0.18);
+  border-radius: 12px;
+  background: rgba(18, 19, 23, 0.86);
+  color: var(--text);
+  padding: 15px;
+  text-align: left;
+}
+
+.mind-entry-grid svg {
+  color: var(--gold);
+}
+
+.mind-entry-grid strong {
+  font-size: 0.95rem;
+}
+
+.mind-entry-grid span {
+  color: var(--muted);
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
+.mind-resume-strip {
+  border-color: rgba(34, 211, 238, 0.24);
+}
+
 .mind-chat-shell {
   width: min(820px, 100%);
   margin: 0 auto;
@@ -4312,6 +4355,10 @@ button:active {
     grid-template-columns: 1fr 1fr;
   }
 
+  .mind-entry-grid {
+    grid-template-columns: 1fr;
+  }
+
   .mind-chat-top {
     grid-template-columns: 1fr;
   }
@@ -5863,6 +5910,7 @@ html.light .contents-quick-actions button:hover {
 /* Refinos de contraste do modo claro em iGentMIND, Manifesto e Admin */
 html.light .mentor-topic,
 html.light .igent-answer,
+html.light .mind-entry-grid button,
 html.light .manifesto-panel,
 html.light .admin-events-panel {
   background:
@@ -5879,6 +5927,7 @@ html.light .mentor-topic {
 
 html.light .mentor-topic strong,
 html.light .igent-answer h2,
+html.light .mind-entry-grid strong,
 html.light .manifesto-panel h1,
 html.light .manifesto-panel .kicker,
 html.light .admin-section-head h2,
@@ -5897,6 +5946,7 @@ html.light .mentor-topic.active {
 }
 
 html.light .igent-answer p,
+html.light .mind-entry-grid span,
 html.light .manifesto-panel p,
 html.light .admin-event-main small,
 html.light .admin-event-meta small,
