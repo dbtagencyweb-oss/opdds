@@ -55,8 +55,10 @@ type ReaderNoteItem = {
 };
 
 type TextBlock = {
-  kind: 'heading' | 'subheading' | 'paragraph';
+  kind: 'heading' | 'subheading' | 'paragraph' | 'divider' | 'image' | 'spacer';
   text: string;
+  alt?: string;
+  size?: number;
 };
 
 type Props = {
@@ -174,6 +176,15 @@ const cleanLabel = (value = '') => {
 
 const pageMarkerPattern = /^[-–—]\s*\d+\s*[-–—]\s*/;
 
+const repairReaderText = (value = '') =>
+  cleanLabel(value)
+    .replaceAll('Orienta\u00c3\u00a7\u00c3\u00a3o', 'Orienta\u00e7\u00e3o')
+    .replaceAll('orienta\u00c3\u00a7\u00c3\u00a3o', 'orienta\u00e7\u00e3o')
+    .replaceAll('ORIENTA\u00c3\u0087\u00c3\u0083O', 'ORIENTA\u00c7\u00c3O')
+    .replaceAll('Reconstru\u00c3\u00a7\u00c3\u00a3o', 'Reconstru\u00e7\u00e3o')
+    .replaceAll('reconstru\u00c3\u00a7\u00c3\u00a3o', 'reconstru\u00e7\u00e3o')
+    .replaceAll('RECONSTRU\u00c3\u0087\u00c3\u0083O', 'RECONSTRU\u00c7\u00c3O');
+
 const compactSpacedHeading = (line: string) => {
   const clean = line.trim();
   const withoutSpaces = clean.replace(/\s+/g, '');
@@ -208,7 +219,7 @@ const normalizePdfHeading = (line: string) => {
 };
 
 const repairExtractedHeading = (value: string) => {
-  const normalized = cleanLabel(value).replace(/\s+/g, ' ').trim();
+  const normalized = repairReaderText(value).replace(/\s+/g, ' ').trim();
   const compact = normalized
     .normalize('NFD')
     .replace(/\p{Diacritic}/gu, '')
@@ -238,7 +249,7 @@ const repairExtractedHeading = (value: string) => {
 };
 
 const normalizeAudioLookup = (value = '') =>
-  cleanLabel(value)
+  repairReaderText(value)
     .normalize('NFD')
     .replace(/\p{Diacritic}/gu, '')
     .toLowerCase();
@@ -282,7 +293,7 @@ const parsePdfTextBlocks = (text: string): TextBlock[] => {
   };
 
   normalized.split('\n').forEach((rawLine) => {
-    let line = cleanLabel(rawLine.trim());
+    let line = repairReaderText(rawLine.trim());
     if (!line) {
       flushParagraph();
       return;
@@ -291,6 +302,31 @@ const parsePdfTextBlocks = (text: string): TextBlock[] => {
     line = line.replace(pageMarkerPattern, '').replace(/^—\s*\d+\s*—\s*/, '').trim();
     if (!line) return;
     if (isDecorativeOrLooseMarker(line)) return;
+
+    if (/^(-{3,}|\*{3,}|_{3,})$/.test(line)) {
+      flushParagraph();
+      blocks.push({ kind: 'divider', text: '' });
+      return;
+    }
+
+    const imageMatch = line.match(/^\[\[imagem:(.+?)(?:\|(.*?))?\]\]$/i) || line.match(/^!\[(.*?)\]\((.*?)\)$/);
+    if (imageMatch) {
+      flushParagraph();
+      const markdownStyle = line.startsWith('![');
+      blocks.push({
+        kind: 'image',
+        text: (markdownStyle ? imageMatch[2] : imageMatch[1]).trim(),
+        alt: (markdownStyle ? imageMatch[1] : imageMatch[2] || '').trim(),
+      });
+      return;
+    }
+
+    const spacerMatch = line.match(/^\[\[espaco:(\d{1,3})\]\]$/i);
+    if (spacerMatch) {
+      flushParagraph();
+      blocks.push({ kind: 'spacer', text: '', size: Math.min(120, Math.max(8, Number(spacerMatch[1]) || 24)) });
+      return;
+    }
 
     if (/^\d+\.\s+/.test(line)) {
       flushParagraph();
@@ -376,10 +412,10 @@ export default function ReaderShell({
   const pdfProgress = Math.round((pdfCurrentPage / Math.max(1, totalPdfPages)) * 100);
   const heardInChapter = audioTracks.filter((track) => audioProgress[track.url]?.heard).length;
   const openingEntry = openingContents.find((entry) => entry.pdfPage === pdfCurrentPage && pdfCurrentPage < (chapters[0]?.pdfPage ?? 1));
-  const displayTitle = cleanLabel(openingEntry?.title || title);
-  const displaySummary = cleanLabel(summary || '');
-  const displayChapterKind = cleanLabel(openingEntry?.kind || chapterKind);
-  const displayCurrentLetterTitle = cleanLabel(currentLetterTitle || '');
+  const displayTitle = repairReaderText(openingEntry?.title || title);
+  const displaySummary = repairReaderText(summary || '');
+  const displayChapterKind = repairReaderText(openingEntry?.kind || chapterKind);
+  const displayCurrentLetterTitle = repairReaderText(currentLetterTitle || '');
   const sortedReaderNotes = useMemo(
     () => [...readerNotes].filter((note) => note.note.trim() || note.page === pdfCurrentPage).sort((a, b) => b.updatedAt.localeCompare(a.updatedAt)),
     [pdfCurrentPage, readerNotes],
@@ -393,8 +429,10 @@ export default function ReaderShell({
   const narrationData = useMemo(() => {
     let cursor = 0;
     const ranges: Array<{ blockIndex: number; wordIndex: number; start: number; end: number }> = [];
-    const text = textBlocks.map((block, blockIndex) => {
-      const cleanText = block.text.replace(/\s+/g, ' ').trim();
+    const textParts: string[] = [];
+    textBlocks.forEach((block, blockIndex) => {
+      if (!['heading', 'subheading', 'paragraph'].includes(block.kind)) return;
+      const cleanText = block.text.replace(/\[br\]/gi, ' ').replace(/\s+/g, ' ').trim();
       let wordIndex = 0;
       for (const match of cleanText.matchAll(/\S+/g)) {
         ranges.push({
@@ -405,9 +443,10 @@ export default function ReaderShell({
         });
         wordIndex += 1;
       }
+      textParts.push(cleanText);
       cursor += cleanText.length + 2;
-      return cleanText;
-    }).join('\n\n');
+    });
+    const text = textParts.join('\n\n');
     return { text, ranges };
   }, [textBlocks]);
 
@@ -472,7 +511,8 @@ export default function ReaderShell({
 
   const renderNarrationText = (block: TextBlock, blockIndex: number) => {
     let wordIndex = 0;
-    return block.text.split(/(\s+)/).map((token, tokenIndex) => {
+    return block.text.split(/(\[br\]|\s+)/i).map((token, tokenIndex) => {
+      if (/^\[br\]$/i.test(token)) return <br key={`${blockIndex}-${tokenIndex}`} />;
       if (!token.trim()) return token;
       const currentWordIndex = wordIndex;
       wordIndex += 1;
@@ -866,7 +906,17 @@ export default function ReaderShell({
             {textBlocks.length ? textBlocks.map((block, index) => {
               if (block.kind === 'heading') return <h2 key={`${pdfCurrentPage}-${index}`}>{renderNarrationText(block, index)}</h2>;
               if (block.kind === 'subheading') return <h3 key={`${pdfCurrentPage}-${index}`}>{renderNarrationText(block, index)}</h3>;
-              return <p key={`${pdfCurrentPage}-${index}`}>{renderNarrationText(block, index)}</p>;
+              if (block.kind === 'divider') return <hr className="reader-content-divider" key={`${pdfCurrentPage}-${index}`} />;
+              if (block.kind === 'image') {
+                return (
+                  <figure className="reader-content-image" key={`${pdfCurrentPage}-${index}`}>
+                    <img src={block.text} alt={block.alt || ''} loading="lazy" />
+                    {block.alt && <figcaption>{block.alt}</figcaption>}
+                  </figure>
+                );
+              }
+              if (block.kind === 'spacer') return <div className="reader-content-spacer" style={{ height: `${block.size ?? 24}px` }} key={`${pdfCurrentPage}-${index}`} />;
+              return <p className={/^\d+\.\s+/.test(block.text) ? 'reader-list-line' : undefined} key={`${pdfCurrentPage}-${index}`}>{renderNarrationText(block, index)}</p>;
             }) : (
               <p>Não foi possível extrair texto desta página. Use o modo Edição para visualizar a página original.</p>
             )}

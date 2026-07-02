@@ -595,6 +595,28 @@ const audioTrackKey = (value = '') =>
     .replace(/\s+/g, '-')
     .trim();
 
+const compactLetterSpacedLine = (line: string) => {
+  const clean = line.trim();
+  const lettersOnly = clean.replace(/[^\p{L}]/gu, '');
+  if (lettersOnly.length < 4) return line.replace(/[ \t]{2,}/g, ' ').trimEnd();
+  if (/^\p{L}(?:\s+\p{L}){3,}/u.test(clean)) {
+    return clean
+      .split(/\s{2,}/)
+      .map((chunk) => chunk.replace(/\s+/g, ''))
+      .join(' ');
+  }
+  return line.replace(/[ \t]{2,}/g, ' ').trimEnd();
+};
+
+const cleanBookEditorText = (value = '') =>
+  repairBrokenPdfCharacters(value)
+    .replace(/\r/g, '')
+    .split('\n')
+    .map((line) => compactLetterSpacedLine(line))
+    .join('\n')
+    .replace(/\n{4,}/g, '\n\n\n')
+    .trim();
+
 const getChapterKind = (index: number, title = '') => {
   const normalized = normalizeForSearch(title);
   if (normalized.includes('pilar')) return title.split('—')[0]?.trim() || 'Pilar';
@@ -812,6 +834,7 @@ export function App() {
   const lastSpectrumTickRef = useRef(0);
   const lastAudioTickRef = useRef(0);
   const currentAudioUrlRef = useRef<string | null>(null);
+  const adminBookPageTextareaRef = useRef<HTMLTextAreaElement | null>(null);
 
   const selectedChapter = bookChapters[currentChapterIndex] ?? bookChapters[0];
   const pages = usePagination(selectedChapter.content);
@@ -1664,6 +1687,35 @@ export function App() {
     setAdminBookPageTitle((current) => repairBrokenPdfCharacters(current));
     setAdminBookPageContent((current) => repairBrokenPdfCharacters(current));
     setAdminMessage('Caracteres corrigidos no editor. Revise antes de publicar.');
+  };
+
+  const handleCleanAdminBookPageContent = () => {
+    setAdminBookPageTitle((current) => cleanBookEditorText(current));
+    setAdminBookPageContent((current) => cleanBookEditorText(current));
+    setAdminMessage('Texto limpo no editor. Revise os paragrafos antes de publicar.');
+  };
+
+  const insertAdminBookPageSnippet = (snippet: string) => {
+    const textarea = adminBookPageTextareaRef.current;
+    if (!textarea) {
+      setAdminBookPageContent((current) => `${current.trimEnd()}\n\n${snippet}\n\n`);
+      return;
+    }
+
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    setAdminBookPageContent((current) => {
+      const before = current.slice(0, start);
+      const after = current.slice(end);
+      const prefix = before && !before.endsWith('\n') ? '\n' : '';
+      const suffix = after && !after.startsWith('\n') ? '\n' : '';
+      return `${before}${prefix}${snippet}${suffix}${after}`;
+    });
+    window.requestAnimationFrame(() => {
+      textarea.focus();
+      const nextPosition = start + snippet.length + (textarea.value.slice(0, start).endsWith('\n') ? 0 : 1);
+      textarea.setSelectionRange(nextPosition, nextPosition);
+    });
   };
 
   const handlePublishBookPage = async () => {
@@ -3266,17 +3318,26 @@ export function App() {
             <label>
               <span>Texto da pagina</span>
               <textarea
+                ref={adminBookPageTextareaRef}
                 className="admin-book-textarea"
                 value={adminBookPageContent}
                 onChange={(event) => setAdminBookPageContent(event.target.value)}
                 placeholder="Cole ou corrija aqui o texto que deve aparecer no modo leitura."
               />
             </label>
+            <div className="admin-book-format-tools" aria-label="Formatacao do texto">
+              <button type="button" onClick={() => insertAdminBookPageSnippet('[br]')}>Quebra de linha</button>
+              <button type="button" onClick={() => insertAdminBookPageSnippet('---')}>Linha divisoria</button>
+              <button type="button" onClick={() => insertAdminBookPageSnippet('[[espaco:32]]')}>Espaco</button>
+              <button type="button" onClick={() => insertAdminBookPageSnippet('[[imagem:/media/imagens/livro/exemplo.jpg|Legenda da imagem]]')}>Imagem</button>
+            </div>
             <div className="workbook-actions">
               <Button onClick={handleRepairAdminBookPageContent} variant="ghost">Corrigir caracteres</Button>
+              <Button onClick={handleCleanAdminBookPageContent} variant="ghost">Limpar texto</Button>
               <Button onClick={handleSaveBookPageDraft} variant="secondary">Salvar rascunho</Button>
               <Button onClick={handlePublishBookPage}>Publicar no leitor</Button>
             </div>
+            <small>Use linha vazia para novo paragrafo, [br] para quebra dentro do mesmo paragrafo, --- para divisor, [[espaco:32]] para respiro e [[imagem:/media/imagens/livro/exemplo.jpg|Legenda]] para imagem.</small>
             <small>Publicar cria uma nova versao e substitui o texto desta pagina para todos os leitores.</small>
           </article>
 

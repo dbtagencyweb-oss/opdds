@@ -868,6 +868,45 @@ body::selection {
   margin: 0 0 1.25em;
 }
 
+.page-copy .reader-list-line {
+  margin-bottom: 0.9em;
+}
+
+.reader-content-divider {
+  width: 100%;
+  margin: 1.7em 0;
+  border: 0;
+  border-top: 1px solid rgba(215, 183, 88, 0.26);
+}
+
+.reader-content-image {
+  margin: 1.8em 0;
+}
+
+.reader-content-image img {
+  display: block;
+  width: 100%;
+  max-height: 520px;
+  object-fit: contain;
+  border-radius: 6px;
+}
+
+.reader-content-image figcaption {
+  margin-top: 8px;
+  color: rgba(235, 229, 215, 0.62);
+  font-family: var(--font-ui);
+  font-size: 0.78rem;
+  text-align: center;
+}
+
+html.light .reader-content-image figcaption {
+  color: rgba(44, 39, 31, 0.58);
+}
+
+.reader-content-spacer {
+  display: block;
+}
+
 .reader-footer {
   display: grid;
   grid-template-columns: 44px 1fr 44px;
@@ -3090,6 +3129,28 @@ button:active {
   min-height: 360px;
   resize: vertical;
   line-height: 1.55;
+}
+
+.admin-book-format-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: -6px;
+}
+
+.admin-book-format-tools button {
+  border: 1px solid rgba(215, 183, 88, 0.18);
+  border-radius: 999px;
+  background: rgba(215, 183, 88, 0.07);
+  color: #d9c06d;
+  padding: 8px 11px;
+  font-size: 0.76rem;
+  font-weight: 800;
+}
+
+.admin-book-format-tools button:hover {
+  border-color: rgba(215, 183, 88, 0.38);
+  color: #f0df9c;
 }
 
 .admin-book-preview {
