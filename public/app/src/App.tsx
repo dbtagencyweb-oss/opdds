@@ -2517,49 +2517,57 @@ export function App() {
           <p className="kicker">Leitura atual</p>
           <h2>{getChapterKind(currentChapterIndex, selectedChapter.title)} - {selectedChapter.title}</h2>
           <span>{trimExcerpt(selectedChapter.summary, 92)}</span>
-          {latestAudioResume && (
-            <div className="home-resume-strip">
-              <Headphones size={16} />
-              <div>
-                <strong>Continuar ouvindo</strong>
-                <small>{latestAudioResume.item.title} - {formatTime(latestAudioResume.progress.currentTime)} de {formatTime(latestAudioResume.progress.duration)}</small>
-              </div>
-              <button onClick={() => playAudioQueueItem(latestAudioResume.item, { resume: true })}>
-                <Play size={13} fill="currentColor" />
-              </button>
-            </div>
-          )}
-          {hasMindAccess && (
-            <div className="home-resume-strip mind-resume-strip">
-              <Brain size={16} />
-              <div>
-                <strong>{mindSavedPlan ? `Continuar iGentMIND - ${mindSavedPlan.topicTitle}` : 'Abrir iGentMIND'}</strong>
-                <small>{mindSavedPlan ? mindSavedPlan.response : 'Cruzar seu ponto atual com o livro e o diario'}</small>
-              </div>
-              <button
-                onClick={() => {
-                  const topic = mentorTopics.find((item) => item.id === mindSavedPlan?.topicId) || activeMentorTopic;
-                  const prompt = mindSavedPlan
-                    ? `Retome esta orientacao: ${mindSavedPlan.response}`
-                    : `Estou na pagina ${pdfPage}, lendo ${selectedChapter.title}. Me ajude a encontrar o proximo gesto.`;
-                  startMindSession(topic, prompt, 'home');
-                }}
-              >
-                <Zap size={13} />
-              </button>
-            </div>
-          )}
         </div>
         <div className="home-reading-actions">
           <Button onClick={() => navigate(ROUTES.READER)} className="cover-primary">Ler agora</Button>
           <Button onClick={() => navigate(ROUTES.LIBRARY)} variant="secondary">Sumario</Button>
-          {hasMindAccess && <Button onClick={() => startMindSession(activeMentorTopic, `Estou em ${currentGroup.title}. Me ajude a organizar o que ler, ouvir ou escrever agora.`, 'home')} variant="ghost"><Brain size={17} /> iGentMIND</Button>}
         </div>
         <div className="home-slide-dots">
           {homeSlides.map((slide, index) => (
             <button key={slide} className={index === homeSlideIndex ? 'active' : ''} onClick={() => setHomeSlideIndex(index)} title={`Imagem ${index + 1}`} />
           ))}
         </div>
+      </section>
+
+      <section className="home-continue-stack">
+        {latestAudioResume && (
+          <div className="home-resume-strip">
+            <Headphones size={16} />
+            <div>
+              <strong>Continuar ouvindo</strong>
+              <small>{latestAudioResume.item.title} - {formatTime(latestAudioResume.progress.currentTime)} de {formatTime(latestAudioResume.progress.duration)}</small>
+            </div>
+            <button onClick={() => playAudioQueueItem(latestAudioResume.item, { resume: true })}>
+              <Play size={13} fill="currentColor" />
+            </button>
+          </div>
+        )}
+        {hasMindAccess && (
+          <div className="home-resume-strip mind-resume-strip">
+            <Brain size={16} />
+            <div>
+              <strong>{mindSavedPlan ? `Continuar iGentMIND - ${mindSavedPlan.topicTitle}` : 'Abrir iGentMIND'}</strong>
+              <small>{mindSavedPlan ? mindSavedPlan.response : 'Cruzar seu ponto atual com o livro e o diario'}</small>
+            </div>
+            <button
+              onClick={() => {
+                const topic = mentorTopics.find((item) => item.id === mindSavedPlan?.topicId) || activeMentorTopic;
+                const prompt = mindSavedPlan
+                  ? `Retome esta orientacao: ${mindSavedPlan.response}`
+                  : `Estou na pagina ${pdfPage}, lendo ${selectedChapter.title}. Me ajude a encontrar o proximo gesto.`;
+                startMindSession(topic, prompt, 'home');
+              }}
+            >
+              <Zap size={13} />
+            </button>
+          </div>
+        )}
+        {hasMindAccess && (
+          <button className="home-mind-float" onClick={() => startMindSession(activeMentorTopic, `Estou em ${currentGroup.title}. Me ajude a organizar o que ler, ouvir ou escrever agora.`, 'home')}>
+            <Brain size={17} />
+            iGentMIND
+          </button>
+        )}
       </section>
 
       <section className="journey-overview">
