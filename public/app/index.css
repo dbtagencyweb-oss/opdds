@@ -2640,14 +2640,19 @@ button:active {
   z-index: 82;
   display: grid;
   place-items: center;
+  width: 100dvw;
+  min-height: 100dvh;
   padding: 24px;
+  overflow: hidden;
   background: rgba(5, 6, 8, 0.78);
   backdrop-filter: blur(18px);
 }
 
 .workbook-transition p {
   width: min(620px, 100%);
+  max-height: calc(100dvh - 48px);
   margin: 0;
+  overflow: auto;
   border: 1px solid rgba(215, 183, 88, 0.28);
   border-radius: 14px;
   background: rgba(18, 19, 23, 0.92);
