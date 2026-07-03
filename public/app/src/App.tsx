@@ -16,6 +16,7 @@ import {
   EyeOff,
   FileText,
   Flame,
+  GripVertical,
   Heart,
   Headphones,
   Home,
@@ -146,6 +147,17 @@ type AudioQueueItem = {
 };
 
 type SaveFeedback = 'idle' | 'saving' | 'saved';
+type AdminAudioProductionStatus = 'ok' | 'review' | 'record' | 'placeholder';
+
+const ADMIN_AUDIO_PRODUCTION_KEY = 'opd_admin_audio_production';
+const ADMIN_AUDIO_ORDER_KEY = 'opd_admin_audio_order';
+
+const audioProductionLabels: Record<AdminAudioProductionStatus, string> = {
+  ok: 'OK',
+  review: 'Revisar',
+  record: 'Regravar',
+  placeholder: 'Placeholder',
+};
 
 type BeforeInstallPromptEvent = Event & {
   prompt: () => Promise<void>;
@@ -796,6 +808,21 @@ export function App() {
   const [adminAudioSectionKey, setAdminAudioSectionKey] = useState('');
   const [adminAudioLabel, setAdminAudioLabel] = useState('');
   const [adminAudioUrl, setAdminAudioUrl] = useState('');
+  const [adminAudioProduction, setAdminAudioProduction] = useState<Record<string, { status: AdminAudioProductionStatus; note: string }>>(() => {
+    try {
+      return JSON.parse(localStorage.getItem(ADMIN_AUDIO_PRODUCTION_KEY) || '{}');
+    } catch {
+      return {};
+    }
+  });
+  const [adminAudioOrder, setAdminAudioOrder] = useState<Record<string, string[]>>(() => {
+    try {
+      return JSON.parse(localStorage.getItem(ADMIN_AUDIO_ORDER_KEY) || '{}');
+    } catch {
+      return {};
+    }
+  });
+  const [adminAudioDraggingKey, setAdminAudioDraggingKey] = useState('');
   const [adminSelectedUserId, setAdminSelectedUserId] = useState('');
   const [adminInvite, setAdminInvite] = useState({ name: '', email: '', plan: 'basic' as Plan, expiresInDays: '' });
   const [adminGrant, setAdminGrant] = useState({ plan: 'vip' as Plan, productKey: PRODUCT_KEYS.workbook, expiresInDays: '' });
@@ -1007,6 +1034,38 @@ export function App() {
     () => adminAudioTracksForChapter.find((track) => audioTrackKey(track.label) === adminAudioSectionKey),
     [adminAudioSectionKey, adminAudioTracksForChapter],
   );
+
+  const adminAudioBoardItems = useMemo(() => {
+    const defaultOrder = adminAudioTracksForChapter.map((track) => audioTrackKey(track.label));
+    const savedOrder = adminAudioOrder[adminAudioChapterId] || [];
+    const orderedKeys = [...savedOrder.filter((key) => defaultOrder.includes(key)), ...defaultOrder.filter((key) => !savedOrder.includes(key))];
+    return orderedKeys
+      .map((sectionKey) => {
+        const baseTrack = adminAudioTracksForChapter.find((track) => audioTrackKey(track.label) === sectionKey);
+        if (!baseTrack) return null;
+        const published = adminBookAudio.find((track) => track.chapterId === adminAudioChapterId && track.sectionKey === sectionKey)?.latestPublished;
+        const productionKey = `${adminAudioChapterId}:${sectionKey}`;
+        const production = adminAudioProduction[productionKey] || { status: published ? 'review' : 'placeholder', note: '' };
+        return {
+          sectionKey,
+          productionKey,
+          label: published?.label || baseTrack.label,
+          url: published?.url || baseTrack.url,
+          defaultUrl: baseTrack.url,
+          published,
+          production,
+        };
+      })
+      .filter(Boolean) as Array<{
+        sectionKey: string;
+        productionKey: string;
+        label: string;
+        url: string;
+        defaultUrl: string;
+        published?: NonNullable<AdminBookAudioSummary['latestPublished']>;
+        production: { status: AdminAudioProductionStatus; note: string };
+      }>;
+  }, [adminAudioChapterId, adminAudioOrder, adminAudioProduction, adminAudioTracksForChapter, adminBookAudio]);
 
   const adminAudioPathWarning = useMemo(() => {
     const path = adminAudioUrl.trim();
@@ -1348,6 +1407,14 @@ export function App() {
     setAdminAudioLabel(published?.label || baseTrack?.label || '');
     setAdminAudioUrl(published?.url || baseTrack?.url || '');
   }, [adminAudioSectionKey, adminAudioTracksForChapter, adminCurrentAudioSummary]);
+
+  useEffect(() => {
+    localStorage.setItem(ADMIN_AUDIO_PRODUCTION_KEY, JSON.stringify(adminAudioProduction));
+  }, [adminAudioProduction]);
+
+  useEffect(() => {
+    localStorage.setItem(ADMIN_AUDIO_ORDER_KEY, JSON.stringify(adminAudioOrder));
+  }, [adminAudioOrder]);
 
   useEffect(() => {
     if (route !== ROUTES.ADMIN || !isAdmin) return;
@@ -1919,6 +1986,42 @@ export function App() {
     } catch (error: any) {
       setAdminMessage(error?.message || 'Nao foi possivel publicar a pagina.');
     }
+  };
+
+  const updateAdminAudioProduction = (productionKey: string, patch: Partial<{ status: AdminAudioProductionStatus; note: string }>) => {
+    setAdminAudioProduction((current) => ({
+      ...current,
+      [productionKey]: {
+        status: current[productionKey]?.status || 'review',
+        note: current[productionKey]?.note || '',
+        ...patch,
+      },
+    }));
+  };
+
+  const selectAdminAudioBoardItem = (sectionKey: string) => {
+    setAdminAudioSectionKey(sectionKey);
+  };
+
+  const dropAdminAudioBoardItem = (targetKey: string) => {
+    if (!adminAudioDraggingKey || adminAudioDraggingKey === targetKey) {
+      setAdminAudioDraggingKey('');
+      return;
+    }
+    const defaultOrder = adminAudioTracksForChapter.map((track) => audioTrackKey(track.label));
+    const currentOrder = adminAudioOrder[adminAudioChapterId] || defaultOrder;
+    const normalized = [...currentOrder.filter((key) => defaultOrder.includes(key)), ...defaultOrder.filter((key) => !currentOrder.includes(key))];
+    const from = normalized.indexOf(adminAudioDraggingKey);
+    const to = normalized.indexOf(targetKey);
+    if (from < 0 || to < 0) {
+      setAdminAudioDraggingKey('');
+      return;
+    }
+    const next = [...normalized];
+    const [moved] = next.splice(from, 1);
+    next.splice(to, 0, moved);
+    setAdminAudioOrder((current) => ({ ...current, [adminAudioChapterId]: next }));
+    setAdminAudioDraggingKey('');
   };
 
   const handlePublishBookAudio = async () => {
@@ -3825,6 +3928,61 @@ export function App() {
                 ))}
               </select>
             </label>
+          </div>
+          <div className="admin-audio-board">
+            <div className="admin-audio-board-head">
+              <div>
+                <strong>Mesa de producao</strong>
+                <small>Arraste para organizar. Clique em uma faixa para editar o caminho, titulo e publicar.</small>
+              </div>
+              <button
+                type="button"
+                onClick={() => setAdminAudioOrder((current) => ({ ...current, [adminAudioChapterId]: adminAudioTracksForChapter.map((track) => audioTrackKey(track.label)) }))}
+              >
+                Restaurar ordem
+              </button>
+            </div>
+            <div className="admin-audio-board-grid">
+              {adminAudioBoardItems.map((item, index) => (
+                <article
+                  key={item.productionKey}
+                  className={`admin-audio-card ${adminAudioSectionKey === item.sectionKey ? 'active' : ''} ${adminAudioDraggingKey === item.sectionKey ? 'dragging' : ''}`}
+                  draggable
+                  onDragStart={() => setAdminAudioDraggingKey(item.sectionKey)}
+                  onDragOver={(event) => event.preventDefault()}
+                  onDrop={() => dropAdminAudioBoardItem(item.sectionKey)}
+                  onDragEnd={() => setAdminAudioDraggingKey('')}
+                >
+                  <button type="button" className="admin-audio-card-main" onClick={() => selectAdminAudioBoardItem(item.sectionKey)}>
+                    <span className="admin-audio-drag"><GripVertical size={15} /></span>
+                    <span className="admin-audio-number">{index + 1}</span>
+                    <span>
+                      <strong>{repairMojibake(item.label)}</strong>
+                      <small>{item.published ? `Publicado v${item.published.version || 1}` : 'Usando caminho padrao'}</small>
+                    </span>
+                  </button>
+                  <div className="admin-audio-card-tools">
+                    <select
+                      value={item.production.status}
+                      onChange={(event) => updateAdminAudioProduction(item.productionKey, { status: event.target.value as AdminAudioProductionStatus })}
+                    >
+                      {(Object.keys(audioProductionLabels) as AdminAudioProductionStatus[]).map((status) => (
+                        <option key={status} value={status}>{audioProductionLabels[status]}</option>
+                      ))}
+                    </select>
+                    <button type="button" onClick={() => handlePlayAudio(item.url, repairMojibake(item.label))}>
+                      <Play size={14} /> Testar
+                    </button>
+                  </div>
+                  <textarea
+                    value={item.production.note}
+                    onChange={(event) => updateAdminAudioProduction(item.productionKey, { note: event.target.value })}
+                    placeholder="Observacao: texto inconsistente, voz errada, placeholder, precisa regenerar..."
+                  />
+                  <code>{item.url}</code>
+                </article>
+              ))}
+            </div>
           </div>
           <label>
             <span>Titulo exibido</span>

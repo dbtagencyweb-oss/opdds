@@ -3324,7 +3324,7 @@ button:active {
 }
 
 .admin-audio-editor {
-  max-width: 920px;
+  max-width: 1120px;
 }
 
 .admin-section-head.compact {
@@ -3380,6 +3380,170 @@ button:active {
 
 .admin-media-warning {
   color: #f5bc77 !important;
+}
+
+.admin-audio-board {
+  display: grid;
+  gap: 14px;
+  margin: 4px 0 6px;
+}
+
+.admin-audio-board-head {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.admin-audio-board-head div {
+  display: grid;
+  gap: 3px;
+}
+
+.admin-audio-board-head strong {
+  color: #f4f2ec;
+  font-size: 1rem;
+}
+
+.admin-audio-board-head small {
+  color: #8f8b84;
+}
+
+.admin-audio-board-head button {
+  flex: 0 0 auto;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.035);
+  color: #c8c3b8;
+  padding: 9px 12px;
+  font-weight: 850;
+}
+
+.admin-audio-board-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.admin-audio-card {
+  display: grid;
+  gap: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.075);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.025);
+  padding: 12px;
+  transition: border-color 0.16s ease, background 0.16s ease, transform 0.16s ease;
+}
+
+.admin-audio-card.active {
+  border-color: rgba(215, 183, 88, 0.45);
+  background: rgba(215, 183, 88, 0.055);
+}
+
+.admin-audio-card.dragging {
+  opacity: 0.58;
+  transform: scale(0.985);
+}
+
+.admin-audio-card-main {
+  display: grid;
+  grid-template-columns: 18px 28px minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+  border: 0;
+  background: transparent;
+  color: #f4f2ec;
+  padding: 0;
+  text-align: left;
+  box-shadow: none;
+}
+
+.admin-audio-card-main strong,
+.admin-audio-card-main small,
+.admin-audio-card code {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-audio-card-main strong {
+  display: block;
+  color: #f4f2ec;
+  font-size: 0.9rem;
+}
+
+.admin-audio-card-main small {
+  display: block;
+  margin-top: 2px;
+  color: #8f8b84;
+  font-size: 0.72rem;
+}
+
+.admin-audio-drag {
+  display: grid;
+  place-items: center;
+  color: rgba(255, 255, 255, 0.28);
+  cursor: grab;
+}
+
+.admin-audio-number {
+  width: 26px;
+  height: 26px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: rgba(215, 183, 88, 0.12);
+  color: #d7b758;
+  font-size: 0.74rem;
+  font-weight: 900;
+}
+
+.admin-audio-card-tools {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+}
+
+.admin-audio-card-tools select,
+.admin-audio-card textarea {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 9px;
+  background: rgba(8, 9, 11, 0.62);
+  color: #f4f2ec;
+}
+
+.admin-audio-card-tools select {
+  min-height: 34px;
+  padding: 0 10px;
+}
+
+.admin-audio-card-tools button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 1px solid rgba(215, 183, 88, 0.22);
+  border-radius: 999px;
+  background: rgba(215, 183, 88, 0.08);
+  color: #efdca2;
+  padding: 0 11px;
+  font-weight: 850;
+}
+
+.admin-audio-card textarea {
+  min-height: 58px;
+  resize: vertical;
+  padding: 9px 10px;
+  color: rgba(244, 242, 236, 0.84);
+}
+
+.admin-audio-card textarea::placeholder {
+  color: rgba(244, 242, 236, 0.34);
+}
+
+.admin-audio-card code {
+  color: rgba(239, 220, 162, 0.72);
+  font-size: 0.72rem;
 }
 
 .admin-book-textarea {
@@ -8286,6 +8450,15 @@ html.light .reader-notes-popover h2 {
   .reader-footer-actions {
     width: min(360px, calc(100vw - 32px)) !important;
     margin: 18px auto max(42px, env(safe-area-inset-bottom)) !important;
+  }
+
+  .admin-audio-board-head {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .admin-audio-board-grid {
+    grid-template-columns: 1fr;
   }
 }
 
