@@ -981,6 +981,7 @@ export default function ReaderShell({
             <div className="progress-track reader-global-progress"><span style={{ width: `${pdfProgress}%` }} /></div>
           </div>
         </article>
+        <div className="reader-footer-actions">
         {showNarrationButton && (
           <div className="reader-narration-controls reader-narration-footer">
             <button
@@ -999,6 +1000,7 @@ export default function ReaderShell({
             <span>Voltar ao menu</span>
           </button>
         )}
+        </div>
         </>
       )}
     </section>

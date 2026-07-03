@@ -6605,6 +6605,26 @@ html.light .reader-actions .reader-page-bookmark-button.active {
   justify-content: flex-end;
 }
 
+.reader-footer-actions {
+  width: min(670px, calc(100% - 56px));
+  margin: 14px auto 46px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.reader-footer-actions .reader-narration-controls {
+  order: 2;
+  width: auto;
+  margin: 0;
+}
+
+.reader-footer-actions .reader-footer-exit-button {
+  order: 1;
+  margin: 0;
+}
+
 .reader-narration-controls button {
   width: 32px;
   height: 32px;
@@ -8260,6 +8280,11 @@ html.light .reader-notes-popover h2 {
   }
 
   .reader-footer-exit-button {
+    margin: 0 !important;
+  }
+
+  .reader-footer-actions {
+    width: min(360px, calc(100vw - 32px)) !important;
     margin: 18px auto max(42px, env(safe-area-inset-bottom)) !important;
   }
 }
