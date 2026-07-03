@@ -808,7 +808,7 @@ export function App() {
   const [adminAudioSectionKey, setAdminAudioSectionKey] = useState('');
   const [adminAudioLabel, setAdminAudioLabel] = useState('');
   const [adminAudioUrl, setAdminAudioUrl] = useState('');
-  const [adminAudioProduction, setAdminAudioProduction] = useState<Record<string, { status: AdminAudioProductionStatus; note: string }>>(() => {
+  const [adminAudioProduction, setAdminAudioProduction] = useState<Record<string, { status: AdminAudioProductionStatus; note: string; coverUrl?: string }>>(() => {
     try {
       return JSON.parse(localStorage.getItem(ADMIN_AUDIO_PRODUCTION_KEY) || '{}');
     } catch {
@@ -1045,7 +1045,7 @@ export function App() {
         if (!baseTrack) return null;
         const published = adminBookAudio.find((track) => track.chapterId === adminAudioChapterId && track.sectionKey === sectionKey)?.latestPublished;
         const productionKey = `${adminAudioChapterId}:${sectionKey}`;
-        const production = adminAudioProduction[productionKey] || { status: published ? 'review' : 'placeholder', note: '' };
+        const production = adminAudioProduction[productionKey] || { status: published ? 'review' : 'placeholder', note: '', coverUrl: '' };
         return {
           sectionKey,
           productionKey,
@@ -1063,7 +1063,7 @@ export function App() {
         url: string;
         defaultUrl: string;
         published?: NonNullable<AdminBookAudioSummary['latestPublished']>;
-        production: { status: AdminAudioProductionStatus; note: string };
+        production: { status: AdminAudioProductionStatus; note: string; coverUrl?: string };
       }>;
   }, [adminAudioChapterId, adminAudioOrder, adminAudioProduction, adminAudioTracksForChapter, adminBookAudio]);
 
@@ -1988,12 +1988,13 @@ export function App() {
     }
   };
 
-  const updateAdminAudioProduction = (productionKey: string, patch: Partial<{ status: AdminAudioProductionStatus; note: string }>) => {
+  const updateAdminAudioProduction = (productionKey: string, patch: Partial<{ status: AdminAudioProductionStatus; note: string; coverUrl: string }>) => {
     setAdminAudioProduction((current) => ({
       ...current,
       [productionKey]: {
         status: current[productionKey]?.status || 'review',
         note: current[productionKey]?.note || '',
+        coverUrl: current[productionKey]?.coverUrl || '',
         ...patch,
       },
     }));
@@ -3979,6 +3980,15 @@ export function App() {
                     onChange={(event) => updateAdminAudioProduction(item.productionKey, { note: event.target.value })}
                     placeholder="Observacao: texto inconsistente, voz errada, placeholder, precisa regenerar..."
                   />
+                  <label className="admin-audio-cover-field">
+                    <span>{item.production.coverUrl ? <img src={item.production.coverUrl} alt="" /> : <Music2 size={18} />}</span>
+                    <input
+                      value={item.production.coverUrl || ''}
+                      onChange={(event) => updateAdminAudioProduction(item.productionKey, { coverUrl: event.target.value })}
+                      placeholder="/media/imagens/capas/pilar-01.webp"
+                      aria-label="Capa ou miniatura da faixa"
+                    />
+                  </label>
                   <code>{item.url}</code>
                 </article>
               ))}
