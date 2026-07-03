@@ -100,6 +100,8 @@ import {
   requestPasswordReset,
   revokeAdminProduct,
   resetPassword,
+  saveAdminBookAudioMeta,
+  saveAdminBookAudioOrder,
   saveAdminBookPageDraft,
   sendMindMessage,
   updateStoredAuthUser,
@@ -130,6 +132,7 @@ type AudioState = {
   isPlaying: boolean;
   currentUrl: string | null;
   title: string | null;
+  coverUrl?: string | null;
   currentTime: number;
   duration: number;
   volume: number;
@@ -144,6 +147,7 @@ type AudioQueueItem = {
   chapterId: string;
   chapterTitle: string;
   trackIndex: number;
+  coverUrl?: string | null;
 };
 
 type SaveFeedback = 'idle' | 'saving' | 'saved';
@@ -846,7 +850,7 @@ export function App() {
   const [adminBookSearch, setAdminBookSearch] = useState('');
   const [adminBookCompareOpen, setAdminBookCompareOpen] = useState(false);
   const [bookPageOverrides, setBookPageOverrides] = useState<Record<number, string>>({});
-  const [bookAudioOverrides, setBookAudioOverrides] = useState<Record<string, { chapterId: string; sectionKey: string; label: string; url: string }>>({});
+  const [bookAudioOverrides, setBookAudioOverrides] = useState<Record<string, { chapterId: string; sectionKey: string; label: string; url: string; coverUrl?: string | null }>>({});
   const [upgradeModal, setUpgradeModal] = useState<UpgradeKey | null>(null);
   const [token, setToken] = useState('');
   const [tokenError, setTokenError] = useState('');
@@ -884,6 +888,7 @@ export function App() {
     isPlaying: false,
     currentUrl: null,
     title: null,
+    coverUrl: null,
     currentTime: 0,
     duration: 0,
     volume: 0.84,
@@ -974,7 +979,7 @@ export function App() {
   const selectedChapterAudioTracks = useMemo(
     () => selectedChapter.audioTracks.map((track) => {
       const key = `${selectedChapter.id}:${audioTrackKey(track.label)}`;
-      return bookAudioOverrides[key] ? { label: bookAudioOverrides[key].label, url: bookAudioOverrides[key].url } : track;
+      return bookAudioOverrides[key] ? { label: bookAudioOverrides[key].label, url: bookAudioOverrides[key].url, coverUrl: bookAudioOverrides[key].coverUrl } : track;
     }),
     [bookAudioOverrides, selectedChapter],
   );
@@ -993,6 +998,7 @@ export function App() {
           chapterId: chapter.id,
           chapterTitle: repairBrokenPdfCharacters(chapter.title),
           trackIndex,
+          coverUrl: override?.coverUrl,
         };
       }),
     ),
@@ -1063,7 +1069,12 @@ export function App() {
         if (!baseTrack) return null;
         const published = adminBookAudio.find((track) => track.chapterId === adminAudioChapterId && track.sectionKey === sectionKey)?.latestPublished;
         const productionKey = `${adminAudioChapterId}:${sectionKey}`;
-        const production = adminAudioProduction[productionKey] || { status: published ? 'review' : 'placeholder', note: '', coverUrl: '' };
+        const savedProduction = adminAudioProduction[productionKey];
+        const production = savedProduction || {
+          status: published ? 'review' : 'placeholder',
+          note: '',
+          coverUrl: published?.coverUrl || '',
+        };
         return {
           sectionKey,
           productionKey,
@@ -1377,16 +1388,17 @@ export function App() {
   useEffect(() => {
     fetchPublishedAudioTracks()
       .then((tracks) => {
-        setBookAudioOverrides(
-          tracks.reduce<Record<string, { chapterId: string; sectionKey: string; label: string; url: string }>>((acc, track) => {
-            acc[`${track.chapterId}:${track.sectionKey}`] = {
-              chapterId: track.chapterId,
-              sectionKey: track.sectionKey,
-              label: track.label,
-              url: track.url,
-            };
-            return acc;
-          }, {}),
+      setBookAudioOverrides(
+        tracks.reduce<Record<string, { chapterId: string; sectionKey: string; label: string; url: string; coverUrl?: string | null }>>((acc, track) => {
+          acc[`${track.chapterId}:${track.sectionKey}`] = {
+            chapterId: track.chapterId,
+            sectionKey: track.sectionKey,
+            label: track.label,
+            url: track.url,
+            coverUrl: track.coverUrl,
+          };
+          return acc;
+        }, {}),
         );
       })
       .catch(() => setBookAudioOverrides({}));
@@ -1425,6 +1437,34 @@ export function App() {
     setAdminAudioLabel(published?.label || baseTrack?.label || '');
     setAdminAudioUrl(published?.url || baseTrack?.url || '');
   }, [adminAudioSectionKey, adminAudioTracksForChapter, adminCurrentAudioSummary]);
+
+  useEffect(() => {
+    if (!adminBookAudio.length) return;
+    setAdminAudioProduction((current) => {
+      const next = { ...current };
+      adminBookAudio.forEach((track) => {
+        if (!track.production) return;
+        next[`${track.chapterId}:${track.sectionKey}`] = {
+          status: track.production.productionStatus || next[`${track.chapterId}:${track.sectionKey}`]?.status || 'review',
+          note: track.production.productionNote || next[`${track.chapterId}:${track.sectionKey}`]?.note || '',
+          coverUrl: track.production.coverUrl || track.latestPublished?.coverUrl || next[`${track.chapterId}:${track.sectionKey}`]?.coverUrl || '',
+        };
+      });
+      return next;
+    });
+    setAdminAudioOrder((current) => {
+      const next = { ...current };
+      const byChapter = adminBookAudio.reduce<Record<string, Array<{ sectionKey: string; sortOrder: number }>>>((acc, track) => {
+        if (track.production?.sortOrder === undefined) return acc;
+        acc[track.chapterId] = [...(acc[track.chapterId] || []), { sectionKey: track.sectionKey, sortOrder: track.production.sortOrder || 0 }];
+        return acc;
+      }, {});
+      Object.entries(byChapter).forEach(([chapterId, tracks]) => {
+        next[chapterId] = tracks.sort((a, b) => a.sortOrder - b.sortOrder).map((track) => track.sectionKey);
+      });
+      return next;
+    });
+  }, [adminBookAudio]);
 
   useEffect(() => {
     localStorage.setItem(ADMIN_AUDIO_PRODUCTION_KEY, JSON.stringify(adminAudioProduction));
@@ -1560,12 +1600,13 @@ export function App() {
       isPlaying: true,
       currentUrl: item.url,
       title: item.title,
+      coverUrl: item.coverUrl || null,
       currentTime: resumeAt,
       duration: saved?.duration || 0,
     }));
   };
 
-  const handlePlayAudio = (url: string | null, title: string | null) => {
+  const handlePlayAudio = (url: string | null, title: string | null, coverUrl?: string | null) => {
     if (!url || !audioRef.current) return;
     playClick('primary');
     const audio = audioRef.current;
@@ -1604,6 +1645,7 @@ export function App() {
       isPlaying: true,
       currentUrl: url,
       title,
+      coverUrl: coverUrl || null,
       currentTime: resumeAt,
       duration: saved?.duration || 0,
     }));
@@ -1650,7 +1692,7 @@ export function App() {
     currentAudioUrlRef.current = null;
     setAudioFullOpen(false);
     stopAudioSpectrum();
-    setAudioState((state) => ({ ...state, isPlaying: false, currentUrl: null, title: null, currentTime: 0, duration: 0 }));
+    setAudioState((state) => ({ ...state, isPlaying: false, currentUrl: null, title: null, coverUrl: null, currentTime: 0, duration: 0 }));
   };
 
   const handleTokenSubmit = () => {
@@ -1931,12 +1973,13 @@ export function App() {
     const [adminAudio, publishedAudio] = await Promise.all([fetchAdminBookAudio(), fetchPublishedAudioTracks()]);
     setAdminBookAudio(adminAudio);
     setBookAudioOverrides(
-      publishedAudio.reduce<Record<string, { chapterId: string; sectionKey: string; label: string; url: string }>>((acc, track) => {
+      publishedAudio.reduce<Record<string, { chapterId: string; sectionKey: string; label: string; url: string; coverUrl?: string | null }>>((acc, track) => {
         acc[`${track.chapterId}:${track.sectionKey}`] = {
           chapterId: track.chapterId,
           sectionKey: track.sectionKey,
           label: track.label,
           url: track.url,
+          coverUrl: track.coverUrl,
         };
         return acc;
       }, {}),
@@ -2043,14 +2086,38 @@ export function App() {
     setAdminAudioDraggingKey('');
   };
 
+  const saveAdminAudioBoard = async () => {
+    setAdminMessage('');
+    try {
+      const sectionKeys = adminAudioBoardItems.map((item) => item.sectionKey);
+      await saveAdminBookAudioOrder({ chapterId: adminAudioChapterId, sectionKeys });
+      await Promise.all(adminAudioBoardItems.map((item, index) =>
+        saveAdminBookAudioMeta({
+          chapterId: adminAudioChapterId,
+          sectionKey: item.sectionKey,
+          productionStatus: item.production.status,
+          productionNote: item.production.note,
+          coverUrl: item.production.coverUrl || '',
+          sortOrder: index,
+        }),
+      ));
+      await refreshBookAudioContent();
+      setAdminMessage('Mesa de audio salva no servidor.');
+    } catch (error: any) {
+      setAdminMessage(error?.message || 'Nao foi possivel salvar a mesa de audio.');
+    }
+  };
+
   const handlePublishBookAudio = async () => {
     setAdminMessage('');
+    const productionKey = `${adminAudioChapterId}:${adminAudioSectionKey}`;
     try {
       await publishAdminBookAudio({
         chapterId: adminAudioChapterId,
         sectionKey: adminAudioSectionKey,
         label: adminAudioLabel,
         url: adminAudioUrl,
+        coverUrl: adminAudioProduction[productionKey]?.coverUrl || undefined,
       });
       await refreshBookAudioContent();
       setAdminMessage('Audio publicado para esta secao.');
@@ -4029,6 +4096,9 @@ export function App() {
               >
                 Restaurar ordem
               </button>
+              <button type="button" onClick={saveAdminAudioBoard}>
+                Salvar mesa
+              </button>
             </div>
             <div className="admin-audio-board-grid">
               {adminAudioBoardItems.map((item, index) => (
@@ -4058,7 +4128,7 @@ export function App() {
                         <option key={status} value={status}>{audioProductionLabels[status]}</option>
                       ))}
                     </select>
-                    <button type="button" onClick={() => handlePlayAudio(item.url, repairMojibake(item.label))}>
+                    <button type="button" onClick={() => handlePlayAudio(item.url, repairMojibake(item.label), item.production.coverUrl || item.published?.coverUrl)}>
                       <Play size={14} /> Testar
                     </button>
                   </div>
@@ -4100,7 +4170,7 @@ export function App() {
           </div>
           {adminAudioPathWarning && <small className="admin-media-warning">{adminAudioPathWarning}</small>}
           <div className="workbook-actions">
-            <Button onClick={() => adminAudioUrl && handlePlayAudio(adminAudioUrl, adminAudioLabel || 'Preview do audio')} variant="secondary">Testar audio</Button>
+            <Button onClick={() => adminAudioUrl && handlePlayAudio(adminAudioUrl, adminAudioLabel || 'Preview do audio', adminAudioProduction[`${adminAudioChapterId}:${adminAudioSectionKey}`]?.coverUrl)} variant="secondary">Testar audio</Button>
             <Button onClick={handlePublishBookAudio}>Publicar audio</Button>
           </div>
           <div className="admin-book-history">
@@ -4293,7 +4363,7 @@ export function App() {
             <button className="audio-full-close" onClick={() => setAudioFullOpen(false)} title="Voltar para barra"><X size={20} /></button>
             <div className="audio-full-card">
               <div className="audio-full-cover">
-                <img src="/media/imagens/capas/capa-topo.jpg" alt="" />
+                <img src={audioState.coverUrl || '/media/imagens/capas/capa-topo.jpg'} alt="" />
                 <div className="audio-orbit one" />
                 <div className="audio-orbit two" />
               </div>

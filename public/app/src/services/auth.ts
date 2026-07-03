@@ -71,9 +71,21 @@ export type BookAudioRevision = {
   sectionKey: string;
   label: string;
   url: string;
+  coverUrl?: string | null;
+  sortOrder?: number;
   version?: number;
   publishedAt?: string | null;
   createdAt?: string;
+  updatedAt?: string;
+};
+
+export type BookAudioProductionMeta = {
+  chapterId: string;
+  sectionKey: string;
+  productionStatus: 'ok' | 'review' | 'record' | 'placeholder';
+  productionNote?: string | null;
+  coverUrl?: string | null;
+  sortOrder?: number;
   updatedAt?: string;
 };
 
@@ -81,6 +93,7 @@ export type AdminBookAudioSummary = {
   chapterId: string;
   sectionKey: string;
   latestPublished?: BookAudioRevision | null;
+  production?: BookAudioProductionMeta | null;
   history: BookAudioRevision[];
 };
 
@@ -347,9 +360,27 @@ export async function fetchAdminBookAudio() {
   return apiRequest<AdminBookAudioSummary[]>('/api/admin/book/audio', { token });
 }
 
-export async function publishAdminBookAudio(input: { chapterId: string; sectionKey: string; label: string; url: string }) {
+export async function publishAdminBookAudio(input: { chapterId: string; sectionKey: string; label: string; url: string; coverUrl?: string }) {
   const token = getStoredAuthToken();
   return apiRequest<BookAudioRevision>('/api/admin/book/audio/publish', {
+    token,
+    method: 'POST',
+    body: JSON.stringify(input),
+  });
+}
+
+export async function saveAdminBookAudioMeta(input: { chapterId: string; sectionKey: string; productionStatus?: string; productionNote?: string; coverUrl?: string; sortOrder?: number }) {
+  const token = getStoredAuthToken();
+  return apiRequest<BookAudioProductionMeta>('/api/admin/book/audio/meta', {
+    token,
+    method: 'POST',
+    body: JSON.stringify(input),
+  });
+}
+
+export async function saveAdminBookAudioOrder(input: { chapterId: string; sectionKeys: string[] }) {
+  const token = getStoredAuthToken();
+  return apiRequest<BookAudioProductionMeta[]>('/api/admin/book/audio/order', {
     token,
     method: 'POST',
     body: JSON.stringify(input),

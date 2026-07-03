@@ -4,7 +4,7 @@ import { AuthService } from '../auth/auth.service';
 import { CurrentUser } from '../auth/current-user.decorator';
 import { AuthenticatedUser } from '../auth/auth.types';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { AdminBookAudioDto, AdminBookPageContentDto, AdminCreateInviteDto, AdminGrantPlanDto, AdminGrantProductDto } from './admin.dto';
+import { AdminBookAudioDto, AdminBookAudioMetaDto, AdminBookAudioOrderDto, AdminBookPageContentDto, AdminCreateInviteDto, AdminGrantPlanDto, AdminGrantProductDto } from './admin.dto';
 import { AdminService } from './admin.service';
 
 @Controller('admin')
@@ -66,6 +66,16 @@ export class AdminController {
   @Post('book/audio/publish')
   publishBookAudio(@Body() body: AdminBookAudioDto, @CurrentUser() user: AuthenticatedUser) {
     return this.adminService.publishBookAudio(body, user.id);
+  }
+
+  @Post('book/audio/meta')
+  saveBookAudioMeta(@Body() body: AdminBookAudioMetaDto) {
+    return this.adminService.saveBookAudioMeta(body);
+  }
+
+  @Post('book/audio/order')
+  saveBookAudioOrder(@Body() body: AdminBookAudioOrderDto) {
+    return this.adminService.saveBookAudioOrder(body);
   }
 
   @Post('invites')

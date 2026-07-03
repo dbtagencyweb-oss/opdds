@@ -1,4 +1,4 @@
-import { IsEmail, IsIn, IsInt, IsOptional, IsString, MaxLength, Min } from 'class-validator';
+import { IsArray, IsEmail, IsIn, IsInt, IsOptional, IsString, MaxLength, Min } from 'class-validator';
 
 const plans = ['pdf', 'basic', 'workbook', 'igent30', 'igent90', 'group', 'vip'] as const;
 
@@ -65,4 +65,48 @@ export class AdminBookAudioDto {
   @IsString()
   @MaxLength(500)
   url!: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(500)
+  coverUrl?: string;
+}
+
+export class AdminBookAudioMetaDto {
+  @IsString()
+  @MaxLength(80)
+  chapterId!: string;
+
+  @IsString()
+  @MaxLength(80)
+  sectionKey!: string;
+
+  @IsOptional()
+  @IsIn(['ok', 'review', 'record', 'placeholder'])
+  productionStatus?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(800)
+  productionNote?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(500)
+  coverUrl?: string;
+
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  sortOrder?: number;
+}
+
+export class AdminBookAudioOrderDto {
+  @IsString()
+  @MaxLength(80)
+  chapterId!: string;
+
+  @IsArray()
+  @IsString({ each: true })
+  sectionKeys!: string[];
 }

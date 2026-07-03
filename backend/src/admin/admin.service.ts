@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { AdminBookAudioDto, AdminBookPageContentDto, AdminGrantPlanDto, AdminGrantProductDto } from './admin.dto';
+import { AdminBookAudioDto, AdminBookAudioMetaDto, AdminBookAudioOrderDto, AdminBookPageContentDto, AdminGrantPlanDto, AdminGrantProductDto } from './admin.dto';
 
 type AccessPlan = 'pdf' | 'basic' | 'workbook' | 'igent30' | 'igent90' | 'group' | 'vip';
 
@@ -163,10 +163,24 @@ export class AdminService {
       sectionKey: revision.sectionKey,
       label: revision.label,
       url: revision.url,
+      coverUrl: revision.coverUrl,
       version: revision.version,
       publishedAt: revision.publishedAt,
       createdAt: revision.createdAt,
       updatedAt: revision.updatedAt,
+    };
+  }
+
+  private mapBookAudioMeta(meta: any) {
+    if (!meta) return null;
+    return {
+      chapterId: meta.chapterId,
+      sectionKey: meta.sectionKey,
+      productionStatus: meta.productionStatus,
+      productionNote: meta.productionNote,
+      coverUrl: meta.coverUrl,
+      sortOrder: meta.sortOrder,
+      updatedAt: meta.updatedAt,
     };
   }
 
@@ -233,11 +247,15 @@ export class AdminService {
   }
 
   async listBookAudioRevisions() {
-    const revisions = await this.prisma.bookAudioRevision.findMany({
-      orderBy: [{ chapterId: 'asc' }, { sectionKey: 'asc' }, { createdAt: 'desc' }],
-    });
+    const [revisions, metas] = await Promise.all([
+      this.prisma.bookAudioRevision.findMany({
+        orderBy: [{ chapterId: 'asc' }, { sectionKey: 'asc' }, { createdAt: 'desc' }],
+      }),
+      this.prisma.bookAudioTrackMeta.findMany(),
+    ]);
+    const metaByTrack = new Map(metas.map((meta) => [`${meta.chapterId}:${meta.sectionKey}`, meta]));
 
-    const byTrack = new Map<string, { chapterId: string; sectionKey: string; latestPublished: any | null; history: any[] }>();
+    const byTrack = new Map<string, { chapterId: string; sectionKey: string; latestPublished: any | null; history: any[]; production: any | null }>();
     for (const revision of revisions) {
       const key = `${revision.chapterId}:${revision.sectionKey}`;
       const current = byTrack.get(key) ?? {
@@ -245,6 +263,7 @@ export class AdminService {
         sectionKey: revision.sectionKey,
         latestPublished: null,
         history: [],
+        production: this.mapBookAudioMeta(metaByTrack.get(key)),
       };
       const mapped = this.mapBookAudioRevision(revision);
       current.history.push(mapped);
@@ -252,7 +271,24 @@ export class AdminService {
       byTrack.set(key, current);
     }
 
-    return Array.from(byTrack.values());
+    for (const meta of metas) {
+      const key = `${meta.chapterId}:${meta.sectionKey}`;
+      if (!byTrack.has(key)) {
+        byTrack.set(key, {
+          chapterId: meta.chapterId,
+          sectionKey: meta.sectionKey,
+          latestPublished: null,
+          history: [],
+          production: this.mapBookAudioMeta(meta),
+        });
+      }
+    }
+
+    return Array.from(byTrack.values()).sort((a, b) => {
+      const orderA = a.production?.sortOrder ?? 9999;
+      const orderB = b.production?.sortOrder ?? 9999;
+      return a.chapterId.localeCompare(b.chapterId) || orderA - orderB || a.sectionKey.localeCompare(b.sectionKey);
+    });
   }
 
   async publishBookAudio(data: AdminBookAudioDto, createdById?: string) {
@@ -260,6 +296,7 @@ export class AdminService {
     const sectionKey = data.sectionKey.trim();
     const label = data.label.trim();
     const url = data.url.trim();
+    const coverUrl = data.coverUrl?.trim() || null;
     if (!chapterId || !sectionKey || !label || !url) throw new BadRequestException('Dados do audio incompletos.');
 
     const revision = await this.prisma.bookAudioRevision.create({
@@ -268,12 +305,50 @@ export class AdminService {
         sectionKey,
         label,
         url,
+        coverUrl,
         version: await this.nextBookAudioVersion(chapterId, sectionKey),
         createdById,
         publishedAt: new Date(),
       },
     });
+    if (coverUrl) {
+      await this.saveBookAudioMeta({ chapterId, sectionKey, coverUrl });
+    }
     return this.mapBookAudioRevision(revision);
+  }
+
+  async saveBookAudioMeta(data: AdminBookAudioMetaDto) {
+    const chapterId = data.chapterId.trim();
+    const sectionKey = data.sectionKey.trim();
+    if (!chapterId || !sectionKey) throw new BadRequestException('Faixa de audio nao informada.');
+
+    const meta = await this.prisma.bookAudioTrackMeta.upsert({
+      where: { chapterId_sectionKey: { chapterId, sectionKey } },
+      create: {
+        chapterId,
+        sectionKey,
+        productionStatus: data.productionStatus || 'review',
+        productionNote: data.productionNote?.trim() || null,
+        coverUrl: data.coverUrl?.trim() || null,
+        sortOrder: data.sortOrder ?? 0,
+      },
+      update: {
+        ...(data.productionStatus ? { productionStatus: data.productionStatus } : {}),
+        ...(data.productionNote !== undefined ? { productionNote: data.productionNote.trim() || null } : {}),
+        ...(data.coverUrl !== undefined ? { coverUrl: data.coverUrl.trim() || null } : {}),
+        ...(data.sortOrder !== undefined ? { sortOrder: data.sortOrder } : {}),
+      },
+    });
+    return this.mapBookAudioMeta(meta);
+  }
+
+  async saveBookAudioOrder(data: AdminBookAudioOrderDto) {
+    const chapterId = data.chapterId.trim();
+    if (!chapterId) throw new BadRequestException('Capitulo nao informado.');
+    const updates = data.sectionKeys.map((sectionKey, index) =>
+      this.saveBookAudioMeta({ chapterId, sectionKey: sectionKey.trim(), sortOrder: index }),
+    );
+    return Promise.all(updates);
   }
 
   async grantPlan(userId: string, data: AdminGrantPlanDto) {

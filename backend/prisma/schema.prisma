@@ -175,6 +175,7 @@ model BookAudioRevision {
   sectionKey  String
   label       String
   url         String
+  coverUrl    String?
   version     Int       @default(1)
   createdById String?
   publishedAt DateTime?
@@ -183,4 +184,19 @@ model BookAudioRevision {
 
   @@index([chapterId, sectionKey, createdAt])
   @@index([chapterId, sectionKey, publishedAt])
+}
+
+model BookAudioTrackMeta {
+  id               String   @id @default(cuid())
+  chapterId        String
+  sectionKey       String
+  productionStatus String   @default("review")
+  productionNote   String?
+  coverUrl         String?
+  sortOrder        Int      @default(0)
+  updatedAt        DateTime @updatedAt
+  createdAt        DateTime @default(now())
+
+  @@unique([chapterId, sectionKey])
+  @@index([chapterId, sortOrder])
 }

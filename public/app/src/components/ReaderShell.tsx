@@ -35,6 +35,7 @@ type ChapterNavItem = {
 type AudioTrack = {
   label: string;
   url: string;
+  coverUrl?: string | null;
 };
 
 type AudioProgressEntry = {
@@ -85,7 +86,7 @@ type Props = {
   onPdfPageChange: (page: number) => void;
   onPdfDocumentReady: (pages: number) => void;
   onSelectChapter: (index: number) => void;
-  playAudio: (url: string | null, title: string | null) => void;
+  playAudio: (url: string | null, title: string | null, coverUrl?: string | null) => void;
   audioProgress?: Record<string, AudioProgressEntry>;
   activeAudioUrl?: string | null;
   isAudioPlaying?: boolean;
@@ -789,7 +790,7 @@ export default function ReaderShell({
                   <button
                     key={track.url}
                     className={activeAudioUrl === track.url && isAudioPlaying ? 'active-audio' : ''}
-                    onClick={() => playAudio(track.url, `${displayTitle} · ${cleanLabel(track.label)}`)}
+                    onClick={() => playAudio(track.url, `${displayTitle} · ${cleanLabel(track.label)}`, track.coverUrl)}
                   >
                     {cleanLabel(track.label)}
                   </button>
@@ -874,7 +875,7 @@ export default function ReaderShell({
                         onClick={(event) => {
                           event.stopPropagation();
                           setActiveAudioTab(index);
-                          playAudio(sectionTrack.url, `${displayTitle} - ${cleanLabel(sectionTrack.label)}`);
+                          playAudio(sectionTrack.url, `${displayTitle} - ${cleanLabel(sectionTrack.label)}`, sectionTrack.coverUrl);
                         }}
                         aria-label={`Ouvir ${tabLabel}`}
                       >
@@ -893,7 +894,7 @@ export default function ReaderShell({
                 <button
                   key={track.url}
                   className={activeAudioUrl === track.url && isAudioPlaying ? 'active-audio' : ''}
-                  onClick={() => playAudio(track.url, `${displayTitle} · ${cleanLabel(track.label)}`)}
+                  onClick={() => playAudio(track.url, `${displayTitle} · ${cleanLabel(track.label)}`, track.coverUrl)}
                 >
                   {cleanLabel(track.label)}
                 </button>
