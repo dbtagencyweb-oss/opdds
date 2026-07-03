@@ -8113,28 +8113,56 @@ html.light .reader-notes-popover h2 {
     align-items: center !important;
     justify-items: center !important;
     padding: max(14px, env(safe-area-inset-top)) 14px max(14px, env(safe-area-inset-bottom)) !important;
-    overflow: hidden;
+    overflow: hidden !important;
   }
 
   .audio-full-card {
     width: min(360px, calc(100vw - 28px)) !important;
-    max-height: calc(100dvh - 28px);
+    max-height: calc(100dvh - 28px) !important;
     margin: auto !important;
-    gap: 14px !important;
+    gap: 10px !important;
     align-content: center !important;
     justify-items: center !important;
     overflow: visible;
   }
 
   .audio-full-cover {
-    width: min(214px, 58vw) !important;
+    width: min(178px, 48vw) !important;
     margin-inline: auto !important;
+  }
+
+  .audio-full-cover img {
+    width: 68% !important;
+    border-radius: 16px !important;
+  }
+
+  .audio-full-copy {
+    max-width: 100%;
+    display: grid;
+    justify-items: center;
+    gap: 4px;
+  }
+
+  .audio-full-copy .kicker {
+    margin: 0 !important;
+    font-size: 0.64rem !important;
   }
 
   .audio-full-copy h2 {
     max-width: 100%;
-    font-size: clamp(1.22rem, 6vw, 1.72rem) !important;
+    display: -webkit-box;
+    margin: 0 !important;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    font-size: clamp(1.08rem, 5.35vw, 1.45rem) !important;
     line-height: 1.12 !important;
+  }
+
+  .audio-full-copy small,
+  .audio-full-copy span {
+    font-size: 0.74rem !important;
+    line-height: 1.25 !important;
   }
 
   .audio-full-visualizer,
@@ -8142,9 +8170,35 @@ html.light .reader-notes-popover h2 {
     width: 100% !important;
   }
 
+  .audio-full-visualizer {
+    height: 72px !important;
+  }
+
+  .audio-full-visualizer .audio-frequency-bars {
+    inset: 8px 0 11px !important;
+    gap: 9px !important;
+  }
+
+  .audio-full-time {
+    margin-top: -8px !important;
+    font-size: 0.74rem !important;
+  }
+
   .audio-full-controls {
     width: 100%;
     gap: 10px !important;
+  }
+
+  .audio-control-main {
+    width: 62px !important;
+    height: 62px !important;
+  }
+
+  .audio-control-soft,
+  .audio-control-volume {
+    min-width: 56px !important;
+    min-height: 42px !important;
+    padding: 0 12px !important;
   }
 
   .compact-audio-player .player-cover {
