@@ -2636,20 +2636,23 @@ button:active {
 
 .workbook-transition {
   position: fixed;
-  inset: 0;
+  top: 0;
+  left: 0;
   z-index: 82;
-  display: grid;
-  place-items: center;
   width: 100dvw;
-  min-height: 100dvh;
+  height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   padding: 24px;
   overflow: hidden;
   background: rgba(5, 6, 8, 0.78);
   backdrop-filter: blur(18px);
+  box-sizing: border-box;
 }
 
 .workbook-transition p {
-  width: min(620px, 100%);
+  width: min(560px, calc(100dvw - 48px));
   max-height: calc(100dvh - 48px);
   margin: 0;
   overflow: auto;
@@ -2657,11 +2660,12 @@ button:active {
   border-radius: 14px;
   background: rgba(18, 19, 23, 0.92);
   color: #efdca2;
-  padding: 24px;
+  padding: 22px;
   text-align: center;
   font-family: var(--font-ui);
-  font-size: clamp(1.25rem, 4vw, 2rem);
+  font-size: clamp(1.12rem, 3vw, 1.78rem);
   line-height: 1.28;
+  box-sizing: border-box;
 }
 
 .workbook-hero {

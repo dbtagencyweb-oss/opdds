@@ -3268,11 +3268,6 @@ export function App() {
 
     return (
       <div className="app-page workbook-page page-enter">
-        {workbookTransition && (
-          <div className="workbook-transition" role="status">
-            <p>{workbookTransition}</p>
-          </div>
-        )}
         <section className="workbook-hero">
           <div>
             <p className="kicker">Workbook</p>
@@ -4250,6 +4245,11 @@ export function App() {
       </div>
       {BottomNavigation()}
       {UpgradeModal()}
+      {workbookTransition && route === ROUTES.WORKBOOK && (
+        <div className="workbook-transition" role="status">
+          <p>{workbookTransition}</p>
+        </div>
+      )}
       {audioState.currentUrl && (
         <>
         <div className="audio-dock pro-player compact-audio-player">
