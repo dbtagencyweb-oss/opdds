@@ -151,6 +151,8 @@ type AdminAudioProductionStatus = 'ok' | 'review' | 'record' | 'placeholder';
 
 const ADMIN_AUDIO_PRODUCTION_KEY = 'opd_admin_audio_production';
 const ADMIN_AUDIO_ORDER_KEY = 'opd_admin_audio_order';
+const WORKBOOK_INTRO_KEY = 'opd_workbook_intro_dismissed';
+const WORKBOOK_WELCOME_AUDIO = '/media/audios/diario/boas-vindas-diego.mp3';
 
 const audioProductionLabels: Record<AdminAudioProductionStatus, string> = {
   ok: 'OK',
@@ -158,6 +160,17 @@ const audioProductionLabels: Record<AdminAudioProductionStatus, string> = {
   record: 'Regravar',
   placeholder: 'Placeholder',
 };
+
+const workbookTransitionPhrases = [
+  'Reconhecimento abre espaço. Família mostra o que preencheu esse espaço antes de você poder escolher.',
+  'Família dá nome às lealdades. Luto mostra o que ainda ficou sem despedida.',
+  'Luto reconhece a ausência. Trabalho pergunta quanto valor você colocou na utilidade.',
+  'Trabalho separa valor de desempenho. Dor mostra onde você aprendeu a fugir para continuar.',
+  'Dor revela a anestesia. Desejo devolve permissão para querer sem pedir desculpas.',
+  'Desejo aponta o que ainda chama. Fé pergunta o que sobrou quando acreditar cansou.',
+  'Fé atravessa o não saber. Escassez mostra onde a falta virou identidade.',
+  'Escassez devolve escala. Vazio ensina a permanecer sem respostas prontas.',
+];
 
 type BeforeInstallPromptEvent = Event & {
   prompt: () => Promise<void>;
@@ -900,6 +913,11 @@ export function App() {
   const [workbookPrompt, setWorkbookPrompt] = useState(workbookPrompts[0]);
   const [workbookPillarIndex, setWorkbookPillarIndex] = useState(0);
   const [workbookAnswers, setWorkbookAnswers] = useState<Record<string, string>>({});
+  const [workbookIntroDismissed, setWorkbookIntroDismissed] = useState(() => {
+    if (typeof window === 'undefined') return true;
+    return localStorage.getItem(WORKBOOK_INTRO_KEY) === 'true';
+  });
+  const [workbookTransition, setWorkbookTransition] = useState('');
   const [letterIndex, setLetterIndex] = useState(0);
   const [readerLetters, setReaderLetters] = useState<Record<string, string>>({});
   const [letterMeta, setLetterMeta] = useState<Record<string, LetterMeta>>({});
@@ -3176,8 +3194,85 @@ export function App() {
       .map((question, index) => ({ question, answer: workbookAnswers[`${workbookPillarIndex}-${index}`] || '' }))
       .filter((item) => item.answer.trim());
 
+    const buildWorkbookJourneyText = () => workbookPillars.map((pillar, pillarIndex) => {
+      const answers = pillar.questions.map((question, questionIndex) => {
+        const answer = workbookAnswers[`${pillarIndex}-${questionIndex}`] || '';
+        return `${question}\n${answer || '[sem resposta]'}`;
+      }).join('\n\n');
+      return `${pillar.roman}. ${pillar.title}\n${answers}`;
+    }).join('\n\n---\n\n');
+
+    const openWorkbookIntro = () => {
+      handlePlayAudio(WORKBOOK_WELCOME_AUDIO, 'Boas-vindas ao Diario');
+    };
+
+    const enterWorkbook = () => {
+      localStorage.setItem(WORKBOOK_INTRO_KEY, 'true');
+      setWorkbookIntroDismissed(true);
+    };
+
+    const goToWorkbookPillar = (nextIndex: number) => {
+      const safeIndex = clamp(nextIndex, 0, workbookPillars.length - 1);
+      if (safeIndex === workbookPillarIndex) return;
+      const phrase = safeIndex > workbookPillarIndex
+        ? workbookTransitionPhrases[workbookPillarIndex] || 'Uma parte terminou. A proxima pergunta nao cobra resposta pronta.'
+        : 'Voltar tambem faz parte da jornada. Algumas respostas precisam ser reencontradas.';
+      setWorkbookTransition(phrase);
+      window.setTimeout(() => {
+        setWorkbookPillarIndex(safeIndex);
+        setWorkbookTransition('');
+      }, 1800);
+    };
+
+    const sendCurrentPillarToMind = () => {
+      const answers = currentPillar.questions.map((question, index) => ({
+        question,
+        answer: workbookAnswers[`${workbookPillarIndex}-${index}`] || '',
+      })).filter((item) => item.answer.trim());
+      const answerText = answers.map((item) => `Pergunta: ${item.question}\nResposta: ${item.answer}`).join('\n\n');
+      startMindSession(
+        linkedTopic,
+        answerText.trim()
+          ? `Leia as respostas abaixo como Diego leria: com tom de autor parceiro, sem parecer agente generico. Antes de perguntar qualquer coisa, abra com uma observacao especifica sobre uma palavra, repeticao, ausencia ou tensao que aparece no texto. Depois devolva uma pergunta curta, humana e dificil na medida certa.\n\nPilar atual: ${currentPillar.title}\n\n${answerText}`
+          : `Estou no pilar ${currentPillar.title}. Abra como Diego, explicando por onde comecar sem transformar isso em questionario.`,
+        'workbook',
+      );
+    };
+
+    const sendJourneyToMind = () => {
+      startMindSession(
+        activeMentorTopic,
+        `Use toda a memoria abaixo do meu Diario dos Desacreditados como contexto da proxima conversa. Responda como autor parceiro: primeiro diga o padrao que mais se repete na minha jornada, depois faca uma unica pergunta que me ajude a continuar.\n\n${buildWorkbookJourneyText()}`,
+        'workbook',
+      );
+    };
+
+    if (!workbookIntroDismissed) {
+      return (
+        <div className="app-page workbook-page page-enter">
+          <section className="workbook-welcome">
+            <div className="mentor-mark"><NotebookPen size={22} /></div>
+            <p className="kicker">Diario dos Desacreditados</p>
+            <h1>Antes de responder, escute isto.</h1>
+            <p>Esse diario nao e um questionario. Nao tem resposta certa. Nao tem nota. Ele existe porque algumas perguntas precisam ser feitas em voz alta, mesmo que so para voce mesmo.</p>
+            <p>Comeca pelo pilar que mais incomoda. Ou pelo que menos assusta. O iGentMIND vai ler o que voce escrever e devolver uma pergunta que eu faria se estivesse do outro lado. Nao para resolver. Para continuar.</p>
+            <div className="workbook-welcome-actions">
+              <Button onClick={openWorkbookIntro} variant="secondary"><Volume2 size={17} /> Ouvir Diego</Button>
+              <Button onClick={enterWorkbook}><BookOpen size={17} /> Comecar diario</Button>
+            </div>
+            <small>Audio esperado: {WORKBOOK_WELCOME_AUDIO}</small>
+          </section>
+        </div>
+      );
+    }
+
     return (
       <div className="app-page workbook-page page-enter">
+        {workbookTransition && (
+          <div className="workbook-transition" role="status">
+            <p>{workbookTransition}</p>
+          </div>
+        )}
         <section className="workbook-hero">
           <div>
             <p className="kicker">Workbook</p>
@@ -3187,6 +3282,7 @@ export function App() {
           <div className="workbook-hero-actions">
             <Button onClick={() => window.open(workbookPdfUrl, '_blank')} variant="secondary"><DownloadCloud size={17} /> Abrir PDF</Button>
             <Button onClick={exportWorkbook} variant="ghost">Exportar</Button>
+            <Button onClick={sendJourneyToMind} variant="secondary"><Brain size={17} /> Enviar ao iGentMIND</Button>
           </div>
         </section>
 
@@ -3199,10 +3295,12 @@ export function App() {
                   <button
                     key={pillar.title}
                     className={`${workbookPillarIndex === index ? 'active' : ''} ${answered ? 'answered' : ''}`}
-                    onClick={() => setWorkbookPillarIndex(index)}
+                    onClick={() => goToWorkbookPillar(index)}
                     title={pillar.title}
                   >
-                    {pillar.roman}
+                    <span className="pilar-roman">{pillar.roman}</span>
+                    <span className="pilar-name">{pillar.title}</span>
+                    <span className="pilar-dot" aria-hidden="true" />
                   </button>
                 );
               })}
@@ -3234,7 +3332,7 @@ export function App() {
                 saveLocalWorkbookEntry(summary);
                 flashSaveFeedback('workbook', setWorkbookSaveStatus);
               }} variant="secondary">Salvar pilar</Button>
-              <Button onClick={() => setWorkbookPillarIndex(clamp(workbookPillarIndex + 1, 0, workbookPillars.length - 1))} variant="ghost">Próximo</Button>
+              <Button onClick={() => goToWorkbookPillar(workbookPillarIndex + 1)} variant="ghost">Próximo</Button>
               <span className={`save-feedback ${workbookSaveStatus}`}>
                 {workbookSaveStatus === 'saving' ? 'Salvando...' : workbookSaveStatus === 'saved' ? 'Salvo' : answeredCount ? 'Salvo automaticamente' : 'Aguardando escrita'}
               </span>
@@ -3267,13 +3365,7 @@ export function App() {
                   <strong>Trecho sugerido</strong>
                   <p>{trimExcerpt(bookChapters[workbookPillarIndex + 8]?.summary || selectedChapter.summary, 120)}</p>
                 </div>
-                <Button onClick={() => startMindSession(
-                  linkedTopic,
-                  currentText.trim()
-                    ? `Analise minhas respostas do pilar ${currentPillar.title} e me devolva um contraponto com um gesto pratico: ${currentText}`
-                    : `Estou no pilar ${currentPillar.title}. Me ajude a escolher por onde comecar no diario.`,
-                  'workbook',
-                )}><Zap size={17} /> Conversar com iGentMIND</Button>
+                <Button onClick={sendCurrentPillarToMind}><Zap size={17} /> Conversar com iGentMIND</Button>
               </>
             ) : (
               <>
