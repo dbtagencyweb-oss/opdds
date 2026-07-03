@@ -5696,6 +5696,7 @@ html.light .volume-control input::-webkit-slider-runnable-track {
   z-index: 90;
   display: grid;
   place-items: center;
+  min-height: 100dvh;
   padding: clamp(18px, 4vw, 54px);
   background: rgba(5,6,8,.86);
   backdrop-filter: blur(24px);
@@ -5729,8 +5730,10 @@ html.light .volume-control input::-webkit-slider-runnable-track {
   position: relative;
   z-index: 1;
   width: min(760px, 100%);
+  margin: auto;
   display: grid;
   justify-items: center;
+  align-content: center;
   gap: 22px;
   color: #f4f2ec;
   text-align: center;
@@ -8088,7 +8091,7 @@ html.light .reader-notes-popover h2 {
   .compact-audio-player.pro-player {
     left: 0 !important;
     right: 0 !important;
-    bottom: calc(82px + env(safe-area-inset-bottom)) !important;
+    bottom: calc(58px + max(8px, env(safe-area-inset-bottom))) !important;
     grid-template-columns: minmax(0, 1fr) 72px 34px 48px 34px 24px !important;
     min-height: 78px !important;
     padding: 8px 10px !important;
@@ -8099,7 +8102,49 @@ html.light .reader-notes-popover h2 {
   }
 
   .audio-active-shell .compact-audio-player.pro-player {
-    bottom: calc(82px + env(safe-area-inset-bottom)) !important;
+    bottom: calc(58px + max(8px, env(safe-area-inset-bottom))) !important;
+  }
+
+  .reader-route-shell .compact-audio-player.pro-player {
+    bottom: 0 !important;
+  }
+
+  .audio-fullscreen-player {
+    align-items: center !important;
+    justify-items: center !important;
+    padding: max(14px, env(safe-area-inset-top)) 14px max(14px, env(safe-area-inset-bottom)) !important;
+    overflow: hidden;
+  }
+
+  .audio-full-card {
+    width: min(360px, calc(100vw - 28px)) !important;
+    max-height: calc(100dvh - 28px);
+    margin: auto !important;
+    gap: 14px !important;
+    align-content: center !important;
+    justify-items: center !important;
+    overflow: visible;
+  }
+
+  .audio-full-cover {
+    width: min(214px, 58vw) !important;
+    margin-inline: auto !important;
+  }
+
+  .audio-full-copy h2 {
+    max-width: 100%;
+    font-size: clamp(1.22rem, 6vw, 1.72rem) !important;
+    line-height: 1.12 !important;
+  }
+
+  .audio-full-visualizer,
+  .audio-full-time {
+    width: 100% !important;
+  }
+
+  .audio-full-controls {
+    width: 100%;
+    gap: 10px !important;
   }
 
   .compact-audio-player .player-cover {
