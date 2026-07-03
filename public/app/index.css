@@ -8110,6 +8110,11 @@ html.light .reader-notes-popover h2 {
   }
 
   .audio-fullscreen-player {
+    left: 0 !important;
+    right: 0 !important;
+    width: 100dvw !important;
+    max-width: 100dvw !important;
+    box-sizing: border-box !important;
     align-items: center !important;
     justify-items: center !important;
     padding: max(14px, env(safe-area-inset-top)) 14px max(14px, env(safe-area-inset-bottom)) !important;
@@ -8117,18 +8122,21 @@ html.light .reader-notes-popover h2 {
   }
 
   .audio-full-card {
-    width: min(360px, calc(100vw - 28px)) !important;
+    width: min(332px, calc(100dvw - 28px)) !important;
     max-height: calc(100dvh - 28px) !important;
     margin: auto !important;
+    place-self: center !important;
     gap: 10px !important;
     align-content: center !important;
     justify-items: center !important;
+    box-sizing: border-box !important;
     overflow: visible;
   }
 
   .audio-full-cover {
     width: min(178px, 48vw) !important;
     margin-inline: auto !important;
+    place-self: center !important;
   }
 
   .audio-full-cover img {
@@ -8137,9 +8145,11 @@ html.light .reader-notes-popover h2 {
   }
 
   .audio-full-copy {
+    width: 100%;
     max-width: 100%;
     display: grid;
     justify-items: center;
+    text-align: center;
     gap: 4px;
   }
 
@@ -8168,6 +8178,7 @@ html.light .reader-notes-popover h2 {
   .audio-full-visualizer,
   .audio-full-time {
     width: 100% !important;
+    max-width: 100% !important;
   }
 
   .audio-full-visualizer {
