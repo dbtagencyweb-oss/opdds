@@ -4935,14 +4935,24 @@ button:active {
 .contents-page .page-heading span,
 .contents-group > header span,
 .contents-main small { color: var(--muted); }
+.contents-page .page-heading,
+.contents-page .library-search,
+.contents-groups {
+  width: min(990px, 100%);
+  margin-inline: auto;
+}
 .contents-groups { display: grid; gap: 24px; margin-top: 22px; }
-.contents-group { overflow: hidden; border: 1px solid var(--line); border-radius: 24px; background: var(--surface); }
+.contents-group { width: 100%; overflow: hidden; border: 1px solid var(--line); border-radius: 24px; background: var(--surface); }
 .contents-group > header { padding: 26px 28px 22px; border-bottom: 1px solid var(--line); background: linear-gradient(135deg, rgba(255,255,255,.04), transparent); }
 .contents-group > header h2 { margin: 4px 0 8px; font-size: clamp(1.5rem, 3vw, 2.25rem); }
 .contents-chapters { display: grid; }
 .contents-chapter + .contents-chapter { border-top: 1px solid var(--line); }
-.contents-main { width: 100%; display: grid; grid-template-columns: 48px 1fr auto; align-items: center; gap: 16px; padding: 20px 26px; text-align: left; color: inherit; }
-.contents-main:hover { background: rgba(255,255,255,.035); }
+.contents-chapter { transition: border-color .18s ease, background .18s ease; }
+.contents-main { width: 100%; display: grid; grid-template-columns: 48px 1fr auto; align-items: center; gap: 16px; min-height: 80px; padding: 20px 26px; text-align: left; color: inherit; }
+.contents-main:hover { background: transparent; }
+.contents-chapter:hover { background: rgba(215, 183, 88, 0.025); }
+.contents-chapter:hover .contents-number { border-color: rgba(215, 183, 88, 0.62); color: #efdca2; }
+.contents-chapter:hover .contents-main strong { color: #f4f2ec; }
 .contents-number { display: grid; place-items: center; width: 42px; height: 42px; border: 1px solid rgba(229,184,94,.34); border-radius: 50%; color: var(--accent); font-family: Georgia, serif; }
 .contents-main strong, .contents-main small { display: block; }
 .contents-main strong { margin-bottom: 5px; font-size: 1rem; }
@@ -6338,7 +6348,11 @@ html.light .library-search svg {
 }
 
 html.light .contents-main:hover {
-  background: rgba(200, 164, 93, 0.08) !important;
+  background: transparent !important;
+}
+
+html.light .contents-chapter:hover {
+  background: rgba(200, 164, 93, 0.045) !important;
 }
 
 html.light .contents-quick-actions button {
