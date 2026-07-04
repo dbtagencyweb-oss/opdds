@@ -426,6 +426,7 @@ export default function ReaderShell({
   const readerShellRef = useRef<HTMLElement | null>(null);
   const sectionAnchorRefs = useRef<Record<string, HTMLElement | null>>({});
   const pinchRef = useRef<{ distance: number; zoom: number } | null>(null);
+  const swipeRef = useRef<{ x: number; y: number; time: number; pinching: boolean } | null>(null);
   const narrationRef = useRef<SpeechSynthesisUtterance | null>(null);
   const pdfProgress = Math.round((pdfCurrentPage / Math.max(1, totalPdfPages)) * 100);
   const heardInChapter = audioTracks.filter((track) => audioProgress[track.url]?.heard).length;
@@ -465,6 +466,17 @@ export default function ReaderShell({
   const handlePdfTouchStart = (event: React.TouchEvent<HTMLDivElement>) => {
     if (event.touches.length === 2) {
       pinchRef.current = { distance: touchDistance(event.touches), zoom: pdfZoom };
+      swipeRef.current = { x: 0, y: 0, time: 0, pinching: true };
+      return;
+    }
+    if (event.touches.length === 1) {
+      const touch = event.touches[0];
+      swipeRef.current = {
+        x: touch.clientX,
+        y: touch.clientY,
+        time: Date.now(),
+        pinching: false,
+      };
     }
   };
 
@@ -477,6 +489,16 @@ export default function ReaderShell({
 
   const handlePdfTouchEnd = (event: React.TouchEvent<HTMLDivElement>) => {
     if (event.touches.length < 2) pinchRef.current = null;
+    const swipe = swipeRef.current;
+    swipeRef.current = null;
+    if (!swipe || swipe.pinching || event.changedTouches.length === 0 || pdfZoom > 1.08) return;
+    const touch = event.changedTouches[0];
+    const dx = touch.clientX - swipe.x;
+    const dy = touch.clientY - swipe.y;
+    const elapsed = Date.now() - swipe.time;
+    if (elapsed > 700 || Math.abs(dx) < 64 || Math.abs(dx) < Math.abs(dy) * 1.35) return;
+    if (dx < 0 && pdfCurrentPage < totalPdfPages) onPdfPageChange(pdfCurrentPage + 1);
+    if (dx > 0 && pdfCurrentPage > 1) onPdfPageChange(pdfCurrentPage - 1);
   };
 
   const narrationData = useMemo(() => {

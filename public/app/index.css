@@ -4687,16 +4687,17 @@ button:active {
   }
 
   .reader-clean-mode .reader-text-surface .pdf-reader-navigation {
-    width: 136px !important;
-    grid-template-columns: 46px 1px 46px !important;
-    gap: 8px !important;
-    margin: 18px auto 10px !important;
-    padding: 7px 10px 10px !important;
+    bottom: max(12px, env(safe-area-inset-bottom)) !important;
+    width: 116px !important;
+    grid-template-columns: 40px 1px 40px !important;
+    gap: 6px !important;
+    margin: 18px auto 12px !important;
+    padding: 6px 8px !important;
   }
 
   .reader-clean-mode .reader-text-surface .pdf-reader-navigation .page-button {
-    width: 42px !important;
-    height: 42px !important;
+    width: 36px !important;
+    height: 36px !important;
   }
 
   .reader-page-progress-footer {
@@ -7057,12 +7058,14 @@ html.light .reader-actions .reader-page-bookmark-button.active {
 
 .reader-clean-mode .reader-text-surface .pdf-reader-navigation {
   position: sticky;
-  bottom: 18px;
-  width: min(420px, calc(100% - 40px));
-  grid-template-columns: 56px minmax(0, 1fr) 56px;
-  gap: 12px;
-  margin: 18px auto 28px;
-  padding: 8px 12px;
+  bottom: max(14px, env(safe-area-inset-bottom));
+  z-index: 8;
+  width: 122px;
+  grid-template-columns: 42px 1px 42px;
+  justify-content: center;
+  gap: 7px;
+  margin: 20px auto 18px;
+  padding: 6px 9px;
   border: 1px solid rgba(35, 31, 25, 0.1);
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.86);
@@ -7071,8 +7074,8 @@ html.light .reader-actions .reader-page-bookmark-button.active {
 }
 
 .reader-clean-mode .reader-text-surface .pdf-reader-navigation .page-button {
-  width: 46px;
-  height: 46px;
+  width: 38px;
+  height: 38px;
   border-radius: 999px;
   background: transparent !important;
   color: #4b453b !important;
@@ -7800,14 +7803,15 @@ html.dark .reader-clean-mode .reader-text-note-panel textarea {
 }
 
 html.dark .reader-clean-mode .reader-text-surface .pdf-reader-navigation {
-  position: relative;
-  bottom: auto;
-  width: 140px;
-  grid-template-columns: 48px 1px 48px;
+  position: sticky;
+  bottom: max(14px, env(safe-area-inset-bottom));
+  z-index: 8;
+  width: 122px;
+  grid-template-columns: 42px 1px 42px;
   justify-content: center;
-  gap: 10px;
-  margin: 18px auto 12px;
-  padding: 7px 12px;
+  gap: 7px;
+  margin: 20px auto 18px;
+  padding: 6px 9px;
   border: 1px solid rgba(255, 255, 255, 0.09);
   border-radius: 999px;
   background: #28292e;
@@ -7815,8 +7819,8 @@ html.dark .reader-clean-mode .reader-text-surface .pdf-reader-navigation {
 }
 
 html.dark .reader-clean-mode .reader-text-surface .pdf-reader-navigation .page-button {
-  width: 42px;
-  height: 42px;
+  width: 38px;
+  height: 38px;
   border-radius: 999px;
   background: transparent !important;
   color: #f4f2ec !important;
