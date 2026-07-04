@@ -4022,6 +4022,28 @@ button:active {
   box-shadow: 0 0 0 3px rgba(117, 183, 152, 0.12);
 }
 
+@media (max-width: 640px) {
+  .pilar-nav {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 7px;
+    width: 100%;
+    margin-bottom: 18px;
+  }
+
+  .pilar-nav button {
+    width: 100%;
+    min-width: 0;
+    min-height: 48px;
+    padding: 7px 5px 8px;
+  }
+
+  .pilar-nav .pilar-name {
+    max-width: 100%;
+    font-size: 0.55rem;
+  }
+}
+
 .diary-intro {
   margin: 0 0 22px;
   border-left: 2px solid rgba(215, 183, 88, 0.34);
