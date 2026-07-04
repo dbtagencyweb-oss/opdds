@@ -269,6 +269,8 @@ const sectionAudioLabel = (section: string) => {
   return '';
 };
 
+const pdfZoomClamp = (value: number) => Math.max(0.8, Math.min(2.4, Number(value.toFixed(2))));
+
 const isHeadingLine = (line: string) => {
   const clean = line.trim();
   if (!clean || clean.length > 88) return false;
@@ -422,6 +424,8 @@ export default function ReaderShell({
   const [expandedAudioTab, setExpandedAudioTab] = useState<number | null>(null);
   const [activeAudioTab, setActiveAudioTab] = useState<number | null>(null);
   const readerShellRef = useRef<HTMLElement | null>(null);
+  const sectionAnchorRefs = useRef<Record<string, HTMLElement | null>>({});
+  const pinchRef = useRef<{ distance: number; zoom: number } | null>(null);
   const narrationRef = useRef<SpeechSynthesisUtterance | null>(null);
   const pdfProgress = Math.round((pdfCurrentPage / Math.max(1, totalPdfPages)) * 100);
   const heardInChapter = audioTracks.filter((track) => audioProgress[track.url]?.heard).length;
@@ -439,6 +443,41 @@ export default function ReaderShell({
     [pdfCurrentPage, pdfTextPages],
   );
   const textBlocks = pdfTextBlocks.length ? pdfTextBlocks : [];
+
+  const scrollToAudioSection = (section: string) => {
+    const key = sectionAudioLabel(section);
+    const element = key ? sectionAnchorRefs.current[key] : null;
+    element?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
+  const registerSectionAnchor = (block: TextBlock, element: HTMLElement | null) => {
+    const key = sectionAudioLabel(block.text);
+    if (key) sectionAnchorRefs.current[key] = element;
+  };
+
+  const touchDistance = (touches: TouchList) => {
+    if (touches.length < 2) return 0;
+    const first = touches[0];
+    const second = touches[1];
+    return Math.hypot(first.clientX - second.clientX, first.clientY - second.clientY);
+  };
+
+  const handlePdfTouchStart = (event: React.TouchEvent<HTMLDivElement>) => {
+    if (event.touches.length === 2) {
+      pinchRef.current = { distance: touchDistance(event.touches), zoom: pdfZoom };
+    }
+  };
+
+  const handlePdfTouchMove = (event: React.TouchEvent<HTMLDivElement>) => {
+    if (event.touches.length !== 2 || !pinchRef.current?.distance) return;
+    event.preventDefault();
+    const ratio = touchDistance(event.touches) / pinchRef.current.distance;
+    setPdfZoom(pdfZoomClamp(pinchRef.current.zoom * ratio));
+  };
+
+  const handlePdfTouchEnd = (event: React.TouchEvent<HTMLDivElement>) => {
+    if (event.touches.length < 2) pinchRef.current = null;
+  };
 
   const narrationData = useMemo(() => {
     let cursor = 0;
@@ -631,9 +670,9 @@ export default function ReaderShell({
           )}
           {mode === 'edition' && (
             <div className="reader-format-controls" aria-label="Zoom do PDF">
-              <button onClick={() => setPdfZoom((value) => Math.max(0.8, Number((value - 0.1).toFixed(2))))}>−</button>
+              <button onClick={() => setPdfZoom((value) => pdfZoomClamp(value - 0.1))}>−</button>
               <span>{Math.round(pdfZoom * 100)}%</span>
-              <button onClick={() => setPdfZoom((value) => Math.min(1.8, Number((value + 0.1).toFixed(2))))}>+</button>
+              <button onClick={() => setPdfZoom((value) => pdfZoomClamp(value + 0.1))}>+</button>
               <button onClick={togglePdfFullscreen} title={pdfFullscreen ? 'Sair da tela cheia' : 'Tela cheia'}>
                 {pdfFullscreen ? <Minimize2 size={15} /> : <Maximize2 size={15} />}
               </button>
@@ -752,13 +791,29 @@ export default function ReaderShell({
 
       {mode === 'edition' ? (
         <div className={`pdf-reader-shell ${pdfFullscreen ? 'pdf-fullscreen-shell' : ''}`}>
+          {pdfFullscreen && (
+            <button
+              className="pdf-fullscreen-close"
+              onClick={() => setPdfFullscreen(false)}
+              title="Fechar tela cheia"
+              aria-label="Fechar tela cheia"
+            >
+              <X size={22} />
+            </button>
+          )}
           <div className="pdf-reader-meta">
             <span>Página {pdfCurrentPage} de {totalPdfPages}</span>
             <span>{displayChapterKind} · seção {chapterIndex + 1}/{chapterTotal}</span>
             <span>{pdfProgress}% do livro</span>
           </div>
 
-          <div className="pdf-page-stage">
+          <div
+            className="pdf-page-stage"
+            onTouchStart={handlePdfTouchStart}
+            onTouchMove={handlePdfTouchMove}
+            onTouchEnd={handlePdfTouchEnd}
+            onTouchCancel={handlePdfTouchEnd}
+          >
             {pdfUrl ? (
               <Suspense fallback={<div className="pdf-page-status">Preparando a edição completa...</div>}>
                 <PdfPageCanvas url={pdfUrl} page={pdfCurrentPage} zoom={pdfZoom} onDocumentReady={onPdfDocumentReady} />
@@ -769,9 +824,9 @@ export default function ReaderShell({
           </div>
 
           <div className="reader-view-controls pdf-zoom-controls">
-            <button onClick={() => setPdfZoom((value) => Math.max(0.8, Number((value - 0.1).toFixed(2))))}>−</button>
+            <button onClick={() => setPdfZoom((value) => pdfZoomClamp(value - 0.1))}>−</button>
             <span>Zoom {Math.round(pdfZoom * 100)}%</span>
-            <button onClick={() => setPdfZoom((value) => Math.min(1.8, Number((value + 0.1).toFixed(2))))}>+</button>
+            <button onClick={() => setPdfZoom((value) => pdfZoomClamp(value + 0.1))}>+</button>
             <button
               className="reader-fullscreen-toggle"
               onClick={() => setPdfFullscreen((value) => !value)}
@@ -875,6 +930,7 @@ export default function ReaderShell({
                         onClick={(event) => {
                           event.stopPropagation();
                           setActiveAudioTab(index);
+                          scrollToAudioSection(section);
                           playAudio(sectionTrack.url, `${displayTitle} - ${cleanLabel(sectionTrack.label)}`, sectionTrack.coverUrl);
                         }}
                         aria-label={`Ouvir ${tabLabel}`}
@@ -923,8 +979,8 @@ export default function ReaderShell({
           </div>
           <div className="page-copy pdf-text-copy" style={{ fontSize: `${fontSize}px`, letterSpacing: `${letterSpacing}px`, lineHeight }}>
             {textBlocks.length ? textBlocks.map((block, index) => {
-              if (block.kind === 'heading') return <h2 key={`${pdfCurrentPage}-${index}`}>{renderNarrationText(block, index)}</h2>;
-              if (block.kind === 'subheading') return <h3 key={`${pdfCurrentPage}-${index}`}>{renderNarrationText(block, index)}</h3>;
+              if (block.kind === 'heading') return <h2 ref={(element) => registerSectionAnchor(block, element)} key={`${pdfCurrentPage}-${index}`}>{renderNarrationText(block, index)}</h2>;
+              if (block.kind === 'subheading') return <h3 ref={(element) => registerSectionAnchor(block, element)} key={`${pdfCurrentPage}-${index}`}>{renderNarrationText(block, index)}</h3>;
               if (block.kind === 'divider') return <hr className="reader-content-divider" key={`${pdfCurrentPage}-${index}`} />;
               if (block.kind === 'image') {
                 return (
@@ -1007,3 +1063,4 @@ export default function ReaderShell({
     </section>
   );
 }
+

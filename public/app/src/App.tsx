@@ -1661,6 +1661,17 @@ export function App() {
     if (previous) playAudioQueueItem(previous, { resume: true });
   };
 
+  const openCurrentAudioPage = () => {
+    if (!currentAudioQueueItem) return;
+    const chapter = bookChapters[currentAudioQueueItem.chapterIndex];
+    if (!chapter) return;
+    setCurrentChapterIndex(currentAudioQueueItem.chapterIndex);
+    goToPdfPage(chapter.pdfPage);
+    setPageIndex(0);
+    setAudioFullOpen(false);
+    navigate(ROUTES.READER);
+  };
+
   const seekAudio = (value: number) => {
     if (!audioRef.current || !audioState.duration) return;
     const nextTime = (value / 100) * audioState.duration;
@@ -4377,6 +4388,12 @@ export function App() {
                   </small>
                 )}
                 <span>{audioState.isPlaying ? 'Em reprodução' : 'Pausado'} · {formatTime(audioState.currentTime)} de {formatTime(audioState.duration)}</span>
+                {currentAudioQueueItem && (
+                  <button className="audio-open-page" onClick={openCurrentAudioPage}>
+                    <BookOpen size={16} />
+                    Abrir página
+                  </button>
+                )}
               </div>
               <div className="audio-full-visualizer" style={{ '--audio-progress': `${audioProgress || 0}%` } as React.CSSProperties}>
                 <AudioFrequencyBars values={audioFrequencies} />
