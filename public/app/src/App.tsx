@@ -114,6 +114,7 @@ const ROUTES = {
   BOOK: 'book',
   LIBRARY: 'library',
   SESSIONS: 'sessions',
+  COMMUNITY: 'community',
   IGENT: 'igent',
   FAVORITES: 'favorites',
   WORKBOOK: 'workbook',
@@ -244,7 +245,7 @@ const navGroups = [
     items: [
       { id: ROUTES.HOME, label: 'Início', icon: Home },
       { id: ROUTES.BOOK, label: 'Livro', icon: BookOpen },
-      { id: ROUTES.LIBRARY, label: 'Biblioteca', icon: Library },
+      { id: ROUTES.LIBRARY, label: 'Jornada', icon: Library },
     ],
   },
   {
@@ -252,6 +253,7 @@ const navGroups = [
     items: [
       { id: ROUTES.SESSIONS, label: 'Sessões', icon: AudioLines },
       { id: ROUTES.IGENT, label: 'iGentMIND', icon: Zap },
+      { id: ROUTES.COMMUNITY, label: 'Comunidade', icon: Users },
     ],
   },
   {
@@ -260,7 +262,7 @@ const navGroups = [
       { id: ROUTES.FAVORITES, label: 'Favoritos', icon: Heart },
       { id: ROUTES.WORKBOOK, label: 'Diário', icon: FileText },
       { id: ROUTES.LETTERS, label: 'Minhas cartas', icon: Mail },
-      { id: ROUTES.MANIFESTO, label: 'Manifesto', icon: Shield },
+      { id: ROUTES.MANIFESTO, label: 'Sobre', icon: Shield },
       { id: ROUTES.SETTINGS, label: 'Minha conta', icon: User },
       { id: ROUTES.ADMIN, label: 'Admin', icon: Users },
     ],
@@ -2453,6 +2455,7 @@ export function App() {
   const isRouteLocked = (routeId: Route) => {
     if ([ROUTES.BOOK, ROUTES.LIBRARY, ROUTES.SESSIONS, ROUTES.READER].includes(routeId as any)) return !hasReaderAccess;
     if (routeId === ROUTES.IGENT) return !hasMindAccess;
+    if (routeId === ROUTES.COMMUNITY) return !hasGroupAccess;
     if (routeId === ROUTES.WORKBOOK) return !hasWorkbookAccess;
     if (routeId === ROUTES.LETTERS) return !hasReaderAccess;
     if (routeId === ROUTES.ADMIN) return !isAdmin;
@@ -2461,6 +2464,7 @@ export function App() {
 
   const upgradeForRoute = (routeId: Route): UpgradeKey => {
     if ([ROUTES.BOOK, ROUTES.LIBRARY, ROUTES.SESSIONS, ROUTES.READER].includes(routeId as any)) return 'basic';
+    if (routeId === ROUTES.COMMUNITY) return 'group';
     if (routeId === ROUTES.WORKBOOK) return 'workbook';
     if (routeId === ROUTES.LETTERS) return 'basic';
     if (routeId === ROUTES.IGENT) return 'igent30';
@@ -3657,15 +3661,74 @@ export function App() {
 
   const ManifestoView = () => (
     <div className="app-page page-enter">
-      <section className="manifesto-panel">
-        <p className="kicker">Manifesto</p>
-        <h1>Você não precisa ser acreditado por todos para continuar existindo com força.</h1>
-        <p>Este espaço não é sobre performance de superação. É sobre lembrar, página por página, que ainda existe presença possível quando o mundo já tentou te resumir.</p>
-        <Button onClick={() => handlePlayAudio('/media/audios/manifesto/boas-vindas.mp3', 'Manifesto')}><Play size={17} /> Ouvir manifesto</Button>
+      <section className="manifesto-panel about-panel">
+        <p className="kicker">Sobre o projeto</p>
+        <h1>O Poder dos Desacreditados nasceu para acompanhar quem continuou mesmo sem aplauso.</h1>
+        <p>Este espaço não é sobre performance de superação. É sobre leitura, presença e continuidade para quem foi reduzido, questionado ou ignorado por tempo demais.</p>
+        <div className="about-grid">
+          <article>
+            <span>Projeto</span>
+            <strong>Livro, diário, áudios e mentor</strong>
+            <p>Uma experiência guiada para transformar leitura em permanência: texto, escuta, escrita e uma próxima pergunta possível.</p>
+          </article>
+          <article>
+            <span>Autor</span>
+            <strong>Diego como presença editorial</strong>
+            <p>A voz do projeto aparece como autor parceiro: não para resolver por você, mas para sustentar a conversa quando a resposta ainda não chegou.</p>
+          </article>
+          <article>
+            <span>Manifesto</span>
+            <strong>Continuar sem pedir licença</strong>
+            <p>Você não precisa ser acreditado por todos para continuar existindo com força.</p>
+          </article>
+        </div>
+        <Button onClick={() => handlePlayAudio('/media/audios/manifesto/boas-vindas.mp3', 'Manifesto do projeto')}><Play size={17} /> Ouvir manifesto</Button>
       </section>
     </div>
   );
 
+  const CommunityView = () => (
+    <div className="app-page page-enter">
+      <section className="community-panel">
+        <div>
+          <p className="kicker">Comunidade</p>
+          <h1>Comunidade Viva dos Desacreditados</h1>
+          <p>Um espaço de continuidade para quem não quer atravessar o livro sozinho depois que a leitura toca alguma coisa real.</p>
+        </div>
+        <div className="community-status">
+          <span>{hasGroupAccess ? 'Acesso liberado' : 'Produto adicional'}</span>
+          <strong>{upgradeOffers.group.price}</strong>
+        </div>
+      </section>
+
+      <section className="community-grid">
+        <article>
+          <Users size={22} />
+          <h2>Grupo de apoio</h2>
+          <p>Um lugar para permanecer perto da obra, compartilhar avanços e voltar aos pilares sem transformar isso em cobrança.</p>
+        </article>
+        <article>
+          <BookOpen size={22} />
+          <h2>Leitura acompanhada</h2>
+          <p>Rodas, provocações e convites de leitura para manter a jornada viva depois do primeiro contato com o livro.</p>
+        </article>
+        <article>
+          <Headphones size={22} />
+          <h2>Continuidade emocional</h2>
+          <p>Áudios, temas e encontros de apoio para quando a pessoa precisa de presença, não de mais conteúdo solto.</p>
+        </article>
+      </section>
+
+      <section className="community-panel community-cta">
+        <div>
+          <p className="kicker">Order bump</p>
+          <h2>Ofereça a comunidade como próximo passo natural.</h2>
+          <p>Depois que o leitor desbloqueia o livro, o grupo entra como sustentação: menos vitrine, mais permanência.</p>
+        </div>
+        <Button onClick={() => openUpgradeCheckout('group')}><Users size={17} /> Entrar na comunidade</Button>
+      </section>
+    </div>
+  );
   const SettingsView = () => (
     <div className="app-page account-page page-enter">
       <section className="account-hero">
@@ -4331,8 +4394,9 @@ export function App() {
       case ROUTES.ONBOARDING: return OnboardingView();
       case ROUTES.HOME: return HomeView();
       case ROUTES.BOOK: return hasReaderAccess ? BookView() : <LockedView title="Livro interativo bloqueado" offerKey="basic" />;
-      case ROUTES.LIBRARY: return hasReaderAccess ? LibraryView() : <LockedView title="Biblioteca bloqueada" offerKey="basic" />;
+      case ROUTES.LIBRARY: return hasReaderAccess ? LibraryView() : <LockedView title="Jornada bloqueada" offerKey="basic" />;
       case ROUTES.SESSIONS: return hasReaderAccess ? SessionsView() : <LockedView title="Audios bloqueados" offerKey="basic" />;
+      case ROUTES.COMMUNITY: return hasGroupAccess ? CommunityView() : <LockedView title="Comunidade bloqueada" offerKey="group" />;
       case ROUTES.IGENT: return hasMindAccess ? IGentMindView() : <LockedView title="iGentMIND bloqueado" offerKey="igent30" />;
       case ROUTES.FAVORITES: return FavoritesView();
       case ROUTES.WORKBOOK: return WorkbookView();
@@ -4455,3 +4519,4 @@ export function App() {
     </div>
   );
 }
+
