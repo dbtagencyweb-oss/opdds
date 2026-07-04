@@ -5,6 +5,7 @@ import {
   ChevronLeft,
   ChevronRight,
   DownloadCloud,
+  Heart,
   Headphones,
   Highlighter,
   Home,
@@ -706,6 +707,13 @@ export default function ReaderShell({
             title={isPageBookmarked ? 'Remover marcação da página' : 'Marcar página'}
           >
             <Bookmark size={18} fill={isPageBookmarked ? 'currentColor' : 'none'} />
+          </button>
+          <button
+            className={`icon-button reader-favorite-button ${isFavorite ? 'active' : ''}`}
+            onClick={onToggleFavorite}
+            title={isFavorite ? 'Remover dos favoritos' : 'Favoritar capitulo'}
+          >
+            <Heart size={18} fill={isFavorite ? 'currentColor' : 'none'} />
           </button>
           <button className="icon-button" onClick={onShare} title="Compartilhar capítulo"><Share2 size={18} /></button>
           <button

@@ -5038,6 +5038,7 @@ button:active {
   align-items: center;
   justify-content: space-between;
   gap: 18px;
+  flex-wrap: nowrap;
   min-height: 68px;
   padding: 10px 16px;
   border-bottom: 1px solid rgba(255,255,255,.08);
@@ -5046,6 +5047,7 @@ button:active {
 }
 
 .reader-index-trigger {
+  flex: 1 1 auto;
   min-width: 0;
   display: flex;
   align-items: center;
@@ -5074,10 +5076,24 @@ button:active {
 
 .reader-index-trigger strong {
   overflow: hidden;
-  max-width: min(48vw, 620px);
+  max-width: min(44vw, 620px);
   font-size: .9rem;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.reader-actions {
+  flex: 0 0 auto;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.reader-actions::-webkit-scrollbar {
+  display: none;
 }
 
 .reader-contents-backdrop {
@@ -5442,16 +5458,29 @@ button:active {
 
 @media (max-width: 760px) {
   .reader-bookbar {
-    align-items: flex-start;
+    align-items: center;
+    gap: 8px;
+    min-height: 56px;
+    padding: 8px 10px;
   }
 
   .reader-actions .segmented-control span,
-  .reader-actions > .icon-button:nth-last-child(-n+2) {
+  .reader-format-controls span,
+  .reader-format-controls button:not(:last-child) {
     display: none;
   }
 
   .reader-index-trigger strong {
-    max-width: 46vw;
+    max-width: 34vw;
+  }
+
+  .reader-index-trigger {
+    gap: 8px;
+  }
+
+  .reader-actions {
+    gap: 5px;
+    max-width: 58vw;
   }
 
   .pdf-reader-shell {
@@ -6914,6 +6943,12 @@ html.light .reader-text-surface .pdf-reader-navigation .page-button:hover:not(:d
 html.dark .reader-clean-mode .reader-actions .reader-page-bookmark-button.active,
 html.light .reader-actions .reader-page-bookmark-button.active {
   color: #d7b758 !important;
+}
+
+.reader-actions .reader-favorite-button.active,
+html.dark .reader-clean-mode .reader-actions .reader-favorite-button.active,
+html.light .reader-actions .reader-favorite-button.active {
+  color: #ef7d8e !important;
 }
 
 .reader-clean-mode .reader-quick-tools {

@@ -2218,8 +2218,18 @@ export function App() {
   };
 
   const handleShareChapter = () => {
-    navigator.clipboard?.writeText(`${selectedChapter.title} - ${window.location.href}`).catch(() => {});
     playClick('soft');
+    const shareTitle = repairMojibake(selectedChapter.title);
+    const shareText = `${shareTitle} - O Poder dos Desacreditados`;
+    const shareUrl = window.location.href;
+    if (navigator.share) {
+      navigator.share({ title: shareTitle, text: shareText, url: shareUrl }).catch(() => {});
+      return;
+    }
+    navigator.clipboard?.writeText(`${shareText}\n${shareUrl}`).then(() => {
+      setNoteSaveStatus('saved');
+      window.setTimeout(() => setNoteSaveStatus('idle'), 1400);
+    }).catch(() => {});
   };
 
   const getMindGuide = (topic = activeMentorTopic) => mindGuides[topic.id] ?? mindGuides.ansiedade;
@@ -3489,6 +3499,9 @@ export function App() {
 
   const FavoritesView = () => {
     const favoriteChapterList = bookChapters.filter((chapter) => favorites.includes(chapter.id));
+    const markedPages = [...readerNotes]
+      .filter((note) => note.note.trim() || note.id.startsWith('page-'))
+      .sort((a, b) => a.page - b.page);
     return (
       <div className="app-page page-enter">
         <div className="page-heading"><div><p className="kicker">Favoritos</p><h1>Salvos para voltar</h1></div></div>
@@ -3499,6 +3512,24 @@ export function App() {
             <article key={chapter.id} className="chapter-row">
               <div><span>Capítulo {bookChapters.indexOf(chapter) + 1}</span><h2>{chapter.title}</h2><p>{chapter.summary}</p></div>
               <Button onClick={() => goToChapter(bookChapters.indexOf(chapter))} variant="secondary">Ler</Button>
+            </article>
+          ))}
+        </div>
+        <div className="page-heading compact-heading"><div><p className="kicker">Marcadores</p><h1>Páginas marcadas</h1></div></div>
+        <div className="chapter-list">
+          {markedPages.length === 0 ? (
+            <div className="empty-state">Nenhuma página marcada ainda.</div>
+          ) : markedPages.map((note) => (
+            <article key={note.id} className="chapter-row">
+              <div>
+                <span>Página {note.page}</span>
+                <h2>{repairMojibake(note.title)}</h2>
+                <p>{note.note.trim() ? trimExcerpt(note.note, 140) : 'Marcada para voltar depois.'}</p>
+              </div>
+              <Button onClick={() => {
+                goToPdfPage(note.page);
+                navigate(ROUTES.READER);
+              }} variant="secondary">Abrir</Button>
             </article>
           ))}
         </div>
