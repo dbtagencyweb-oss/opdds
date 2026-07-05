@@ -5421,7 +5421,7 @@ button:active {
   overflow: auto;
   padding: 0 0 52px;
   overscroll-behavior: contain;
-  touch-action: pan-x pan-y;
+  touch-action: pan-x pan-y pinch-zoom;
   scrollbar-width: thin;
   scrollbar-color: rgba(215, 183, 88, 0.42) rgba(255, 255, 255, 0.08);
 }
