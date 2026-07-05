@@ -916,6 +916,7 @@ export function App() {
     }
   });
   const [homeSlideIndex, setHomeSlideIndex] = useState(0);
+  const [activeJourneyStateIndex, setActiveJourneyStateIndex] = useState(1);
   const [workbookEntry, setWorkbookEntry] = useState('');
   const [workbookPrompt, setWorkbookPrompt] = useState(workbookPrompts[0]);
   const [workbookPillarIndex, setWorkbookPillarIndex] = useState(0);
@@ -2813,12 +2814,13 @@ export function App() {
         <h2>Onde você está agora?</h2>
         <div className="home-state-list">
           {journeyStates.map((state, index) => (
-            <article key={state.title} className={index === 1 ? 'active' : ''}>
+            <article key={state.title} className={activeJourneyStateIndex === index ? 'active' : ''}>
               <div>
                 <h3>{state.title}</h3>
                 <p>{state.desc}</p>
               </div>
               <button onClick={() => {
+                setActiveJourneyStateIndex(index);
                 setCurrentChapterIndex(state.chapter);
                 handlePlayAudio(state.audioUrl, state.title);
               }} title={`Ouvir ${state.title}`}>

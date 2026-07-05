@@ -2690,7 +2690,7 @@ button:active {
 }
 
 .workbook-page {
-  width: min(1180px, 100%);
+  width: min(var(--page-standard), 100%);
   display: grid;
   gap: 18px;
 }
@@ -5277,11 +5277,17 @@ button:active {
 .reader-contents-drawer nav {
   overflow-y: auto;
   min-height: 0;
+  display: flex;
+  flex-direction: column;
   overscroll-behavior: contain;
-  padding: 8px 8px max(132px, calc(96px + env(safe-area-inset-bottom)));
+  padding: 8px 8px max(18px, env(safe-area-inset-bottom));
   -webkit-overflow-scrolling: touch;
   scrollbar-width: thin;
   scrollbar-color: rgba(215, 183, 88, 0.42) transparent;
+}
+
+.reader-contents-drawer nav section:last-of-type {
+  margin-bottom: 18px;
 }
 
 .reader-contents-drawer nav::-webkit-scrollbar {
@@ -5345,6 +5351,31 @@ button:active {
 
 .reader-contents-drawer nav section > button.active small {
   color: rgba(30,27,22,.62);
+}
+
+.reader-contents-footer {
+  margin-top: auto;
+  padding: 18px 14px max(18px, env(safe-area-inset-bottom));
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.reader-contents-footer span {
+  display: block;
+  margin-bottom: 9px;
+  color: #777981;
+  font-size: 0.68rem;
+  font-weight: 850;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.reader-contents-footer button {
+  width: 100%;
+  min-height: 42px;
+  border: 1px solid rgba(215, 183, 88, 0.28);
+  border-radius: 999px;
+  color: #efdca2;
+  font-weight: 850;
 }
 
 .pdf-reader-shell {
@@ -8145,10 +8176,10 @@ html.light .reader-footer-exit-button:hover {
 
 .reader-notes-popover {
   width: min(440px, calc(100vw - 32px));
-  max-height: min(680px, calc(100vh - 40px));
+  max-height: min(580px, calc(100dvh - 40px));
   display: grid;
-  grid-template-rows: auto auto minmax(0, 1fr);
-  overflow: hidden;
+  grid-template-rows: auto auto auto;
+  overflow: visible;
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 22px;
   background: #18191d;
@@ -8234,7 +8265,7 @@ html.light .reader-footer-exit-button:hover {
 
 .reader-note-editor textarea {
   width: 100%;
-  min-height: 180px;
+  min-height: 156px;
   resize: vertical;
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 16px;
@@ -8250,7 +8281,8 @@ html.light .reader-footer-exit-button:hover {
 }
 
 .reader-notes-list {
-  overflow: visible;
+  max-height: min(320px, calc(100dvh - 260px));
+  overflow-y: auto;
   display: grid;
   gap: 8px;
   padding: 0 18px 18px;
@@ -8866,7 +8898,7 @@ html.light .reader-notes-popover h2 {
 
   .reader-notes-popover {
     width: min(360px, calc(100vw - 32px)) !important;
-    max-height: min(620px, calc(100vh - 48px)) !important;
+    max-height: min(540px, calc(100dvh - 48px)) !important;
     border-radius: 20px !important;
   }
 
@@ -8875,7 +8907,7 @@ html.light .reader-notes-popover h2 {
   }
 
   .reader-note-editor textarea {
-    min-height: 170px !important;
+    min-height: 148px !important;
   }
 
   .reader-footer-exit-button {

@@ -816,6 +816,14 @@ export default function ReaderShell({
               ))}
             </section>
           ))}
+          {onExitReader && (
+            <div className="reader-contents-footer">
+              <span>Após o epílogo</span>
+              <button type="button" onClick={onExitReader}>
+                Voltar para home
+              </button>
+            </div>
+          )}
         </nav>
       </aside>
 
