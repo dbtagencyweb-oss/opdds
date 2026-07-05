@@ -2690,7 +2690,7 @@ button:active {
 }
 
 .workbook-page {
-  width: min(var(--page-standard), 100%);
+  width: min(var(--page-wide), 100%);
   display: grid;
   gap: 18px;
 }
@@ -4017,15 +4017,24 @@ button:active {
 }
 
 .workbook-hero-actions {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
+  width: min(260px, 100%);
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
   justify-content: flex-end;
+}
+
+.workbook-hero-actions button {
+  min-width: 0;
+}
+
+.workbook-hero-actions button:last-child {
+  grid-column: 1 / -1;
 }
 
 .diary-shell {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 330px;
+  grid-template-columns: minmax(0, 1.48fr) minmax(280px, 0.82fr);
   gap: 18px;
   align-items: start;
 }
@@ -4055,16 +4064,16 @@ button:active {
 }
 
 .pilar-nav {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: 7px;
-  flex-wrap: wrap;
   margin-bottom: 18px;
 }
 
 .pilar-nav button {
   position: relative;
-  width: auto;
-  min-width: 70px;
+  width: 100%;
+  min-width: 0;
   min-height: 48px;
   display: grid;
   grid-template-rows: auto auto;
@@ -4146,6 +4155,12 @@ button:active {
   .pilar-nav .pilar-name {
     max-width: 100%;
     font-size: 0.55rem;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 1040px) {
+  .pilar-nav {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 
@@ -5236,8 +5251,9 @@ button:active {
   inset: 0 auto 0 0;
   z-index: 50;
   width: min(390px, 92vw);
-  height: 100svh;
-  max-height: 100svh;
+  height: 100dvh;
+  min-height: 100vh;
+  max-height: none;
   display: grid;
   grid-template-rows: auto minmax(0,1fr);
   border-right: 5px solid #565861;
@@ -5281,6 +5297,7 @@ button:active {
   flex-direction: column;
   overscroll-behavior: contain;
   padding: 8px 8px max(18px, env(safe-area-inset-bottom));
+  background: #18191d;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: thin;
   scrollbar-color: rgba(215, 183, 88, 0.42) transparent;
