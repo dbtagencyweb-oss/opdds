@@ -1,4 +1,5 @@
 import { IsEmail, IsInt, IsOptional, IsString, Min, MinLength } from 'class-validator';
+import { Transform } from 'class-transformer';
 
 export class RegisterDto {
   @IsString()
@@ -24,10 +25,12 @@ export class LoginDto {
 }
 
 export class CreateInviteDto {
+  @Transform(({ value }) => String(value || '').trim().toLowerCase())
   @IsEmail()
   email!: string;
 
   @IsOptional()
+  @Transform(({ value }) => String(value || '').trim())
   @IsString()
   name?: string;
 
@@ -36,6 +39,7 @@ export class CreateInviteDto {
   plan?: 'pdf' | 'basic' | 'workbook' | 'igent30' | 'igent90' | 'group' | 'vip';
 
   @IsOptional()
+  @Transform(({ value }) => value === '' || value == null ? undefined : Number(value))
   @IsInt()
   @Min(1)
   expiresInDays?: number;

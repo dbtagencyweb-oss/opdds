@@ -1905,10 +1905,16 @@ export function App() {
   const handleCreateAdminInvite = async () => {
     setAdminMessage('');
     setAdminResult(null);
+    const email = adminInvite.email.trim().toLowerCase();
+    const name = adminInvite.name.trim();
+    if (!email) {
+      setAdminMessage('Informe o e-mail do leitor.');
+      return;
+    }
     try {
       const invite = await createAdminInvite({
-        name: adminInvite.name || undefined,
-        email: adminInvite.email,
+        name: name || undefined,
+        email,
         plan: adminInvite.plan,
         expiresInDays: parseOptionalDays(adminInvite.expiresInDays),
       });

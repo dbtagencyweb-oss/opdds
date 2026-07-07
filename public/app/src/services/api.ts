@@ -33,7 +33,19 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
   }
 
   if (!response.ok) {
-    throw new Error(`API ${response.status}: ${response.statusText}`);
+    let detail = response.statusText;
+    try {
+      const payload = await response.json();
+      const message = Array.isArray(payload?.message) ? payload.message.join(' ') : payload?.message;
+      detail = message || payload?.error || detail;
+    } catch {
+      try {
+        detail = (await response.text()) || detail;
+      } catch {
+        // Keep the original status text when the response body is not readable.
+      }
+    }
+    throw new Error(`API ${response.status}: ${detail}`);
   }
 
   return response.json() as Promise<T>;

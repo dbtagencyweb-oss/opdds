@@ -1,12 +1,15 @@
 import { IsArray, IsEmail, IsIn, IsInt, IsOptional, IsString, MaxLength, Min } from 'class-validator';
+import { Transform } from 'class-transformer';
 
 const plans = ['pdf', 'basic', 'workbook', 'igent30', 'igent90', 'group', 'vip'] as const;
 
 export class AdminCreateInviteDto {
+  @Transform(({ value }) => String(value || '').trim().toLowerCase())
   @IsEmail()
   email!: string;
 
   @IsOptional()
+  @Transform(({ value }) => String(value || '').trim())
   @IsString()
   name?: string;
 
@@ -14,6 +17,7 @@ export class AdminCreateInviteDto {
   plan!: typeof plans[number];
 
   @IsOptional()
+  @Transform(({ value }) => value === '' || value == null ? undefined : Number(value))
   @IsInt()
   @Min(1)
   expiresInDays?: number;
@@ -24,6 +28,7 @@ export class AdminGrantPlanDto {
   plan!: typeof plans[number];
 
   @IsOptional()
+  @Transform(({ value }) => value === '' || value == null ? undefined : Number(value))
   @IsInt()
   @Min(1)
   expiresInDays?: number;
@@ -34,6 +39,7 @@ export class AdminGrantProductDto {
   productKey!: string;
 
   @IsOptional()
+  @Transform(({ value }) => value === '' || value == null ? undefined : Number(value))
   @IsInt()
   @Min(1)
   expiresInDays?: number;
