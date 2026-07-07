@@ -1202,6 +1202,7 @@ html.light .reader-content-image figcaption {
   .reader-grid,
   .settings-grid,
   .admin-overview-grid,
+  .admin-copy-grid,
   .admin-book-editor-grid {
     grid-template-columns: 1fr;
   }
@@ -3840,7 +3841,86 @@ button:active {
 
 .admin-copy-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1fr);
+  grid-template-columns: minmax(300px, 0.88fr) minmax(0, 1.12fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.admin-copy-library {
+  grid-column: 1 / -1;
+}
+
+.admin-copy-builder {
+  display: grid;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.admin-copy-builder label {
+  display: grid;
+  gap: 7px;
+}
+
+.admin-copy-builder label span {
+  color: var(--muted);
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.admin-copy-builder select,
+.admin-copy-builder textarea {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.16);
+  color: var(--text);
+  padding: 11px 12px;
+}
+
+.admin-copy-builder textarea {
+  min-height: 72px;
+  resize: vertical;
+  line-height: 1.45;
+}
+
+.admin-copy-output {
+  display: grid;
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.admin-copy-output article {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.035);
+  overflow: hidden;
+}
+
+.admin-copy-output article > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 11px 13px;
+  border-bottom: 1px solid var(--line);
+}
+
+.admin-copy-output button,
+.admin-copy-list small {
+  color: var(--gold-soft);
+  font-size: 0.74rem;
+  font-weight: 850;
+}
+
+.admin-copy-output pre {
+  margin: 0;
+  white-space: pre-wrap;
+  color: var(--text);
+  font-family: var(--font-ui);
+  line-height: 1.58;
+  padding: 14px;
 }
 
 .admin-copy-list {
@@ -3851,16 +3931,23 @@ button:active {
 }
 
 .admin-copy-list button {
-  display: flex;
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr) auto;
   align-items: center;
   gap: 10px;
-  min-height: 48px;
+  min-height: 52px;
   border: 1px solid var(--line);
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.035);
   color: var(--text);
-  padding: 0 13px;
+  padding: 10px 13px;
   font-weight: 850;
+  text-align: left;
+}
+
+.admin-copy-list button span {
+  min-width: 0;
+  line-height: 1.35;
 }
 
 .admin-events-panel {

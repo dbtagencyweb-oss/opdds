@@ -153,11 +153,72 @@ type AudioQueueItem = {
 
 type SaveFeedback = 'idle' | 'saving' | 'saved';
 type AdminAudioProductionStatus = 'ok' | 'review' | 'record' | 'placeholder';
+type MarketingGoal = 'awareness' | 'conversion' | 'retargeting' | 'community';
+type MarketingChannel = 'ads' | 'whatsapp' | 'email' | 'salesPage' | 'onboarding';
+type MarketingProduct = 'book' | 'workbook' | 'igent' | 'community' | 'vip';
 
 const ADMIN_AUDIO_PRODUCTION_KEY = 'opd_admin_audio_production';
 const ADMIN_AUDIO_ORDER_KEY = 'opd_admin_audio_order';
 const WORKBOOK_INTRO_KEY = 'opd_workbook_intro_dismissed';
 const WORKBOOK_WELCOME_AUDIO = '/media/audios/diario/boas-vindas-diego.mp3';
+
+const marketingGoalLabels: Record<MarketingGoal, string> = {
+  awareness: 'Topo de funil',
+  conversion: 'Conversão direta',
+  retargeting: 'Retargeting',
+  community: 'Comunidade',
+};
+
+const marketingChannelLabels: Record<MarketingChannel, string> = {
+  ads: 'Anúncios',
+  whatsapp: 'WhatsApp',
+  email: 'E-mail',
+  salesPage: 'Página de vendas',
+  onboarding: 'Onboarding',
+};
+
+const marketingProductLabels: Record<MarketingProduct, string> = {
+  book: 'Livro + App + Áudios',
+  workbook: 'Diário dos Desacreditados',
+  igent: 'iGentMIND',
+  community: 'Comunidade Viva',
+  vip: 'Pacote VIP',
+};
+
+const marketingProductAngles: Record<MarketingProduct, { promise: string; mechanism: string; cta: string }> = {
+  book: {
+    promise: 'ler sem transformar dor em performance',
+    mechanism: 'livro, modo leitura, PDF e áudios guiados',
+    cta: 'Começar a leitura',
+  },
+  workbook: {
+    promise: 'organizar o que está pesado sem virar questionário frio',
+    mechanism: 'perguntas por pilar, cartas e memória emocional da jornada',
+    cta: 'Abrir o diário',
+  },
+  igent: {
+    promise: 'receber uma próxima pergunta com contexto da própria escrita',
+    mechanism: 'mentor iGentMIND conectado à leitura, diário e pilares',
+    cta: 'Conversar com iGentMIND',
+  },
+  community: {
+    promise: 'continuar acompanhado depois que a leitura toca algo real',
+    mechanism: 'grupo, provocações de leitura e presença de continuidade',
+    cta: 'Entrar na comunidade',
+  },
+  vip: {
+    promise: 'acessar a jornada completa em leitura, escrita, áudio e acompanhamento',
+    mechanism: 'livro, app, diário, iGentMIND, comunidade e pacote de apoio',
+    cta: 'Liberar acesso completo',
+  },
+};
+
+const marketingGoalAngles: Record<MarketingGoal, string> = {
+  awareness: 'para quem ainda não sabe nomear o próprio cansaço',
+  conversion: 'para quem já entendeu que precisa parar de se abandonar',
+  retargeting: 'para quem viu a proposta, mas ainda está tentando decidir se merece continuar',
+  community: 'para quem não quer atravessar a obra sozinho depois do primeiro impacto',
+};
 
 const audioProductionLabels: Record<AdminAudioProductionStatus, string> = {
   ok: 'OK',
@@ -851,6 +912,13 @@ export function App() {
   const [adminBookTab, setAdminBookTab] = useState<'pages' | 'audio'>('pages');
   const [adminBookSearch, setAdminBookSearch] = useState('');
   const [adminBookCompareOpen, setAdminBookCompareOpen] = useState(false);
+  const [marketingGoal, setMarketingGoal] = useState<MarketingGoal>('conversion');
+  const [marketingProduct, setMarketingProduct] = useState<MarketingProduct>('book');
+  const [marketingChannel, setMarketingChannel] = useState<MarketingChannel>('ads');
+  const [marketingAudience, setMarketingAudience] = useState('pessoas cansadas de tentar vencer performando força');
+  const [marketingOffer, setMarketingOffer] = useState('acesso ao app de leitura, áudios e jornada guiada');
+  const [marketingObjection, setMarketingObjection] = useState('não tenho energia para mais um método de autoajuda');
+  const [marketingCopied, setMarketingCopied] = useState('');
   const [bookPageOverrides, setBookPageOverrides] = useState<Record<number, string>>({});
   const [bookAudioOverrides, setBookAudioOverrides] = useState<Record<string, { chapterId: string; sectionKey: string; label: string; url: string; coverUrl?: string | null }>>({});
   const [upgradeModal, setUpgradeModal] = useState<UpgradeKey | null>(null);
@@ -986,6 +1054,43 @@ export function App() {
     }),
     [bookAudioOverrides, selectedChapter],
   );
+
+  const marketingDrafts = useMemo(() => {
+    const product = marketingProductAngles[marketingProduct];
+    const productName = marketingProductLabels[marketingProduct];
+    const goalAngle = marketingGoalAngles[marketingGoal];
+    const audience = marketingAudience.trim() || 'pessoas desacreditadas que continuam tentando';
+    const offer = marketingOffer.trim() || product.mechanism;
+    const objection = marketingObjection.trim() || 'não quero mais uma promessa vazia';
+    const baseHook = `Não é sobre vencer mais rápido. É sobre ${product.promise}.`;
+    const bridge = `Para ${audience}, ${productName} organiza uma travessia ${goalAngle}: ${product.mechanism}.`;
+    const objectionTurn = `Se a objeção é "${objection}", a resposta não é pressão. É presença, ritmo e um próximo passo pequeno.`;
+
+    return {
+      headlines: [
+        baseHook,
+        `Um app para quem continuou mesmo quando ninguém mais acreditava.`,
+        `${productName}: ${product.promise}.`,
+      ],
+      ads: [
+        `${baseHook}\n\n${bridge}\n\n${objectionTurn}\n\n${product.cta}.`,
+        `Você não precisa transformar cansaço em espetáculo para continuar.\n\n${productName} foi criado para ${product.promise}, usando ${offer}.\n\n${product.cta}.`,
+      ],
+      whatsapp: [
+        `Oi. Pensei em você por causa disso: ${baseHook}\n\nO ${productName} junta ${offer} para quem precisa de presença, não de cobrança.\n\nQuer que eu te mande o acesso?`,
+        `Passando aqui com uma proposta simples: se você está em fase de reconstrução, talvez o primeiro passo não seja acelerar.\n\nÉ ${product.promise}.\n\n${product.cta}.`,
+      ],
+      email: [
+        `Assunto: não é mais um método para vencer\n\n${baseHook}\n\n${bridge}\n\n${objectionTurn}\n\nO convite é simples: entrar, ler no seu ritmo e continuar sem se abandonar.\n\n${product.cta}.`,
+      ],
+      salesPage: [
+        `Promessa: ${baseHook}\n\nPara quem é: ${audience}.\n\nO que recebe: ${offer}.\n\nPor que funciona: ${product.mechanism} criam uma jornada de leitura, escuta e escrita sem exigir performance.\n\nObjeção principal: ${objection}.\n\nResposta: aqui não existe pressa nem nota. Existe continuidade.\n\nCTA: ${product.cta}.`,
+      ],
+      onboarding: [
+        `Bem-vindo ao ${productName}.\n\nAqui você não precisa provar nada. Use ${offer} para encontrar um ponto de presença hoje.\n\nComece pequeno: leia uma página, ouça uma parte ou escreva uma resposta honesta.`,
+      ],
+    };
+  }, [marketingAudience, marketingChannel, marketingGoal, marketingObjection, marketingOffer, marketingProduct]);
 
   const audiobookQueue = useMemo<AudioQueueItem[]>(
     () => bookChapters.flatMap((chapter, chapterIndex) =>
@@ -1900,6 +2005,12 @@ export function App() {
   const parseOptionalDays = (value: string) => {
     const days = Number(value);
     return Number.isFinite(days) && days > 0 ? Math.floor(days) : undefined;
+  };
+
+  const copyMarketingText = async (key: string, text: string) => {
+    await navigator.clipboard?.writeText(text);
+    setMarketingCopied(key);
+    window.setTimeout(() => setMarketingCopied((current) => current === key ? '' : current), 1600);
   };
 
   const handleCreateAdminInvite = async () => {
@@ -4347,14 +4458,85 @@ export function App() {
       {adminSection === 'copy' && (
         <section className="admin-copy-grid">
           <article className="account-card admin-panel">
-            <p className="kicker">Copys</p>
-            <h2>Central de textos comerciais</h2>
-            <p>Modulo preparado para organizar anuncios, headlines, e-mails, WhatsApp, pagina de vendas e variacoes A/B.</p>
+            <div className="admin-section-head compact">
+              <div>
+                <p className="kicker">Copys</p>
+                <h2>Central de marketing</h2>
+              </div>
+              <span>{marketingProductLabels[marketingProduct]}</span>
+            </div>
+            <p>Monte rapidamente textos para anúncios, WhatsApp, e-mail, página de vendas e onboarding com o tom do projeto.</p>
+            <div className="admin-copy-builder">
+              <label>
+                <span>Produto</span>
+                <select value={marketingProduct} onChange={(event) => setMarketingProduct(event.target.value as MarketingProduct)}>
+                  {Object.entries(marketingProductLabels).map(([key, label]) => <option key={key} value={key}>{label}</option>)}
+                </select>
+              </label>
+              <label>
+                <span>Objetivo</span>
+                <select value={marketingGoal} onChange={(event) => setMarketingGoal(event.target.value as MarketingGoal)}>
+                  {Object.entries(marketingGoalLabels).map(([key, label]) => <option key={key} value={key}>{label}</option>)}
+                </select>
+              </label>
+              <label>
+                <span>Canal</span>
+                <select value={marketingChannel} onChange={(event) => setMarketingChannel(event.target.value as MarketingChannel)}>
+                  {Object.entries(marketingChannelLabels).map(([key, label]) => <option key={key} value={key}>{label}</option>)}
+                </select>
+              </label>
+              <label>
+                <span>Público</span>
+                <textarea value={marketingAudience} onChange={(event) => setMarketingAudience(event.target.value)} />
+              </label>
+              <label>
+                <span>Oferta / entrega</span>
+                <textarea value={marketingOffer} onChange={(event) => setMarketingOffer(event.target.value)} />
+              </label>
+              <label>
+                <span>Objeção principal</span>
+                <textarea value={marketingObjection} onChange={(event) => setMarketingObjection(event.target.value)} />
+              </label>
+            </div>
+          </article>
+
+          <article className="account-card admin-panel">
+            <div className="admin-section-head compact">
+              <div>
+                <p className="kicker">{marketingChannelLabels[marketingChannel]}</p>
+                <h2>Peças prontas</h2>
+              </div>
+              <Button variant="ghost" onClick={() => copyMarketingText('all', marketingDrafts[marketingChannel].join('\n\n---\n\n'))}>
+                <Copy size={15} /> {marketingCopied === 'all' ? 'Copiado' : 'Copiar tudo'}
+              </Button>
+            </div>
+            <div className="admin-copy-output">
+              {marketingDrafts[marketingChannel].map((text, index) => {
+                const key = `${marketingChannel}-${index}`;
+                return (
+                  <article key={key}>
+                    <div>
+                      <strong>Variação {index + 1}</strong>
+                      <button type="button" onClick={() => copyMarketingText(key, text)}>
+                        <Copy size={14} /> {marketingCopied === key ? 'Copiado' : 'Copiar'}
+                      </button>
+                    </div>
+                    <pre>{text}</pre>
+                  </article>
+                );
+              })}
+            </div>
+          </article>
+
+          <article className="account-card admin-panel admin-copy-library">
+            <p className="kicker">Headlines e ângulos</p>
+            <h2>Banco rápido</h2>
             <div className="admin-copy-list">
-              {['Anuncios', 'Headlines', 'E-mails', 'WhatsApp', 'Pagina de vendas', 'Onboarding'].map((item) => (
-                <button key={item} type="button">
+              {marketingDrafts.headlines.map((item, index) => (
+                <button key={item} type="button" onClick={() => copyMarketingText(`headline-${index}`, item)}>
                   <NotebookPen size={16} />
                   <span>{item}</span>
+                  <small>{marketingCopied === `headline-${index}` ? 'copiado' : 'copiar'}</small>
                 </button>
               ))}
             </div>
