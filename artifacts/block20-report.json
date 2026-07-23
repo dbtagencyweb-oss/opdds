@@ -1,0 +1,302 @@
+{
+  "generatedAt": "2026-07-12T16:56:24.158Z",
+  "summary": {
+    "total": 34,
+    "passed": 34,
+    "failed": 0,
+    "skipped": 0,
+    "requiredJourneys": 22,
+    "coveredJourneys": 22
+  },
+  "journeyMatrix": [
+    {
+      "id": "B20-J01",
+      "title": "Leitura integral sem usar o iGentMIND",
+      "area": "navigation",
+      "status": "passed",
+      "expected": [
+        "A leitura chega ao final do pilar.",
+        "Nenhum convite bloqueia a leitura.",
+        "Nenhuma resposta, memória ou escrita é criada."
+      ],
+      "failures": []
+    },
+    {
+      "id": "B20-J02",
+      "title": "Leitor aceita apenas uma pergunta",
+      "area": "journey",
+      "status": "passed",
+      "expected": [
+        "Apenas uma pergunta é respondida.",
+        "Nenhuma progressão forçada acontece.",
+        "O retorno ocorre no ponto exato do livro."
+      ],
+      "failures": []
+    },
+    {
+      "id": "B20-J03",
+      "title": "Leitor responde todas as perguntas",
+      "area": "integration",
+      "status": "passed",
+      "expected": [
+        "Nove perguntas são respondidas.",
+        "As três fases ficam completas.",
+        "Nenhuma escala sai do intervalo de zero a quatro."
+      ],
+      "failures": []
+    },
+    {
+      "id": "B20-J04",
+      "title": "Leitor em estado defensivo",
+      "area": "journey",
+      "status": "passed",
+      "expected": [
+        "A resposta não usa profundidade deep.",
+        "Não há pressão por escrita.",
+        "A intervenção respeita defesa e escolha explícita."
+      ],
+      "failures": []
+    },
+    {
+      "id": "B20-J05",
+      "title": "Leitor com carga alta",
+      "area": "safety",
+      "status": "passed",
+      "expected": [
+        "Intervenções profundas são suprimidas.",
+        "Pausa ou retorno à leitura são priorizados.",
+        "A leitura permanece disponível."
+      ],
+      "failures": []
+    },
+    {
+      "id": "B20-J06",
+      "title": "Leitor pula perguntas",
+      "area": "journey",
+      "status": "passed",
+      "expected": [
+        "Perguntas puladas não contam como respondidas.",
+        "O fluxo continua.",
+        "A reflexão não bloqueia o livro."
+      ],
+      "failures": []
+    },
+    {
+      "id": "B20-J07",
+      "title": "Leitor recusa escrita",
+      "area": "privacy",
+      "status": "passed",
+      "expected": [
+        "A recusa é respeitada.",
+        "Nenhum diário ou carta é aberto.",
+        "A oferta não é repetida no mesmo movimento."
+      ],
+      "failures": []
+    },
+    {
+      "id": "B20-J08",
+      "title": "Diário totalmente privado",
+      "area": "privacy",
+      "status": "passed",
+      "expected": [
+        "O diário fica marcado como privado.",
+        "Seu conteúdo não entra em telemetria.",
+        "Ele não vira memória automaticamente."
+      ],
+      "failures": []
+    },
+    {
+      "id": "B20-J09",
+      "title": "Carta privada sem envio",
+      "area": "privacy",
+      "status": "passed",
+      "expected": [
+        "A carta é salva apenas localmente.",
+        "Nenhum destinatário é criado.",
+        "Nenhuma mensagem externa é enviada."
+      ],
+      "failures": []
+    },
+    {
+      "id": "B20-J10",
+      "title": "Âncora interrompida antes do fim",
+      "area": "journey",
+      "status": "passed",
+      "expected": [
+        "A âncora fica interrompida, não concluída.",
+        "A leitura não fica bloqueada.",
+        "A retomada permanece opcional."
+      ],
+      "failures": []
+    },
+    {
+      "id": "B20-J11",
+      "title": "Resposta aberta corrige opção fechada",
+      "area": "integration",
+      "status": "passed",
+      "expected": [
+        "A resposta aberta se torna a fonte principal.",
+        "A evidência fechada perde autoridade.",
+        "Nenhum padrão definitivo é criado."
+      ],
+      "failures": []
+    },
+    {
+      "id": "B20-J12",
+      "title": "Memória recusada",
+      "area": "privacy",
+      "status": "passed",
+      "expected": [
+        "Nenhuma memória confirmada é armazenada.",
+        "A recusa fica registrada sem conteúdo privado.",
+        "A sugestão não reaparece como memória ativa."
+      ],
+      "failures": []
+    },
+    {
+      "id": "B20-J13",
+      "title": "Memória editada e confirmada",
+      "area": "privacy",
+      "status": "passed",
+      "expected": [
+        "Somente o texto editado é armazenado.",
+        "A confirmação explícita é preservada.",
+        "A memória original sugerida não é salva."
+      ],
+      "failures": []
+    },
+    {
+      "id": "B20-J14",
+      "title": "Fechamento sem síntese",
+      "area": "journey",
+      "status": "passed",
+      "expected": [
+        "O leitor consegue encerrar sem síntese.",
+        "O fechamento é válido.",
+        "Nenhum texto personalizado é forçado."
+      ],
+      "failures": []
+    },
+    {
+      "id": "B20-J15",
+      "title": "Fechamento parcial",
+      "area": "journey",
+      "status": "passed",
+      "expected": [
+        "O estado permanece parcial.",
+        "Complete é falso.",
+        "O leitor pode continuar a leitura."
+      ],
+      "failures": []
+    },
+    {
+      "id": "B20-J16",
+      "title": "Fechamento após reflexão completa",
+      "area": "integration",
+      "status": "passed",
+      "expected": [
+        "Complete é verdadeiro.",
+        "A síntese pode ser gerada.",
+        "Rotas canônicas e complementares permanecem separadas."
+      ],
+      "failures": []
+    },
+    {
+      "id": "B20-J17",
+      "title": "Retorno exato ao ponto do livro",
+      "area": "navigation",
+      "status": "passed",
+      "expected": [
+        "O cursor anterior é preservado.",
+        "O retorno não avança nem retrocede o texto.",
+        "A reflexão não altera o ponto de leitura."
+      ],
+      "failures": []
+    },
+    {
+      "id": "B20-J18",
+      "title": "Continuação para Pilar II — Família",
+      "area": "navigation",
+      "status": "passed",
+      "expected": [
+        "O destino é pillar_02_familia.",
+        "O ID legado não aparece.",
+        "O Pilar I não é reaberto por engano."
+      ],
+      "failures": []
+    },
+    {
+      "id": "B20-J19",
+      "title": "Falha de referência de conteúdo",
+      "area": "safety",
+      "status": "passed",
+      "expected": [
+        "O sistema falha fechado.",
+        "Nenhum conteúdo canônico é inventado.",
+        "A leitura pode continuar sem a referência."
+      ],
+      "failures": []
+    },
+    {
+      "id": "B20-J20",
+      "title": "Falha de segurança ou carga acima do limite",
+      "area": "safety",
+      "status": "passed",
+      "expected": [
+        "Safety vence todas as outras prioridades.",
+        "A reflexão é suspensa.",
+        "Nenhuma resposta deep é produzida."
+      ],
+      "failures": []
+    },
+    {
+      "id": "B20-J21",
+      "title": "Bloqueio de telemetria de conteúdo privado",
+      "area": "privacy",
+      "status": "passed",
+      "expected": [
+        "Diário, carta e resposta aberta não aparecem em telemetria.",
+        "Snippets e corpos também são bloqueados.",
+        "Somente metadados mínimos podem permanecer."
+      ],
+      "failures": []
+    },
+    {
+      "id": "B20-J22",
+      "title": "Reabertura posterior do Pilar I",
+      "area": "regression",
+      "status": "passed",
+      "expected": [
+        "O progresso anterior é recuperado.",
+        "Memórias não são duplicadas.",
+        "O leitor recebe opção de retomar, não obrigação."
+      ],
+      "failures": []
+    }
+  ],
+  "failures": [],
+  "issueCatalog": {
+    "B20_E001": "Contrato do adaptador de testes não conectado.",
+    "B20_E002": "ID legado pillar_01_vinculo ainda presente.",
+    "B20_E003": "Origem editorial e modo de geração estão misturados.",
+    "B20_E004": "Formato de next_move incompatível ou incompleto.",
+    "B20_E005": "Alteração de escala fora de -1, 0 ou 1.",
+    "B20_E006": "Escala resultante fora do intervalo de 0 a 4.",
+    "B20_E007": "Memória armazenada sem consentimento confirmado.",
+    "B20_E008": "Mais de uma memória usada na mesma resposta.",
+    "B20_E009": "Conteúdo privado apareceu em telemetria.",
+    "B20_E010": "Carta privada produziu saída externa.",
+    "B20_E011": "Mais de uma pergunta foi exibida no mesmo turno.",
+    "B20_E012": "Mais de três movimentos visíveis foram compostos.",
+    "B20_E013": "Resposta fechada recebeu confiança inicial excessiva.",
+    "B20_E014": "Resposta aberta não substituiu interpretação fechada.",
+    "B20_E015": "Cálculo de complete incompatível com o fechamento.",
+    "B20_E016": "Cursor do livro não foi preservado.",
+    "B20_E017": "Falha de referência produziu conteúdo inventado.",
+    "B20_E018": "Safety não venceu a cadeia de prioridades.",
+    "B20_E019": "Âncora interrompida foi marcada como concluída.",
+    "B20_E020": "Memória duplicada durante reabertura.",
+    "B20_E021": "Leitura bloqueada por reflexão opcional.",
+    "B20_E022": "Convite automático apareceu em seção proibida."
+  }
+}

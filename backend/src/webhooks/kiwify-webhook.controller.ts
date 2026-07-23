@@ -1,7 +1,9 @@
-import { Body, Controller, Headers, HttpCode, Post, UnauthorizedException } from '@nestjs/common';
+import { Body, Controller, Headers, HttpCode, Post, Query, RawBodyRequest, Req, UnauthorizedException } from '@nestjs/common';
+import type { Request } from 'express';
 import * as crypto from 'crypto';
 import { AuthService } from '../auth/auth.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { IS_PRODUCTION } from '../config/env';
 
 type AccessPlan = 'pdf' | 'basic' | 'workbook' | 'igent30' | 'igent90' | 'group' | 'vip';
 type RevokeStatus = 'CANCELED' | 'REFUNDED';
@@ -102,11 +104,27 @@ function resolvePlan(payload: any): AccessPlan {
   return 'basic';
 }
 
-function verifySignature(raw: string, signature = '', secret = '') {
-  if (!secret) return true;
-  if (!signature) return process.env.KIWIFY_REQUIRE_SIGNATURE !== 'true';
-  const expected = crypto.createHmac('sha1', secret).update(raw).digest('hex');
-  return expected === signature;
+function timingSafeEqualHex(a: string, b: string) {
+  const bufA = Buffer.from(a, 'hex');
+  const bufB = Buffer.from(b, 'hex');
+  if (bufA.length === 0 || bufA.length !== bufB.length) return false;
+  return crypto.timingSafeEqual(bufA, bufB);
+}
+
+/**
+ * Verifica a assinatura HMAC-SHA1 da Kiwify sobre o corpo BRUTO da requisição.
+ * Regras (seguro por padrão):
+ * - Com secret configurado: assinatura obrigatória e válida, senão rejeita.
+ * - Sem secret: em produção rejeita (a menos de KIWIFY_ALLOW_UNSIGNED=true);
+ *   fora de produção libera para facilitar testes locais.
+ */
+function verifySignature(rawBody: Buffer, signature = '', secret = '') {
+  if (!secret) {
+    return !IS_PRODUCTION || process.env.KIWIFY_ALLOW_UNSIGNED === 'true';
+  }
+  if (!signature) return false;
+  const expected = crypto.createHmac('sha1', secret).update(rawBody).digest('hex');
+  return timingSafeEqualHex(expected, signature.trim().toLowerCase());
 }
 
 function extractData(body: any) {
@@ -132,8 +150,16 @@ export class KiwifyWebhookController {
 
   @Post('webhook')
   @HttpCode(200)
-  async handle(@Body() body: any, @Headers('x-kiwify-event') event: string, @Headers('x-kiwify-signature') signature: string) {
-    const raw = JSON.stringify(body);
+  async handle(
+    @Req() req: RawBodyRequest<Request>,
+    @Body() body: any,
+    @Headers('x-kiwify-event') event: string,
+    @Headers('x-kiwify-signature') headerSignature: string,
+    @Query('signature') querySignature: string,
+  ) {
+    // Corpo bruto exato recebido (necessário para o HMAC bater); fallback defensivo.
+    const raw = req.rawBody ?? Buffer.from(JSON.stringify(body ?? {}));
+    const signature = String(headerSignature || querySignature || '');
     if (!verifySignature(raw, signature, process.env.KIWIFY_TOKEN || '')) {
       throw new UnauthorizedException('Assinatura Kiwify inválida.');
     }

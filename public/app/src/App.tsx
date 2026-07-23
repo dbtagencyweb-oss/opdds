@@ -1,11 +1,16 @@
-import { type Dispatch, type SetStateAction, useEffect, useMemo, useRef, useState } from 'react';
+﻿import { type Dispatch, type FocusEvent, type SetStateAction, useEffect, useMemo, useRef, useState } from 'react';
 import {
   AlertCircle,
+  AlignCenter,
+  AlignLeft,
+  AlignRight,
   AudioLines,
+  Bookmark,
   BookOpen,
   Boxes,
   Brain,
   Briefcase,
+  Bold,
   CheckCircle2,
   ChevronDown,
   ChevronLeft,
@@ -20,6 +25,9 @@ import {
   Heart,
   Headphones,
   Home,
+  Heading1,
+  Heading2,
+  Italic,
   Library,
   ListMusic,
   Lock,
@@ -33,6 +41,7 @@ import {
   RotateCcw,
   Search,
   Settings,
+  Share2,
   Shield,
   SkipBack,
   SkipForward,
@@ -45,32 +54,90 @@ import {
   Zap,
 } from 'lucide-react';
 import { usePagination } from './hooks/usePagination';
-import { accessTokenPlans, accessTokens, bookChapters, onboardingSteps, pdfUrl, workbookPdfUrl } from './data/book';
+import { accessTokenPlans, accessTokens, bookChapters, getChapterIndexForPillar, onboardingSteps, pdfUrl, workbookPdfUrl } from './data/book';
 import { bookGroups, pillarLetters } from './data/bookStructure';
+import {
+  buildArtifactCanonicalBookChapters,
+  repairCanonicalText,
+  type CanonicalBookBlock,
+  type CanonicalBookBlockKind,
+} from './data/canonicalBook';
+import { READER_STATE_LABELS } from './data/igentMindContract';
+import {
+  getOfficialMindPillarProtocol,
+  MIND_PHASES,
+  type MindPhaseId,
+  type MindProtocolOption,
+} from './data/igentMindProtocol';
+import {
+  MIND_GUIDED_MAX_TURNS,
+  buildMindJourneySynthesis,
+  mindJourneyClosingReplies,
+  planMindJourneyTurn,
+} from './data/igentMindJourneyOrchestrator';
+import { getFinalMindPillar } from './data/igentMindFinalProject';
+import {
+  analyzeStructuredSignal,
+  type PrimarySignal,
+  type SecondarySignal,
+  type SignalAnalysisResult,
+} from './data/igentMindSignals';
+import {
+  createInitialReaderMindState,
+  updateReaderMindState,
+  type ReaderMindState,
+} from './data/igentMindState';
+import {
+  buildAgentMemoryContext,
+  createSessionMemory,
+  defaultMemoryEngineResult,
+  type SessionMemory,
+} from './data/igentMindMemory';
+import {
+  decideNextAction,
+  type DecisionEngineResult,
+} from './data/igentMindDecision';
+import { buildLocalMindResponse } from './data/igentMindLocalResponder';
+import {
+  applySafetyProtocol,
+  assessSafety,
+  buildSafetyResponseText,
+  safetyResourcesByLocale,
+  type SafetyAssessment,
+} from './data/igentMindSafety';
 import { pdfTextPages } from './data/pdfTextPages';
 import Button from './components/Button';
 import OnboardingModal from './components/OnboardingModal';
 import ReaderShell from './components/ReaderShell';
 import { PRODUCT_KEYS, PRODUCT_LABELS, ProductKey } from './config/products';
+import { runtimeConfig } from './config/runtime';
 import { useTheme } from './theme/ThemeProvider';
 import { hasLocalEntitlement, LocalPlan } from './services/entitlements';
 import {
   AudioProgressEntry,
+  clearLocalJourney,
   LetterMeta,
+  ReaderAnchor,
   ReaderNote,
   getLocalWorkbookSavedAt,
   loadLocalAudioProgress,
+  loadLocalCanonicalJournalAnswers,
   loadLocalLetterMeta,
   loadLocalLetters,
+  loadLocalReaderAnchors,
   loadLocalReaderNotes,
   loadLocalWorkbookAnswers,
   loadLocalWorkbookEntry,
+  loadLocalWorkbookPrompt,
   saveLocalAudioProgress,
+  saveLocalCanonicalJournalAnswers,
   saveLocalLetterMeta,
   saveLocalLetters,
+  saveLocalReaderAnchors,
   saveLocalReaderNotes,
   saveLocalWorkbookAnswers,
   saveLocalWorkbookEntry,
+  saveLocalWorkbookPrompt,
 } from './services/workbookStore';
 import {
   AdminBookPageSummary,
@@ -80,6 +147,8 @@ import {
   AdminProduct,
   AuthUser,
   createAdminInvite,
+  deleteMindSessions,
+  deleteReaderJourney,
   fetchAdminBookPageHistory,
   fetchAdminBookAudio,
   fetchAdminBookPages,
@@ -87,6 +156,8 @@ import {
   fetchAdminProducts,
   fetchAdminUsers,
   fetchCurrentUser,
+  fetchMindStatus,
+  fetchReaderJourney,
   fetchPublishedAudioTracks,
   fetchPublishedBookPages,
   getStoredAuthUser,
@@ -104,6 +175,7 @@ import {
   saveAdminBookAudioOrder,
   saveAdminBookPageDraft,
   sendMindMessage,
+  syncReaderJourney,
   updateStoredAuthUser,
 } from './services/auth';
 
@@ -127,7 +199,7 @@ const ROUTES = {
 
 type Route = typeof ROUTES[keyof typeof ROUTES];
 type Plan = LocalPlan;
-type AdminSection = 'overview' | 'readers' | 'book' | 'kiwify' | 'plans' | 'copy';
+type AdminSection = 'overview' | 'readers' | 'book' | 'sensory' | 'kiwify' | 'plans' | 'copy';
 
 type AudioState = {
   isPlaying: boolean;
@@ -138,6 +210,14 @@ type AudioState = {
   duration: number;
   volume: number;
   playbackRate: number;
+};
+
+type AmbientAudioState = {
+  isPlaying: boolean;
+  currentUrl: string | null;
+  title: string | null;
+  coverUrl?: string | null;
+  volume: number;
 };
 
 type AudioQueueItem = {
@@ -151,6 +231,14 @@ type AudioQueueItem = {
   coverUrl?: string | null;
 };
 
+type SensoryTrack = {
+  id: string;
+  title: string;
+  text: string;
+  audioUrl: string;
+  coverUrl?: string;
+};
+
 type SaveFeedback = 'idle' | 'saving' | 'saved';
 type AdminAudioProductionStatus = 'ok' | 'review' | 'record' | 'placeholder';
 type MarketingGoal = 'awareness' | 'conversion' | 'retargeting' | 'community';
@@ -159,8 +247,25 @@ type MarketingProduct = 'book' | 'workbook' | 'igent' | 'community' | 'vip';
 
 const ADMIN_AUDIO_PRODUCTION_KEY = 'opd_admin_audio_production';
 const ADMIN_AUDIO_ORDER_KEY = 'opd_admin_audio_order';
+const ADMIN_SUPPORT_AUDIO_KEY = 'opd_admin_support_audio';
+const ADMIN_READING_TRACKS_KEY = 'opd_admin_reading_tracks';
+const ADMIN_CANONICAL_DRAFTS_KEY = 'opd_admin_canonical_block_drafts_v1';
+const SELECTED_READING_TRACK_KEY = 'opd_selected_reading_track';
+const ADMIN_SENSORY_PLAYLIST_KEY = ADMIN_READING_TRACKS_KEY;
+const SELECTED_SENSORY_TRACK_KEY = SELECTED_READING_TRACK_KEY;
 const WORKBOOK_INTRO_KEY = 'opd_workbook_intro_dismissed';
-const WORKBOOK_WELCOME_AUDIO = '/media/audios/diario/boas-vindas-diego.mp3';
+const WORKBOOK_WELCOME_AUDIO = '/media/audios/manifesto/boas-vindas.mp3';
+
+const defaultSupportAudios: SensoryTrack[] = [
+  { id: 'sobrevivencia', title: 'Sobrevivência', text: 'Para dias em que a leitura precisa ser curta e segura.', audioUrl: '/media/audios/home/sobrevivencia.mp3' },
+  { id: 'reconstrucao', title: 'Reconstrução', text: 'Para voltar a organizar a força sem pressa.', audioUrl: '/media/audios/home/reconstrucao.mp3' },
+  { id: 'continuidade', title: 'Continuidade', text: 'Para sustentar o eixo depois do impacto.', audioUrl: '/media/audios/home/continuidade.mp3' },
+];
+
+const defaultReadingTracks: SensoryTrack[] = [
+  { id: 'silencio-dourado', title: 'Silêncio dourado', text: 'Trilha instrumental discreta para ler com presença.', audioUrl: '/media/audios/trilhas/silencio-dourado.mp3' },
+];
+const defaultSensoryPlaylist = defaultReadingTracks;
 
 const marketingGoalLabels: Record<MarketingGoal, string> = {
   awareness: 'Topo de funil',
@@ -188,7 +293,7 @@ const marketingProductLabels: Record<MarketingProduct, string> = {
 const marketingProductAngles: Record<MarketingProduct, { promise: string; mechanism: string; cta: string }> = {
   book: {
     promise: 'ler sem transformar dor em performance',
-    mechanism: 'livro, modo leitura, PDF e áudios guiados',
+    mechanism: 'livro, modo leitura, PDF e Áudios guiados',
     cta: 'Começar a leitura',
   },
   workbook: {
@@ -312,7 +417,7 @@ const navGroups = [
   {
     title: 'Ferramentas',
     items: [
-      { id: ROUTES.SESSIONS, label: 'Sessões', icon: AudioLines },
+      { id: ROUTES.SESSIONS, label: 'Áudios de apoio', icon: AudioLines },
       { id: ROUTES.IGENT, label: 'iGentMIND', icon: Zap },
       { id: ROUTES.COMMUNITY, label: 'Comunidade', icon: Users },
     ],
@@ -331,7 +436,7 @@ const navGroups = [
 ];
 
 const homeSlides = [
-  '/media/imagens/capas/capa-topo.jpg',
+  '/media/imagens/capas/capa.webp',
   '/media/imagens/capas/capa.webp',
 ];
 
@@ -340,19 +445,19 @@ const journeyStates = [
     title: 'Sobrevivência',
     desc: 'Estou em crise ou tentando não entrar em pânico.',
     audioUrl: '/media/audios/home/sobrevivencia.mp3',
-    chapter: 8,
+    chapter: 10,
   },
   {
     title: 'Reconstrução',
     desc: 'Estou tentando me reerguer sem me violentar.',
     audioUrl: '/media/audios/home/reconstrucao.mp3',
-    chapter: 11,
+    chapter: 13,
   },
   {
     title: 'Continuidade',
     desc: 'Quero manter o equilíbrio depois do impacto.',
     audioUrl: '/media/audios/home/continuidade.mp3',
-    chapter: 14,
+    chapter: 16,
   },
 ];
 
@@ -487,7 +592,7 @@ const upgradeOffers: Record<UpgradeKey, {
   productKeys: ProductKey[];
 }> = {
   basic: {
-    title: 'Livro interativo + áudios',
+    title: 'Livro interativo + Áudios',
     eyebrow: 'Upgrade de leitura',
     description: 'Desbloqueia capítulos no app, biblioteca, sessões de áudio e leitura guiada estilo Kindle.',
     price: 'R$ 27',
@@ -534,7 +639,7 @@ const upgradeOffers: Record<UpgradeKey, {
   vip: {
     title: 'Pacote completo OPDDS',
     eyebrow: 'Acesso total',
-    description: 'Livro interativo, áudios, Diário, iGentMIND e grupo em um único pacote.',
+    description: 'Livro interativo, Áudios, Diário, iGentMIND e grupo em um único pacote.',
     price: 'Pacote',
     checkoutUrl: 'https://pay.kiwify.com.br/yYaKNrk',
     plan: 'vip',
@@ -586,36 +691,153 @@ const maskAccessToken = (value?: string | null) => {
   if (!value) return 'nenhum';
   if (value.startsWith('OPDDS_')) return `${value.slice(0, 12)}...${value.slice(-4)}`;
   if (value.startsWith('LOCAL_')) return 'acesso local';
-  return `sessao segura ...${value.slice(-8)}`;
+  return `sessão segura ...${value.slice(-8)}`;
+};
+
+const chapterIndexForPillar = getChapterIndexForPillar;
+
+const audioForPillar = (pillarIndex: number, preferredLabel = 'manifesto') => {
+  const chapter = bookChapters[chapterIndexForPillar(pillarIndex)];
+  return chapter?.audioTracks.find((track) => track.label.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().includes(preferredLabel))?.url
+    ?? chapter?.audioTracks[0]?.url
+    ?? '';
 };
 
 const pillarCards = [
-  { title: 'Reconhecimento', desc: 'Onde a negação cessa.', icon: Sparkles, chapter: 8 },
-  { title: 'Família', desc: 'Lealdades invisíveis.', icon: Boxes, chapter: 9 },
-  { title: 'Luto', desc: 'Quando a ausência permanece.', icon: Cloud, chapter: 10 },
-  { title: 'Trabalho', desc: 'Quando produzir deixa de significar existir.', icon: Briefcase, chapter: 11 },
-  { title: 'Dor', desc: 'Dor, fuga e anestesia.', icon: Flame, chapter: 12 },
-  { title: 'Desejo', desc: 'Amor, projeção e frustração.', icon: Heart, chapter: 13 },
-  { title: 'Fé', desc: 'Sentido e desencanto.', icon: Sparkles, chapter: 14 },
-  { title: 'Escassez', desc: 'Ver a falta sem se tornar falta.', icon: AlertCircle, chapter: 15 },
-  { title: 'Vazio', desc: 'Presença e continuidade.', icon: RotateCcw, chapter: 16 },
+  { title: 'Reconhecimento', desc: 'Onde a negação cessa.', icon: Sparkles, chapter: chapterIndexForPillar(0) },
+  { title: 'Família', desc: 'Lealdades invisíveis.', icon: Boxes, chapter: chapterIndexForPillar(1) },
+  { title: 'Luto', desc: 'Quando a ausência permanece.', icon: Cloud, chapter: chapterIndexForPillar(2) },
+  { title: 'Trabalho', desc: 'Quando produzir deixa de significar existir.', icon: Briefcase, chapter: chapterIndexForPillar(3) },
+  { title: 'Dor', desc: 'Dor, fuga e anestesia.', icon: Flame, chapter: chapterIndexForPillar(4) },
+  { title: 'Desejo', desc: 'Amor, projeção e frustração.', icon: Heart, chapter: chapterIndexForPillar(5) },
+  { title: 'Fé', desc: 'Sentido e desencanto.', icon: Sparkles, chapter: chapterIndexForPillar(6) },
+  { title: 'Escassez', desc: 'Ver a falta sem se tornar falta.', icon: AlertCircle, chapter: chapterIndexForPillar(7) },
+  { title: 'Vazio', desc: 'Presença e continuidade.', icon: RotateCcw, chapter: chapterIndexForPillar(8) },
 ];
 
 const mentorTopics = [
-  { id: 'culpa', title: 'Culpa', icon: AlertCircle, color: '#ff7474', audioUrl: '/media/audios/livro/pilar-01-reconhecimento/p1-julgamento.wav' },
-  { id: 'recaida', title: 'Recaída', icon: RotateCcw, color: '#ff8f2c', audioUrl: '/media/audios/livro/pilar-09-continuidade/p9-manifesto.wav' },
-  { id: 'luto', title: 'Luto', icon: Cloud, color: '#a7a8b5', audioUrl: '/media/audios/livro/pilar-04-luto/p4-manifesto.wav' },
-  { id: 'desejo', title: 'Desejo', icon: Flame, color: '#ff5f8a', audioUrl: '/media/audios/livro/pilar-07-fuga/p7-manifesto.wav' },
-  { id: 'fe', title: 'Fé quebrada', icon: Sparkles, color: '#b987ff', audioUrl: '/media/audios/livro/pilar-08-fe/p8-manifesto.wav' },
-  { id: 'solidao', title: 'Solidão', icon: Brain, color: '#7384ff', audioUrl: '/media/audios/livro/pilar-03-vinculo/p3-manifesto.wav' },
-  { id: 'fracasso', title: 'Fracasso', icon: Zap, color: '#e6b800', audioUrl: '/media/audios/livro/pilar-05-trabalho/p5-manifesto.wav' },
-  { id: 'ansiedade', title: 'Ansiedade', icon: AudioLines, color: '#22d3ee', audioUrl: '/media/audios/livro/pilar-01-reconhecimento/p1-presenca.wav' },
-  { id: 'pressao', title: 'Pressão', icon: Volume2, color: '#34d399', audioUrl: '/media/audios/livro/pilar-09-continuidade/p9-narrativa.wav' },
+  { id: 'culpa', title: 'Culpa', icon: AlertCircle, color: '#ff7474', pillarIndex: 0, audioUrl: audioForPillar(0, 'julgamento') },
+  { id: 'recaida', title: 'Recaída', icon: RotateCcw, color: '#ff8f2c', pillarIndex: 8, audioUrl: audioForPillar(8) },
+  { id: 'luto', title: 'Luto', icon: Cloud, color: '#a7a8b5', pillarIndex: 2, audioUrl: audioForPillar(2) },
+  { id: 'desejo', title: 'Desejo', icon: Flame, color: '#ff5f8a', pillarIndex: 5, audioUrl: audioForPillar(5) },
+  { id: 'fe', title: 'Fé quebrada', icon: Sparkles, color: '#b987ff', pillarIndex: 6, audioUrl: audioForPillar(6) },
+  { id: 'solidao', title: 'Solidão', icon: Brain, color: '#7384ff', pillarIndex: 1, audioUrl: audioForPillar(1) },
+  { id: 'fracasso', title: 'Fracasso', icon: Zap, color: '#e6b800', pillarIndex: 3, audioUrl: audioForPillar(3) },
+  { id: 'ansiedade', title: 'Ansiedade', icon: AudioLines, color: '#22d3ee', pillarIndex: 0, audioUrl: audioForPillar(0, 'presenca') },
+  { id: 'pressao', title: 'Pressão', icon: Volume2, color: '#34d399', pillarIndex: 3, audioUrl: audioForPillar(3, 'narrativa') },
+];
+
+const mindTerritoryAudioUrls = Array.from({ length: 9 }, (_, pillarIndex) => audioForPillar(pillarIndex));
+
+const mindTriads = [
+  {
+    id: 'sobrevivencia',
+    title: 'Sobrevivência',
+    prompt: 'Estou tentando não afundar.',
+    nuance: 'Crise, pânico, peso sem nome.',
+    color: '#72c6a4',
+    territories: [
+      { pillarIndex: 0, label: 'Reconhecimento', limiar: 'onde a negação cessa', icon: Sparkles },
+      { pillarIndex: 1, label: 'Família', limiar: 'onde aprendemos a nos calar', icon: Boxes },
+      { pillarIndex: 2, label: 'Luto', limiar: 'quando a ausência permanece', icon: Cloud },
+    ],
+  },
+  {
+    id: 'reconstrucao',
+    title: 'Reconstrução',
+    prompt: 'Estou tentando me reerguer.',
+    nuance: 'Processando, reorganizando.',
+    color: '#e1b84f',
+    territories: [
+      { pillarIndex: 3, label: 'Trabalho', limiar: 'quando produzir deixa de significar existir', icon: Briefcase },
+      { pillarIndex: 4, label: 'Dor', limiar: 'sentir sem anestesiar', icon: Flame },
+      { pillarIndex: 5, label: 'Desejo', limiar: 'querer quando querer machuca', icon: Heart },
+    ],
+  },
+  {
+    id: 'continuidade',
+    title: 'Continuidade',
+    prompt: 'Quero manter o equilíbrio depois do impacto.',
+    nuance: 'Sustentar, permanecer.',
+    color: '#9aa4ff',
+    territories: [
+      { pillarIndex: 6, label: 'Fé', limiar: 'o que fica depois do desencanto', icon: Shield },
+      { pillarIndex: 7, label: 'Escassez', limiar: 'a falta como mapa, não como sentença', icon: AlertCircle },
+      { pillarIndex: 8, label: 'Vazio', limiar: 'ficar sem preencher', icon: RotateCcw },
+    ],
+  },
+];
+
+type MindEntryIntent = 'understand' | 'reflect' | 'act' | 'continue';
+
+const mindEntryIntents: Array<{
+  id: MindEntryIntent;
+  label: string;
+  title: string;
+  description: string;
+}> = [
+  {
+    id: 'understand',
+    label: 'Entender',
+    title: 'Entender este trecho',
+    description: 'Explica o tema do livro sem interpretar você.',
+  },
+  {
+    id: 'reflect',
+    label: 'Refletir',
+    title: 'Refletir sobre isso',
+    description: 'Abre uma pergunta por vez ligada ao território.',
+  },
+  {
+    id: 'act',
+    label: 'Agir',
+    title: 'Dar um próximo passo',
+    description: 'Sugere diário, âncora, pausa ou retorno ao livro.',
+  },
+  {
+    id: 'continue',
+    label: 'Continuar',
+    title: 'Continuar lendo',
+    description: 'Volta ao livro sem iniciar reflexão.',
+  },
 ];
 
 const sensoryClicks = {
   primary: { frequency: 520, duration: 0.055 },
   soft: { frequency: 320, duration: 0.04 },
+};
+
+type MindTriageOption = {
+  id: string;
+  semantic_position?: MindProtocolOption['semantic_position'];
+  primary_signal?: PrimarySignal;
+  secondary_signals?: SecondarySignal[];
+  label: string;
+  signal: string;
+  response: string;
+  load?: 1 | 2 | 3;
+};
+
+type MindTriageQuestion = {
+  id: string;
+  phase?: MindPhaseId;
+  prompt: string;
+  openPrompt?: string;
+  options: MindTriageOption[];
+};
+
+type MindTriageAnswer = {
+  questionId?: string;
+  phase?: MindPhaseId;
+  question: string;
+  option: string;
+  signal: string;
+  semantic_position?: MindProtocolOption['semantic_position'];
+  primary_signal?: PrimarySignal;
+  secondary_signals?: SecondarySignal[];
+  load?: number;
+  signal_analysis?: SignalAnalysisResult;
+  open_answer?: string;
 };
 
 type MindMessage = {
@@ -624,7 +846,14 @@ type MindMessage = {
   text: string;
   kind?: 'intro' | 'plan';
   replies?: string[];
+  triageOptions?: MindTriageOption[];
   recommendations?: MindRecommendation[];
+  references?: Array<{
+    chapterId: string;
+    chapterTitle: string;
+    sectionId: string;
+    sectionTitle: string;
+  }>;
 };
 
 type MindRecommendation = {
@@ -645,30 +874,350 @@ type MindSavedPlan = {
   createdAt: string;
 };
 
+const mindTriageBank: Record<number, MindTriageQuestion[]> = {
+  0: [
+    {
+      id: 'r1-negacao',
+      prompt: 'Quando você lê "onde a negação cessa", isso parece mais com o quê?',
+      options: [
+        { id: 'sei-evito', label: 'Eu já sei, mas evito', signal: 'clareza evitada', response: 'Então talvez o ponto não seja descobrir. Talvez seja encarar o custo emocional de admitir o que já apareceu.' },
+        { id: 'sem-nome', label: 'Ainda não consigo nomear', signal: 'experiência sem linguagem', response: 'Tudo bem ainda não ter nome. Às vezes o nome só vem depois que a defesa para de gritar.' },
+        { id: 'raiva', label: 'Isso me dá raiva', signal: 'resistência ativa', response: 'A raiva pode ser uma porta. Nem sempre ela nega a verdade; às vezes protege o lugar onde a verdade encostou.' },
+        { id: 'nao-sentiu', label: 'Ainda não fez sentido', signal: 'baixa ressonância', response: 'Então a primeira pergunta não precisa forçar profundidade. Precisa descobrir onde o texto ainda não encontrou sua vida.' },
+      ],
+    },
+    {
+      id: 'r2-protecao',
+      prompt: 'O que você mais tenta proteger quando evita reconhecer algo?',
+      options: [
+        { id: 'imagem', label: 'Minha imagem', signal: 'proteção da persona', response: 'Quando a imagem vira abrigo, qualquer verdade parece ameaça. Talvez você esteja cansado de sustentar uma versão.' },
+        { id: 'rotina', label: 'Minha rotina', signal: 'medo de ruptura', response: 'Reconhecer algo pode parecer perigoso quando a rotina é o que impede tudo de desabar.' },
+        { id: 'alguem', label: 'Alguém importante', signal: 'lealdade afetiva', response: 'Às vezes a negação não protege você. Protege o vínculo, a história ou alguém que você ainda não quer decepcionar.' },
+        { id: 'esperanca', label: 'Minha esperança', signal: 'medo de perder futuro', response: 'Tem verdades que parecem acabar com a esperança. Mas talvez acabem só com uma esperança que já estava te cobrando demais.' },
+      ],
+    },
+    {
+      id: 'r3-corpo',
+      prompt: 'No corpo, esse tema aparece mais como:',
+      options: [
+        { id: 'peso', label: 'Peso', signal: 'sobrecarga silenciosa', response: 'Peso costuma aparecer quando a pessoa carrega uma verdade por tempo demais sem poder dizer que está carregando.' },
+        { id: 'aperto', label: 'Aperto', signal: 'ameaça e urgência', response: 'O aperto pode ser o corpo tentando reduzir o mundo inteiro a uma única saída. Vamos devagar.' },
+        { id: 'cansaco', label: 'Cansaço', signal: 'exaustão defensiva', response: 'Cansaço também pode ser o preço de fingir normalidade quando algo já pediu reconhecimento.' },
+        { id: 'nada', label: 'Não sinto nada', signal: 'anestesia ou distância', response: 'Não sentir nada também é uma informação. Às vezes a distância foi o jeito possível de continuar.' },
+      ],
+    },
+  ],
+  1: [
+    {
+      id: 'f1-papel',
+      prompt: 'Na família, qual papel você mais aprendeu a ocupar?',
+      options: [
+        { id: 'forte', label: 'O forte', signal: 'autossuficiência compulsória', response: 'Ser o forte pode parecer honra, mas às vezes é só a forma socialmente aceita de não pedir cuidado.' },
+        { id: 'calado', label: 'O calado', signal: 'silenciamento aprendido', response: 'O silêncio pode ter sido proteção antes. Hoje talvez ele esteja cobrando a sua presença.' },
+        { id: 'mediador', label: 'O que pacifica tudo', signal: 'mediação como sobrevivência', response: 'Quem pacifica tudo muitas vezes aprende a desaparecer para que os outros não explodam.' },
+        { id: 'problema', label: 'O problema', signal: 'identidade atribuída', response: 'Quando alguém é colocado no lugar de problema, até a própria dor começa a pedir desculpa por existir.' },
+      ],
+    },
+    {
+      id: 'f2-lealdade',
+      prompt: 'Que lealdade parece mais difícil quebrar?',
+      options: [
+        { id: 'culpa', label: 'A culpa', signal: 'culpa herdada', response: 'Culpa herdada não pede só coragem. Pede perceber o que nunca foi seu e mesmo assim entrou no seu nome.' },
+        { id: 'expectativa', label: 'A expectativa', signal: 'roteiro familiar', response: 'Expectativa familiar vira destino quando ninguém percebe que está obedecendo.' },
+        { id: 'cuidado', label: 'Cuidar de todos', signal: 'parentificação', response: 'Cuidar de todos pode ter sido amor. Mas amor que exige desaparecimento vira dívida.' },
+        { id: 'pertencer', label: 'Pertencer a qualquer custo', signal: 'medo de exclusão', response: 'Pertencer a qualquer custo ensina uma pergunta dura: quanto de você ficou do lado de fora para caber dentro?' },
+      ],
+    },
+    {
+      id: 'f3-limite',
+      prompt: 'O limite que você evita impor mexe mais com:',
+      options: [
+        { id: 'medo', label: 'Medo de rejeição', signal: 'ameaça de abandono', response: 'Quando o limite parece rejeição, a pessoa passa a negociar dignidade para não perder vínculo.' },
+        { id: 'pena', label: 'Pena de alguém', signal: 'culpa cuidadora', response: 'A pena pode ser afeto, mas também pode prender você no lugar de quem nunca pode escolher a própria vida.' },
+        { id: 'briga', label: 'Medo de briga', signal: 'evitação de conflito', response: 'Evitar conflito pode preservar paz por fora e produzir guerra por dentro.' },
+        { id: 'confusao', label: 'Nem sei qual limite é meu', signal: 'fronteira difusa', response: 'Quando o limite não tem nome, o primeiro trabalho é perceber onde você começa a se abandonar.' },
+      ],
+    },
+  ],
+  2: [
+    {
+      id: 'l1-ausencia',
+      prompt: 'O que parece não voltar?',
+      options: [
+        { id: 'pessoa', label: 'Uma pessoa', signal: 'perda relacional', response: 'Quando uma pessoa falta, o mundo não perde só presença. Perde também os rituais que organizavam você.' },
+        { id: 'fase', label: 'Uma fase da vida', signal: 'luto de ciclo', response: 'Luto de fase é estranho porque ninguém faz cerimônia, mas algo terminou do mesmo jeito.' },
+        { id: 'confianca', label: 'Minha confiança', signal: 'ruptura interna', response: 'Perder confiança em si pode doer como perder casa: o lugar ainda existe, mas não parece seguro.' },
+        { id: 'futuro', label: 'Um futuro que imaginei', signal: 'luto de possibilidade', response: 'Também se sofre pelo que não aconteceu. Algumas ausências nunca tiveram corpo, mas tiveram promessa.' },
+      ],
+    },
+    {
+      id: 'l2-reacao',
+      prompt: 'Quando essa ausência aparece, você tende a:',
+      options: [
+        { id: 'controlar', label: 'Controlar tudo', signal: 'controle contra vazio', response: 'Controle às vezes é tentativa de impedir uma segunda perda.' },
+        { id: 'sumir', label: 'Sumir', signal: 'retirada protetiva', response: 'Sumir pode ser a forma que o corpo encontrou para não ter que explicar uma dor sem linguagem.' },
+        { id: 'ocupar', label: 'Me ocupar demais', signal: 'produtividade defensiva', response: 'Ocupação pode parecer vida, mas às vezes é só barulho para não ouvir a ausência.' },
+        { id: 'lembrar', label: 'Voltar sempre à memória', signal: 'fixação afetiva', response: 'Voltar à memória pode ser amor. A pergunta é se essa volta acolhe você ou te impede de retornar.' },
+      ],
+    },
+    {
+      id: 'l3-permissao',
+      prompt: 'O que você ainda não se permitiu?',
+      options: [
+        { id: 'chorar', label: 'Chorar de verdade', signal: 'luto contido', response: 'Às vezes a pessoa segue funcionando porque ainda não encontrou um lugar seguro para cair.' },
+        { id: 'sentir-raiva', label: 'Sentir raiva', signal: 'raiva proibida', response: 'Raiva no luto não nega amor. Às vezes ela só mostra a violência da falta.' },
+        { id: 'continuar', label: 'Continuar', signal: 'culpa por seguir', response: 'Continuar pode parecer traição quando uma parte sua acredita que amar é permanecer parado.' },
+        { id: 'despedir', label: 'Me despedir', signal: 'despedida suspensa', response: 'Despedida não apaga. Ela só devolve movimento ao que ficou congelado.' },
+      ],
+    },
+  ],
+  3: [
+    {
+      id: 't1-valor',
+      prompt: 'No trabalho, onde seu valor fica mais preso?',
+      options: [
+        { id: 'resultado', label: 'No resultado', signal: 'valor condicionado', response: 'Quando valor depende só de resultado, qualquer oscilação vira ameaça de desaparecimento.' },
+        { id: 'utilidade', label: 'Em ser útil', signal: 'utilidade como identidade', response: 'Ser útil pode virar prisão quando descansar parece prova de inutilidade.' },
+        { id: 'comparacao', label: 'Na comparação', signal: 'medida externa', response: 'Comparação rouba escala. Ela mede sua vida com a régua de uma história que não é sua.' },
+        { id: 'controle', label: 'Em controlar tudo', signal: 'perfeccionismo defensivo', response: 'Controlar tudo pode ser medo de que qualquer falha revele algo imperdoável.' },
+      ],
+    },
+    {
+      id: 't2-descanso',
+      prompt: 'Quando você descansa, aparece mais:',
+      options: [
+        { id: 'culpa', label: 'Culpa', signal: 'descanso proibido', response: 'Culpa no descanso mostra que seu corpo parou antes da sua permissão interna chegar.' },
+        { id: 'medo', label: 'Medo de ficar para trás', signal: 'ameaça competitiva', response: 'Ficar para trás é uma frase forte. Talvez ela esconda a pergunta: atrás de quem?' },
+        { id: 'vazio', label: 'Vazio', signal: 'identidade colada à produção', response: 'Se parar produz vazio, talvez trabalhar tenha virado mais do que trabalho: virou forma de existir.' },
+        { id: 'alivio', label: 'Alívio', signal: 'necessidade legítima', response: 'Alívio é dado. Ele mostra que alguma parte sua não queria performance; queria autorização.' },
+      ],
+    },
+    {
+      id: 't3-prova',
+      prompt: 'O que você ainda tenta provar?',
+      options: [
+        { id: 'capaz', label: 'Que sou capaz', signal: 'capacidade em julgamento', response: 'Provar capacidade o tempo todo cansa porque transforma cada entrega em tribunal.' },
+        { id: 'merecedor', label: 'Que mereço estar aqui', signal: 'pertencimento condicionado', response: 'Quando merecimento precisa de prova constante, presença vira entrevista sem fim.' },
+        { id: 'nao-fracassei', label: 'Que não fracassei', signal: 'fracasso como ameaça identitária', response: 'Talvez o fracasso esteja sendo tratado como identidade, não como acontecimento.' },
+        { id: 'nao-dependo', label: 'Que não dependo de ninguém', signal: 'autonomia defensiva', response: 'Não depender pode parecer força, mas às vezes é só medo antigo de precisar e não encontrar.' },
+      ],
+    },
+  ],
+  4: [
+    {
+      id: 'd1-fuga',
+      prompt: 'Quando a dor aparece, qual fuga parece mais próxima?',
+      options: [
+        { id: 'distracao', label: 'Distração', signal: 'desvio rápido', response: 'Distração pode aliviar, mas também pode impedir a dor de virar mensagem.' },
+        { id: 'excesso', label: 'Excesso', signal: 'anestesia intensa', response: 'Excesso geralmente não começa como descontrole. Começa como tentativa de não sentir sozinho.' },
+        { id: 'isolamento', label: 'Isolamento', signal: 'retirada da dor', response: 'Isolar pode proteger de perguntas, mas também pode deixar a dor sem testemunha.' },
+        { id: 'ironia', label: 'Ironia ou frieza', signal: 'blindagem afetiva', response: 'A frieza às vezes é só uma forma elegante de dizer: se eu sentir, desmonto.' },
+      ],
+    },
+    {
+      id: 'd2-antes',
+      prompt: 'Antes da fuga, o que costuma aparecer?',
+      options: [
+        { id: 'vergonha', label: 'Vergonha', signal: 'autoexposição ameaçadora', response: 'Vergonha aperta porque faz a pessoa sentir que a dor virou espetáculo.' },
+        { id: 'impotencia', label: 'Impotência', signal: 'perda de agência', response: 'Impotência não é fraqueza. É o momento em que a pessoa esquece que ainda existe uma escolha pequena.' },
+        { id: 'raiva', label: 'Raiva', signal: 'dor convertida em ataque', response: 'Raiva pode ser dor procurando saída mais aceitável do que pedir ajuda.' },
+        { id: 'nada', label: 'Nada, só vou', signal: 'automatismo', response: 'Automatismo é uma pista. O corpo aprendeu um caminho antes da consciência chegar.' },
+      ],
+    },
+    {
+      id: 'd3-precisa',
+      prompt: 'O que essa dor parece pedir sem conseguir dizer?',
+      options: [
+        { id: 'cuidado', label: 'Cuidado', signal: 'pedido reprimido', response: 'Cuidado às vezes é difícil de pedir porque parece dívida antes mesmo de chegar.' },
+        { id: 'limite', label: 'Limite', signal: 'invasão sustentada', response: 'Dor que pede limite costuma vir de algo que passou tempo demais entrando sem permissão.' },
+        { id: 'descanso', label: 'Descanso', signal: 'exaustão ignorada', response: 'Descanso não resolve tudo, mas pode interromper a violência de continuar como se nada estivesse acontecendo.' },
+        { id: 'verdade', label: 'Verdade', signal: 'nomeação pendente', response: 'Talvez a dor esteja pedindo menos solução e mais nome.' },
+      ],
+    },
+  ],
+  5: [
+    {
+      id: 'de1-desejo',
+      prompt: 'Seu desejo hoje parece mais:',
+      options: [
+        { id: 'vida', label: 'Sinal de vida', signal: 'desejo restaurador', response: 'Desejo como sinal de vida não precisa virar plano ainda. Primeiro ele precisa poder existir sem vergonha.' },
+        { id: 'fuga', label: 'Vontade de fugir', signal: 'escape projetado', response: 'Nem toda fuga é covardia. Mas vale perguntar se você quer ir para algo ou só sair de uma dor.' },
+        { id: 'carencia', label: 'Carência', signal: 'falta buscando objeto', response: 'Carência não é defeito. Ela só fica perigosa quando escolhe qualquer lugar para não ficar só.' },
+        { id: 'confusao', label: 'Confusão', signal: 'ambivalência afetiva', response: 'Confusão pode ser o encontro entre uma falta antiga e uma possibilidade nova.' },
+      ],
+    },
+    {
+      id: 'de2-prova',
+      prompt: 'O que você espera que esse desejo prove?',
+      options: [
+        { id: 'amavel', label: 'Que sou amável', signal: 'valor pelo olhar do outro', response: 'Quando o desejo precisa provar que você é amável, o outro vira espelho e tribunal ao mesmo tempo.' },
+        { id: 'livre', label: 'Que sou livre', signal: 'liberdade reativa', response: 'Às vezes a liberdade que nasce só como reação ainda está presa ao que tenta contrariar.' },
+        { id: 'vivo', label: 'Que ainda estou vivo', signal: 'desejo contra anestesia', response: 'Desejo pode aparecer como prova de vida quando a rotina virou sobrevivência.' },
+        { id: 'nada', label: 'Não quero provar nada', signal: 'desejo mais limpo', response: 'Talvez exista algo mais simples aí: um querer que ainda não precisa defender sua existência.' },
+      ],
+    },
+    {
+      id: 'de3-medo',
+      prompt: 'O medo por trás do desejo é:',
+      options: [
+        { id: 'rejeicao', label: 'Ser rejeitado', signal: 'ameaça vincular', response: 'Medo de rejeição faz o desejo pedir desculpa antes mesmo de ser dito.' },
+        { id: 'perder-controle', label: 'Perder o controle', signal: 'ameaça de intensidade', response: 'Perder controle assusta quando sentir já foi perigoso em algum momento.' },
+        { id: 'machucar', label: 'Machucar alguém', signal: 'culpa antecipada', response: 'Culpa antecipada pode tentar impedir escolhas antes de você saber se elas são violentas ou apenas honestas.' },
+        { id: 'dar-certo', label: 'Dar certo', signal: 'medo de expansão', response: 'Às vezes o medo não é o desejo falhar. É ele dar certo e pedir uma versão sua que ainda não nasceu.' },
+      ],
+    },
+  ],
+  6: [
+    {
+      id: 'fe1-quebra',
+      prompt: 'O que quebrou primeiro?',
+      options: [
+        { id: 'crenca', label: 'Minha crença', signal: 'ruptura de sentido', response: 'Quando a crença quebra, a pessoa não perde só uma resposta. Perde um chão simbólico.' },
+        { id: 'confianca', label: 'Minha confiança', signal: 'traição da esperança', response: 'Confiança quebrada torna qualquer consolo suspeito. Talvez você não precise de resposta; precise de honestidade.' },
+        { id: 'paciencia', label: 'Minha paciência', signal: 'cansaço espiritual', response: 'Paciência também acaba. E quando acaba, muitas vezes revela que você sustentou mais do que dizia.' },
+        { id: 'linguagem', label: 'Minha linguagem para isso', signal: 'silêncio simbólico', response: 'Às vezes o sagrado não some. Só perde a linguagem antiga.' },
+      ],
+    },
+    {
+      id: 'fe2-resposta',
+      prompt: 'Hoje você está mais cansado de:',
+      options: [
+        { id: 'explicar', label: 'Explicar tudo', signal: 'exaustão racional', response: 'Explicar tudo pode ser a forma que a mente encontrou para não admitir que algo ainda dói sem resposta.' },
+        { id: 'esperar', label: 'Esperar', signal: 'esperança fatigada', response: 'Esperar cansa quando vira obrigação de continuar acreditando do mesmo jeito.' },
+        { id: 'fingir', label: 'Fingir certeza', signal: 'certeza performada', response: 'Fingir certeza é solitário porque impede até a dúvida de ser acompanhada.' },
+        { id: 'pedir', label: 'Pedir e não receber', signal: 'frustração espiritual', response: 'Pedir e não receber pode ferir mais do que a falta. Fere a confiança de que havia escuta.' },
+      ],
+    },
+    {
+      id: 'fe3-resta',
+      prompt: 'Apesar do desencanto, o que ainda resta?',
+      options: [
+        { id: 'silencio', label: 'Silêncio', signal: 'presença sem linguagem', response: 'Silêncio pode ser vazio, mas também pode ser o primeiro lugar sem mentira.' },
+        { id: 'duvida', label: 'Dúvida', signal: 'fé não dogmática', response: 'Dúvida não é o oposto da profundidade. Às vezes é a recusa de aceitar resposta pequena demais.' },
+        { id: 'vontade', label: 'Vontade de continuar', signal: 'continuidade mínima', response: 'Vontade mínima também conta. Ela não precisa parecer fé para manter você aqui.' },
+        { id: 'nada', label: 'Nada', signal: 'deserto interno', response: 'Dizer “nada” com honestidade já é diferente de fingir que está tudo vivo.' },
+      ],
+    },
+  ],
+  7: [
+    {
+      id: 'e1-falta',
+      prompt: 'A falta hoje aparece mais como:',
+      options: [
+        { id: 'dinheiro', label: 'Dinheiro', signal: 'pressão material', response: 'Quando a falta é concreta, acolher não pode virar abstração. Primeiro é preciso separar urgência real de sentença sobre você.' },
+        { id: 'tempo', label: 'Tempo', signal: 'escassez temporal', response: 'Falta de tempo muitas vezes esconde excesso de obrigação e pouca permissão para existir fora da função.' },
+        { id: 'apoio', label: 'Apoio', signal: 'solidão operacional', response: 'Falta de apoio pesa porque transforma qualquer tarefa em prova de resistência.' },
+        { id: 'valor', label: 'Valor pessoal', signal: 'falta internalizada', response: 'Quando a falta vira valor pessoal, a escassez deixa de ser circunstância e começa a parecer identidade.' },
+      ],
+    },
+    {
+      id: 'e2-urgencia',
+      prompt: 'A urgência está te fazendo:',
+      options: [
+        { id: 'correr', label: 'Correr sem pensar', signal: 'reatividade', response: 'Correr pode resolver algo imediato, mas também pode impedir você de ver qual é a próxima ação real.' },
+        { id: 'paralisar', label: 'Paralisar', signal: 'sobrecarga por ameaça', response: 'Paralisar não é preguiça. Pode ser o corpo tentando sobreviver a muitas ameaças ao mesmo tempo.' },
+        { id: 'comparar', label: 'Me comparar', signal: 'medida de falta', response: 'Comparação em escassez transforma a vida do outro em prova contra você.' },
+        { id: 'esconder', label: 'Esconder a situação', signal: 'vergonha material', response: 'Esconder a falta costuma doer duas vezes: pela falta e pela solidão de performar normalidade.' },
+      ],
+    },
+    {
+      id: 'e3-recurso',
+      prompt: 'O que ainda existe, mesmo pequeno?',
+      options: [
+        { id: 'habilidade', label: 'Uma habilidade', signal: 'recurso interno', response: 'Uma habilidade pequena ainda é recurso. Escassez tenta apagar o que continua disponível.' },
+        { id: 'pessoa', label: 'Uma pessoa possível', signal: 'rede mínima', response: 'Uma pessoa possível pode não resolver tudo, mas pode quebrar o isolamento da falta.' },
+        { id: 'passo', label: 'Um passo concreto', signal: 'ação mínima', response: 'Um passo concreto devolve escala. A falta quer virar mundo inteiro; o passo devolve chão.' },
+        { id: 'nao-sei', label: 'Não consigo ver nada', signal: 'campo fechado', response: 'Quando nada aparece, a triagem não força otimismo. Ela só pergunta o que está bloqueando a visão.' },
+      ],
+    },
+  ],
+  8: [
+    {
+      id: 'v1-vazio',
+      prompt: 'O vazio parece mais com:',
+      options: [
+        { id: 'silencio', label: 'Silêncio', signal: 'espaço sem preenchimento', response: 'Silêncio pode assustar quando você aprendeu que estar bem é estar ocupado por dentro.' },
+        { id: 'sem-sentido', label: 'Falta de sentido', signal: 'desorientação existencial', response: 'Falta de sentido não precisa ser resolvida depressa. Às vezes ela pede menos resposta e mais presença.' },
+        { id: 'desconexao', label: 'Desconexão', signal: 'distância de si', response: 'Desconexão pode ser o jeito que a mente encontrou para reduzir dor, mas ela também reduz vida.' },
+        { id: 'calma-estranha', label: 'Uma calma estranha', signal: 'vazio habitável', response: 'Nem todo vazio é ameaça. Alguns espaços começam estranhos porque ainda não foram invadidos.' },
+      ],
+    },
+    {
+      id: 'v2-preenche',
+      prompt: 'O que você tenta usar para preencher rápido?',
+      options: [
+        { id: 'tela', label: 'Tela/distração', signal: 'preenchimento digital', response: 'A tela pode ser descanso, mas também pode ser uma parede entre você e algo que ficou pedindo nome.' },
+        { id: 'pessoa', label: 'Outra pessoa', signal: 'preenchimento vincular', response: 'Usar alguém para preencher vazio costuma transformar vínculo em remédio, e remédio em cobrança.' },
+        { id: 'trabalho', label: 'Trabalho', signal: 'preenchimento por função', response: 'Trabalho preenche rápido porque entrega identidade pronta. Mas talvez você esteja buscando existência, não função.' },
+        { id: 'controle', label: 'Controle', signal: 'organização contra abismo', response: 'Controlar pode organizar fora enquanto o dentro continua sem lugar.' },
+      ],
+    },
+    {
+      id: 'v3-permanecer',
+      prompt: 'O que ajudaria você a permanecer sem se abandonar?',
+      options: [
+        { id: 'ritual', label: 'Um ritual pequeno', signal: 'continuidade encarnada', response: 'Ritual pequeno cria presença sem exigir transformação grandiosa.' },
+        { id: 'testemunha', label: 'Uma testemunha', signal: 'presença acompanhada', response: 'Às vezes permanecer sozinho é demais. Uma testemunha não resolve, mas sustenta presença.' },
+        { id: 'palavra', label: 'Uma palavra honesta', signal: 'nome mínimo', response: 'Uma palavra honesta pode ser o primeiro fio entre vazio e linguagem.' },
+        { id: 'tempo', label: 'Tempo sem cobrança', signal: 'continuidade sem performance', response: 'Tempo sem cobrança pode parecer improdutivo, mas talvez seja o primeiro lugar onde você não precisa se provar.' },
+      ],
+    },
+  ],
+};
+
 const MIND_LAST_PLAN_KEY = 'opd_mind_last_plan';
+const MIND_DATA_SCOPES_KEY = 'opd_mind_data_scopes';
+type MindDataScopes = {
+  diary: boolean;
+  caderno: boolean;
+  letters: boolean;
+  notes: boolean;
+  anchors: boolean;
+  pastSessions: boolean;
+  readingProgress: boolean;
+};
+const DEFAULT_MIND_DATA_SCOPES: MindDataScopes = {
+  diary: false,
+  caderno: false,
+  letters: false,
+  notes: false,
+  anchors: false,
+  pastSessions: false,
+  readingProgress: false,
+};
+const MIND_SCOPE_OPTIONS: Array<{ key: keyof MindDataScopes; label: string }> = [
+  { key: 'readingProgress', label: 'progresso de leitura' },
+  { key: 'diary', label: 'Diário' },
+  { key: 'caderno', label: 'Cadernos de presença' },
+  { key: 'letters', label: 'cartas privadas' },
+  { key: 'notes', label: 'notas e marcações' },
+  { key: 'anchors', label: 'âncoras salvas' },
+  { key: 'pastSessions', label: 'conversas anteriores' },
+];
+const loadMindDataScopes = (): MindDataScopes => {
+  try {
+    return { ...DEFAULT_MIND_DATA_SCOPES, ...JSON.parse(localStorage.getItem(MIND_DATA_SCOPES_KEY) || '{}') };
+  } catch {
+    return DEFAULT_MIND_DATA_SCOPES;
+  }
+};
 const APP_VERSION = 'v1.3.0';
 
 const repairMojibake = (value = '') => {
-  const text = String(value ?? '');
-  if (!/[ÃÂâð]/.test(text)) return text;
-  try {
-    const bytes = Uint8Array.from(Array.from(text).map((char) => char.charCodeAt(0) & 255));
-    return new TextDecoder('utf-8').decode(bytes);
-  } catch {
-    return text
-      .replaceAll('vocÃª', 'você')
-      .replaceAll('nÃ£o', 'não')
-      .replaceAll('Ã©', 'é')
-      .replaceAll('Ã¡', 'á')
-      .replaceAll('Ã­', 'í')
-      .replaceAll('Ã³', 'ó')
-      .replaceAll('Ã§', 'ç')
-      .replaceAll('Ã£', 'ã')
-      .replaceAll('Ãª', 'ê')
-      .replaceAll('â€”', '-')
-      .replaceAll('â€œ', '“')
-      .replaceAll('â€', '”');
-  }
+  let text = repairCanonicalText(String(value ?? ''));
+  const replacements: Array<[string, string]> = [
+    ['Ã¡', 'á'], ['Ã ', 'à'], ['Ã¢', 'â'], ['Ã£', 'ã'], ['Ã©', 'é'], ['Ãª', 'ê'],
+    ['Ã­', 'í'], ['Ã³', 'ó'], ['Ã´', 'ô'], ['Ãµ', 'õ'], ['Ãº', 'ú'], ['Ã§', 'ç'],
+    ['Ã', 'Á'], ['É', 'É'], ['ÃŠ', 'Ê'], ['Ã‡', 'Ç'], ['Â·', '·'], ['Â ', ' '],
+    ['â€œ', '"'], ['â€', '"'], ['â€˜', "'"], ['â€™', "'"], ['â€”', '—'], ['â€“', '–'],
+    ['In?cio', 'Início'], ['audios', 'Áudios'], ['Di?rio', 'Diário'], ['página', 'página'],
+    ['Página', 'Página'], ['Título', 'Título'], ['título', 'título'], ['Código', 'Código'],
+    ['Histórico', 'Histórico'], ['Espaço', 'Espaço'], ['espa?o', 'espaço'],
+  ];
+  replacements.forEach(([bad, good]) => {
+    text = text.split(bad).join(good);
+  });
+  return repairCanonicalText(text);
 };
 
 const repairBrokenPdfCharacters = (value = '') => {
@@ -704,6 +1253,9 @@ const repairBrokenPdfCharacters = (value = '') => {
     [new RegExp(`IMPRESS${broken}O`, 'g'), 'IMPRESS\u00c3O'],
     [new RegExp(`Impress${broken}o`, 'g'), 'Impress\u00e3o'],
     [new RegExp(`impress${broken}o`, 'g'), 'impress\u00e3o'],
+    [new RegExp(`CONTEMPOR${broken}NEAS`, 'g'), 'CONTEMPOR\u00c2NEAS'],
+    [new RegExp(`Contempor${broken}neas`, 'g'), 'Contempor\u00e2neas'],
+    [new RegExp(`contempor${broken}neas`, 'g'), 'contempor\u00e2neas'],
     [new RegExp(`N${broken}O`, 'g'), 'N\u00c3O'],
     [new RegExp(`N${broken}o`, 'g'), 'N\u00e3o'],
     [new RegExp(`n${broken}o`, 'g'), 'n\u00e3o'],
@@ -713,7 +1265,9 @@ const repairBrokenPdfCharacters = (value = '') => {
     [new RegExp(`\u00c2ncora pr${broken}tica`, 'g'), '\u00c2ncora pr\u00e1tica'],
     [new RegExp(`ancora pr${broken}tica`, 'gi'), '\u00e2ncora pr\u00e1tica'],
   ];
-  return replacements.reduce((text, [pattern, replacement]) => text.replace(pattern, replacement), repairMojibake(value));
+  return replacements
+    .reduce((text, [pattern, replacement]) => text.replace(pattern, replacement), repairMojibake(value))
+    .replace(/[\u0013\u0014\u25A0-\u25A3\u25A8-\u25AB\u25AD-\u25AF\u25CC\u25FB-\u25FE\uFFFC]/g, '?');
 };
 
 const normalizeForSearch = (value = '') =>
@@ -756,13 +1310,13 @@ const cleanBookEditorText = (value = '') =>
 
 const getChapterKind = (index: number, title = '') => {
   const normalized = normalizeForSearch(title);
-  if (normalized.includes('pilar')) return title.split('—')[0]?.trim() || 'Pilar';
+  if (normalized.includes('pilar')) return title.split('?')[0]?.trim() || 'Pilar';
   if (normalized.includes('prefacio')) return 'Prefácio';
   if (normalized.includes('introducao')) return 'Introdução';
   if (normalized.includes('posfacio')) return 'Posfácio';
   if (normalized.includes('epilogo')) return 'Epílogo';
   if (normalized.includes('carta')) return 'Carta final';
-  if (index >= 8 && index <= 16) return `Pilar ${String(index - 7).padStart(2, '0')}`;
+  if (bookChapters[index]?.pillar) return `Pilar ${String(bookChapters[index].pillar).padStart(2, '0')}`;
   return 'Livro';
 };
 
@@ -785,16 +1339,16 @@ const mindGuides: Record<string, {
     opening: 'Culpa tenta te convencer de que uma falha virou identidade. Vamos separar responsabilidade de sentença.',
     firstQuestion: 'Quando você pensa nisso, qual frase mais te acusa por dentro?',
     quickReplies: ['Eu devia ter feito mais', 'Eu estraguei tudo', 'Não consigo me perdoar', 'Tenho medo de repetir'],
-    chapterHint: 8,
+    chapterHint: chapterIndexForPillar(0),
     counterpoint: 'Você pode reconhecer um erro sem entregar sua existência inteira para ele.',
-    practice: 'Escreva uma frase começando com: “Eu assumo o que cabe a mim, mas não aceito ser reduzido a isso.”',
+    practice: 'Escreva uma frase começando com: "Eu assumo o que cabe a mim, mas não aceito ser reduzido a isso."',
     keywords: ['culpa', 'julgamento', 'falha', 'perdao', 'acusacao', 'erro', 'sentenca', 'reconhecimento'],
   },
   recaida: {
     opening: 'Recaída não é volta ao zero. É um ponto do caminho pedindo mais honestidade, não mais punição.',
     firstQuestion: 'O que você está chamando de recaída: um comportamento, um pensamento ou um cansaço?',
-    quickReplies: ['Comportamento', 'Pensamento', 'Cansaço', 'Vergonha de tentar de novo'],
-    chapterHint: 16,
+    quickReplies: ['Comportamento', 'Pensamento', 'Cansação', 'Vergonha de tentar de novo'],
+    chapterHint: chapterIndexForPillar(8),
     counterpoint: 'Quem continua depois de cair não perdeu o processo; está aprendendo onde precisa de apoio.',
     practice: 'Escolha um gesto mínimo para as próximas duas horas. Pequeno o bastante para ser cumprido.',
     keywords: ['recaida', 'continuidade', 'cair', 'recomecar', 'processo', 'vergonha', 'permanecer'],
@@ -803,7 +1357,7 @@ const mindGuides: Record<string, {
     opening: 'Luto não é só perda de alguém. Às vezes é perda de uma versão sua que não volta.',
     firstQuestion: 'O que exatamente parece não voltar agora?',
     quickReplies: ['Uma pessoa', 'Uma fase da vida', 'Minha confiança', 'A vontade de continuar'],
-    chapterHint: 10,
+    chapterHint: chapterIndexForPillar(2),
     counterpoint: 'Aceitar que algo não volta não significa aceitar que nada mais nasce.',
     practice: 'Nomeie a ausência sem brigar com ela. Depois nomeie uma presença pequena que ainda ficou.',
     keywords: ['luto', 'perda', 'ausencia', 'volta', 'despedida', 'vazio', 'saudade'],
@@ -812,25 +1366,25 @@ const mindGuides: Record<string, {
     opening: 'Desejo assusta quando parece maior que a coragem. Mas ele também pode revelar vida onde você só via desistência.',
     firstQuestion: 'O que você deseja e tem medo de admitir?',
     quickReplies: ['Mudar de vida', 'Ser escolhido', 'Ir embora', 'Começar algo meu'],
-    chapterHint: 13,
+    chapterHint: chapterIndexForPillar(5),
     counterpoint: 'Nem todo desejo é fuga. Alguns são mapas que você ainda não aprendeu a ler.',
-    practice: 'Pergunte: “Esse desejo me tira de mim ou me devolve para mim?”',
+    practice: 'Pergunte: "Esse desejo me tira de mim ou me devolve para mim?"',
     keywords: ['desejo', 'fuga', 'mudanca', 'vontade', 'medo', 'ir embora', 'reconstrucao'],
   },
   fe: {
     opening: 'Fé quebrada não é ausência de profundidade. Às vezes é a alma recusando respostas fáceis.',
     firstQuestion: 'O que quebrou primeiro: sua crença, sua confiança ou sua paciência?',
     quickReplies: ['Minha crença', 'Minha confiança', 'Minha paciência', 'Minha esperança'],
-    chapterHint: 14,
+    chapterHint: chapterIndexForPillar(6),
     counterpoint: 'Você não precisa fingir certeza para continuar. Presença já é uma forma de fé.',
-    practice: 'Respire e diga: “Hoje eu não preciso explicar tudo. Preciso só não me abandonar.”',
+    practice: 'Respire e diga: "Hoje eu não preciso explicar tudo. Preciso só não me abandonar."',
     keywords: ['fe', 'esperanca', 'crenca', 'presenca', 'certeza', 'alma', 'sentido'],
   },
   solidao: {
     opening: 'Solidão machuca mais quando vira prova de que você não importa. Essa prova é falsa.',
     firstQuestion: 'Sua solidão hoje parece abandono, invisibilidade ou proteção?',
-    quickReplies: ['Abandono', 'Invisibilidade', 'Proteção', 'Cansaço de pedir presença'],
-    chapterHint: 9,
+    quickReplies: ['Abandono', 'Invisibilidade', 'Proteção', 'Cansação de pedir presença'],
+    chapterHint: chapterIndexForPillar(1),
     counterpoint: 'Estar sem companhia não confirma que você é impossível de amar.',
     practice: 'Mande uma mensagem simples para alguém seguro ou escreva o que você gostaria de ouvir.',
     keywords: ['solidao', 'vinculo', 'abandono', 'pertencer', 'invisibilidade', 'companhia'],
@@ -839,16 +1393,16 @@ const mindGuides: Record<string, {
     opening: 'Fracasso é uma palavra pesada demais para um recorte da sua história.',
     firstQuestion: 'Quem te ensinou a chamar esse momento de fracasso?',
     quickReplies: ['Minha família', 'Comparação', 'Eu mesmo', 'O dinheiro/trabalho'],
-    chapterHint: 11,
+    chapterHint: chapterIndexForPillar(3),
     counterpoint: 'Resultado ruim não é identidade ruim. Você é mais amplo que a última tentativa.',
     practice: 'Liste três coisas que você aprendeu sem transformar aprendizado em castigo.',
-    keywords: ['fracasso', 'trabalho', 'valor', 'resultado', 'producao', 'comparacao', 'tentativa'],
+    keywords: ['fracasso', 'trabalho', 'valor', 'resultado', 'produção', 'comparacao', 'tentativa'],
   },
   ansiedade: {
     opening: 'Ansiedade tenta te sequestrar para um futuro que ainda não aconteceu. Vamos voltar um passo.',
     firstQuestion: 'O medo está apontando para qual cenário?',
     quickReplies: ['Vou perder algo', 'Vão me rejeitar', 'Não vou dar conta', 'Algo ruim vai acontecer'],
-    chapterHint: 8,
+    chapterHint: chapterIndexForPillar(0),
     counterpoint: 'Prever desastre não é o mesmo que estar preparado. Preparação começa no corpo presente.',
     practice: 'Solte os ombros, descruze a mandíbula e conte cinco objetos ao seu redor.',
     keywords: ['ansiedade', 'medo', 'futuro', 'desastre', 'corpo', 'presenca', 'controle'],
@@ -857,7 +1411,7 @@ const mindGuides: Record<string, {
     opening: 'Pressão vira prisão quando tudo parece urgente e nada parece suficiente.',
     firstQuestion: 'Qual cobrança está falando mais alto agora?',
     quickReplies: ['Ser forte', 'Dar resultado', 'Não decepcionar', 'Resolver tudo hoje'],
-    chapterHint: 16,
+    chapterHint: chapterIndexForPillar(3),
     counterpoint: 'Você não precisa carregar como prova de valor aquilo que está te quebrando.',
     practice: 'Escolha uma coisa para adiar sem culpa e uma coisa pequena para concluir.',
     keywords: ['pressao', 'cobranca', 'urgencia', 'valor', 'trabalho', 'continuidade', 'cansaco'],
@@ -870,6 +1424,7 @@ export function App() {
     ? '/media/imagens/brand/lettering_logo_fp.webp'
     : '/media/imagens/brand/logo_opdds_fd_claro.webp';
   const [route, setRoute] = useState<Route>(ROUTES.ACCESS);
+  const [readerInitialMode, setReaderInitialMode] = useState<'edition' | 'text'>('text');
   const [plan, setPlan] = useState<Plan>('vip');
   const [authUser, setAuthUser] = useState<AuthUser | null>(null);
   const [accountName, setAccountName] = useState('');
@@ -884,6 +1439,7 @@ export function App() {
   const [adminBookPageNumber, setAdminBookPageNumber] = useState(1);
   const [adminBookPageTitle, setAdminBookPageTitle] = useState('');
   const [adminBookPageContent, setAdminBookPageContent] = useState('');
+  const [adminSelectedBookLineIndex, setAdminSelectedBookLineIndex] = useState<number | null>(null);
   const [adminAudioChapterId, setAdminAudioChapterId] = useState(bookChapters[0]?.id || '');
   const [adminAudioSectionKey, setAdminAudioSectionKey] = useState('');
   const [adminAudioLabel, setAdminAudioLabel] = useState('');
@@ -902,24 +1458,69 @@ export function App() {
       return {};
     }
   });
+  const [supportAudios, setSupportAudios] = useState<SensoryTrack[]>(() => {
+    try {
+      const stored = JSON.parse(localStorage.getItem(ADMIN_SUPPORT_AUDIO_KEY) || 'null');
+      return Array.isArray(stored) && stored.length ? stored : defaultSupportAudios;
+    } catch {
+      return defaultSupportAudios;
+    }
+  });
+  const [readingTracks, setReadingTracks] = useState<SensoryTrack[]>(() => {
+    try {
+      const stored = JSON.parse(localStorage.getItem(ADMIN_READING_TRACKS_KEY) || 'null');
+      return Array.isArray(stored) && stored.length ? stored : defaultReadingTracks;
+    } catch {
+      return defaultReadingTracks;
+    }
+  });
+  const [adminSupportAudioDraft, setAdminSupportAudioDraft] = useState<SensoryTrack>({
+    id: '',
+    title: '',
+    text: '',
+    audioUrl: '',
+    coverUrl: '',
+  });
+  const [adminReadingTrackDraft, setAdminReadingTrackDraft] = useState<SensoryTrack>({
+    id: '',
+    title: '',
+    text: '',
+    audioUrl: '',
+    coverUrl: '',
+  });
+  const [selectedReadingTrackId, setSelectedReadingTrackId] = useState(() => {
+    if (typeof window === 'undefined') return defaultReadingTracks[0]?.id || '';
+    return localStorage.getItem(SELECTED_READING_TRACK_KEY) || defaultReadingTracks[0]?.id || '';
+  });
   const [adminAudioDraggingKey, setAdminAudioDraggingKey] = useState('');
   const [adminSelectedUserId, setAdminSelectedUserId] = useState('');
   const [adminInvite, setAdminInvite] = useState({ name: '', email: '', plan: 'basic' as Plan, expiresInDays: '' });
-  const [adminGrant, setAdminGrant] = useState({ plan: 'vip' as Plan, productKey: PRODUCT_KEYS.workbook, expiresInDays: '' });
+  const [adminGrant, setAdminGrant] = useState<{ plan: Plan; productKey: ProductKey; expiresInDays: string }>({ plan: 'vip', productKey: PRODUCT_KEYS.workbook, expiresInDays: '' });
   const [adminResult, setAdminResult] = useState<AdminInviteResponse | null>(null);
   const [adminMessage, setAdminMessage] = useState('');
   const [adminSection, setAdminSection] = useState<AdminSection>('overview');
-  const [adminBookTab, setAdminBookTab] = useState<'pages' | 'audio'>('pages');
+  const [adminBookTab, setAdminBookTab] = useState<'canonical' | 'pages' | 'audio'>('canonical');
   const [adminBookSearch, setAdminBookSearch] = useState('');
   const [adminBookCompareOpen, setAdminBookCompareOpen] = useState(false);
+  const [adminPlainPasteDraft, setAdminPlainPasteDraft] = useState('');
+  const [adminCanonicalChapterId, setAdminCanonicalChapterId] = useState(bookChapters[0]?.id || '');
+  const [adminCanonicalDrafts, setAdminCanonicalDrafts] = useState<Record<string, CanonicalBookBlock[]>>(() => {
+    try {
+      const stored = JSON.parse(localStorage.getItem(ADMIN_CANONICAL_DRAFTS_KEY) || '{}');
+      return stored && typeof stored === 'object' ? stored : {};
+    } catch {
+      return {};
+    }
+  });
   const [marketingGoal, setMarketingGoal] = useState<MarketingGoal>('conversion');
   const [marketingProduct, setMarketingProduct] = useState<MarketingProduct>('book');
   const [marketingChannel, setMarketingChannel] = useState<MarketingChannel>('ads');
   const [marketingAudience, setMarketingAudience] = useState('pessoas cansadas de tentar vencer performando força');
-  const [marketingOffer, setMarketingOffer] = useState('acesso ao app de leitura, áudios e jornada guiada');
+  const [marketingOffer, setMarketingOffer] = useState('acesso ao app de leitura, Áudios e jornada guiada');
   const [marketingObjection, setMarketingObjection] = useState('não tenho energia para mais um método de autoajuda');
   const [marketingCopied, setMarketingCopied] = useState('');
   const [bookPageOverrides, setBookPageOverrides] = useState<Record<number, string>>({});
+  const [bookPageTitleOverrides, setBookPageTitleOverrides] = useState<Record<number, string>>({});
   const [bookAudioOverrides, setBookAudioOverrides] = useState<Record<string, { chapterId: string; sectionKey: string; label: string; url: string; coverUrl?: string | null }>>({});
   const [upgradeModal, setUpgradeModal] = useState<UpgradeKey | null>(null);
   const [token, setToken] = useState('');
@@ -945,12 +1546,13 @@ export function App() {
   const [authPasswordConfirm, setAuthPasswordConfirm] = useState('');
   const [showAuthPassword, setShowAuthPassword] = useState(false);
   const [showAuthPasswordConfirm, setShowAuthPasswordConfirm] = useState(false);
+  const [authSubmitting, setAuthSubmitting] = useState(false);
   const [passwordResetToken, setPasswordResetToken] = useState('');
   const [authMessage, setAuthMessage] = useState('');
   const [currentChapterIndex, setCurrentChapterIndex] = useState(0);
   const [favorites, setFavorites] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [fontSize, setFontSize] = useState(18);
+  const [fontSize, setFontSize] = useState(16);
   const [pageIndex, setPageIndex] = useState(0);
   const [pdfPage, setPdfPage] = useState(10);
   const [totalPdfPages, setTotalPdfPages] = useState(286);
@@ -964,16 +1566,38 @@ export function App() {
     volume: 0.84,
     playbackRate: 1,
   });
+  const [ambientAudioState, setAmbientAudioState] = useState<AmbientAudioState>({
+    isPlaying: false,
+    currentUrl: null,
+    title: null,
+    coverUrl: null,
+    volume: 0.38,
+  });
   const [audioFullOpen, setAudioFullOpen] = useState(false);
+  const [ambientPlayerCollapsed, setAmbientPlayerCollapsed] = useState(false);
   const [onboardingStep, setOnboardingStep] = useState(0);
   const [menuOpen, setMenuOpen] = useState(false);
   const [accountMenuOpen, setAccountMenuOpen] = useState(false);
   const [activeMentorTopic, setActiveMentorTopic] = useState(mentorTopics[7]);
   const [mindStep, setMindStep] = useState<'select' | 'chat'>('select');
+  const [selectedMindTriadId, setSelectedMindTriadId] = useState(mindTriads[0].id);
+  const [selectedMindEntryIntent, setSelectedMindEntryIntent] = useState<MindEntryIntent>('reflect');
+  const [mindDataScopes, setMindDataScopes] = useState<MindDataScopes>(loadMindDataScopes);
+  const [activeMindEntryIntent, setActiveMindEntryIntent] = useState<MindEntryIntent>('reflect');
+  const [activeMindPillarIndex, setActiveMindPillarIndex] = useState<number | null>(null);
   const [mindInput, setMindInput] = useState('');
   const [mindMessages, setMindMessages] = useState<MindMessage[]>([]);
+  const [mindTyping, setMindTyping] = useState(false);
+  const [activeMindTriageStep, setActiveMindTriageStep] = useState(0);
+  const [activeMindTriageAnswers, setActiveMindTriageAnswers] = useState<MindTriageAnswer[]>([]);
+  const [activeReaderMindState, setActiveReaderMindState] = useState<ReaderMindState | null>(null);
+  const [activeSessionMemory, setActiveSessionMemory] = useState<SessionMemory | null>(null);
+  const [activeDecisionResult, setActiveDecisionResult] = useState<DecisionEngineResult | null>(null);
+  const [activeSafetyAssessment, setActiveSafetyAssessment] = useState<SafetyAssessment | null>(null);
+  const [mindTriageComplete, setMindTriageComplete] = useState(false);
   const [mindSessionId, setMindSessionId] = useState<string | undefined>();
   const [mindLoading, setMindLoading] = useState(false);
+  const [mindServiceStatus, setMindServiceStatus] = useState<'openai' | 'gemini' | 'local' | null>(null);
   const [pendingMindPrompt, setPendingMindPrompt] = useState('');
   const [pendingMindSource, setPendingMindSource] = useState<MindSavedPlan['source']>('chat');
   const [mindSavedPlan, setMindSavedPlan] = useState<MindSavedPlan | null>(() => {
@@ -989,6 +1613,7 @@ export function App() {
   const [workbookPrompt, setWorkbookPrompt] = useState(workbookPrompts[0]);
   const [workbookPillarIndex, setWorkbookPillarIndex] = useState(0);
   const [workbookAnswers, setWorkbookAnswers] = useState<Record<string, string>>({});
+  const [canonicalJournalAnswers, setCanonicalJournalAnswers] = useState<Record<string, string>>({});
   const [workbookIntroDismissed, setWorkbookIntroDismissed] = useState(() => {
     if (typeof window === 'undefined') return true;
     return localStorage.getItem(WORKBOOK_INTRO_KEY) === 'true';
@@ -998,6 +1623,7 @@ export function App() {
   const [readerLetters, setReaderLetters] = useState<Record<string, string>>({});
   const [letterMeta, setLetterMeta] = useState<Record<string, LetterMeta>>({});
   const [readerNotes, setReaderNotes] = useState<ReaderNote[]>([]);
+  const [readerAnchors, setReaderAnchors] = useState<ReaderAnchor[]>([]);
   const [workbookSaveStatus, setWorkbookSaveStatus] = useState<SaveFeedback>('idle');
   const [letterSaveStatus, setLetterSaveStatus] = useState<SaveFeedback>('idle');
   const [noteSaveStatus, setNoteSaveStatus] = useState<SaveFeedback>('idle');
@@ -1005,6 +1631,7 @@ export function App() {
   const [audioFrequencies, setAudioFrequencies] = useState<number[]>(idleAudioBars);
   const readerName = authUser?.name?.trim() || authName || 'Sobrevivente';
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const ambientAudioRef = useRef<HTMLAudioElement | null>(null);
   const sfxRef = useRef<AudioContext | null>(null);
   const audioAnalysisContextRef = useRef<AudioContext | null>(null);
   const audioSourceRef = useRef<MediaElementAudioSourceNode | null>(null);
@@ -1019,21 +1646,67 @@ export function App() {
   const audiobookQueueRef = useRef<AudioQueueItem[]>([]);
   const audioSettingsRef = useRef({ volume: 0.84, playbackRate: 1 });
   const adminBookPageTextareaRef = useRef<HTMLTextAreaElement | null>(null);
+  const adminCanonicalImportRef = useRef<HTMLInputElement | null>(null);
   const saveFeedbackTimersRef = useRef<Record<string, { saved?: number; idle?: number }>>({});
+  const journeyHydratedRef = useRef(false);
+  const journeySyncTimerRef = useRef<number | null>(null);
+  const mindTimersRef = useRef<number[]>([]);
+  const mindChatWindowRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => () => {
+    mindTimersRef.current.forEach((timer) => window.clearTimeout(timer));
+    mindTimersRef.current = [];
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem(MIND_DATA_SCOPES_KEY, JSON.stringify(mindDataScopes));
+  }, [mindDataScopes]);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetchMindStatus()
+      .then((status) => {
+        if (!cancelled) setMindServiceStatus(status?.provider ?? 'local');
+      })
+      .catch(() => {
+        if (!cancelled) setMindServiceStatus(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [authUser?.id]);
+
+  useEffect(() => {
+    const chat = mindChatWindowRef.current;
+    if (!chat) return;
+    chat.scrollTo({ top: chat.scrollHeight, behavior: 'smooth' });
+  }, [mindMessages, mindTyping]);
 
   const selectedChapter = bookChapters[currentChapterIndex] ?? bookChapters[0];
   const pages = usePagination(selectedChapter.content);
+  const selectedReadingTrack = readingTracks.find((track) => track.id === selectedReadingTrackId) || readingTracks[0] || defaultReadingTracks[0];
+  const sensoryPlaylist = readingTracks;
+  const setSensoryPlaylist = setReadingTracks;
+  const adminSensoryDraft = adminReadingTrackDraft;
+  const setAdminSensoryDraft = setAdminReadingTrackDraft;
+  const selectedSensoryTrackId = selectedReadingTrackId;
+  const setSelectedSensoryTrackId = setSelectedReadingTrackId;
+  const selectedSensoryTrack = selectedReadingTrack;
   const readProgress = Math.round(((currentChapterIndex + 1) / Math.max(1, bookChapters.length)) * 100);
   const pdfReadProgress = Math.round((pdfPage / Math.max(1, totalPdfPages)) * 100);
   const audioProgress = audioState.duration ? (audioState.currentTime / audioState.duration) * 100 : 0;
-  const hasPdfAccess = hasLocalEntitlement(plan, PRODUCT_KEYS.pdf);
-  const hasReaderAccess = hasLocalEntitlement(plan, PRODUCT_KEYS.base);
-  const hasWorkbookAccess = hasLocalEntitlement(plan, PRODUCT_KEYS.workbook);
-  const hasMindAccess = hasLocalEntitlement(plan, PRODUCT_KEYS.igentMind30) || hasLocalEntitlement(plan, PRODUCT_KEYS.igentMind90) || hasLocalEntitlement(plan, PRODUCT_KEYS.vip);
-  const hasGroupAccess = hasLocalEntitlement(plan, PRODUCT_KEYS.group);
+  const onlineProducts = Array.isArray(authUser?.products) ? authUser.products : null;
+  const hasProductAccess = (productKey: ProductKey) => (
+    onlineProducts ? onlineProducts.includes(productKey) : hasLocalEntitlement(plan, productKey)
+  );
+  const hasPdfAccess = hasProductAccess(PRODUCT_KEYS.pdf);
+  const hasReaderAccess = hasProductAccess(PRODUCT_KEYS.base);
+  const hasWorkbookAccess = hasProductAccess(PRODUCT_KEYS.workbook);
+  const hasMindAccess = hasProductAccess(PRODUCT_KEYS.igentMind30) || hasProductAccess(PRODUCT_KEYS.igentMind90) || hasProductAccess(PRODUCT_KEYS.vip);
+  const hasGroupAccess = hasProductAccess(PRODUCT_KEYS.group);
   const hasOrderBump = hasWorkbookAccess || hasMindAccess || hasGroupAccess;
   const isAdmin = authUser?.role === 'ADMIN';
-  const currentProducts = (authUser?.products?.length ? authUser.products : Object.values(PRODUCT_KEYS).filter((productKey) => hasLocalEntitlement(plan, productKey as ProductKey)));
+  const currentProducts = onlineProducts || Object.values(PRODUCT_KEYS).filter((productKey) => hasLocalEntitlement(plan, productKey as ProductKey));
   const upgradeEntries = Object.entries(upgradeOffers) as Array<[UpgradeKey, typeof upgradeOffers[UpgradeKey]]>;
   const lockedUpgradeCount = upgradeEntries.filter(([key]) => !currentProducts.includes(upgradeActiveProductKeys[key])).length;
   const currentGroup = bookGroups.find((group) => group.id === selectedChapter.groupId) ?? bookGroups[0];
@@ -1043,9 +1716,190 @@ export function App() {
   const currentPageNote = readerNotes.find((note) => note.page === pdfPage);
   const currentPillarLetter = selectedChapter.pillar ? pillarLetters[selectedChapter.pillar - 1] : null;
   const mergedPdfTextPages = useMemo(
-    () => pdfTextPages.map((text, index) => bookPageOverrides[index + 1] || text),
+    () => pdfTextPages.map((text, index) => repairBrokenPdfCharacters(bookPageOverrides[index + 1] || text)),
     [bookPageOverrides],
   );
+  const canonicalBookChapters = useMemo(
+    () => buildArtifactCanonicalBookChapters(bookChapters, mergedPdfTextPages, bookPageTitleOverrides, bookGroups),
+    [bookPageTitleOverrides, mergedPdfTextPages],
+  );
+  const effectiveCanonicalBookChapters = useMemo(
+    () => canonicalBookChapters.map((chapter) => {
+      const draftBlocks = adminCanonicalDrafts[chapter.id];
+      return Array.isArray(draftBlocks) ? { ...chapter, blocks: draftBlocks } : chapter;
+    }),
+    [adminCanonicalDrafts, canonicalBookChapters],
+  );
+  useEffect(() => {
+    const next = { ...canonicalJournalAnswers };
+    let changed = false;
+    for (const prompt of canonicalBookChapters.flatMap((chapter) => chapter.journalPrompts ?? [])) {
+      if (next[prompt.id] != null) continue;
+      const legacyValue = prompt.legacyIds?.map((id) => next[id]).find((value) => value != null);
+      if (legacyValue == null) continue;
+      next[prompt.id] = legacyValue;
+      changed = true;
+    }
+    if (changed) setCanonicalJournalAnswers(next);
+  }, [canonicalBookChapters, canonicalJournalAnswers]);
+  const selectedCanonicalChapter = effectiveCanonicalBookChapters[currentChapterIndex] ?? null;
+  const adminCanonicalChapter = effectiveCanonicalBookChapters.find((chapter) => chapter.id === adminCanonicalChapterId)
+    ?? effectiveCanonicalBookChapters[0]
+    ?? null;
+  const adminCanonicalOriginalChapter = canonicalBookChapters.find((chapter) => chapter.id === adminCanonicalChapter?.id) ?? null;
+  const adminCanonicalHasDraft = Boolean(adminCanonicalChapter && adminCanonicalDrafts[adminCanonicalChapter.id]);
+
+  const updateAdminCanonicalBlocks = (chapterId: string, updater: (blocks: CanonicalBookBlock[]) => CanonicalBookBlock[]) => {
+    const original = canonicalBookChapters.find((chapter) => chapter.id === chapterId);
+    if (!original) return;
+    const currentBlocks = adminCanonicalDrafts[chapterId] ?? original.blocks;
+    setAdminCanonicalDrafts((current) => ({
+      ...current,
+      [chapterId]: updater(currentBlocks.map((block) => ({ ...block }))),
+    }));
+  };
+
+  const updateAdminCanonicalBlock = (chapterId: string, blockId: string, patch: Partial<CanonicalBookBlock>) => {
+    updateAdminCanonicalBlocks(chapterId, (blocks) =>
+      blocks.map((block) => (block.id === blockId ? { ...block, ...patch } : block)),
+    );
+  };
+
+  const createAdminCanonicalBlock = (chapterId: string, index: number, kind: CanonicalBookBlockKind = 'paragraph'): CanonicalBookBlock => ({
+    id: `${chapterId}-manual-${Date.now()}-${index}`,
+    kind,
+    text: '',
+    sourcePage: adminCanonicalChapter?.sourcePageStart,
+  });
+
+  const insertAdminCanonicalBlock = (chapterId: string, index: number) => {
+    updateAdminCanonicalBlocks(chapterId, (blocks) => {
+      const next = [...blocks];
+      next.splice(index, 0, createAdminCanonicalBlock(chapterId, index));
+      return next;
+    });
+  };
+
+  const removeAdminCanonicalBlock = (chapterId: string, blockId: string) => {
+    updateAdminCanonicalBlocks(chapterId, (blocks) => blocks.filter((block) => block.id !== blockId));
+  };
+
+  const moveAdminCanonicalBlock = (chapterId: string, blockId: string, direction: -1 | 1) => {
+    updateAdminCanonicalBlocks(chapterId, (blocks) => {
+      const index = blocks.findIndex((block) => block.id === blockId);
+      const target = index + direction;
+      if (index < 0 || target < 0 || target >= blocks.length) return blocks;
+      const next = [...blocks];
+      const [block] = next.splice(index, 1);
+      next.splice(target, 0, block);
+      return next;
+    });
+  };
+
+  const splitAdminCanonicalBlock = (chapterId: string, blockId: string) => {
+    updateAdminCanonicalBlocks(chapterId, (blocks) => {
+      const index = blocks.findIndex((block) => block.id === blockId);
+      if (index < 0) return blocks;
+      const block = blocks[index];
+      const parts = block.text.split(/\n{2,}/).map((part) => part.trim()).filter(Boolean);
+      if (parts.length < 2) return blocks;
+      const splitBlocks = parts.map((text, partIndex) => ({
+        ...block,
+        id: partIndex === 0 ? block.id : `${block.id}-split-${Date.now()}-${partIndex}`,
+        text,
+      }));
+      return [...blocks.slice(0, index), ...splitBlocks, ...blocks.slice(index + 1)];
+    });
+  };
+
+  const mergeAdminCanonicalBlockWithNext = (chapterId: string, blockId: string) => {
+    updateAdminCanonicalBlocks(chapterId, (blocks) => {
+      const index = blocks.findIndex((block) => block.id === blockId);
+      if (index < 0 || index >= blocks.length - 1) return blocks;
+      const current = blocks[index];
+      const nextBlock = blocks[index + 1];
+      return [
+        ...blocks.slice(0, index),
+        { ...current, text: [current.text, nextBlock.text].filter(Boolean).join('\n\n') },
+        ...blocks.slice(index + 2),
+      ];
+    });
+  };
+
+  const resetAdminCanonicalChapter = (chapterId: string) => {
+    setAdminCanonicalDrafts((current) => {
+      const next = { ...current };
+      delete next[chapterId];
+      return next;
+    });
+  };
+
+  const exportAdminCanonicalDrafts = () => {
+    const payload = {
+      schema: 'opdds.canonical-block-drafts',
+      version: 1,
+      exportedAt: new Date().toISOString(),
+      bookVersion: 'FINAL_17-07-26',
+      chapters: adminCanonicalDrafts,
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = `opdds-correcoes-canonicas-${new Date().toISOString().slice(0, 10)}.json`;
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+    URL.revokeObjectURL(url);
+    setAdminMessage('Correções canônicas exportadas em JSON.');
+  };
+
+  const importAdminCanonicalDrafts = async (file: File | null) => {
+    if (!file) return;
+    setAdminMessage('');
+    try {
+      const raw = await file.text();
+      const payload = JSON.parse(raw);
+      const chapters = payload?.chapters && typeof payload.chapters === 'object' ? payload.chapters : payload;
+      const allowedKinds: CanonicalBookBlockKind[] = ['heading', 'subheading', 'paragraph', 'pause', 'divider', 'image', 'image-full', 'spacer'];
+      const normalized: Record<string, CanonicalBookBlock[]> = {};
+
+      Object.entries(chapters as Record<string, unknown>).forEach(([chapterId, blocks]) => {
+        if (!Array.isArray(blocks)) return;
+        const safeBlocks = blocks
+          .map((block, index) => {
+            if (!block || typeof block !== 'object') return null;
+            const entry = block as Partial<CanonicalBookBlock>;
+            const kind = allowedKinds.includes(entry.kind as CanonicalBookBlockKind)
+              ? entry.kind as CanonicalBookBlockKind
+              : 'paragraph';
+            return {
+              id: String(entry.id || `${chapterId}-imported-${index}`),
+              kind,
+              text: String(entry.text ?? ''),
+              alt: entry.alt ? String(entry.alt) : undefined,
+              size: typeof entry.size === 'number' ? entry.size : undefined,
+              className: entry.className ? String(entry.className) : undefined,
+              sourcePage: typeof entry.sourcePage === 'number' ? entry.sourcePage : undefined,
+            };
+          })
+          .filter(Boolean) as CanonicalBookBlock[];
+        if (safeBlocks.length) normalized[chapterId] = safeBlocks;
+      });
+
+      if (!Object.keys(normalized).length) {
+        setAdminMessage('Arquivo de correções sem blocos válidos.');
+        return;
+      }
+
+      setAdminCanonicalDrafts((current) => ({ ...current, ...normalized }));
+      setAdminMessage(`Correções importadas: ${Object.keys(normalized).length} capítulo(s).`);
+    } catch {
+      setAdminMessage('Não consegui importar esse JSON de correções.');
+    } finally {
+      if (adminCanonicalImportRef.current) adminCanonicalImportRef.current.value = '';
+    }
+  };
 
   const selectedChapterAudioTracks = useMemo(
     () => selectedChapter.audioTracks.map((track) => {
@@ -1204,12 +2058,32 @@ export function App() {
       }>;
   }, [adminAudioChapterId, adminAudioOrder, adminAudioProduction, adminAudioTracksForChapter, adminBookAudio]);
 
+  const adminVisualAudioChapter = useMemo(() => {
+    return [...bookChapters]
+      .reverse()
+      .find((chapter) => chapter.pdfPage <= adminBookPageNumber) ?? adminAudioChapter;
+  }, [adminAudioChapter, adminBookPageNumber]);
+
+  const adminVisualAudioItems = useMemo(() => {
+    if (!adminVisualAudioChapter) return [];
+    return adminVisualAudioChapter.audioTracks.map((track) => {
+      const sectionKey = audioTrackKey(track.label);
+      const published = adminBookAudio.find((item) => item.chapterId === adminVisualAudioChapter.id && item.sectionKey === sectionKey)?.latestPublished;
+      return {
+        chapterId: adminVisualAudioChapter.id,
+        sectionKey,
+        label: published?.label || track.label,
+        url: published?.url || track.url,
+      };
+    });
+  }, [adminBookAudio, adminVisualAudioChapter]);
+
   const adminAudioPathWarning = useMemo(() => {
     const path = adminAudioUrl.trim();
     if (!path) return '';
     const validSource = path.startsWith('/media/') || /^https?:\/\//i.test(path);
     if (!validSource) return 'Use um caminho iniciado por /media/ ou uma URL publica.';
-    if (!/\.(mp3|wav|m4a|ogg)(\?.*)?$/i.test(path)) return 'Confira a extensao: recomendamos .mp3, .wav, .m4a ou .ogg.';
+  if (!/\.(mp3|wav|m4a|ogg)(\?.*)?$/i.test(path)) return 'Confira a extensão: recomendamos .mp3, .wav, .m4a ou .ogg.';
     return '';
   }, [adminAudioUrl]);
 
@@ -1417,9 +2291,12 @@ export function App() {
     const onboardingDone = localStorage.getItem('opd_onboarding_done');
     const savedWorkbook = loadLocalWorkbookEntry();
     const savedWorkbookAnswers = loadLocalWorkbookAnswers();
+    const savedWorkbookPrompt = loadLocalWorkbookPrompt();
+    const savedCanonicalJournalAnswers = loadLocalCanonicalJournalAnswers();
     const savedLetters = loadLocalLetters();
     const savedLetterMeta = loadLocalLetterMeta();
     const savedReaderNotes = loadLocalReaderNotes();
+    const savedReaderAnchors = loadLocalReaderAnchors();
     const savedAudioProgress = loadLocalAudioProgress();
 
     if (savedAuthUser) {
@@ -1438,9 +2315,12 @@ export function App() {
     if (Array.isArray(savedFavorites)) setFavorites(savedFavorites);
     setWorkbookEntry(savedWorkbook);
     setWorkbookAnswers(savedWorkbookAnswers);
+    if (workbookPrompts.includes(savedWorkbookPrompt)) setWorkbookPrompt(savedWorkbookPrompt);
+    setCanonicalJournalAnswers(savedCanonicalJournalAnswers);
     setReaderLetters(savedLetters);
     setLetterMeta(savedLetterMeta);
     setReaderNotes(savedReaderNotes);
+    setReaderAnchors(savedReaderAnchors);
     setAudioProgressMap(savedAudioProgress);
 
     const params = new URLSearchParams(window.location.search);
@@ -1468,6 +2348,37 @@ export function App() {
   }, [authUser?.id]);
 
   useEffect(() => {
+    const audio = new Audio();
+    audio.crossOrigin = 'anonymous';
+    audio.loop = true;
+    audio.preload = 'metadata';
+    audio.volume = ambientAudioState.volume;
+    ambientAudioRef.current = audio;
+
+    const syncPlaying = () => setAmbientAudioState((state) => ({ ...state, isPlaying: !audio.paused }));
+    const markStopped = () => setAmbientAudioState((state) => ({ ...state, isPlaying: false }));
+
+    audio.addEventListener('play', syncPlaying);
+    audio.addEventListener('pause', markStopped);
+    audio.addEventListener('ended', markStopped);
+
+    return () => {
+      audio.pause();
+      audio.src = '';
+      audio.removeEventListener('play', syncPlaying);
+      audio.removeEventListener('pause', markStopped);
+      audio.removeEventListener('ended', markStopped);
+    };
+  }, []);
+
+  useEffect(() => {
+    const audio = ambientAudioRef.current;
+    if (!audio) return;
+    const duckFactor = audioState.isPlaying ? 0.28 : 1;
+    audio.volume = Math.max(0, Math.min(1, ambientAudioState.volume * duckFactor));
+  }, [ambientAudioState.volume, audioState.isPlaying]);
+
+  useEffect(() => {
     if (!authUser) return;
     fetchCurrentUser()
       .then((user) => {
@@ -1489,8 +2400,17 @@ export function App() {
             return acc;
           }, {}),
         );
+        setBookPageTitleOverrides(
+          pages.reduce<Record<number, string>>((acc, page) => {
+            if (page.title) acc[page.pageNumber] = repairBrokenPdfCharacters(page.title);
+            return acc;
+          }, {}),
+        );
       })
-      .catch(() => setBookPageOverrides({}));
+      .catch(() => {
+        setBookPageOverrides({});
+        setBookPageTitleOverrides({});
+      });
   }, []);
 
   useEffect(() => {
@@ -1583,6 +2503,10 @@ export function App() {
   }, [adminAudioOrder]);
 
   useEffect(() => {
+    localStorage.setItem(ADMIN_CANONICAL_DRAFTS_KEY, JSON.stringify(adminCanonicalDrafts));
+  }, [adminCanonicalDrafts]);
+
+  useEffect(() => {
     if (route !== ROUTES.ADMIN || !isAdmin) return;
     const revision = adminCurrentBookPage?.latestDraft || adminCurrentBookPage?.latestPublished;
     setAdminBookPageTitle(revision?.title || '');
@@ -1653,6 +2577,123 @@ export function App() {
   useEffect(() => {
     saveLocalWorkbookEntry(workbookEntry);
   }, [workbookEntry]);
+
+  const persistJourneyLocally = (snapshot: {
+    workbookEntry: string;
+    workbookPrompt: string;
+    workbookAnswers: Record<string, string>;
+    canonicalJournalAnswers: Record<string, string>;
+    letters: Record<string, string>;
+    letterMeta: Record<string, LetterMeta>;
+    readerNotes: ReaderNote[];
+    readerAnchors: ReaderAnchor[];
+    audioProgress: Record<string, AudioProgressEntry>;
+  }) => {
+    saveLocalWorkbookEntry(snapshot.workbookEntry);
+    saveLocalWorkbookPrompt(snapshot.workbookPrompt);
+    saveLocalWorkbookAnswers(snapshot.workbookAnswers);
+    saveLocalCanonicalJournalAnswers(snapshot.canonicalJournalAnswers);
+    saveLocalLetters(snapshot.letters);
+    saveLocalLetterMeta(snapshot.letterMeta);
+    saveLocalReaderNotes(snapshot.readerNotes);
+    saveLocalReaderAnchors(snapshot.readerAnchors);
+    saveLocalAudioProgress(snapshot.audioProgress);
+  };
+
+  const mergeById = <T extends { id?: string }>(localItems: T[], remoteItems: unknown[]): T[] => {
+    const map = new Map<string, T>();
+    localItems.forEach((item, index) => map.set(item.id || `local-${index}`, item));
+    remoteItems
+      .filter((item): item is T => Boolean(item && typeof item === 'object'))
+      .forEach((item, index) => map.set(item.id || `remote-${index}`, item));
+    return Array.from(map.values());
+  };
+
+  useEffect(() => {
+    let cancelled = false;
+    journeyHydratedRef.current = false;
+
+    fetchReaderJourney()
+      .then((snapshot) => {
+        if (cancelled) return;
+        if (!snapshot) {
+          journeyHydratedRef.current = true;
+          return;
+        }
+
+        const mergedWorkbookEntry = snapshot.workbookEntry?.trim() ? snapshot.workbookEntry : workbookEntry;
+        const mergedWorkbookPrompt = workbookPrompts.includes(snapshot.workbookPrompt) ? snapshot.workbookPrompt : workbookPrompt;
+        const mergedWorkbookAnswers = { ...workbookAnswers, ...(snapshot.workbookAnswers || {}) };
+        const mergedCanonicalJournalAnswers = { ...canonicalJournalAnswers, ...(snapshot.canonicalJournalAnswers || {}) };
+        const mergedLetters = { ...readerLetters, ...(snapshot.letters || {}) };
+        const mergedLetterMeta = { ...letterMeta, ...((snapshot.letterMeta || {}) as Record<string, LetterMeta>) };
+        const mergedReaderNotes = mergeById(readerNotes, snapshot.readerNotes || []);
+        const mergedReaderAnchors = mergeById(readerAnchors, snapshot.anchors || []);
+        const mergedAudioProgress = { ...audioProgressMap, ...((snapshot.audioProgress || {}) as Record<string, AudioProgressEntry>) };
+
+        setWorkbookEntry(mergedWorkbookEntry);
+        setWorkbookPrompt(mergedWorkbookPrompt);
+        setWorkbookAnswers(mergedWorkbookAnswers);
+        setCanonicalJournalAnswers(mergedCanonicalJournalAnswers);
+        setReaderLetters(mergedLetters);
+        setLetterMeta(mergedLetterMeta);
+        setReaderNotes(mergedReaderNotes);
+        setReaderAnchors(mergedReaderAnchors);
+        setAudioProgressMap(mergedAudioProgress);
+        persistJourneyLocally({
+          workbookEntry: mergedWorkbookEntry,
+          workbookPrompt: mergedWorkbookPrompt,
+          workbookAnswers: mergedWorkbookAnswers,
+          canonicalJournalAnswers: mergedCanonicalJournalAnswers,
+          letters: mergedLetters,
+          letterMeta: mergedLetterMeta,
+          readerNotes: mergedReaderNotes,
+          readerAnchors: mergedReaderAnchors,
+          audioProgress: mergedAudioProgress,
+        });
+        journeyHydratedRef.current = true;
+      })
+      .catch(() => {
+        if (!cancelled) journeyHydratedRef.current = true;
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [authUser?.id]);
+
+  useEffect(() => {
+    if (!journeyHydratedRef.current) return;
+    persistJourneyLocally({
+      workbookEntry,
+      workbookPrompt,
+      workbookAnswers,
+      canonicalJournalAnswers,
+      letters: readerLetters,
+      letterMeta,
+      readerNotes,
+      readerAnchors,
+      audioProgress: audioProgressMap,
+    });
+    if (journeySyncTimerRef.current) window.clearTimeout(journeySyncTimerRef.current);
+    journeySyncTimerRef.current = window.setTimeout(() => {
+      void syncReaderJourney({
+        workbookEntry,
+        workbookAnswers,
+        canonicalJournalAnswers,
+        workbookPrompt,
+        letters: readerLetters,
+        letterMeta,
+        readerNotes,
+        anchors: readerAnchors,
+        audioProgress: audioProgressMap,
+      }).catch(() => {});
+    }, 900);
+
+    return () => {
+      if (journeySyncTimerRef.current) window.clearTimeout(journeySyncTimerRef.current);
+    };
+  }, [workbookEntry, workbookAnswers, canonicalJournalAnswers, workbookPrompt, readerLetters, letterMeta, readerNotes, readerAnchors, audioProgressMap, authUser?.id]);
 
   const navigate = (target: Route) => {
     playClick('soft');
@@ -1776,6 +2817,7 @@ export function App() {
     setCurrentChapterIndex(currentAudioQueueItem.chapterIndex);
     goToPdfPage(chapter.pdfPage);
     setPageIndex(0);
+    setReaderInitialMode('text');
     setAudioFullOpen(false);
     navigate(ROUTES.READER);
   };
@@ -1814,10 +2856,74 @@ export function App() {
     setAudioState((state) => ({ ...state, isPlaying: false, currentUrl: null, title: null, coverUrl: null, currentTime: 0, duration: 0 }));
   };
 
+  const playAmbientTrack = (track: SensoryTrack) => {
+    const audio = ambientAudioRef.current;
+    if (!audio || !track.audioUrl) return;
+    playClick('soft');
+    setAmbientPlayerCollapsed(false);
+    const title = repairMojibake(track.title);
+    const isSameTrack = ambientAudioState.currentUrl === track.audioUrl;
+
+    if (!isSameTrack) {
+      audio.pause();
+      audio.src = track.audioUrl;
+      audio.loop = true;
+      audio.currentTime = 0;
+      audio.load();
+      setAmbientAudioState((state) => ({
+        ...state,
+        currentUrl: track.audioUrl,
+        title,
+        coverUrl: track.coverUrl || null,
+        isPlaying: true,
+      }));
+    }
+
+    audio.play()
+      .then(() => setAmbientAudioState((state) => ({
+        ...state,
+        currentUrl: track.audioUrl,
+        title,
+        coverUrl: track.coverUrl || null,
+        isPlaying: true,
+      })))
+      .catch(() => setAmbientAudioState((state) => ({ ...state, isPlaying: false })));
+  };
+
+  const pauseAmbientTrack = () => {
+    ambientAudioRef.current?.pause();
+    setAmbientAudioState((state) => ({ ...state, isPlaying: false }));
+  };
+
+  const stopAmbientTrack = () => {
+    const audio = ambientAudioRef.current;
+    if (audio) {
+      audio.pause();
+      audio.src = '';
+    }
+    setAmbientAudioState((state) => ({ ...state, isPlaying: false, currentUrl: null, title: null, coverUrl: null }));
+  };
+
+  const changeAmbientVolume = (value: number) => {
+    const nextVolume = value / 100;
+    setAmbientAudioState((state) => ({ ...state, volume: nextVolume }));
+  };
+
+  const playAdjacentAmbientTrack = (direction: 1 | -1) => {
+    const playlist = sensoryPlaylist.length ? sensoryPlaylist : defaultSensoryPlaylist;
+    if (!playlist.length) return;
+    const currentIndex = Math.max(0, playlist.findIndex((track) => track.audioUrl === ambientAudioState.currentUrl || track.id === selectedSensoryTrackId));
+    const nextIndex = (currentIndex + direction + playlist.length) % playlist.length;
+    const nextTrack = playlist[nextIndex];
+    setSelectedSensoryTrackId(nextTrack.id);
+    localStorage.setItem(SELECTED_SENSORY_TRACK_KEY, nextTrack.id);
+    playAmbientTrack(nextTrack);
+  };
+
   const handleTokenSubmit = () => {
     playClick('primary');
     const normalized = token.trim().toUpperCase();
-    if (accessTokens.includes(normalized)) {
+    if (runtimeConfig.localMode && accessTokens.includes(normalized)) {
       const unlockedPlan = accessTokenPlans[normalized] ?? plan;
       localStorage.setItem('opd_token', normalized);
       localStorage.setItem('opd_plan', unlockedPlan);
@@ -1830,7 +2936,9 @@ export function App() {
   };
 
   const handleRegisterSubmit = async () => {
+    if (authSubmitting) return;
     playClick('primary');
+    setAuthSubmitting(true);
     setAuthMessage('');
     setTokenError('');
     try {
@@ -1847,11 +2955,15 @@ export function App() {
       navigate(ROUTES.ONBOARDING);
     } catch (error: any) {
       setAuthMessage(error?.message || 'Não foi possível criar sua conta.');
+    } finally {
+      setAuthSubmitting(false);
     }
   };
 
   const handleLoginSubmit = async () => {
+    if (authSubmitting) return;
     playClick('primary');
+    setAuthSubmitting(true);
     setAuthMessage('');
     try {
       const response = await loginAccount({ email: authEmail, password: authPassword });
@@ -1862,6 +2974,8 @@ export function App() {
       navigate(localStorage.getItem('opd_onboarding_done') ? ROUTES.HOME : ROUTES.ONBOARDING);
     } catch (error: any) {
       setAuthMessage(error?.message || 'Não foi possível entrar.');
+    } finally {
+      setAuthSubmitting(false);
     }
   };
 
@@ -1979,7 +3093,7 @@ export function App() {
     const updated = updateStoredAuthUser({ name: accountName, email: accountEmail });
     if (updated) {
       setAuthUser(updated);
-      setAccountMessage('Perfil atualizado neste dispositivo.');
+      setAccountMessage('Perfil atualizado nesta sessão.');
     } else {
       setAccountMessage('Entre na conta para editar o perfil.');
     }
@@ -2098,6 +3212,12 @@ export function App() {
         return acc;
       }, {}),
     );
+    setBookPageTitleOverrides(
+      publishedPages.reduce<Record<number, string>>((acc, page) => {
+        if (page.title) acc[page.pageNumber] = repairBrokenPdfCharacters(page.title);
+        return acc;
+      }, {}),
+    );
   };
 
   const refreshBookAudioContent = async () => {
@@ -2120,14 +3240,18 @@ export function App() {
   const handleSaveBookPageDraft = async () => {
     setAdminMessage('');
     try {
+      const visualTitle = getAdminVisualPage().title;
+      const readerContent = composeAdminBookPageForReader(adminBookPageContent);
       await saveAdminBookPageDraft(adminBookPageNumber, {
-        title: adminBookPageTitle || undefined,
-        content: adminBookPageContent,
+        title: visualTitle || adminBookPageTitle || undefined,
+        content: readerContent,
       });
+      setAdminBookPageContent(readerContent);
+      setAdminBookPageTitle(visualTitle || adminBookPageTitle);
       await refreshBookPageContent();
       setAdminMessage(`Rascunho salvo para a pagina ${adminBookPageNumber}.`);
     } catch (error: any) {
-      setAdminMessage(error?.message || 'Nao foi possivel salvar o rascunho.');
+      setAdminMessage(error?.message || 'Não foi possível salvar o rascunho.');
     }
   };
 
@@ -2152,6 +3276,15 @@ export function App() {
 
     const start = textarea.selectionStart;
     const end = textarea.selectionEnd;
+    if (snippet === '[br]') {
+      setAdminBookPageContent((current) => `${current.slice(0, start)}[br]${current.slice(end)}`);
+      window.requestAnimationFrame(() => {
+        textarea.focus();
+        textarea.setSelectionRange(start + snippet.length, start + snippet.length);
+      });
+      return;
+    }
+
     setAdminBookPageContent((current) => {
       const before = current.slice(0, start);
       const after = current.slice(end);
@@ -2166,17 +3299,627 @@ export function App() {
     });
   };
 
+  const adminHeaderPattern = {
+    hide: /^\[\[\s*(?:cabecalho|header)\s*:\s*ocultar\s*\]\]$/i,
+    eyebrow: /^\[\[\s*(?:cabecalho\s*[-—–]\s*sec(?:a|ã)o|header\s*[-—–]\s*eyebrow)\s*:/i,
+    title: /^\[\[\s*(?:cabecalho\s*[-—–]\s*titulo|header\s*[-—–]\s*title)\s*:/i,
+  };
+  const matchAdminHeaderValue = (line: string, kind: 'eyebrow' | 'title') => {
+    const name = kind === 'eyebrow'
+      ? String.raw`(?:cabecalho\s*[-—–]\s*sec(?:a|ã)o|header\s*[-—–]\s*eyebrow)`
+      : String.raw`(?:cabecalho\s*[-—–]\s*titulo|header\s*[-—–]\s*title)`;
+    return line.match(new RegExp(String.raw`^\[\[\s*${name}\s*:\s*(.*?)\s*\]\]$`, 'i'));
+  };
+
+  const renderAdminBookPreviewLine = (rawLine: string, key: string | number) => {
+    const line = repairBrokenPdfCharacters(rawLine.trim());
+    if (!line) return null;
+
+    if (adminHeaderPattern.hide.test(line) || adminHeaderPattern.eyebrow.test(line) || adminHeaderPattern.title.test(line)) {
+      return <p className="admin-preview-command" key={key}>{line}</p>;
+    }
+
+    const titleCommandMatch = line.match(/^\[\[(titulo|subtitulo):(.+?)(?:\|(.*?))?\]\]$/i);
+    if (titleCommandMatch) {
+      const Tag = titleCommandMatch[1].toLowerCase() === 'subtitulo' ? 'h3' : 'h2';
+      return <Tag className="admin-preview-command" key={key}>{titleCommandMatch[2].trim()}</Tag>;
+    }
+
+    if (/^\[br\]$/i.test(line)) {
+      return <div className="admin-preview-spacer" key={key} aria-label="Quebra de linha" />;
+    }
+
+    if (/^(-{3,}|\*{3,}|_{3,})$/.test(line)) {
+      return <hr className="admin-preview-divider" key={key} />;
+    }
+
+    const spacerMatch = line.match(/^\[\[espaco:(\d{1,3})\]\]$/i);
+    if (spacerMatch) {
+      return <div className="admin-preview-spacer" style={{ height: `${Math.min(120, Math.max(8, Number(spacerMatch[1]) || 24))}px` }} key={key} />;
+    }
+
+    const imageMatch = line.match(/^\[\[(?:imagem|capa):(.+?)(?:\|(.*?))?\]\]$/i);
+    if (imageMatch) {
+      return <p className="admin-preview-command" key={key}>Imagem: {imageMatch[1].trim()}</p>;
+    }
+
+    return (
+      <p key={key}>
+        {line.split(/\[br\]/i).map((part, index) => (
+          <span key={`${key}-${index}`}>{index > 0 && <br />}{part}</span>
+        ))}
+      </p>
+    );
+  };
+
+  const getAdminBookLines = () => adminBookPageContent.replace(/\r/g, '').split('\n');
+
+  const updateAdminBookLine = (lineIndex: number, nextValue: string) => {
+    setAdminBookPageContent((current) => {
+      const lines = current.replace(/\r/g, '').split('\n');
+      lines[lineIndex] = nextValue;
+      return lines.join('\n');
+    });
+  };
+
+  const insertAdminBookLineAfter = (lineIndex: number, value = '') => {
+    setAdminBookPageContent((current) => {
+      const lines = current.replace(/\r/g, '').split('\n');
+      lines.splice(lineIndex + 1, 0, value);
+      return lines.join('\n');
+    });
+  };
+
+  const removeAdminBookLine = (lineIndex: number) => {
+    setAdminBookPageContent((current) => {
+      const lines = current.replace(/\r/g, '').split('\n');
+      lines.splice(lineIndex, 1);
+      return lines.join('\n');
+    });
+  };
+
+  const eraseJourneyData = async () => {
+    if (!window.confirm('Apagar definitivamente Diário, Cadernos, cartas, notas, âncoras e progresso sincronizado desta jornada?')) return;
+    try {
+      await deleteReaderJourney();
+      clearLocalJourney();
+      setWorkbookEntry('');
+      setWorkbookPrompt(workbookPrompts[0]);
+      setWorkbookAnswers({});
+      setCanonicalJournalAnswers({});
+      setReaderLetters({});
+      setLetterMeta({});
+      setReaderNotes([]);
+      setReaderAnchors([]);
+      setAudioProgressMap({});
+      setAccountMessage('Dados da jornada apagados no dispositivo e na conta.');
+    } catch {
+      setAccountMessage('Não foi possível apagar a jornada agora. Tente novamente.');
+    }
+  };
+
+  const eraseMindHistory = async () => {
+    if (!window.confirm('Apagar definitivamente todas as conversas salvas do iGentMIND?')) return;
+    try {
+      await deleteMindSessions();
+      localStorage.removeItem(MIND_LAST_PLAN_KEY);
+      setMindSavedPlan(null);
+      setMindMessages([]);
+      setMindSessionId(undefined);
+      setAccountMessage('Histórico do iGentMIND apagado.');
+    } catch {
+      setAccountMessage('Não foi possível apagar as conversas agora. Tente novamente.');
+    }
+  };
+
+  const parseAdminBlockCommand = (rawLine = '') => {
+    const line = rawLine.trim();
+    const match = line.match(/^\[\[(titulo|subtitulo|paragrafo|paragraph):(.+?)(?:\|(.*?))?\]\]$/i);
+    if (!match) {
+      return {
+        kind: 'paragrafo',
+        text: rawLine,
+        styles: [] as string[],
+      };
+    }
+    return {
+      kind: match[1].toLowerCase() === 'paragraph' ? 'paragrafo' : match[1].toLowerCase(),
+      text: match[2],
+      styles: (match[3] || '').split(/[,\s]+/).map((item) => item.trim()).filter(Boolean),
+    };
+  };
+
+  const buildAdminBlockCommand = (kind: string, text: string, styles: string[] = []) => {
+    const cleanText = repairCanonicalText(text).trim();
+    const uniqueStyles = Array.from(new Set(styles.map((style) => style.trim()).filter(Boolean)));
+    if (!cleanText) return '';
+    const command = kind === 'subtitulo' ? 'subtitulo' : kind === 'titulo' ? 'titulo' : 'paragrafo';
+    return `[[${command}:${cleanText}${uniqueStyles.length ? `|${uniqueStyles.join(',')}` : ''}]]`;
+  };
+
+  const isAdminCanonicalBodyLine = (line = '') => {
+    const clean = line.trim();
+    return /^\[\[(titulo|subtitulo|h1|h2|paragrafo|paragraph|imagem|capa|espaco):/i.test(clean)
+      || /^\[br\]$/i.test(clean)
+      || /^(-{3,}|\*{3,}|_{3,})$/.test(clean);
+  };
+
+  const adminBlockStyleClass = (styles: string[] = []) => styles
+    .map((style) => {
+      if (style === 'negrito') return 'is-bold';
+      if (style === 'italico') return 'is-italic';
+      if (style === 'maiusculo') return 'is-uppercase';
+      if (style === 'minusculo') return 'is-lowercase';
+      if (style === 'centralizado') return 'is-center';
+      if (style === 'direita') return 'is-right';
+      return '';
+    })
+    .filter(Boolean)
+    .join(' ');
+
+  const escapeAdminInlineHtml = (value = '') => value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+
+  const adminInlineTextToHtml = (value = '') => {
+    const parts = value.split(/(\*\*.*?\*\*|__.*?__|\*[^*]+\*)/g).filter(Boolean);
+    return parts.map((part) => {
+      const renderPlain = (text: string) => escapeAdminInlineHtml(text).replace(/\[br\]/gi, '<br />');
+      if (/^\*\*.*\*\*$/.test(part) || /^__.*__$/.test(part)) {
+        return `<strong>${renderPlain(part.replace(/^(\*\*|__)|(\*\*|__)$/g, ''))}</strong>`;
+      }
+      if (/^\*[^*]+\*$/.test(part)) {
+        return `<em>${renderPlain(part.slice(1, -1))}</em>`;
+      }
+      return renderPlain(part);
+    }).join('');
+  };
+
+  const serializeAdminInlineHtml = (root: HTMLElement) => {
+    const walk = (node: Node): string => {
+      if (node.nodeType === Node.TEXT_NODE) return node.textContent || '';
+      if (node.nodeType !== Node.ELEMENT_NODE) return '';
+      const element = node as HTMLElement;
+      const content = Array.from(element.childNodes).map(walk).join('');
+      const tag = element.tagName.toLowerCase();
+      if (['strong', 'b'].includes(tag)) return `**${content}**`;
+      if (['em', 'i'].includes(tag)) return `*${content}*`;
+      if (tag === 'br') return '[br]';
+      if (['div', 'p'].includes(tag)) return `\n${content}`;
+      return content;
+    };
+    return Array.from(root.childNodes)
+      .map(walk)
+      .join('')
+      .replace(/\u00a0/g, ' ')
+      .replace(/\n{3,}/g, '\n\n')
+      .replace(/[ \t]*\n[ \t]*/g, '\n')
+      .replace(/\s*\[br\]\s*/gi, '[br]')
+      .replace(/[ \t]{2,}/g, ' ')
+      .trim();
+  };
+
+  const buildAdminReplacementLinesFromText = (kind: string, text: string, styles: string[] = []) => {
+    if (kind === 'titulo' || kind === 'subtitulo') {
+      return [buildAdminBlockCommand(kind, text.replace(/\n+/g, ' '), styles)].filter(Boolean);
+    }
+    return text
+      .split(/\n+/)
+      .map((line) => line.trim())
+      .filter(Boolean)
+      .map((line) => buildAdminBlockCommand('paragrafo', line, styles));
+  };
+
+  const updateAdminBookLineFromSerializedBlock = (lineIndex: number, sourceLine: string, serializedText: string) => {
+    const block = parseAdminBlockCommand(sourceLine);
+    const replacementLines = buildAdminReplacementLinesFromText(block.kind, serializedText, block.styles);
+    setAdminBookPageContent((current) => {
+      const lines = current.replace(/\r/g, '').split('\n');
+      if (lines[lineIndex] === undefined) return current;
+      lines.splice(lineIndex, 1, ...(replacementLines.length ? replacementLines : ['']));
+      return lines.join('\n');
+    });
+  };
+
+  const getAdminSelectedInlineElement = () => {
+    const selection = window.getSelection();
+    if (!selection || selection.rangeCount === 0 || selection.isCollapsed) return null;
+    const node = selection.getRangeAt(0).commonAncestorContainer;
+    const element = node.nodeType === Node.ELEMENT_NODE ? node as Element : node.parentElement;
+    return element?.closest<HTMLElement>('[data-admin-line-index]') || null;
+  };
+
+  const saveAdminInlineElement = (element: HTMLElement) => {
+    const lineIndex = Number(element.dataset.adminLineIndex);
+    if (!Number.isFinite(lineIndex)) return;
+    setAdminSelectedBookLineIndex(lineIndex);
+    const currentLine = getAdminBookLines()[lineIndex] || '';
+    const nextText = serializeAdminInlineHtml(element);
+    updateAdminBookLineFromSerializedBlock(lineIndex, currentLine, nextText);
+  };
+
+  const applyAdminInlineFormat = (command: 'bold' | 'italic') => {
+    const element = getAdminSelectedInlineElement();
+    if (!element) {
+      setAdminMessage('Selecione uma palavra ou frase dentro do texto para aplicar este estilo.');
+      return;
+    }
+    document.execCommand(command);
+    saveAdminInlineElement(element);
+  };
+
+  const updateAdminSelectedBlock = (updater: (block: { kind: string; text: string; styles: string[] }) => { kind: string; text: string; styles: string[] }) => {
+    if (adminSelectedBookLineIndex === null) {
+      setAdminMessage('Selecione um parágrafo ou título na página para formatar.');
+      return;
+    }
+    setAdminBookPageContent((current) => {
+      const lines = current.replace(/\r/g, '').split('\n');
+      const currentLine = lines[adminSelectedBookLineIndex];
+      if (currentLine === undefined) return current;
+      const block = parseAdminBlockCommand(currentLine);
+      const next = updater(block);
+      lines[adminSelectedBookLineIndex] = buildAdminBlockCommand(next.kind, next.text, next.styles);
+      return lines.join('\n');
+    });
+  };
+
+  const setAdminSelectedBlockKind = (kind: 'paragrafo' | 'titulo' | 'subtitulo') => {
+    updateAdminSelectedBlock((block) => ({ ...block, kind }));
+  };
+
+  const toggleAdminSelectedBlockStyle = (style: string) => {
+    updateAdminSelectedBlock((block) => {
+      const hasStyle = block.styles.includes(style);
+      return {
+        ...block,
+        styles: hasStyle ? block.styles.filter((item) => item !== style) : [...block.styles, style],
+      };
+    });
+  };
+
+  const setAdminSelectedBlockAlignment = (style: 'esquerda' | 'centralizado' | 'direita') => {
+    updateAdminSelectedBlock((block) => ({
+      ...block,
+      styles: style === 'esquerda'
+        ? block.styles.filter((item) => !['centralizado', 'direita'].includes(item))
+        : [...block.styles.filter((item) => !['centralizado', 'direita'].includes(item)), style],
+    }));
+  };
+
+  const transformAdminSelectedBlockText = (mode: 'upper' | 'lower' | 'capitalize') => {
+    updateAdminSelectedBlock((block) => {
+      const text = mode === 'upper'
+        ? block.text.toUpperCase()
+        : mode === 'lower'
+          ? block.text.toLocaleLowerCase('pt-BR')
+          : block.text.toLocaleLowerCase('pt-BR').replace(/(^|[.!?]\s+)(\p{L})/gu, (_, prefix, letter) => `${prefix}${letter.toLocaleUpperCase('pt-BR')}`);
+      return { ...block, text };
+    });
+  };
+
+  const composeAdminBookPageForReader = (content = adminBookPageContent) =>
+    content
+      .replace(/\r/g, '')
+      .split('\n')
+      .map((rawLine) => {
+        const line = repairCanonicalText(rawLine).trim();
+        if (!line) return '';
+        if (isAdminHeaderDirectiveLine(line) || isAdminCanonicalBodyLine(line)) return line;
+        return buildAdminBlockCommand('paragrafo', line);
+      })
+      .join('\n')
+      .replace(/\n{3,}/g, '\n\n')
+      .trim();
+
+  const upsertAdminBookDirective = (kind: 'cabecalho' | 'cabecalho-secao' | 'cabecalho-titulo', value = '') => {
+    const patterns = {
+      cabecalho: /^\[\[\s*(?:cabecalho|header)\s*:/i,
+      'cabecalho-secao': adminHeaderPattern.eyebrow,
+      'cabecalho-titulo': adminHeaderPattern.title,
+    };
+    const directive = kind === 'cabecalho' ? '[[cabecalho:ocultar]]' : `[[${kind}:${value}]]`;
+    setAdminBookPageContent((current) => {
+      const lines = current.replace(/\r/g, '').split('\n');
+      const index = lines.findIndex((line) => patterns[kind].test(line.trim()));
+      if (index >= 0) lines[index] = directive;
+      else lines.unshift(directive);
+      return lines.join('\n');
+    });
+  };
+
+  const removeAdminBookDirective = (kind: 'cabecalho' | 'cabecalho-secao' | 'cabecalho-titulo') => {
+    const patterns = {
+      cabecalho: /^\[\[\s*(?:cabecalho|header)\s*:/i,
+      'cabecalho-secao': adminHeaderPattern.eyebrow,
+      'cabecalho-titulo': adminHeaderPattern.title,
+    };
+    setAdminBookPageContent((current) => current
+      .replace(/\r/g, '')
+      .split('\n')
+      .filter((line) => !patterns[kind].test(line.trim()))
+      .join('\n'));
+  };
+
+  const getAdminVisualPage = () => {
+    const sourceLines = getAdminBookLines();
+    const data = {
+      hideHeader: false,
+      eyebrow: 'Livro',
+      title: adminBookPageTitle || '',
+      titleLineIndex: -1,
+      bodyLines: [] as Array<{ line: string; index: number }>,
+    };
+
+    sourceLines.forEach((rawLine, index) => {
+      const line = rawLine.trim();
+      if (adminHeaderPattern.hide.test(line)) {
+        data.hideHeader = true;
+        return;
+      }
+      const eyebrow = matchAdminHeaderValue(line, 'eyebrow');
+      if (eyebrow) {
+        data.eyebrow = eyebrow[1].trim() || 'Livro';
+        return;
+      }
+      const title = matchAdminHeaderValue(line, 'title');
+      if (title) {
+        data.title = title[1].trim();
+        return;
+      }
+      data.bodyLines.push({ line: rawLine, index });
+    });
+
+    return data;
+  };
+
+  const promoteFirstBodyLineToAdminHeader = () => {
+    let promoted = '';
+    setAdminBookPageContent((current) => {
+      const lines = current.replace(/\r/g, '').split('\n');
+      const firstBodyIndex = lines.findIndex((rawLine) => {
+        const line = rawLine.trim();
+        return line
+          && !adminHeaderPattern.hide.test(line)
+          && !adminHeaderPattern.eyebrow.test(line)
+          && !adminHeaderPattern.title.test(line)
+          && !/^\[\[/.test(line)
+          && !/^(-{3,}|\*{3,}|_{3,})$/.test(line);
+      });
+      if (firstBodyIndex < 0) return current;
+      promoted = repairBrokenPdfCharacters(lines[firstBodyIndex].trim());
+      lines.splice(firstBodyIndex, 1);
+      const titleDirective = `[[cabecalho-titulo:${promoted}]]`;
+      const existingTitleIndex = lines.findIndex((line) => adminHeaderPattern.title.test(line.trim()));
+      if (existingTitleIndex >= 0) lines[existingTitleIndex] = titleDirective;
+      else lines.unshift(titleDirective);
+      return lines.join('\n');
+    });
+    setAdminMessage(promoted ? 'Primeira linha do miolo movida para o título do header.' : 'Não encontrei uma linha de miolo para usar como título.');
+  };
+
+  const getAdminVisualBodyText = (bodyLines: Array<{ line: string; index: number }>) =>
+    bodyLines.map(({ line }) => line).join('\n');
+
+  const updateAdminVisualBodyText = (bodyLines: Array<{ line: string; index: number }>, nextValue: string) => {
+    setAdminBookPageContent((current) => {
+      const lines = current.replace(/\r/g, '').split('\n');
+      const nextLines = nextValue.replace(/\r/g, '').split('\n');
+      if (!bodyLines.length) return [...lines, '', ...nextLines].join('\n');
+      const first = bodyLines[0].index;
+      const last = bodyLines[bodyLines.length - 1].index;
+      lines.splice(first, last - first + 1, ...nextLines);
+      return lines.join('\n');
+    });
+  };
+
+  const isAdminHeaderDirectiveLine = (line: string) => {
+    const clean = line.trim();
+    return adminHeaderPattern.hide.test(clean)
+      || adminHeaderPattern.eyebrow.test(clean)
+      || adminHeaderPattern.title.test(clean);
+  };
+
+  const normalizeAdminPlainPaste = (value = '', keepParagraphs = false) => {
+    const clean = repairBrokenPdfCharacters(value)
+      .replace(/\r/g, '')
+      .replace(/\u00a0/g, ' ')
+      .replace(/-\n(?=\p{Ll})/gu, '')
+      .replace(/[ \t]+/g, ' ')
+      .trim();
+    if (!clean) return '';
+
+    const paragraphs = clean
+      .split(/\n\s*\n+/)
+      .map((paragraph) => paragraph
+        .split('\n')
+        .map((line) => line.trim())
+        .filter(Boolean)
+        .join(' ')
+        .replace(/\s{2,}/g, ' ')
+        .trim())
+      .filter(Boolean)
+    return keepParagraphs ? paragraphs.join('\n\n') : paragraphs.join(' ');
+  };
+
+  const replaceAdminVisualBodyWithPlainText = (nextText: string, keepParagraphs = false) => {
+    const normalized = normalizeAdminPlainPaste(nextText, keepParagraphs);
+    if (!normalized) return;
+    const nextLines = normalized
+      .split(/\n{2,}|\n/)
+      .map((line) => buildAdminBlockCommand('paragrafo', line))
+      .filter(Boolean);
+    setAdminBookPageContent((current) => {
+      const lines = current.replace(/\r/g, '').split('\n');
+      const headerLines = lines.filter(isAdminHeaderDirectiveLine);
+      return [...headerLines, ...nextLines].join('\n');
+    });
+    setAdminPlainPasteDraft('');
+    setAdminSelectedBookLineIndex(null);
+    setAdminMessage('Miolo substituído por texto limpo. Agora selecione trechos para formatar.');
+  };
+
+  const renderAdminVisualEditableLine = (rawLine: string, lineIndex: number) => {
+    const line = repairBrokenPdfCharacters(rawLine.trim());
+    const blockCommand = parseAdminBlockCommand(line);
+    const selected = adminSelectedBookLineIndex === lineIndex;
+    const audioCue = (() => {
+      const clean = line.replace(/\[br\]/gi, ' ').replace(/\s+/g, ' ').trim();
+      if (!clean || clean.length > 56 || clean.split(/\s+/).length > 5) return null;
+      const key = audioTrackKey(clean);
+      return adminVisualAudioItems.find((item) => item.sectionKey === key) ?? null;
+    })();
+    const audioCueNode = audioCue ? (
+      <button
+        type="button"
+        className="admin-visual-audio-cue"
+        onClick={() => {
+          setAdminBookTab('audio');
+          setAdminAudioChapterId(audioCue.chapterId);
+          setAdminAudioSectionKey(audioCue.sectionKey);
+          setAdminAudioLabel(audioCue.label);
+          setAdminAudioUrl(audioCue.url);
+        }}
+        title={`Editar áudio: ${audioCue.label}`}
+      >
+        <Headphones size={12} />
+        <span>{audioCue.label}</span>
+      </button>
+    ) : null;
+    const editableProps = {
+      contentEditable: true,
+      suppressContentEditableWarning: true,
+      'data-admin-line-index': lineIndex,
+      onFocus: () => setAdminSelectedBookLineIndex(lineIndex),
+      onClick: () => setAdminSelectedBookLineIndex(lineIndex),
+      onBlur: (event: FocusEvent<HTMLElement>) => {
+        const nextText = serializeAdminInlineHtml(event.currentTarget);
+        updateAdminBookLineFromSerializedBlock(lineIndex, line, nextText);
+      },
+    };
+
+    if (!line) {
+      return (
+        <div className="admin-visual-empty-line" key={`visual-${lineIndex}`}>
+          <button type="button" onClick={() => insertAdminBookLineAfter(lineIndex, '')}>+ parágrafo</button>
+          <button type="button" onClick={() => insertAdminBookLineAfter(lineIndex, '---')}>+ divisor</button>
+        </div>
+      );
+    }
+
+    if (adminHeaderPattern.hide.test(line) || adminHeaderPattern.eyebrow.test(line) || adminHeaderPattern.title.test(line)) return null;
+    if (/^(-{3,}|\*{3,}|_{3,})$/.test(line)) {
+      return <hr className="admin-visual-divider" key={`visual-${lineIndex}`} onDoubleClick={() => removeAdminBookLine(lineIndex)} />;
+    }
+    if (/^\[br\]$/i.test(line)) {
+      return <div className="admin-visual-line-break" key={`visual-${lineIndex}`} onDoubleClick={() => removeAdminBookLine(lineIndex)}>quebra</div>;
+    }
+    const spacerMatch = line.match(/^\[\[espaco:(\d{1,3})\]\]$/i);
+    if (spacerMatch) {
+      return (
+        <div className="admin-visual-spacer" style={{ height: `${Math.min(120, Math.max(8, Number(spacerMatch[1]) || 24))}px` }} key={`visual-${lineIndex}`}>
+          <span>espaço {spacerMatch[1]}px</span>
+          <button type="button" onClick={() => removeAdminBookLine(lineIndex)}>remover</button>
+        </div>
+      );
+    }
+
+    const titleCommandMatch = line.match(/^\[\[(titulo|subtitulo):(.+?)(?:\|(.*?))?\]\]$/i);
+    if (titleCommandMatch) {
+      const Tag = titleCommandMatch[1].toLowerCase() === 'subtitulo' ? 'h3' : 'h2';
+      const styles = blockCommand.styles;
+      const titleAudioCue = (() => {
+        const clean = repairBrokenPdfCharacters(titleCommandMatch[2].trim()).replace(/\s+/g, ' ');
+        const key = audioTrackKey(clean);
+        return adminVisualAudioItems.find((item) => item.sectionKey === key) ?? null;
+      })();
+      const titleAudioCueNode = titleAudioCue ? (
+        <button
+          type="button"
+          className="admin-visual-audio-cue"
+          onClick={() => {
+            setAdminBookTab('audio');
+            setAdminAudioChapterId(titleAudioCue.chapterId);
+            setAdminAudioSectionKey(titleAudioCue.sectionKey);
+            setAdminAudioLabel(titleAudioCue.label);
+            setAdminAudioUrl(titleAudioCue.url);
+          }}
+          title={`Editar áudio: ${titleAudioCue.label}`}
+        >
+          <Headphones size={12} />
+          <span>{titleAudioCue.label}</span>
+        </button>
+      ) : null;
+      return (
+        <div className={`admin-visual-audio-line admin-visual-block ${selected ? 'selected' : ''}`} key={`visual-${lineIndex}`} onClick={() => setAdminSelectedBookLineIndex(lineIndex)}>
+          <Tag
+            className={`admin-visual-title ${adminBlockStyleClass(styles)}`}
+            contentEditable
+            suppressContentEditableWarning
+            data-admin-line-index={lineIndex}
+            onFocus={() => setAdminSelectedBookLineIndex(lineIndex)}
+            onBlur={(event) => updateAdminBookLineFromSerializedBlock(lineIndex, line, serializeAdminInlineHtml(event.currentTarget))}
+            dangerouslySetInnerHTML={{ __html: adminInlineTextToHtml(repairBrokenPdfCharacters(titleCommandMatch[2].trim())) }}
+          />
+          {titleAudioCueNode}
+        </div>
+      );
+    }
+
+    const paragraphCommandMatch = line.match(/^\[\[(?:paragrafo|paragraph):(.+?)(?:\|(.*?))?\]\]$/i);
+    if (paragraphCommandMatch) {
+      const cleanText = repairBrokenPdfCharacters(paragraphCommandMatch[1].trim());
+      return (
+        <div className={`admin-visual-audio-line admin-visual-block ${selected ? 'selected' : ''}`} key={`visual-${lineIndex}`} onClick={() => setAdminSelectedBookLineIndex(lineIndex)}>
+          <p
+            className={`admin-visual-paragraph ${adminBlockStyleClass(blockCommand.styles)}`}
+            {...editableProps}
+            dangerouslySetInnerHTML={{ __html: adminInlineTextToHtml(cleanText) }}
+          />
+          {audioCueNode}
+        </div>
+      );
+    }
+
+    const imageMatch = line.match(/^\[\[(?:imagem|capa):(.+?)(?:\|(.*?))?\]\]$/i);
+    if (imageMatch) {
+      return (
+        <figure className="admin-visual-image" key={`visual-${lineIndex}`}>
+          <img src={imageMatch[1].trim()} alt={imageMatch[2]?.trim() || ''} />
+          <figcaption {...editableProps}>{imageMatch[2]?.trim() || 'Legenda da imagem'}</figcaption>
+        </figure>
+      );
+    }
+
+    return (
+      <div className={`admin-visual-audio-line admin-visual-block ${audioCue ? 'has-audio' : ''} ${selected ? 'selected' : ''}`} key={`visual-${lineIndex}`} onClick={() => setAdminSelectedBookLineIndex(lineIndex)}>
+        <p
+          className="admin-visual-paragraph"
+          {...editableProps}
+          dangerouslySetInnerHTML={{ __html: adminInlineTextToHtml(line) }}
+        />
+        {audioCueNode}
+      </div>
+    );
+  };
+
   const handlePublishBookPage = async () => {
     setAdminMessage('');
     try {
+      const visualTitle = getAdminVisualPage().title;
+      const readerContent = composeAdminBookPageForReader(adminBookPageContent);
       await publishAdminBookPage(adminBookPageNumber, {
-        title: adminBookPageTitle || undefined,
-        content: adminBookPageContent,
+        title: visualTitle || adminBookPageTitle || undefined,
+        content: readerContent,
       });
+      setAdminBookPageContent(readerContent);
+      setAdminBookPageTitle(visualTitle || adminBookPageTitle);
       await refreshBookPageContent();
       setAdminMessage(`Pagina ${adminBookPageNumber} publicada no modo leitura.`);
     } catch (error: any) {
-      setAdminMessage(error?.message || 'Nao foi possivel publicar a pagina.');
+      setAdminMessage(error?.message || 'Não foi possível publicar a pagina.');
     }
   };
 
@@ -2235,7 +3978,7 @@ export function App() {
       await refreshBookAudioContent();
       setAdminMessage('Mesa de audio salva no servidor.');
     } catch (error: any) {
-      setAdminMessage(error?.message || 'Nao foi possivel salvar a mesa de audio.');
+      setAdminMessage(error?.message || 'Não foi possível salvar a mesa de audio.');
     }
   };
 
@@ -2251,13 +3994,132 @@ export function App() {
         coverUrl: adminAudioProduction[productionKey]?.coverUrl || undefined,
       });
       await refreshBookAudioContent();
-      setAdminMessage('Audio publicado para esta secao.');
+      setAdminMessage('Áudio publicado para esta seção.');
     } catch (error: any) {
-      setAdminMessage(error?.message || 'Nao foi possivel publicar o audio.');
+      setAdminMessage(error?.message || 'Não foi possível publicar o audio.');
     }
   };
 
+  const persistSensoryPlaylist = (tracks: SensoryTrack[]) => {
+    setSensoryPlaylist(tracks);
+    localStorage.setItem(ADMIN_SENSORY_PLAYLIST_KEY, JSON.stringify(tracks));
+  };
+
+  const handleSaveSensoryTrack = () => {
+    const title = adminSensoryDraft.title.trim();
+    const audioUrl = adminSensoryDraft.audioUrl.trim();
+    if (!title || !audioUrl) {
+      setAdminMessage('Informe pelo menos titulo e URL do audio sensorial.');
+      return;
+    }
+    const id = adminSensoryDraft.id || title.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || `track-${Date.now()}`;
+    const nextTrack: SensoryTrack = {
+      id,
+      title,
+      text: adminSensoryDraft.text.trim() || 'Trilha para leitura com presença.',
+      audioUrl,
+      coverUrl: adminSensoryDraft.coverUrl?.trim() || '',
+    };
+    persistSensoryPlaylist([
+      ...sensoryPlaylist.filter((track) => track.id !== id),
+      nextTrack,
+    ]);
+    setAdminSensoryDraft({ id: '', title: '', text: '', audioUrl: '', coverUrl: '' });
+    setAdminMessage('Áudio sensorial salvo na playlist.');
+  };
+
+  const handleEditSensoryTrack = (track: SensoryTrack) => {
+    setAdminSensoryDraft({
+      ...track,
+      title: repairMojibake(track.title),
+      text: repairMojibake(track.text),
+    });
+  };
+
+  const handleRemoveSensoryTrack = (trackId: string) => {
+    const removedTrack = sensoryPlaylist.find((track) => track.id === trackId);
+    persistSensoryPlaylist(sensoryPlaylist.filter((track) => track.id !== trackId));
+    if (removedTrack?.audioUrl && ambientAudioState.currentUrl === removedTrack.audioUrl) stopAmbientTrack();
+    if (selectedSensoryTrackId === trackId) {
+      const nextTrack = sensoryPlaylist.find((track) => track.id !== trackId) || defaultSensoryPlaylist[0];
+      setSelectedSensoryTrackId(nextTrack.id);
+      localStorage.setItem(SELECTED_SENSORY_TRACK_KEY, nextTrack.id);
+    }
+    setAdminMessage('Áudio sensorial removido da playlist.');
+  };
+
+  const selectSensoryTrack = (track: SensoryTrack, playNow = false) => {
+    setSelectedSensoryTrackId(track.id);
+    localStorage.setItem(SELECTED_SENSORY_TRACK_KEY, track.id);
+    if (playNow) playAmbientTrack(track);
+  };
+
+  const toggleSelectedSensoryTrack = () => {
+    if (!selectedSensoryTrack) return;
+    if (ambientAudioState.currentUrl && ambientPlayerCollapsed) {
+      setAmbientPlayerCollapsed(false);
+      return;
+    }
+    if (ambientAudioState.currentUrl === selectedSensoryTrack.audioUrl && ambientAudioState.isPlaying) {
+      pauseAmbientTrack();
+      return;
+    }
+    playAmbientTrack(selectedSensoryTrack);
+  };
+
+  const persistSupportAudios = (tracks: SensoryTrack[]) => {
+    setSupportAudios(tracks);
+    localStorage.setItem(ADMIN_SUPPORT_AUDIO_KEY, JSON.stringify(tracks));
+  };
+
+  const handleSaveSupportAudio = () => {
+    const title = adminSupportAudioDraft.title.trim();
+    const audioUrl = adminSupportAudioDraft.audioUrl.trim();
+    if (!title || !audioUrl) {
+      setAdminMessage('Informe pelo menos título e URL do áudio de apoio.');
+      return;
+    }
+    const id = adminSupportAudioDraft.id || title.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || `support-${Date.now()}`;
+    persistSupportAudios([
+      ...supportAudios.filter((track) => track.id !== id),
+      {
+        id,
+        title,
+        text: adminSupportAudioDraft.text.trim() || 'Áudio de apoio para a jornada.',
+        audioUrl,
+        coverUrl: adminSupportAudioDraft.coverUrl?.trim() || '',
+      },
+    ]);
+    setAdminSupportAudioDraft({ id: '', title: '', text: '', audioUrl: '', coverUrl: '' });
+    setAdminMessage('Áudio de apoio salvo.');
+  };
+
+  const handleEditSupportAudio = (track: SensoryTrack) => {
+    setAdminSupportAudioDraft({
+      ...track,
+      title: repairMojibake(track.title),
+      text: repairMojibake(track.text),
+    });
+  };
+
+  const handleRemoveSupportAudio = (trackId: string) => {
+    persistSupportAudios(supportAudios.filter((track) => track.id !== trackId));
+    setAdminMessage('Áudio de apoio removido.');
+  };
+
   const handleOpenAdminBookPageInReader = () => {
+    const visualTitle = getAdminVisualPage().title;
+    const readerContent = composeAdminBookPageForReader(adminBookPageContent);
+    setAdminBookPageContent(readerContent);
+    setAdminBookPageTitle(visualTitle || adminBookPageTitle);
+    setBookPageOverrides((current) => ({
+      ...current,
+      [adminBookPageNumber]: readerContent,
+    }));
+    setBookPageTitleOverrides((current) => ({
+      ...current,
+      [adminBookPageNumber]: repairBrokenPdfCharacters(visualTitle || adminBookPageTitle || ''),
+    }));
     goToPdfPage(adminBookPageNumber);
     setPageIndex(0);
     navigate(ROUTES.READER);
@@ -2337,22 +4199,43 @@ export function App() {
     navigate(ROUTES.LETTERS);
   };
 
-  const handleShareChapter = () => {
+  const handleShareProject = () => {
     playClick('soft');
-    const shareTitle = repairMojibake(selectedChapter.title);
-    const shareText = `${shareTitle} - O Poder dos Desacreditados`;
-    const shareUrl = window.location.href;
+    const shareTitle = 'O Poder dos Desacreditados';
+    const shareText = 'Conheça o app de leitura, Áudios e jornada guiada de O Poder dos Desacreditados.';
+    const shareUrl = window.location.origin;
     if (navigator.share) {
       navigator.share({ title: shareTitle, text: shareText, url: shareUrl }).catch(() => {});
       return;
     }
     navigator.clipboard?.writeText(`${shareText}\n${shareUrl}`).then(() => {
-      setNoteSaveStatus('saved');
-      window.setTimeout(() => setNoteSaveStatus('idle'), 1400);
-    }).catch(() => {});
+      setAccountMessage('Link do projeto copiado. Agora é só enviar para quem precisa conhecer.');
+      window.setTimeout(() => setAccountMessage(''), 2200);
+    }).catch(() => {
+      setAccountMessage(shareUrl);
+    });
   };
 
   const getMindGuide = (topic = activeMentorTopic) => mindGuides[topic.id] ?? mindGuides.ansiedade;
+
+  const clearMindTimers = () => {
+    mindTimersRef.current.forEach((timer) => window.clearTimeout(timer));
+    mindTimersRef.current = [];
+    setMindTyping(false);
+  };
+
+  const revealAgentMessages = (messages: MindMessage[], initialDelay = 360, stepDelay = 920) => {
+    clearMindTimers();
+    if (!messages.length) return;
+    setMindTyping(true);
+    messages.forEach((message, index) => {
+      const timer = window.setTimeout(() => {
+        setMindMessages((current) => [...current, message]);
+        if (index === messages.length - 1) setMindTyping(false);
+      }, initialDelay + index * stepDelay);
+      mindTimersRef.current.push(timer);
+    });
+  };
 
   const findMindRecommendations = (readerText = '', topic = activeMentorTopic): MindRecommendation[] => {
     const guide = getMindGuide(topic);
@@ -2398,9 +4281,443 @@ export function App() {
       .map(({ score, ...recommendation }) => recommendation);
   };
 
+  const buildPillarDiarySnapshot = (pillarIndex: number) => {
+    const pillar = workbookPillars[pillarIndex] ?? workbookPillars[0];
+    const answers = pillar.questions
+      .map((question, index) => ({
+        question,
+        answer: workbookAnswers[`${pillarIndex}-${index}`] || '',
+      }))
+      .filter((item) => item.answer.trim());
+
+    const text = answers.map((item) => `${item.question} ${item.answer}`).join(' ');
+    const words = normalizeForSearch(text)
+      .split(' ')
+      .filter((word) => word.length > 4);
+    const repeatedWord = words.find((word, index) => words.indexOf(word) !== index);
+
+    return {
+      pillar,
+      answers,
+      hasAnswers: answers.length > 0,
+      repeatedWord,
+      excerpt: trimExcerpt(answers.map((item) => item.answer).join(' '), 360),
+    };
+  };
+
+  const getMindTriageQuestions = (pillarIndex: number | null) =>
+    pillarIndex == null
+      ? []
+      : (getOfficialMindPillarProtocol(pillarIndex)?.questions ?? mindTriageBank[pillarIndex] ?? []);
+
+  const buildMindTriageMessage = (pillarIndex: number, step: number): MindMessage | null => {
+    const question = getMindTriageQuestions(pillarIndex)[step];
+    if (!question) return null;
+    const visiblePositions = question.phase === 'judgment'
+      ? ['recognition', 'defense', 'ambivalence', 'desire']
+      : question.phase === 'presence'
+        ? ['recognition', 'ambivalence', 'desire', 'uncertainty']
+        : ['recognition', 'minimization', 'ambivalence', 'uncertainty'];
+    return {
+      id: `triage-${pillarIndex}-${question.id}`,
+      from: 'agent',
+      text: question.prompt,
+      triageOptions: question.options.filter((option) =>
+        !option.semantic_position || visiblePositions.includes(option.semantic_position),
+      ),
+    };
+  };
+
+  const commitMindTriageAnswer = (answer: MindTriageAnswer, signalAnalysis: SignalAnalysisResult) => {
+    if (activeMindPillarIndex == null || mindTyping) return;
+    const questions = getMindTriageQuestions(activeMindPillarIndex);
+    const currentQuestion = questions[activeMindTriageStep];
+    if (!currentQuestion) return;
+    const protocol = getOfficialMindPillarProtocol(activeMindPillarIndex);
+    const previousMindState = activeReaderMindState || createInitialReaderMindState({
+      readerId: authUser?.id || readerName,
+      pillarId: protocol?.identity.id || String(activeMindPillarIndex),
+      phase: currentQuestion.phase || 'consciousness',
+      questionId: currentQuestion.id,
+    });
+    const stateAtCurrentQuestion = currentQuestion.phase && previousMindState.current_phase !== currentQuestion.phase
+      ? {
+          ...previousMindState,
+          current_phase: currentQuestion.phase,
+          current_question_id: currentQuestion.id,
+          book_position: {
+            ...previousMindState.book_position,
+            current_phase: currentQuestion.phase,
+          },
+        }
+      : previousMindState;
+    const stateUpdate = updateReaderMindState(stateAtCurrentQuestion, {
+      signal: signalAnalysis,
+      questionId: currentQuestion.id,
+    });
+    const decisionResult = decideNextAction({
+      reader_state: stateUpdate.state,
+      current_pillar: {
+        id: protocol?.identity.id || String(activeMindPillarIndex),
+        title: protocol?.identity.title || activeMentorTopic.title,
+      },
+      current_phase: stateUpdate.state.current_phase,
+      current_interaction: {
+        interaction_type: answer.open_answer ? 'open_response' : 'structured_option',
+        selected_option_id: answer.open_answer ? undefined : answer.signal,
+        open_response: answer.open_answer,
+      },
+      signal_analysis: signalAnalysis,
+      memory_result: defaultMemoryEngineResult(['no persistent memory retrieval in this step']),
+      recent_interventions: activeSessionMemory?.recent_intervention_types || [],
+      recent_question_ids: activeMindTriageAnswers.map((answer) => answer.questionId),
+      available_content: {
+        questions: protocol?.questions || [],
+        micro_returns: protocol?.micro_returns || [],
+        journal_prompts: protocol?.journal_prompts || [],
+        letters: protocol?.guided_letters || [],
+        anchors: protocol?.practical_anchors || [],
+      },
+      content_progress: Math.round(readProgress * 100),
+      reflective_progress: stateUpdate.state.current_phase === 'presence'
+        ? 'integrating'
+        : stateUpdate.state.current_phase === 'judgment'
+          ? 'questioning'
+          : 'recognizing',
+      active_open_threads: [],
+    });
+
+    const nextAnswers = [...activeMindTriageAnswers, { ...answer, signal_analysis: signalAnalysis }];
+    const chapter = bookChapters[chapterIndexForPillar(activeMindPillarIndex)];
+    const turnPlan = planMindJourneyTurn({
+      questions,
+      answers: nextAnswers,
+      pillarTitle: protocol?.identity.title || activeMentorTopic.title,
+      chapterTitle: chapter?.title,
+      readerState: stateUpdate.state,
+      decision: decisionResult,
+    });
+    const nextStep = turnPlan.nextQuestionIndex ?? activeMindTriageStep;
+    const nextQuestionMessage = turnPlan.nextQuestionIndex == null
+      ? null
+      : buildMindTriageMessage(activeMindPillarIndex, turnPlan.nextQuestionIndex);
+
+    playClick('soft');
+    clearMindTimers();
+    setActiveMindTriageAnswers(nextAnswers);
+    setActiveReaderMindState(stateUpdate.state);
+    setActiveDecisionResult(decisionResult);
+    setActiveSessionMemory((current) => {
+      if (!current) return current;
+      const recentSignals = [
+        answer.primary_signal,
+        ...(answer.secondary_signals || []),
+        ...current.recent_signal_ids,
+      ].filter(Boolean) as string[];
+      return {
+        ...current,
+        current_phase: stateUpdate.state.current_phase,
+        current_question_id: currentQuestion.id,
+        selected_option_id: answer.open_answer ? undefined : answer.signal,
+        recent_signal_ids: Array.from(new Set(recentSignals)).slice(0, 6),
+        recent_intervention_types: Array.from(new Set([
+          decisionResult.selected_intervention,
+          ...(signalAnalysis.recommended_interventions || []),
+          ...current.recent_intervention_types,
+        ])).slice(0, 6),
+        current_reader_state: stateUpdate.state.global_state,
+        current_depth: stateUpdate.state.depth_level,
+        current_load: stateUpdate.state.load_level,
+        current_readiness: stateUpdate.state.readiness_level,
+        recent_interactions: [
+          ...current.recent_interactions,
+          `${currentQuestion.prompt} -> ${answer.open_answer || answer.option}`,
+        ].slice(-6),
+        updated_at: new Date().toISOString(),
+      };
+    });
+    setActiveMindTriageStep(nextStep);
+    setMindTriageComplete(turnPlan.complete);
+    setMindMessages((current) => [
+      ...current.map((message) => ({ ...message, triageOptions: undefined, replies: undefined })),
+      { id: `user-triage-${Date.now()}`, from: 'user', text: answer.open_answer || answer.option },
+    ]);
+
+    const nextAgentMessages: MindMessage[] = [
+      ...(turnPlan.acknowledgement ? [{
+        id: `agent-triage-response-${Date.now()}`,
+        from: 'agent' as const,
+        kind: 'intro' as const,
+        text: turnPlan.acknowledgement,
+      }] : []),
+      ...(nextQuestionMessage ? [nextQuestionMessage] : [{
+        id: `agent-triage-synthesis-${Date.now()}`,
+        from: 'agent',
+        kind: 'plan',
+        text: turnPlan.synthesis || buildMindJourneySynthesis({
+          pillarTitle: protocol?.identity.title || activeMentorTopic.title,
+          chapterTitle: chapter?.title,
+          answers: nextAnswers,
+        }),
+        replies: turnPlan.replies || mindJourneyClosingReplies,
+      } as MindMessage]),
+    ];
+    revealAgentMessages(nextAgentMessages, 420, 760);
+  };
+
+  const selectMindTriageOption = (option: MindTriageOption) => {
+    if (activeMindPillarIndex == null || mindTyping) return;
+    const questions = getMindTriageQuestions(activeMindPillarIndex);
+    const currentQuestion = questions[activeMindTriageStep];
+    if (!currentQuestion) return;
+    const signalAnalysis = analyzeStructuredSignal({
+      primary: option.primary_signal,
+      secondary: option.secondary_signals,
+      sourceId: option.id,
+      intensity: option.load ? Math.min(4, option.load) as 1 | 2 | 3 : 1,
+    });
+    commitMindTriageAnswer({
+      questionId: currentQuestion.id,
+      phase: currentQuestion.phase,
+      question: currentQuestion.prompt,
+      option: option.label,
+      signal: option.signal,
+      semantic_position: option.semantic_position,
+      primary_signal: option.primary_signal,
+      secondary_signals: option.secondary_signals?.slice(0, 3),
+      load: option.load,
+    }, signalAnalysis);
+  };
+
+  const submitOpenMindTriageAnswer = (text: string) => {
+    const value = text.trim();
+    if (!value || activeMindPillarIndex == null || mindTyping || mindTriageComplete) return;
+    const questions = getMindTriageQuestions(activeMindPillarIndex);
+    const currentQuestion = questions[activeMindTriageStep];
+    if (!currentQuestion) return;
+    const locale = typeof navigator !== 'undefined' ? navigator.language || 'pt-BR' : 'pt-BR';
+    const safetyAssessment = assessSafety({
+      current_text: value,
+      recent_interactions: activeSessionMemory?.recent_interactions || [],
+      current_load: activeReaderMindState?.load_level || 1,
+      current_reader_state: activeReaderMindState?.global_state || 'unmapped',
+      detected_categories: [],
+      locale,
+    });
+    setActiveSafetyAssessment(safetyAssessment);
+    setMindInput('');
+    if (safetyAssessment.level >= 2) {
+      setMindTriageComplete(true);
+      setMindMessages((current) => [
+        ...current.map((message) => ({ ...message, triageOptions: undefined, replies: undefined })),
+        { id: `user-triage-open-${Date.now()}`, from: 'user', text: value },
+        {
+          id: `agent-triage-safety-${Date.now()}`,
+          from: 'agent',
+          kind: 'plan',
+          text: buildSafetyResponseText(safetyAssessment, safetyResourcesByLocale[locale]),
+        },
+      ]);
+      return;
+    }
+    const signalAnalysis: SignalAnalysisResult = {
+      primary_signal: 'recognition',
+      secondary_signals: [],
+      intensity: 1,
+      confidence: 'low',
+      evidence: [{ source_type: 'open_response', source_id: currentQuestion.id, excerpt: trimExcerpt(value, 180) }],
+      reader_confirmed: false,
+      contradicts_previous_signal: false,
+      recommended_interventions: ['mirror', 'question'],
+      should_create_pattern: false,
+      should_update_existing_pattern: false,
+      requires_more_context: true,
+    };
+    commitMindTriageAnswer({
+      questionId: currentQuestion.id,
+      phase: currentQuestion.phase,
+      question: currentQuestion.prompt,
+      option: value,
+      signal: 'open_response',
+      primary_signal: 'recognition',
+      load: 1,
+      open_answer: value,
+    }, signalAnalysis);
+  };
+
+  const finishMindTriage = () => {
+    if (activeMindPillarIndex == null || mindTyping || mindTriageComplete) return;
+    const protocol = getOfficialMindPillarProtocol(activeMindPillarIndex);
+    const chapter = bookChapters[chapterIndexForPillar(activeMindPillarIndex)];
+    const plan = planMindJourneyTurn({
+      questions: getMindTriageQuestions(activeMindPillarIndex),
+      answers: activeMindTriageAnswers,
+      pillarTitle: protocol?.identity.title || activeMentorTopic.title,
+      chapterTitle: chapter?.title,
+      readerState: activeReaderMindState,
+      decision: activeDecisionResult,
+      forceComplete: true,
+    });
+    playClick('soft');
+    clearMindTimers();
+    setMindTriageComplete(true);
+    setMindMessages((current) => [
+      ...current.map((message) => ({ ...message, triageOptions: undefined, replies: undefined })),
+      {
+        id: `agent-triage-stop-${Date.now()}`,
+        from: 'agent',
+        kind: 'plan',
+        text: plan.synthesis || 'Vamos parar aqui. Você pode voltar ao livro sem precisar concluir esta conversa.',
+        replies: plan.replies || mindJourneyClosingReplies,
+      },
+    ]);
+  };
+
+  const buildMindIntentMessages = (
+    triad: typeof mindTriads[number],
+    territory: typeof mindTriads[number]['territories'][number],
+    intent: MindEntryIntent,
+    diaryLead: string,
+    firstTriageQuestion: MindMessage | null,
+  ): MindMessage[] => {
+    const protocol = getOfficialMindPillarProtocol(territory.pillarIndex);
+    const finalPillar = getFinalMindPillar(territory.pillarIndex);
+    const chapter = bookChapters[chapterIndexForPillar(territory.pillarIndex)];
+    const pillarTitle = finalPillar?.title || territory.label;
+    const thesis = finalPillar?.thesis || protocol?.identity.explains || 'um dilema do livro que pede leitura sem pressa';
+    const movement = finalPillar?.centralMovement || protocol?.identity.dilemma || territory.limiar;
+    const canonicalExcerpt = chapter?.content?.find((paragraph) => paragraph.trim().length >= 60);
+
+    if (intent === 'understand') {
+      return [
+        {
+          id: `intent-understand-${territory.pillarIndex}-intro`,
+          from: 'agent',
+          kind: 'intro',
+          text: `Vamos entender o trecho antes de falar sobre você. ${pillarTitle} pertence à tríade ${triad.title} e trabalha este limiar: ${territory.limiar}.`,
+        },
+        {
+          id: `intent-understand-${territory.pillarIndex}-explain`,
+          from: 'agent',
+          kind: 'plan',
+          text: `${canonicalExcerpt
+            ? `No capítulo “${chapter?.title}”, o texto diz: “${trimExcerpt(repairMojibake(canonicalExcerpt), 360)}”`
+            : `O capítulo “${chapter?.title || pillarTitle}” é a referência para este território.`}\n\nA lente de acompanhamento do iGent organiza esse trecho assim: ${thesis} O movimento proposto é ${movement}.\n\nA primeira parte vem do livro; a lente do iGent não é uma citação nem uma interpretação sobre você.`,
+          replies: ['Ver exemplo cotidiano', 'Isso aparece na minha vida', 'Voltar ao trecho'],
+        },
+      ];
+    }
+
+    if (intent === 'act') {
+      return [
+        {
+          id: `intent-act-${territory.pillarIndex}-intro`,
+          from: 'agent',
+          kind: 'intro',
+          text: `Você não precisa conversar longamente agora. Podemos transformar ${territory.label} em um próximo movimento pequeno e reversível.`,
+        },
+        {
+          id: `intent-act-${territory.pillarIndex}-choice`,
+          from: 'agent',
+          kind: 'plan',
+          text: `Escolha só um caminho. Nada aqui bloqueia sua leitura e nenhuma prática interrompida vira fracasso.`,
+          replies: ['Escrever por dois minutos', 'Fazer uma âncora breve', 'Guardar para retomar depois', 'Voltar ao trecho'],
+        },
+      ];
+    }
+
+    return [
+      {
+        id: `intent-reflect-${territory.pillarIndex}-intro`,
+        from: 'agent',
+        kind: 'intro',
+        text: diaryLead,
+      },
+      firstTriageQuestion ?? {
+        id: `intent-reflect-${territory.pillarIndex}-question`,
+        from: 'agent',
+        text: chapter?.content?.[0] || 'O que esse trecho toca em você agora?',
+      },
+    ];
+  };
+
+  const startMindTerritorySession = (
+    triad: typeof mindTriads[number],
+    territory: typeof mindTriads[number]['territories'][number],
+    intent: MindEntryIntent = selectedMindEntryIntent,
+  ) => {
+    const snapshot = buildPillarDiarySnapshot(territory.pillarIndex);
+    const firstTriageQuestion = buildMindTriageMessage(territory.pillarIndex, 0);
+    const protocol = getOfficialMindPillarProtocol(territory.pillarIndex);
+    const chapterIndex = chapterIndexForPillar(territory.pillarIndex);
+    if (intent === 'continue') {
+      playClick('soft');
+      goToChapter(chapterIndex);
+      return;
+    }
+    const topic = {
+      id: `pilar-${territory.pillarIndex + 1}-${audioTrackKey(territory.label)}`,
+      title: territory.label,
+      icon: territory.icon,
+      color: triad.color,
+      pillarIndex: territory.pillarIndex,
+      audioUrl: mindTerritoryAudioUrls[territory.pillarIndex] || selectedChapter.audioUrl,
+    };
+    const diaryLead = snapshot.hasAnswers
+      ? `Li o que você escreveu sobre ${territory.label}. ${snapshot.repeatedWord ? `Tem uma palavra que voltou mais de uma vez: "${snapshot.repeatedWord}".` : 'Tem uma tensão ali que merece ser olhada com calma.'} Vou fazer até três movimentos e depois organizar o que apareceu.`
+      : `${territory.label} é um território difícil de começar — porque ele pede que você pare de explicar e repare onde isso toca. Vou fazer até três movimentos e depois organizar o que apareceu.`;
+
+    playClick('primary');
+    setSelectedMindTriadId(triad.id);
+    setSelectedMindEntryIntent(intent);
+    setActiveMindEntryIntent(intent);
+    setActiveMindPillarIndex(territory.pillarIndex);
+    setActiveMindTriageStep(0);
+    setActiveMindTriageAnswers([]);
+    const initialMindState = createInitialReaderMindState({
+      readerId: authUser?.id || readerName,
+      pillarId: protocol?.identity.id || territory.label,
+      phase: getMindTriageQuestions(territory.pillarIndex)[0]?.phase || 'consciousness',
+      questionId: firstTriageQuestion?.id,
+    });
+    const localSessionId = `mind_${Date.now()}`;
+    setActiveReaderMindState(initialMindState);
+    setActiveSessionMemory(createSessionMemory({
+      readerId: authUser?.id || readerName,
+      sessionId: localSessionId,
+      pillarId: initialMindState.current_pillar_id,
+      phase: initialMindState.current_phase,
+      questionId: initialMindState.current_question_id,
+      readerState: initialMindState.global_state,
+      depth: initialMindState.depth_level,
+      load: initialMindState.load_level,
+      readiness: initialMindState.readiness_level,
+    }));
+    setActiveDecisionResult(null);
+    setActiveSafetyAssessment(null);
+    setMindTriageComplete(intent !== 'reflect');
+    setActiveMentorTopic(topic);
+    setMindStep('chat');
+    setMindInput('');
+    setMindSessionId(undefined);
+    setMindLoading(false);
+    setPendingMindPrompt('');
+    setPendingMindSource('workbook');
+    setMindMessages([]);
+    revealAgentMessages(buildMindIntentMessages(triad, territory, intent, diaryLead, firstTriageQuestion));
+    navigate(ROUTES.IGENT);
+  };
+
   const startMindSession = (topic: typeof mentorTopics[number], prompt = '', source: MindSavedPlan['source'] = 'chat') => {
     const guide = getMindGuide(topic);
-    const recommendations = findMindRecommendations(topic.title, topic);
+    setActiveMindPillarIndex(topic.pillarIndex);
+    setActiveMindTriageStep(0);
+    setActiveMindTriageAnswers([]);
+    setActiveReaderMindState(null);
+    setActiveSessionMemory(null);
+    setActiveDecisionResult(null);
+    setActiveSafetyAssessment(null);
+    setMindTriageComplete(true);
     setActiveMentorTopic(topic);
     setMindStep('chat');
     setMindInput('');
@@ -2408,7 +4725,8 @@ export function App() {
     setMindLoading(false);
     setPendingMindPrompt(prompt);
     setPendingMindSource(source);
-    setMindMessages([
+    setMindMessages([]);
+    revealAgentMessages([
       {
         id: `${topic.id}-intro`,
         from: 'agent',
@@ -2418,48 +4736,187 @@ export function App() {
       {
         id: `${topic.id}-question`,
         from: 'agent',
-        text: `${guide.firstQuestion}\n\nEu já separei alguns trechos do livro que podem conversar com esse estado.`,
-        replies: guide.quickReplies,
-        recommendations,
+        text: guide.firstQuestion,
       },
     ]);
     navigate(ROUTES.IGENT);
     handlePlayAudio(topic.audioUrl, topic.title);
   };
 
-  const buildMindContext = (readerText: string) => {
-    const currentAnswers = workbookPillars[workbookPillarIndex]?.questions
+  const buildMindContext = (readerText: string, source: MindSavedPlan['source']) => {
+    const contextPillarIndex = activeMindPillarIndex ?? workbookPillarIndex;
+    const contextPillar = workbookPillars[contextPillarIndex] ?? workbookPillars[0];
+    const contextTriad = mindTriads.find((triad) => triad.id === selectedMindTriadId) ?? mindTriads[0];
+    const contextTerritory = contextTriad.territories.find((territory) => territory.pillarIndex === contextPillarIndex);
+    const contextProtocol = getOfficialMindPillarProtocol(contextPillarIndex);
+    const currentFinalPillar = getFinalMindPillar(contextPillarIndex);
+    const locale = typeof navigator !== 'undefined' ? navigator.language || 'pt-BR' : 'pt-BR';
+    const currentLoad = activeMindTriageAnswers.reduce((total, answer) => total + (answer.load || 1), 0);
+    const currentAnswers = contextPillar.questions
       .map((question, index) => ({
         question,
-        answer: workbookAnswers[`${workbookPillarIndex}-${index}`] || '',
+        answer: workbookAnswers[`${contextPillarIndex}-${index}`] || '',
       }))
       .filter((item) => item.answer.trim())
-      .slice(0, 4);
+      .slice(0, 6);
+    const canonicalJournal = effectiveCanonicalBookChapters
+      .flatMap((chapter) => (chapter.journalPrompts ?? []).map((prompt) => ({
+        chapterId: chapter.id,
+        chapter: chapter.title,
+        prompt: prompt.text,
+        answer: canonicalJournalAnswers[prompt.id] || '',
+      })))
+      .filter((item) => item.answer.trim())
+      .slice(-12)
+      .map((item) => ({ ...item, answer: trimExcerpt(item.answer, 420) }));
 
+    const favoriteChapters = bookChapters
+      .filter((chapter) => favorites.includes(chapter.id))
+      .slice(-8)
+      .map((chapter) => ({
+        id: chapter.id,
+        title: repairMojibake(chapter.title),
+        summary: trimExcerpt(repairMojibake(chapter.summary), 160),
+      }));
+    const agentMemoryContext = buildAgentMemoryContext({
+      session: activeSessionMemory,
+      pillar: null,
+      journey: null,
+    });
+    const currentSafetyAssessment = assessSafety({
+      current_text: readerText,
+      recent_interactions: activeSessionMemory?.recent_interactions || [],
+      current_load: activeReaderMindState?.load_level || 1,
+      current_reader_state: activeReaderMindState?.global_state || 'unmapped',
+      detected_categories: activeSafetyAssessment ? [activeSafetyAssessment.category, ...activeSafetyAssessment.secondary_categories] : [],
+      locale,
+    });
     return {
       readerName,
+      source,
       topic: activeMentorTopic.title,
       input: readerText,
-      currentChapter: {
+      privacy: mindDataScopes,
+      mindFlow: {
+        entryIntent: activeMindEntryIntent,
+        entryIntentRule: 'understand explica o livro sem criar sinais do leitor; reflect usa triagem reflexiva; act oferece um proximo movimento breve; continue retorna ao livro.',
+        journeyContract: {
+          maximumGuidedTurns: MIND_GUIDED_MAX_TURNS,
+          openAnswerHasPriority: true,
+          semanticLabelsAreInternal: true,
+          synthesisIsRequired: true,
+          readerCanStopAtAnyTime: true,
+        },
+        canonicalSchema: {
+          source: 'canonical_book',
+          title: 'O Poder dos Desacreditados',
+          layerRule: 'O livro é a fonte autoral. O iGent apenas acompanha a leitura e não apresenta conteúdo complementar como citação do livro.',
+          currentChapter: {
+            id: bookChapters[chapterIndexForPillar(contextPillarIndex)]?.id,
+            title: bookChapters[chapterIndexForPillar(contextPillarIndex)]?.title,
+          },
+          currentPillar: currentFinalPillar ? {
+            id: currentFinalPillar.id,
+            ordinal: currentFinalPillar.ordinal,
+            title: currentFinalPillar.title,
+            triad: currentFinalPillar.triad,
+            threshold: currentFinalPillar.threshold,
+            thesis: currentFinalPillar.thesis,
+            centralMovement: currentFinalPillar.centralMovement,
+          } : null,
+        },
+        readerMindState: activeReaderMindState ? {
+          current_phase: activeReaderMindState.current_phase,
+          global_state: activeReaderMindState.global_state,
+          readiness_level: activeReaderMindState.readiness_level,
+          load_level: activeReaderMindState.load_level,
+          depth_level: activeReaderMindState.depth_level,
+        } : null,
+        decisionEngine: activeDecisionResult ? {
+          action: activeDecisionResult.action,
+          selected_intervention: activeDecisionResult.selected_intervention,
+          selected_depth: activeDecisionResult.selected_depth,
+          should_ask_question: activeDecisionResult.should_ask_question,
+          blocked_actions: activeDecisionResult.blocked_actions,
+        } : null,
+        safetyAssessment: currentSafetyAssessment,
+        safetyFlow: activeDecisionResult ? applySafetyProtocol(currentSafetyAssessment, activeDecisionResult) : null,
+        memoryContext: agentMemoryContext,
+        triad: contextTriad.title,
+        territory: contextTerritory?.label || contextPillar.title,
+        limiar: contextTerritory?.limiar || contextPillar.subtitle,
+        explains: contextProtocol?.identity.explains,
+        dilemma: contextProtocol?.identity.dilemma,
+        triageComplete: mindTriageComplete,
+        triageAnswers: activeMindTriageAnswers.slice(-MIND_GUIDED_MAX_TURNS).map((answer) => ({
+          question: answer.question,
+          option: answer.option,
+          open_answer: answer.open_answer,
+          phase: answer.phase,
+        })),
+        sessionMemory: {
+          current_question: getMindTriageQuestions(contextPillarIndex)[activeMindTriageStep]?.id,
+          selected_option: activeMindTriageAnswers.at(-1)?.semantic_position,
+          current_load: currentLoad,
+        },
+        rule: 'No máximo uma pergunta por resposta. Não aconselhar, motivar ou concluir pelo leitor. Não reabrir a triagem depois da síntese.',
+      },
+      readingState: mindDataScopes.readingProgress ? {
+        route,
+        page: pdfPage,
+        progress: Math.round(readProgress * 100),
+        currentGroup: currentGroup?.title,
+      } : undefined,
+      currentChapter: mindDataScopes.readingProgress ? {
         id: selectedChapter.id,
         title: repairMojibake(selectedChapter.title),
         summary: trimExcerpt(repairMojibake(selectedChapter.summary), 260),
         pdfPage,
-      },
-      workbook: {
-        currentPillar: workbookPillars[workbookPillarIndex]?.title,
+      } : undefined,
+      workbook: mindDataScopes.diary ? {
+        currentPillar: contextPillar.title,
+        currentPillarSubtitle: contextPillar.subtitle,
         freeWriting: trimExcerpt(workbookEntry, 320),
         answers: currentAnswers,
-      },
-      letters: Object.entries(readerLetters)
+      } : undefined,
+      canonicalJournal: mindDataScopes.caderno ? canonicalJournal : undefined,
+      letters: mindDataScopes.letters ? Object.entries(readerLetters)
         .filter(([, value]) => value.trim())
         .slice(-3)
-        .map(([key, value]) => ({ key, excerpt: trimExcerpt(value, 220) })),
-      notes: readerNotes
+        .map(([key, value]) => ({ key, excerpt: trimExcerpt(value, 220) })) : undefined,
+      notes: mindDataScopes.notes ? readerNotes
         .filter((note) => note.note.trim())
         .slice(-5)
-        .map((note) => ({ page: note.page, title: note.title, excerpt: trimExcerpt(note.note, 220) })),
-      pageNote: currentPageNote?.note ? trimExcerpt(currentPageNote.note, 260) : '',
+        .map((note) => ({ page: note.page, title: note.title, excerpt: trimExcerpt(note.note, 220) })) : undefined,
+      anchors: mindDataScopes.anchors ? readerAnchors
+        .filter((anchor) => anchor.title.trim() || anchor.content.trim())
+        .slice(-6)
+        .map((anchor) => ({
+          title: anchor.title,
+          content: trimExcerpt(anchor.content, 180),
+          pillar: anchor.pillar,
+          status: anchor.status,
+        })) : undefined,
+      bookmarks: mindDataScopes.notes ? readerNotes
+        .filter((note) => note.note.trim() || note.id.startsWith('page-'))
+        .slice(-8)
+        .map((note) => ({ page: note.page, title: note.title || `Pagina ${note.page}` })) : undefined,
+      favorites: mindDataScopes.readingProgress ? favoriteChapters : undefined,
+      pageNote: mindDataScopes.notes && currentPageNote?.note ? trimExcerpt(currentPageNote.note, 260) : '',
+      audioProgress: mindDataScopes.readingProgress ? Object.fromEntries(
+        Object.entries(audioProgressMap)
+          .sort(([, a], [, b]) => String(b.updatedAt || '').localeCompare(String(a.updatedAt || '')))
+          .slice(0, 24),
+      ) : undefined,
+      audioState: mindDataScopes.readingProgress ? {
+        currentUrl: audioState.currentUrl,
+        title: audioState.title,
+        isPlaying: audioState.isPlaying,
+        currentTime: Math.round(audioState.currentTime || 0),
+        duration: Math.round(audioState.duration || 0),
+        heardCount: heardAudioCount,
+        totalTracks: totalAudioTracks,
+      } : undefined,
     };
   };
 
@@ -2485,11 +4942,55 @@ export function App() {
 
   const answerMind = async (text: string) => {
     const value = text.trim();
-    if (!value || mindLoading) return;
-    const guide = getMindGuide();
-    const recommendations = findMindRecommendations(value, activeMentorTopic);
-    const localResponseText =
-      `${guide.counterpoint}\n\nPlano de presença: ${guide.practice}\n\nPelo que você trouxe, eu buscaria estes pontos do livro primeiro:`;
+    if (!value || mindLoading || mindTyping || !mindTriageComplete) return;
+    const locale = typeof navigator !== 'undefined' ? navigator.language || 'pt-BR' : 'pt-BR';
+    const safetyAssessment = assessSafety({
+      current_text: value,
+      recent_interactions: activeSessionMemory?.recent_interactions || [],
+      current_load: activeReaderMindState?.load_level || 1,
+      current_reader_state: activeReaderMindState?.global_state || 'unmapped',
+      detected_categories: [],
+      locale,
+    });
+    setActiveSafetyAssessment(safetyAssessment);
+    if (safetyAssessment.level >= 2) {
+      const safeText = buildSafetyResponseText(safetyAssessment, safetyResourcesByLocale[locale]);
+      playClick('soft');
+      clearMindTimers();
+      setMindInput('');
+      setMindTyping(false);
+      setMindLoading(false);
+      setMindMessages((current) => [
+        ...current.map((message) => ({ ...message, replies: undefined })),
+        { id: `user-${Date.now()}`, from: 'user', text: value },
+        { id: `agent-safety-${Date.now()}`, from: 'agent', kind: 'plan', text: safeText },
+      ]);
+      setActiveSessionMemory((current) => current
+        ? {
+            ...current,
+            current_reader_state: 'overloaded',
+            current_depth: 0,
+            current_load: Math.max(current.current_load, 3) as 3 | 4,
+            recent_interactions: [...current.recent_interactions, 'Evento de seguranca: fluxo reflexivo bloqueado'].slice(-6),
+            updated_at: new Date().toISOString(),
+          }
+        : current);
+      return;
+    }
+    const localPillarIndex = activeMindPillarIndex ?? activeMentorTopic.pillarIndex;
+    const localProtocol = getOfficialMindPillarProtocol(localPillarIndex);
+    const localFinalPillar = getFinalMindPillar(localPillarIndex);
+    const localResponse = buildLocalMindResponse({
+      intent: activeMindEntryIntent,
+      pillarIndex: localPillarIndex,
+      territory: localFinalPillar?.title || activeMentorTopic.title,
+      message: value,
+      thesis: localFinalPillar?.thesis || localProtocol?.identity.explains,
+      movement: localFinalPillar?.centralMovement || localProtocol?.identity.dilemma,
+      counterpoint: getMindGuide().counterpoint,
+      practice: getMindGuide().practice,
+      turnCount: mindMessages.filter((message) => message.from === 'user').length,
+    });
     const history = mindMessages
       .filter((message) => message.text.trim())
       .slice(-10)
@@ -2498,62 +4999,182 @@ export function App() {
         content: message.text,
       }));
     playClick('primary');
+    clearMindTimers();
     setMindInput('');
     setMindLoading(true);
+    setMindTyping(true);
+    setActiveSessionMemory((current) => {
+      if (!current) return current;
+      return {
+        ...current,
+        current_open_response: value,
+        recent_interactions: [
+          ...current.recent_interactions,
+          `Resposta livre -> ${value}`,
+        ].slice(-6),
+        updated_at: new Date().toISOString(),
+      };
+    });
     setMindMessages((current) => [
       ...current.map((message) => ({ ...message, replies: undefined })),
       { id: `user-${Date.now()}`, from: 'user', text: value },
-      {
-        id: `agent-${Date.now()}`,
-        from: 'agent',
-        kind: 'plan',
-        text: localResponseText,
-        replies: ['Abrir capítulo sugerido', 'Ouvir apoio', 'Recomeçar triagem'],
-        recommendations,
-      },
     ]);
 
     try {
       const response = await sendMindMessage({
         sessionId: mindSessionId,
         topic: activeMentorTopic.title,
+        source: pendingMindSource,
         message: value,
         messages: history,
-        context: buildMindContext(value),
+        context: buildMindContext(value, pendingMindSource),
       });
       setMindSessionId(response.sessionId);
       saveMindPlan(activeMentorTopic, value, response.message, pendingMindSource);
-      setMindMessages((current) => {
-        const next = [...current];
-        const lastAgentIndex = next.map((message) => message.from).lastIndexOf('agent');
-        if (lastAgentIndex >= 0) {
-          next[lastAgentIndex] = {
-            ...next[lastAgentIndex],
-            text: response.fallback
-              ? `${response.message}\n\nNo momento, estou usando o modo guiado de seguranÃ§a enquanto a IA conectada nÃ£o responde.`
-              : response.message,
-            recommendations,
-          };
-        }
-        return next;
-      });
-    } catch {
-      saveMindPlan(activeMentorTopic, value, localResponseText, pendingMindSource);
-      // Mantem a resposta local quando o backend ou a IA estiverem indisponiveis.
+      setMindMessages((current) => [
+        ...current,
+        {
+          id: `agent-${Date.now()}`,
+          from: 'agent',
+          kind: 'plan',
+          text: response.fallback
+            ? `${localResponse.text}\n\nNo momento, estou usando o modo guiado local enquanto a IA conectada não responde.`
+            : response.message,
+          replies: response.fallback ? localResponse.replies : undefined,
+          references: response.references,
+        },
+      ]);
+    } catch (error) {
+      const localModeReason = error instanceof Error && error.message.includes('conta online')
+        ? 'Você está usando um acesso local. Para conversar com o Gemini, entre com uma conta online que tenha o iGent liberado.'
+        : 'A conexão com a IA não respondeu; a conversa continua no modo guiado local.';
+      saveMindPlan(activeMentorTopic, value, localResponse.text, pendingMindSource);
+      setMindMessages((current) => [
+        ...current,
+        {
+          id: `agent-${Date.now()}`,
+          from: 'agent',
+          kind: 'plan',
+          text: `${localResponse.text}\n\n${localModeReason}`,
+          replies: localResponse.replies,
+        },
+      ]);
     } finally {
+      setMindTyping(false);
       setMindLoading(false);
     }
   };
 
   useEffect(() => {
-    if (mindStep !== 'chat' || !pendingMindPrompt.trim()) return;
+    if (mindStep !== 'chat' || mindTyping || !pendingMindPrompt.trim()) return;
     const prompt = pendingMindPrompt;
-    window.setTimeout(() => answerMind(prompt), 80);
+    window.setTimeout(() => answerMind(prompt), 180);
     setPendingMindPrompt('');
-  }, [mindStep, pendingMindPrompt]);
+  }, [mindStep, mindTyping, pendingMindPrompt]);
 
   const handleMindQuickReply = (reply: string) => {
     const normalizedReply = normalizeForSearch(reply);
+    const appendLocalMindTurn = (agentText: string, replies?: string[]) => {
+      playClick('soft');
+      setMindMessages((current) => [
+        ...current.map((message) => ({ ...message, replies: undefined })),
+        { id: `user-quick-${Date.now()}`, from: 'user', text: reply },
+        { id: `agent-quick-${Date.now()}`, from: 'agent', kind: 'plan', text: agentText, replies },
+      ]);
+    };
+
+    if (normalizedReply.includes('voltar ao trecho') || normalizedReply.includes('continuar lendo')) {
+      const chapterIndex = activeMindPillarIndex != null ? chapterIndexForPillar(activeMindPillarIndex) : getMindGuide().chapterHint;
+      goToChapter(chapterIndex);
+      return;
+    }
+    if (normalizedReply.includes('levar para o diario') || normalizedReply.includes('escrever no diario')) {
+      const pillarIndex = activeMindPillarIndex ?? workbookPillarIndex;
+      const pillarTitle = getOfficialMindPillarProtocol(pillarIndex)?.identity.title || activeMentorTopic.title;
+      const selectedLines = activeMindTriageAnswers
+        .slice(-MIND_GUIDED_MAX_TURNS)
+        .map((answer) => `• ${answer.open_answer || answer.option}`)
+        .join('\n');
+      const draft = [
+        `Fio trazido do iGent — ${pillarTitle}`,
+        selectedLines || 'Parei antes de responder. Quero começar daqui com minhas palavras.',
+        'O que eu quero escrever a partir disso:',
+      ].join('\n\n');
+      setWorkbookPillarIndex(pillarIndex);
+      setWorkbookEntry((current) => current.trim() ? `${current.trim()}\n\n---\n\n${draft}` : draft);
+      navigate(ROUTES.WORKBOOK);
+      return;
+    }
+    if (normalizedReply.includes('conversar com minhas palavras')) {
+      appendLocalMindTurn(
+        'Pode escrever do seu jeito. Eu vou responder ao que você disser agora, sem reabrir o questionário e sem transformar sua frase em diagnóstico.',
+      );
+      return;
+    }
+    if (normalizedReply.includes('encerrar por agora')) {
+      appendLocalMindTurn(
+        'Encerramos por aqui. Nada ficou em dívida. Quando quiser voltar, o livro, o Diário e esta conversa continuam sendo caminhos separados — você escolhe qual deles ajuda.',
+        ['Voltar ao trecho'],
+      );
+      return;
+    }
+    if (normalizedReply.includes('fazer uma ancora breve') || normalizedReply.includes('fazer uma âncora breve')) {
+      const territory = activeMindPillarIndex != null
+        ? getOfficialMindPillarProtocol(activeMindPillarIndex)?.identity.title || activeMentorTopic.title
+        : activeMentorTopic.title;
+      const now = new Date().toISOString();
+      const anchor: ReaderAnchor = {
+        id: `anchor-${Date.now()}`,
+        type: 'brief_anchor',
+        title: `Âncora breve - ${territory}`,
+        content: 'Eu posso reconhecer isso sem resolver agora.',
+        pillar: territory,
+        status: 'started',
+        createdAt: now,
+        updatedAt: now,
+      };
+      setReaderAnchors((current) => {
+        const next = [...current, anchor].slice(-80);
+        saveLocalReaderAnchors(next);
+        return next;
+      });
+      appendLocalMindTurn(
+        `Vamos fazer uma âncora breve em ${territory}.\n\nPor alguns segundos, não tente entender tudo. Escolha uma frase pequena e observe onde ela toca no corpo:\n\n"Eu posso reconhecer isso sem resolver agora."\n\nSe pesar, pare aqui e volte ao trecho. Interromper também é um jeito de se cuidar.`,
+        ['Voltar ao trecho', 'Guardar para retomar depois'],
+      );
+      return;
+    }
+    if (normalizedReply.includes('escrever por dois minutos')) {
+      appendLocalMindTurn(
+        'Escreva por dois minutos sem tentar organizar bonito.\n\nComece por: "Neste trecho, o que ficou em mim foi..."\n\nEsse escrito é privado. Ele só vira memória se você decidir guardar depois.',
+        ['Guardar para retomar depois', 'Voltar ao trecho'],
+      );
+      return;
+    }
+    if (normalizedReply.includes('guardar para retomar depois')) {
+      appendLocalMindTurn(
+        'Tudo bem. Vou tratar isso como um fio aberto, não como conclusão.\n\nQuando você voltar, retomamos pelo mesmo território e sem cobrança de continuidade perfeita.',
+        ['Voltar ao trecho'],
+      );
+      return;
+    }
+    if ((normalizedReply.includes('isso aparece na minha vida') || normalizedReply.includes('comecar reflexao')) && activeMindPillarIndex != null) {
+      const firstQuestion = buildMindTriageMessage(activeMindPillarIndex, activeMindTriageStep);
+      setActiveMindEntryIntent('reflect');
+      setMindTriageComplete(false);
+      if (firstQuestion) {
+        revealAgentMessages([
+          {
+            id: `agent-shift-reflect-${Date.now()}`,
+            from: 'agent',
+            kind: 'intro',
+            text: 'Então saímos da explicação do livro e entramos na reflexão. Uma pergunta por vez, e você pode parar quando quiser.',
+          },
+          firstQuestion,
+        ], 360, 820);
+      }
+      return;
+    }
     if (normalizedReply.includes('abrir capitulo')) {
       goToChapter(getMindGuide().chapterHint);
       return;
@@ -2599,7 +5220,7 @@ export function App() {
             <img className="access-brand-logo" src={brandLogo} alt="O Poder dos Desacreditados" />
             <div className="token-mini">
               <div className="access-copy">
-                <p className="kicker">Segurança da conta</p>
+                <p className="kicker">Seguran?a da conta</p>
                 <h1>{isReset ? 'Crie uma nova senha.' : 'Recupere sua senha.'}</h1>
                 <span>{isReset ? 'Digite e confirme sua nova senha para voltar ao app.' : 'Informe seu e-mail e enviaremos um link seguro de redefinição.'}</span>
               </div>
@@ -2683,8 +5304,14 @@ export function App() {
             </label>
           )}
           {(tokenError || authMessage) && <p>{authMessage || tokenError}</p>}
-          <Button onClick={authMode === 'register' ? handleRegisterSubmit : handleLoginSubmit} className="cover-primary">
-            {authMode === 'register' ? 'Criar acesso' : 'Entrar'}
+          <Button
+            onClick={authMode === 'register' ? handleRegisterSubmit : handleLoginSubmit}
+            className={`cover-primary ${authSubmitting ? 'is-loading' : ''}`}
+            disabled={authSubmitting}
+            aria-busy={authSubmitting}
+          >
+            {authSubmitting && <span className="button-spinner" aria-hidden="true" />}
+            {authSubmitting ? (authMode === 'register' ? 'Criando acesso...' : 'Entrando...') : (authMode === 'register' ? 'Criar acesso' : 'Entrar')}
           </Button>
           {authMode === 'register' && <button className="cover-link" onClick={handleTokenSubmit}>Validar token manualmente</button>}
           {authMode === 'login' && <button className="cover-link" onClick={() => { setAuthMessage(''); setAuthMode('forgot'); }}>Esqueci minha senha</button>}
@@ -2818,7 +5445,7 @@ export function App() {
             <div>
               <p className="kicker">Acesso liberado</p>
               <h2>PDF de O Poder dos Desacreditados</h2>
-              <span>Baixe o livro e volte para destravar app, áudios, Diário e iGentMIND quando seu pedido incluir esses módulos.</span>
+              <span>Baixe o livro e volte para destravar app, Áudios, Diário e iGentMIND quando seu pedido incluir esses módulos.</span>
             </div>
             <div className="home-card-actions">
               <Button onClick={() => window.open(pdfUrl, '_blank')}><DownloadCloud size={17} /> Baixar PDF</Button>
@@ -2828,7 +5455,7 @@ export function App() {
           <section className="unlock-strip">
             <div>
               <p className="kicker">Próximo nível</p>
-              <h2>Livro interativo, áudios e Biblioteca</h2>
+              <h2>Livro interativo, Áudios e Biblioteca</h2>
               <span>Este ambiente já está preparado para liberar os módulos automaticamente pelo token do checkout.</span>
             </div>
             <Button onClick={() => openUpgrade('basic')} variant="secondary"><Lock size={17} /> Ver upgrade</Button>
@@ -2851,7 +5478,7 @@ export function App() {
           <span>{trimExcerpt(selectedChapter.summary, 92)}</span>
         </div>
         <div className="home-reading-actions">
-          <Button onClick={() => navigate(ROUTES.READER)} className="cover-primary">Ler agora</Button>
+          <Button onClick={() => { setReaderInitialMode('text'); navigate(ROUTES.READER); }} className="cover-primary">Ler agora</Button>
           <Button onClick={() => navigate(ROUTES.LIBRARY)} variant="secondary">Sumario</Button>
         </div>
         <div className="home-slide-dots">
@@ -2869,36 +5496,39 @@ export function App() {
               <strong>Continuar ouvindo</strong>
               <small>{latestAudioResume.item.title} - {formatTime(latestAudioResume.progress.currentTime)} de {formatTime(latestAudioResume.progress.duration)}</small>
             </div>
-            <button onClick={() => playAudioQueueItem(latestAudioResume.item, { resume: true })}>
+            <button
+              onClick={() => {
+                playAudioQueueItem(latestAudioResume.item, { resume: true });
+                const chapter = bookChapters[latestAudioResume.item.chapterIndex];
+                if (chapter) {
+                  setCurrentChapterIndex(latestAudioResume.item.chapterIndex);
+                  goToPdfPage(chapter.pdfPage);
+                  setPageIndex(0);
+                }
+                setReaderInitialMode('text');
+                navigate(ROUTES.READER);
+              }}
+            >
               <Play size={13} fill="currentColor" />
             </button>
           </div>
         )}
-        {hasMindAccess && (
-          <div className="home-resume-strip mind-resume-strip">
-            <Brain size={16} />
+        {selectedReadingTrack && (
+          <div className={`home-reading-track-strip ${ambientAudioState.currentUrl === selectedReadingTrack.audioUrl && ambientAudioState.isPlaying ? 'playing' : ''}`}>
+            <button className="home-track-visual" onClick={toggleSelectedSensoryTrack} title="Tocar trilha de leitura">
+              <span />
+              <span />
+              <span />
+              <span />
+            </button>
             <div>
-              <strong>{mindSavedPlan ? `Continuar iGentMIND - ${mindSavedPlan.topicTitle}` : 'Abrir iGentMIND'}</strong>
-              <small>{mindSavedPlan ? mindSavedPlan.response : 'Cruzar seu ponto atual com o livro e o diario'}</small>
+              <strong>Trilha de leitura</strong>
+              <small>{repairMojibake(selectedReadingTrack.title)}</small>
             </div>
-            <button
-              onClick={() => {
-                const topic = mentorTopics.find((item) => item.id === mindSavedPlan?.topicId) || activeMentorTopic;
-                const prompt = mindSavedPlan
-                  ? `Retome esta orientacao: ${mindSavedPlan.response}`
-                  : `Estou na pagina ${pdfPage}, lendo ${selectedChapter.title}. Me ajude a encontrar o proximo gesto.`;
-                startMindSession(topic, prompt, 'home');
-              }}
-            >
-              <Zap size={13} />
+            <button className="home-track-play" onClick={toggleSelectedSensoryTrack} title={ambientAudioState.isPlaying ? 'Pausar trilha' : 'Tocar trilha'}>
+              {ambientAudioState.currentUrl === selectedReadingTrack.audioUrl && ambientAudioState.isPlaying ? <Pause size={15} /> : <Play size={14} fill="currentColor" />}
             </button>
           </div>
-        )}
-        {hasMindAccess && (
-          <button className="home-mind-float" onClick={() => startMindSession(activeMentorTopic, `Estou em ${currentGroup.title}. Me ajude a organizar o que ler, ouvir ou escrever agora.`, 'home')}>
-            <Brain size={17} />
-            iGentMIND
-          </button>
         )}
       </section>
 
@@ -2918,7 +5548,7 @@ export function App() {
         <article>
           <Headphones size={20} />
           <strong>{heardAudioCount}/{totalAudioTracks}</strong>
-          <span>áudios ouvidos</span>
+          <span>Áudios ouvidos</span>
         </article>
         <article>
           <NotebookPen size={20} />
@@ -2953,7 +5583,7 @@ export function App() {
         <blockquote>"Não somos o que nos aconteceu. Somos o que escolhemos fazer com o que sobrou."</blockquote>
         <button onClick={() => handlePlayAudio('/media/audios/home/manifesto-da-semana.wav', 'Manifesto do dia')}>
           <Play size={14} />
-          Ouvir reflexão
+          Ouvir reflex?o
         </button>
       </section>
 
@@ -2996,14 +5626,44 @@ export function App() {
     </div>
   );
 
+  const downloadBookPdf = () => {
+    const anchor = document.createElement('a');
+    anchor.href = pdfUrl;
+    anchor.download = 'o-poder-dos-desacreditados.pdf';
+    anchor.rel = 'noopener';
+    anchor.click();
+  };
+
   const BookView = () => (
-    <div className="book-stage page-enter">
-      <img className="book-cover-main" src="/media/imagens/capas/capa.webp" alt="Capa do livro" />
-      <div className="book-buttons">
-        <Button onClick={() => navigate(ROUTES.READER)} className="cover-primary"><BookOpen size={19} /> Ler agora</Button>
-        <Button onClick={() => window.open(pdfUrl, '_blank')} variant="secondary"><DownloadCloud size={18} /> Baixar livro</Button>
-        <button onClick={() => navigate(ROUTES.LIBRARY)}><Boxes size={17} /> Abrir sumário completo</button>
+    <div className="book-stage book-hub-page page-enter">
+      <section className="book-hero-3d" aria-label="Escolha de leitura do livro">
+        <div className="book-3d-stage">
+          <div className="book-3d-object" tabIndex={0} aria-label="Capa interativa do livro">
+            <div className="book-3d-cover book-3d-front">
+              <img src="/media/imagens/capas/capa.webp" alt="Capa do livro O Poder dos Desacreditados" />
+            </div>
+            <div className="book-3d-spine" aria-hidden="true" />
+            <div className="book-3d-cover book-3d-back">
+              <div className="book-back-text">
+                <p>O mundo costuma valorizar quem chega. Pouco se fala sobre quem continua. Este livro ? para quem seguiu mesmo sem aplauso, mesmo sem clareza, mesmo sem reconhecimento.</p>
+                <p>Para quem atravessou quedas silenciosas, carregou dúvidas por dentro e, ainda assim, permaneceu. O Poder dos Desacreditados não oferece promessas rápidas nem soluções prontas. Ele oferece algo mais raro: presença.</p>
+                <p>Aqui, a dor não vira espetáculo. O cansaço não vira fracasso. E continuar não é tratado como fraqueza. Este não é um livro sobre vencer. É um livro sobre não se abandonar.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="book-hub-copy">
+          <p className="kicker">Livro</p>
+          <h1>O Poder dos Desacreditados</h1>
+          <p>Escolha como quer atravessar a obra agora: leitura interativa, e-book em PDF ou arquivo para baixar.</p>
+        </div>
+      </section>
+      <div className="book-action-grid">
+        <Button onClick={() => { setReaderInitialMode('text'); navigate(ROUTES.READER); }} className="cover-primary"><BookOpen size={19} /> Leitura interativa</Button>
+        <Button onClick={() => { setReaderInitialMode('edition'); navigate(ROUTES.READER); }} variant="secondary"><BookOpen size={18} /> E-book PDF</Button>
+        <Button onClick={downloadBookPdf} variant="ghost"><DownloadCloud size={18} /> Baixar livro PDF</Button>
       </div>
+      <button className="cover-link book-summary-link" onClick={() => navigate(ROUTES.LIBRARY)}><Boxes size={17} /> Abrir sumário completo</button>
     </div>
   );
 
@@ -3064,7 +5724,7 @@ export function App() {
                 {chapters.map(({ chapter, index }) => (
                   <article className="contents-chapter" key={chapter.id}>
                     <button className="contents-main" onClick={() => goToChapter(index)}>
-                      <span className="contents-number">{chapter.roman ?? String(index + 1).padStart(2, '0')}</span>
+                      <span className="contents-number">{chapter.roman ? chapter.roman : String(index + 1).padStart(2, '0')}</span>
                       <span>
                         <strong>{chapter.title}</strong>
                         <small>{chapter.summary}</small>
@@ -3104,28 +5764,44 @@ export function App() {
       <div className="page-heading">
         <div>
           <p className="kicker">Sessões</p>
-          <h1>Áudios sensoriais</h1>
+          <h1>Áudios de apoio</h1>
+          <span>Falas e conteúdos curtos para Sobrevivência, Reconstrução, Continuidade e novos apoios.</span>
         </div>
       </div>
       <section className="session-grid">
-        {[
-          { title: 'Sobrevivência', text: 'Para dias em que a leitura precisa ser curta e segura.', audioUrl: '/media/audios/home/sobrevivencia.mp3' },
-          { title: 'Reconstrução', text: 'Para voltar a organizar a força sem pressa.', audioUrl: '/media/audios/home/reconstrucao.mp3' },
-          { title: 'Continuidade', text: 'Para sustentar o eixo depois do impacto.', audioUrl: '/media/audios/home/continuidade.mp3' },
-        ].map((item) => (
-          <article key={item.title} className="session-card">
-            <span>Rota guiada</span>
-            <h2>{item.title}</h2>
-            <p>{item.text}</p>
+        {supportAudios.map((item) => (
+          <article key={item.id} className="session-card">
+            <span>áudio de apoio</span>
+            <h2>{repairMojibake(item.title)}</h2>
+            <p>{repairMojibake(item.text)}</p>
             <div className="session-actions">
-              <button onClick={() => handlePlayAudio(item.audioUrl, item.title)}><ListMusic size={16} /> Ouvir agora</button>
+              <button onClick={() => handlePlayAudio(item.audioUrl, repairMojibake(item.title), item.coverUrl)}><ListMusic size={16} /> Ouvir agora</button>
+            </div>
+          </article>
+        ))}
+      </section>
+      <div className="page-heading compact-heading">
+        <div>
+          <p className="kicker">Leitura</p>
+          <h1>Trilhas de leitura</h1>
+          <span>Músicas ambiente que o leitor escolhe e aciona pelo ícone no rodap? da página.</span>
+        </div>
+      </div>
+      <section className="session-grid">
+        {sensoryPlaylist.map((item) => (
+          <article key={item.id} className={`session-card ${selectedSensoryTrackId === item.id ? 'active' : ''}`}>
+            <span>{selectedSensoryTrackId === item.id ? 'Selecionada' : 'Trilha de leitura'}</span>
+            <h2>{repairMojibake(item.title)}</h2>
+            <p>{repairMojibake(item.text)}</p>
+            <div className="session-actions">
+              <button onClick={() => selectSensoryTrack(item, false)}><CheckCircle2 size={16} /> Usar na leitura</button>
+              <button onClick={() => selectSensoryTrack(item, true)}><ListMusic size={16} /> Testar trilha</button>
             </div>
           </article>
         ))}
       </section>
     </div>
   );
-
   const IGentView = () => (
     <div className="app-page page-enter">
       <section className="igent-head">
@@ -3165,25 +5841,79 @@ export function App() {
 
   const IGentMindView = () => {
     const guide = getMindGuide();
+    const selectedMindTriad = mindTriads.find((triad) => triad.id === selectedMindTriadId) ?? mindTriads[0];
+    const chatChapterIndex = activeMindPillarIndex != null ? chapterIndexForPillar(activeMindPillarIndex) : guide.chapterHint;
+    const chatTriadTitle = mindTriads.find((triad) => triad.id === selectedMindTriadId)?.title;
+    const chatTerritory = activeMindPillarIndex != null
+      ? selectedMindTriad.territories.find((territory) => territory.pillarIndex === activeMindPillarIndex)
+      : null;
+    const chatSnapshot = activeMindPillarIndex != null ? buildPillarDiarySnapshot(activeMindPillarIndex) : null;
+    const chatChapter = bookChapters[chatChapterIndex] ?? bookChapters[guide.chapterHint];
+    const chatContextLabel = chatSnapshot?.hasAnswers
+      ? `${chatSnapshot.answers.length} resposta${chatSnapshot.answers.length > 1 ? 's' : ''} do Diário`
+      : activeMindPillarIndex != null
+        ? 'sem resposta salva'
+        : 'triagem livre';
+    const activeTriageQuestions = getMindTriageQuestions(activeMindPillarIndex);
+    const activeTriageQuestion = activeTriageQuestions[activeMindTriageStep];
+    const activeTriagePhase = MIND_PHASES.find((phase) => phase.id === activeTriageQuestion?.phase);
+    const triageTotal = Math.min(activeTriageQuestions.length, MIND_GUIDED_MAX_TURNS);
+    const triageProgress = triageTotal ? Math.min(100, Math.round((activeMindTriageAnswers.length / triageTotal) * 100)) : 100;
+    const triageStepLabel = triageTotal
+      ? mindTriageComplete
+        ? 'síntese pronta'
+        : `${Math.min(activeMindTriageAnswers.length + 1, triageTotal)} de até ${triageTotal}`
+      : 'livre';
+    const activeIntentMeta = mindEntryIntents.find((intent) => intent.id === activeMindEntryIntent) ?? mindEntryIntents[1];
+    const chatModeLabel = activeMindEntryIntent === 'understand'
+      ? 'Ajuda contextual'
+      : activeMindEntryIntent === 'act'
+        ? 'Próximo movimento'
+        : 'Reflexão guiada';
     return (
       <div className="app-page page-enter">
         {mindStep === 'select' ? (
           <>
             <section className="igent-head">
               <p className="kicker">iGentMIND</p>
-              <h1>Conselheiro Virtual</h1>
-              <span>Escolha o que você está sentindo agora. O agente responde com contraponto, presença e um capítulo sugerido.</span>
+              <h1>Onde você está agora?</h1>
+              <span>Não escolha um pilar. Escolha o estado que mais parece com o que está acontecendo por dentro.</span>
+              <small>{mindServiceStatus && mindServiceStatus !== 'local'
+                ? `IA conectada: ${mindServiceStatus === 'openai' ? 'OpenAI' : 'Gemini'} · segurança no servidor`
+                : 'Modo guiado local · conecte um provedor de IA no backend para respostas gerativas'}</small>
+            </section>
+            <section className="mind-intent-panel" aria-label="Privacidade do contexto">
+              <div className="mind-flow-topline">
+                <span>O que o agente pode consultar nesta conversa?</span>
+                <small>Você controla</small>
+              </div>
+              <p>O livro canônico é sempre usado. Seus escritos privados só entram no contexto quando marcados abaixo.</p>
+              <div className="mind-replies">
+                {MIND_SCOPE_OPTIONS.map((scope) => (
+                  <label key={scope.key} className="mind-privacy-option">
+                    <input
+                      type="checkbox"
+                      checked={mindDataScopes[scope.key]}
+                      onChange={(event) => setMindDataScopes((current) => ({
+                        ...current,
+                        [scope.key]: event.target.checked,
+                      }))}
+                    />
+                    <span>{scope.label}</span>
+                  </label>
+                ))}
+              </div>
             </section>
             {mindSavedPlan && (
               <section className="igent-answer mind-last-plan">
                 <Brain size={22} />
                 <div>
                   <h2>Continuar de onde parou</h2>
-                  <p>{mindSavedPlan.response}</p>
+                  <p>{repairMojibake(mindSavedPlan.response)}</p>
                   <div className="mind-replies">
                     <button onClick={() => startMindSession(
                       mentorTopics.find((topic) => topic.id === mindSavedPlan.topicId) || activeMentorTopic,
-                      `Retome esta orientacao e me diga o proximo gesto: ${mindSavedPlan.response}`,
+                      `Retome esta conversa e me devolva apenas uma pergunta que aprofunde o que apareceu: ${repairMojibake(mindSavedPlan.response)}`,
                       'chat',
                     )}>Retomar conversa</button>
                     <button onClick={() => goToChapter(mindSavedPlan.chapterIndex)}>Abrir trecho</button>
@@ -3191,106 +5921,205 @@ export function App() {
                 </div>
               </section>
             )}
-            <section className="mind-entry-grid">
-              <button onClick={() => startMindSession(activeMentorTopic, `Estou na pagina ${pdfPage}, lendo ${selectedChapter.title}. Me ajude a entender o que este trecho esta tocando em mim.`, 'reader')}>
-                <BookOpen size={18} />
-                <strong>Conversar sobre a leitura</strong>
-                <span>Usa a pagina e o capitulo atual como contexto.</span>
-              </button>
-              <button onClick={() => startMindSession(activeMentorTopic, workbookEntry.trim() || 'Quero organizar o que escrevi no diario e transformar em um gesto pequeno.', 'workbook')}>
-                <NotebookPen size={18} />
-                <strong>Analisar diario</strong>
-                <span>Cruza escrita, pilar atual e respostas salvas.</span>
-              </button>
-              <button onClick={() => startMindSession(activeMentorTopic, 'Faca uma triagem rapida do meu estado agora e me oriente por uma pergunta de cada vez.', 'chat')}>
-                <Zap size={18} />
-                <strong>Triagem rapida</strong>
-                <span>Comeca com uma conversa curta e objetiva.</span>
-              </button>
+            <section className="mind-triad-panel">
+              <div className="mind-flow-topline">
+                <span>Escolha um estado</span>
+                <small>Passo 1 de 4</small>
+              </div>
+              <div className="mind-triad-grid">
+                {mindTriads.map((triad) => {
+                  const active = selectedMindTriad.id === triad.id;
+                  return (
+                    <button
+                      key={triad.id}
+                      className={active ? 'mind-triad-card active' : 'mind-triad-card'}
+                      style={{ '--triad-color': triad.color } as any}
+                      onClick={() => {
+                        playClick('soft');
+                        setSelectedMindTriadId(triad.id);
+                      }}
+                    >
+                      <span>{triad.title}</span>
+                      <strong>{triad.prompt}</strong>
+                      <small>{triad.nuance}</small>
+                    </button>
+                  );
+                })}
+              </div>
             </section>
-            <section className="mentor-topic-grid">
-              {mentorTopics.map((topic) => {
-                const Icon = topic.icon;
-                const active = activeMentorTopic.id === topic.id;
+            <section className="mind-intent-panel">
+              <div className="mind-flow-topline">
+                <span>O que você precisa agora?</span>
+                <small>Passo 2 de 4</small>
+              </div>
+              <div className="mind-intent-grid">
+                {mindEntryIntents.map((intent) => (
+                  <button
+                    key={intent.id}
+                    type="button"
+                    className={selectedMindEntryIntent === intent.id ? 'mind-intent-card active' : 'mind-intent-card'}
+                    onClick={() => {
+                      playClick('soft');
+                      setSelectedMindEntryIntent(intent.id);
+                    }}
+                  >
+                    <small>{intent.label}</small>
+                    <strong>{intent.title}</strong>
+                    <span>{intent.description}</span>
+                  </button>
+                ))}
+              </div>
+            </section>
+            <section className="mind-territory-panel">
+              <div className="mind-flow-topline">
+                <span>{selectedMindTriad.title}</span>
+                <small>Passo 3 de 4 · qual dilema ressoa?</small>
+              </div>
+              <div className="mind-territory-list">
+                {selectedMindTriad.territories.map((territory) => {
+                  const Icon = territory.icon;
+                  const snapshot = buildPillarDiarySnapshot(territory.pillarIndex);
+                  const chapter = bookChapters[chapterIndexForPillar(territory.pillarIndex)];
                 return (
                   <button
-                    key={topic.id}
-                    className={active ? 'mentor-topic active' : 'mentor-topic'}
-                    style={{ '--topic-color': topic.color } as any}
-                    onClick={() => startMindSession(topic)}
+                    key={`${selectedMindTriad.id}-${territory.label}`}
+                    className="mind-territory-card"
+                    onClick={() => startMindTerritorySession(selectedMindTriad, territory, selectedMindEntryIntent)}
                   >
-                    <Icon size={30} />
-                    <strong>{topic.title}</strong>
+                    <Icon size={22} />
+                    <span>
+                      <strong>{territory.label}</strong>
+                      <em>{territory.limiar}</em>
+                    </span>
+                    <small>{selectedMindEntryIntent === 'continue' ? 'abrir livro' : snapshot.hasAnswers ? 'com Diário' : 'primeira vez'}</small>
+                    <i>{chapter?.title || `Pilar ${territory.pillarIndex + 1}`}</i>
                   </button>
                 );
               })}
+              </div>
             </section>
             <section className="igent-answer">
               <Brain size={22} />
               <div>
                 <h2>Como ele funciona</h2>
-                <p>O iGentMIND não diagnostica e não substitui cuidado profissional. Ele conversa com a linguagem do livro: separa dor de julgamento, devolve presença e aponta uma leitura para confrontar o medo sem se violentar.</p>
+                <p>O iGentMIND usa o livro como referência e só consulta escritos que você autorizar. Na reflexão, faz no máximo três movimentos, aceita resposta livre e termina com uma síntese. Você decide se volta ao livro, leva algo ao Diário ou encerra.</p>
               </div>
             </section>
           </>
         ) : (
           <section className="mind-chat-shell">
-            <div className="mind-chat-top">
-              <button onClick={() => setMindStep('select')}><ChevronLeft size={18} /> Voltar</button>
-              <div>
-                <p className="kicker">iGentMIND · {activeMentorTopic.title}</p>
-                <h1>Conversa guiada</h1>
+            <div className="mind-chat-status">
+              <button className="mind-chat-icon-button" onClick={() => setMindStep('select')} aria-label="Voltar para a triagem">
+                <ChevronLeft size={18} />
+              </button>
+              <div className="mind-chat-status-main">
+                <p className="kicker">{chatModeLabel}</p>
+                <h1>{activeMentorTopic.title}</h1>
+                <div className="mind-context-chips">
+                  <span>{chatTriadTitle || 'Triagem'}</span>
+                  <span>{chatTerritory?.limiar || 'uma pergunta por vez'}</span>
+                  <span>{activeIntentMeta.title}</span>
+                  <span>{chatContextLabel}</span>
+                  {activeMindEntryIntent === 'reflect' && <span>triagem {triageStepLabel}</span>}
+                  {activeTriagePhase && <span>{activeTriagePhase.label}</span>}
+                  {activeReaderMindState && <span>{READER_STATE_LABELS[activeReaderMindState.global_state]}</span>}
+                </div>
+                <div className="mind-triage-progress" aria-label={`Progresso da triagem ${triageProgress}%`}>
+                  <span style={{ width: `${triageProgress}%` }}></span>
+                </div>
               </div>
-              <button onClick={() => goToChapter(guide.chapterHint)}><FileText size={17} /> Capítulo</button>
+              <button className="mind-chat-pillar-button" onClick={() => goToChapter(chatChapterIndex)}>
+                <FileText size={17} />
+                <span>Pilar</span>
+              </button>
             </div>
 
-            <div className="mind-chat-window">
+            <div className="mind-chat-context-card">
+              <div>
+                <NotebookPen size={18} />
+                <span>Contexto carregado</span>
+              </div>
+              <p>
+                {activeMindEntryIntent === 'understand'
+                  ? `Modo explicação: o agente ajuda a compreender ${chatTerritory?.label || activeMentorTopic.title} sem criar sinais sobre você.`
+                  : activeMindEntryIntent === 'act'
+                    ? `Modo próximo movimento: escolha uma ação breve, pausa ou retorno ao livro.`
+                    : chatSnapshot?.hasAnswers
+                  ? `Li o Diário em ${chatSnapshot.pillar.title}${chatSnapshot.repeatedWord ? ` e encontrei uma palavra recorrente: "${chatSnapshot.repeatedWord}".` : '. Vou usar isso com cuidado, sem concluir por você.'}`
+                  : activeMindPillarIndex != null
+                    ? `Ainda não há resposta salva em ${chatSnapshot?.pillar.title || activeMentorTopic.title}. A conversa usa até três movimentos e termina com uma síntese que não substitui o livro.`
+                    : `Esta conversa veio de uma entrada livre. O agente vai usar o que você escrever agora como contexto principal.`}
+              </p>
+              {chatChapter && <small>{repairMojibake(chatChapter.title)}</small>}
+            </div>
+
+            <div className="mind-chat-window" ref={mindChatWindowRef}>
               {mindMessages.map((message) => (
                 <div key={message.id} className={`mind-message ${message.from} ${message.kind ?? ''}`}>
                   <div className="mind-avatar">{message.from === 'agent' ? <Brain size={18} /> : <Sparkles size={18} />}</div>
                   <div className="mind-bubble">
-                    {message.text.split('\n').map((line) => <p key={line}>{line}</p>)}
-                    {message.recommendations && (
-                      <div className="mind-recommendations">
-                        {message.recommendations.map((item) => (
-                          <article key={`${message.id}-${item.chapterIndex}`}>
-                            <span>{item.reason}</span>
-                            <strong>{item.title}</strong>
-                            <p>{item.excerpt}</p>
-                            <div>
-                              <button onClick={() => goToChapter(item.chapterIndex)}>Ler trecho</button>
-                              {item.audioUrl && <button onClick={() => handlePlayAudio(item.audioUrl, item.title)}>Ouvir pilar</button>}
-                            </div>
-                          </article>
-                        ))}
-                      </div>
-                    )}
+                    {repairMojibake(message.text).split('\n').map((line) => <p key={line}>{line}</p>)}
+                    {message.references?.length ? (
+                      <small className="mind-canonical-references">
+                        Fonte no livro: {message.references.map((reference) => `${reference.chapterTitle} — ${reference.sectionTitle}`).join(' · ')}
+                      </small>
+                    ) : null}
                     {message.replies && (
                       <div className="mind-replies">
                         {message.replies.map((reply) => (
-                          <button key={reply} onClick={() => handleMindQuickReply(reply)}>{reply}</button>
+                          <button key={reply} onClick={() => handleMindQuickReply(repairMojibake(reply))}>{repairMojibake(reply)}</button>
                         ))}
+                      </div>
+                    )}
+                    {message.triageOptions && (
+                      <div className="mind-triage-choice">
+                        <div className="mind-triage-options">
+                          {message.triageOptions.map((option) => (
+                            <button
+                              key={option.id}
+                              type="button"
+                              onClick={() => selectMindTriageOption(option)}
+                              disabled={mindTyping}
+                            >
+                              <strong>{option.label}</strong>
+                            </button>
+                          ))}
+                        </div>
+                        <button className="mind-triage-stop" type="button" onClick={finishMindTriage} disabled={mindTyping}>
+                          Parar e organizar o que apareceu
+                        </button>
                       </div>
                     )}
                   </div>
                 </div>
               ))}
+              {mindTyping && (
+                <div className="mind-message typing">
+                  <div className="mind-avatar"><Brain size={18} /></div>
+                  <div className="mind-bubble mind-typing-bubble" aria-label="iGentMIND digitando">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                  </div>
+                </div>
+              )}
             </div>
 
             <form
               className="mind-compose"
               onSubmit={(event) => {
                 event.preventDefault();
-                answerMind(mindInput);
+                if (mindTriageComplete) answerMind(mindInput);
+                else submitOpenMindTriageAnswer(mindInput);
               }}
             >
               <input
                 value={mindInput}
                 onChange={(event) => setMindInput(event.target.value)}
-                placeholder="Responda com suas palavras..."
-                disabled={mindLoading}
+                placeholder={mindTriageComplete ? 'Converse com suas palavras...' : 'Ou responda com suas próprias palavras...'}
+                disabled={mindLoading || mindTyping}
               />
-              <button type="submit" disabled={mindLoading}>{mindLoading ? 'Pensando...' : 'Enviar'}</button>
+              <button type="submit" disabled={mindLoading || mindTyping || !mindInput.trim()}>{mindLoading || mindTyping ? 'Lendo...' : 'Enviar'}</button>
             </form>
           </section>
         )}
@@ -3312,12 +6141,18 @@ export function App() {
         chapterPageTotal={pages.length}
         chapterIndex={currentChapterIndex}
         chapterTotal={bookChapters.length}
-        chapterKind={getChapterKind(currentChapterIndex, selectedChapter.title)}
+        chapterKind={selectedChapter.pillar ? `${repairMojibake(currentGroup.eyebrow)} - Pilar ${selectedChapter.roman}` : repairMojibake(currentGroup.eyebrow)}
         chapterSections={selectedChapter.sections}
-        coverImageUrl="/media/imagens/capas/capa-topo.jpg"
+        canonicalChapter={selectedCanonicalChapter}
+        journalAnswers={canonicalJournalAnswers}
+        onJournalAnswerChange={(promptId, value) => {
+          setCanonicalJournalAnswers((current) => ({ ...current, [promptId]: value }));
+        }}
+        coverImageUrl="/media/imagens/capas/capa.webp"
         audioTracks={selectedChapterAudioTracks}
         pdfUrl={pdfUrl}
         pdfTextPages={mergedPdfTextPages}
+        pdfPageTitles={bookPageTitleOverrides}
         pdfCurrentPage={pdfPage}
         totalPdfPages={totalPdfPages}
         chapters={bookChapters}
@@ -3328,6 +6163,15 @@ export function App() {
         audioProgress={audioProgressMap}
         activeAudioUrl={audioState.currentUrl}
         isAudioPlaying={audioState.isPlaying}
+        audioCurrentTime={audioState.currentTime}
+        audioDuration={audioState.duration}
+        audioVolume={audioState.volume}
+        audioPlaybackRate={audioState.playbackRate}
+        audioFrequencies={audioFrequencies}
+        onAudioSeek={seekAudio}
+        onAudioVolumeChange={changeVolume}
+        onAudioPlaybackRateChange={changePlaybackRate}
+        onOpenAudioFullscreen={() => setAudioFullOpen(true)}
         isFavorite={favorites.includes(selectedChapter.id)}
         onToggleFavorite={() => toggleFavorite(selectedChapter.id)}
         isPageBookmarked={Boolean(currentPageNote)}
@@ -3341,9 +6185,17 @@ export function App() {
         onFontIncrease={() => setFontSize((size) => clamp(size + 1, 14, 28))}
         onFontDecrease={() => setFontSize((size) => clamp(size - 1, 14, 28))}
         onOpenPdf={() => window.open(pdfUrl, '_blank')}
-        onShare={handleShareChapter}
-        onExitReader={() => navigate(ROUTES.HOME)}
+        onExitReader={() => {
+          setAmbientPlayerCollapsed(true);
+          navigate(ROUTES.HOME);
+        }}
         showNarrationButton={showReaderNarrationButton}
+        sensoryTrackTitle={selectedReadingTrack ? repairMojibake(selectedReadingTrack.title) : undefined}
+        isSensoryTrackPlaying={Boolean(selectedReadingTrack && ambientAudioState.currentUrl === selectedReadingTrack.audioUrl && ambientAudioState.isPlaying)}
+        onToggleSensoryTrack={toggleSelectedSensoryTrack}
+        darkMode={darkMode}
+        onToggleTheme={toggleTheme}
+        initialMode={readerInitialMode}
       />
     </div>
   );
@@ -3352,7 +6204,7 @@ export function App() {
     <div className="app-page page-enter">
       <section className="locked-panel">
         <div className="mentor-mark"><Lock size={20} /></div>
-        <p className="kicker">Função extra</p>
+        <p className="kicker">Funão extra</p>
         <h1>{title}</h1>
         <p>Este recurso faz parte de um módulo extra. Você pode adquirir o produto específico agora ou testar a liberação localmente.</p>
         <div className="locked-actions">
@@ -3369,7 +6221,7 @@ export function App() {
     const currentPillar = workbookPillars[workbookPillarIndex] ?? workbookPillars[0];
     const answeredCount = Object.values(workbookAnswers).filter((answer) => answer.trim()).length;
     const totalQuestions = workbookPillars.reduce((total, pillar) => total + pillar.questions.length, 0);
-    const linkedTopic = mentorTopics[workbookPillarIndex % mentorTopics.length];
+    const linkedTopic = mentorTopics.find((topic) => topic.pillarIndex === workbookPillarIndex) ?? mentorTopics[0];
     const currentText = currentPillar.questions
       .map((_, index) => workbookAnswers[`${workbookPillarIndex}-${index}`] || '')
       .filter(Boolean)
@@ -3414,7 +6266,7 @@ export function App() {
     }).join('\n\n---\n\n');
 
     const openWorkbookIntro = () => {
-      handlePlayAudio(WORKBOOK_WELCOME_AUDIO, 'Boas-vindas ao Diario');
+      handlePlayAudio(WORKBOOK_WELCOME_AUDIO, 'Boas-vindas ao Diário');
     };
 
     const enterWorkbook = () => {
@@ -3426,8 +6278,8 @@ export function App() {
       const safeIndex = clamp(nextIndex, 0, workbookPillars.length - 1);
       if (safeIndex === workbookPillarIndex) return;
       const phrase = safeIndex > workbookPillarIndex
-        ? workbookTransitionPhrases[workbookPillarIndex] || 'Uma parte terminou. A proxima pergunta nao cobra resposta pronta.'
-        : 'Voltar tambem faz parte da jornada. Algumas respostas precisam ser reencontradas.';
+      ? workbookTransitionPhrases[workbookPillarIndex] || 'Uma parte terminou. A próxima pergunta não cobra resposta pronta.'
+      : 'Voltar também faz parte da jornada. Algumas respostas precisam ser reencontradas.';
       setWorkbookTransition(phrase);
       window.setTimeout(() => {
         setWorkbookPillarIndex(safeIndex);
@@ -3453,7 +6305,7 @@ export function App() {
     const sendJourneyToMind = () => {
       startMindSession(
         activeMentorTopic,
-        `Use toda a memoria abaixo do meu Diario dos Desacreditados como contexto da proxima conversa. Responda como autor parceiro: primeiro diga o padrao que mais se repete na minha jornada, depois faca uma unica pergunta que me ajude a continuar.\n\n${buildWorkbookJourneyText()}`,
+        `Use toda a memória abaixo do meu Diário dos Desacreditados como contexto da próxima conversa. Responda como autor parceiro: primeiro diga o padrão que mais se repete na minha jornada, depois faça uma única pergunta que me ajude a continuar.\n\n${buildWorkbookJourneyText()}`,
         'workbook',
       );
     };
@@ -3463,15 +6315,15 @@ export function App() {
         <div className="app-page workbook-page page-enter">
           <section className="workbook-welcome">
             <div className="mentor-mark"><NotebookPen size={22} /></div>
-            <p className="kicker">Diario dos Desacreditados</p>
+            <p className="kicker">Diário dos Desacreditados</p>
             <h1>Antes de responder, escute isto.</h1>
-            <p>Esse diario nao e um questionario. Nao tem resposta certa. Nao tem nota. Ele existe porque algumas perguntas precisam ser feitas em voz alta, mesmo que so para voce mesmo.</p>
-            <p>Comeca pelo pilar que mais incomoda. Ou pelo que menos assusta. O iGentMIND vai ler o que voce escrever e devolver uma pergunta que eu faria se estivesse do outro lado. Nao para resolver. Para continuar.</p>
+            <p>Esse diário não é um questionário. Não tem resposta certa. Não tem nota. Ele existe porque algumas perguntas precisam ser feitas em voz alta, mesmo que só para você mesmo.</p>
+            <p>Comece pelo pilar que mais incomoda. Ou pelo que menos assusta. O iGentMIND vai ler o que você escrever e devolver uma pergunta que eu faria se estivesse do outro lado. Não para resolver. Para continuar.</p>
             <div className="workbook-welcome-actions">
               <Button onClick={openWorkbookIntro} variant="secondary"><Volume2 size={17} /> Ouvir Diego</Button>
               <Button onClick={enterWorkbook}><BookOpen size={17} /> Comecar diario</Button>
             </div>
-            <small>Audio esperado: {WORKBOOK_WELCOME_AUDIO}</small>
+            <small>Áudio esperado: {WORKBOOK_WELCOME_AUDIO}</small>
           </section>
         </div>
       );
@@ -3520,7 +6372,7 @@ export function App() {
             <div className="diary-questions">
               {currentPillar.questions.map((question, questionIndex) => (
                 <label key={question} className="diary-question">
-                  <span>Questão {questionIndex + 1}</span>
+                  <span>Questáo {questionIndex + 1}</span>
                   <strong>{question}</strong>
                   <textarea
                     value={workbookAnswers[`${workbookPillarIndex}-${questionIndex}`] || ''}
@@ -3575,7 +6427,7 @@ export function App() {
               </>
             ) : (
               <>
-                <p>Este painel cruza suas respostas com temas do livro e sugere capítulos, áudios e contrapontos.</p>
+                <p>Este painel cruza suas respostas com temas do livro e sugere capítulos, Áudios e contrapontos.</p>
                 <Button onClick={() => openUpgrade('igent30')}><Zap size={17} /> Desbloquear iGent 30 dias</Button>
               </>
             )}
@@ -3689,8 +6541,8 @@ export function App() {
     };
     const exportLetters = () => {
       const text = pillarLetters.map((letter) => (
-        `${letter.roman} · ${letter.title}\n${readerLetters[letter.id]?.trim() || '[carta ainda não escrita]'}`
-      )).join('\n\n────────────────────────\n\n');
+        `${letter.roman} — ${letter.title}\n${readerLetters[letter.id]?.trim() || '[carta ainda não escrita]'}`
+      )).join('\n\n------------------------\n\n');
       const blob = new Blob([`MINHAS CARTAS DE PRESENÇA\n\n${text}`], { type: 'text/plain;charset=utf-8' });
       const url = URL.createObjectURL(blob);
       const anchor = document.createElement('a');
@@ -3760,7 +6612,7 @@ export function App() {
               />
               <footer>
                 <span className={`save-feedback ${letterSaveStatus}`}>
-                  {letterSaveStatus === 'saving' ? 'Salvando...' : letterSaveStatus === 'saved' ? 'Carta salva' : readerLetters[currentLetter.id]?.trim() ? 'Salva neste dispositivo' : 'Salvamento automático neste dispositivo'}
+                  {letterSaveStatus === 'saving' ? 'Salvando...' : letterSaveStatus === 'saved' ? 'Carta sincronizada' : readerLetters[currentLetter.id]?.trim() ? 'Salva na sua jornada' : 'Salvamento automático na sua jornada'}
                 </span>
                 <strong>— {readerName}</strong>
               </footer>
@@ -3787,7 +6639,7 @@ export function App() {
         <div className="about-grid">
           <article>
             <span>Projeto</span>
-            <strong>Livro, diário, áudios e mentor</strong>
+            <strong>Livro, diário, Áudios e mentor</strong>
             <p>Uma experiência guiada para transformar leitura em permanência: texto, escuta, escrita e uma próxima pergunta possível.</p>
           </article>
           <article>
@@ -3824,7 +6676,7 @@ export function App() {
         <article>
           <Users size={22} />
           <h2>Grupo de apoio</h2>
-          <p>Um lugar para permanecer perto da obra, compartilhar avanços e voltar aos pilares sem transformar isso em cobrança.</p>
+          <p>Um lugar para permanecer perto da obra, compartilhar avanãos e voltar aos pilares sem transformar isso em cobrança.</p>
         </article>
         <article>
           <BookOpen size={22} />
@@ -3834,7 +6686,7 @@ export function App() {
         <article>
           <Headphones size={22} />
           <h2>Continuidade emocional</h2>
-          <p>Áudios, temas e encontros de apoio para quando a pessoa precisa de presença, não de mais conteúdo solto.</p>
+          <p>Áudios, temas e encontros de apoio para quando a pessoa precisa de presença, não de mais conte?do solto.</p>
         </article>
       </section>
 
@@ -3892,7 +6744,7 @@ export function App() {
           <p className="kicker">Leitura</p>
           <h2>{'Prefer\u00eancias'}</h2>
           <label className="setting-toggle-row">
-            <span>{'Mostrar narra\u00e7\u00e3o da p\u00e1gina'}</span>
+            <span>{'Mostrar botão de trilha na leitura'}</span>
             <input
               type="checkbox"
               checked={showReaderNarrationButton}
@@ -3905,12 +6757,31 @@ export function App() {
         </article>
 
         <article className="account-card account-sensory-card">
-          <p className="kicker">{'\u00c1udios sensoriais'}</p>
+          <p className="kicker">Trilhas de leitura</p>
           <h2>{'Leitura com presen\u00e7a'}</h2>
-          <p>Use uma trilha curta para preparar o corpo antes de ler, escrever ou ouvir um pilar.</p>
+          <p>Escolha uma trilha instrumental de fundo para acompanhar o modo leitura.</p>
           <div className="workbook-actions">
-            <Button onClick={() => handlePlayAudio('/media/audios/home/sobrevivencia.mp3', '\u00c1udio sensorial de leitura')} variant="secondary"><Music2 size={16} /> Ouvir agora</Button>
+            <Button onClick={toggleSelectedSensoryTrack} variant="secondary"><Music2 size={16} /> Ouvir trilha atual</Button>
             <Button onClick={() => navigate(ROUTES.SESSIONS)} variant="ghost">{'Ver sess\u00f5es'}</Button>
+          </div>
+        </article>
+
+        <article className="account-card">
+          <p className="kicker">Privacidade</p>
+          <h2>Seus dados, seu controle</h2>
+          <p>As exclusões removem os dados deste dispositivo e da conta conectada. Esta ação não pode ser desfeita.</p>
+          <div className="workbook-actions">
+            <Button onClick={eraseMindHistory} variant="ghost">Apagar conversas do iGent</Button>
+            <Button onClick={eraseJourneyData} variant="ghost">Apagar jornada</Button>
+          </div>
+        </article>
+
+        <article className="account-card account-share-card">
+          <p className="kicker">Convite</p>
+          <h2>Compartilhar esse projeto</h2>
+          <p>Envie o app para alguém que precisa encontrar o livro, os Áudios e a jornada no próprio ritmo.</p>
+          <div className="workbook-actions">
+            <Button onClick={handleShareProject} variant="secondary"><Share2 size={16} /> Convidar amigo</Button>
           </div>
         </article>
 
@@ -3977,6 +6848,7 @@ export function App() {
           { id: 'overview', label: 'Visao geral', icon: Home },
           { id: 'readers', label: 'Leitores', icon: Users },
           { id: 'book', label: 'Livro', icon: BookOpen },
+          { id: 'sensory', label: 'Áudios', icon: AudioLines },
           { id: 'kiwify', label: 'Kiwify', icon: Zap },
           { id: 'plans', label: 'Planos', icon: Lock },
           { id: 'copy', label: 'Copys', icon: NotebookPen },
@@ -4116,7 +6988,7 @@ export function App() {
             <Button onClick={handleGrantAdminPlan}>Aplicar plano</Button>
             <label>
               <span>Produto avulso</span>
-              <select value={adminGrant.productKey} onChange={(event) => setAdminGrant((current) => ({ ...current, productKey: event.target.value }))}>
+              <select value={adminGrant.productKey} onChange={(event) => setAdminGrant((current) => ({ ...current, productKey: event.target.value as ProductKey }))}>
                 {adminProducts.map((product) => <option key={product.key} value={product.key}>{product.name}</option>)}
               </select>
             </label>
@@ -4132,18 +7004,153 @@ export function App() {
             <p className="kicker">Livro</p>
             <h2>Editor do modo leitura</h2>
           </div>
-          <span>{adminPublishedPageCount} publicadas · {adminDraftPageCount} rascunho(s) · {adminBookAudio.length} audio(s)</span>
+          <span>{adminPublishedPageCount} publicadas · {adminDraftPageCount} rascunho(s) · {adminBookAudio.length} áudio(s)</span>
         </div>
         <div className="admin-book-subnav" role="tablist" aria-label="Editor do livro">
+          <button className={adminBookTab === 'canonical' ? 'active' : ''} onClick={() => setAdminBookTab('canonical')}>
+            <BookOpen size={16} />
+            Canônico
+          </button>
           <button className={adminBookTab === 'pages' ? 'active' : ''} onClick={() => setAdminBookTab('pages')}>
             <FileText size={16} />
-            Textos
+            PDF antigo
           </button>
           <button className={adminBookTab === 'audio' ? 'active' : ''} onClick={() => setAdminBookTab('audio')}>
             <Headphones size={16} />
             Áudios
           </button>
         </div>
+        {adminBookTab === 'canonical' && (
+          <article className="account-card admin-panel admin-canonical-editor">
+            <div className="admin-section-head compact">
+              <div>
+                <p className="kicker">Texto canônico</p>
+                <h2>Editor por blocos do leitor</h2>
+              </div>
+              <span>{adminCanonicalHasDraft ? 'Rascunho local aplicado no leitor' : 'Usando arquivo canônico original'}</span>
+            </div>
+
+            <div className="admin-control-grid">
+              <label>
+                <span>Capítulo / seção</span>
+                <select
+                  value={adminCanonicalChapter?.id || adminCanonicalChapterId}
+                  onChange={(event) => {
+                    setAdminCanonicalChapterId(event.target.value);
+                    const chapterIndex = effectiveCanonicalBookChapters.findIndex((chapter) => chapter.id === event.target.value);
+                    if (chapterIndex >= 0) setCurrentChapterIndex(chapterIndex);
+                  }}
+                >
+                  {effectiveCanonicalBookChapters.map((chapter, index) => (
+                    <option key={chapter.id} value={chapter.id}>
+                      {String(index + 1).padStart(2, '0')} - {repairCanonicalText(chapter.title)}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label>
+                <span>Status</span>
+                <input
+                  readOnly
+                  value={`${adminCanonicalChapter?.blocks.length ?? 0} bloco(s) · ${adminCanonicalOriginalChapter?.blocks.length ?? 0} original`}
+                />
+              </label>
+            </div>
+
+            {adminCanonicalChapter && (
+              <>
+                <div className="admin-canonical-summary">
+                  <div>
+                    <span>{repairCanonicalText(adminCanonicalChapter.eyebrow)}</span>
+                    <strong>{repairCanonicalText(adminCanonicalChapter.title)}</strong>
+                    <small>{repairCanonicalText(adminCanonicalChapter.summary)}</small>
+                  </div>
+                  <div className="admin-canonical-actions">
+                    <button type="button" onClick={() => insertAdminCanonicalBlock(adminCanonicalChapter.id, 0)}>
+                      + bloco no início
+                    </button>
+                    <button type="button" onClick={exportAdminCanonicalDrafts} disabled={!Object.keys(adminCanonicalDrafts).length}>
+                      <DownloadCloud size={14} /> Exportar correções
+                    </button>
+                    <button type="button" onClick={() => adminCanonicalImportRef.current?.click()}>
+                      Importar correções
+                    </button>
+                    <input
+                      ref={adminCanonicalImportRef}
+                      type="file"
+                      accept="application/json,.json"
+                      hidden
+                      onChange={(event) => importAdminCanonicalDrafts(event.target.files?.[0] ?? null)}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        navigator.clipboard?.writeText(JSON.stringify(adminCanonicalChapter.blocks, null, 2));
+                        setAdminMessage('Blocos canônicos copiados como JSON.');
+                      }}
+                    >
+                      <Copy size={14} /> Copiar JSON
+                    </button>
+                    <button type="button" onClick={() => resetAdminCanonicalChapter(adminCanonicalChapter.id)} disabled={!adminCanonicalHasDraft}>
+                      <RotateCcw size={14} /> Restaurar original
+                    </button>
+                    <button type="button" onClick={() => setRoute(ROUTES.READER)}>
+                      <Eye size={14} /> Ver no leitor
+                    </button>
+                  </div>
+                </div>
+
+                <div className="admin-canonical-help">
+                  Edite o texto exatamente como deve aparecer. Quebras de linha dentro do mesmo bloco são preservadas. Para separar em blocos, use o botão “dividir por linhas vazias”; para juntar blocos picados, use “mesclar próximo”.
+                </div>
+
+                <div className="admin-canonical-block-list">
+                  {adminCanonicalChapter.blocks.map((block, index) => (
+                    <section key={block.id} className={`admin-canonical-block-card kind-${block.kind}`}>
+                      <div className="admin-canonical-block-head">
+                        <span>{String(index + 1).padStart(2, '0')}</span>
+                        <select
+                          value={block.kind}
+                          onChange={(event) => updateAdminCanonicalBlock(adminCanonicalChapter.id, block.id, { kind: event.target.value as CanonicalBookBlockKind })}
+                          aria-label="Tipo do bloco"
+                        >
+                          <option value="paragraph">Parágrafo</option>
+                          <option value="heading">Título</option>
+                          <option value="subheading">Subtítulo</option>
+                          <option value="pause">Destaque central</option>
+                          <option value="divider">Divisor</option>
+                          <option value="spacer">Espaço</option>
+                          <option value="image">Imagem</option>
+                          <option value="image-full">Imagem página inteira</option>
+                        </select>
+                        <input
+                          value={block.className || ''}
+                          onChange={(event) => updateAdminCanonicalBlock(adminCanonicalChapter.id, block.id, { className: event.target.value || undefined })}
+                          placeholder="classe visual opcional"
+                        />
+                      </div>
+                      <textarea
+                        value={block.text}
+                        onChange={(event) => updateAdminCanonicalBlock(adminCanonicalChapter.id, block.id, { text: event.target.value })}
+                        spellCheck
+                        placeholder={block.kind === 'spacer' ? 'Espaço sem texto' : 'Digite o texto exato deste bloco'}
+                      />
+                      <div className="admin-canonical-block-actions">
+                        <button type="button" onClick={() => insertAdminCanonicalBlock(adminCanonicalChapter.id, index)}>+ antes</button>
+                        <button type="button" onClick={() => insertAdminCanonicalBlock(adminCanonicalChapter.id, index + 1)}>+ depois</button>
+                        <button type="button" onClick={() => moveAdminCanonicalBlock(adminCanonicalChapter.id, block.id, -1)} disabled={index === 0}>subir</button>
+                        <button type="button" onClick={() => moveAdminCanonicalBlock(adminCanonicalChapter.id, block.id, 1)} disabled={index === adminCanonicalChapter.blocks.length - 1}>descer</button>
+                        <button type="button" onClick={() => splitAdminCanonicalBlock(adminCanonicalChapter.id, block.id)}>dividir por linhas vazias</button>
+                        <button type="button" onClick={() => mergeAdminCanonicalBlockWithNext(adminCanonicalChapter.id, block.id)} disabled={index === adminCanonicalChapter.blocks.length - 1}>mesclar próximo</button>
+                        <button type="button" className="danger" onClick={() => removeAdminCanonicalBlock(adminCanonicalChapter.id, block.id)}>remover</button>
+                      </div>
+                    </section>
+                  ))}
+                </div>
+              </>
+            )}
+          </article>
+        )}
         {adminBookTab === 'pages' && (
         <>
         <div className="admin-book-toolbar">
@@ -4165,9 +7172,8 @@ export function App() {
               </div>
               <div className="admin-book-compare-box">
                 {(adminCurrentPageSource || 'Sem texto extraído para esta página.')
-                  .split(/\n+/)
-                  .filter(Boolean)
-                  .map((paragraph, index) => <p key={`source-${index}`}>{repairBrokenPdfCharacters(paragraph)}</p>)}
+                  .split('\n')
+                  .map((paragraph, index) => renderAdminBookPreviewLine(paragraph, `source-${index}`))}
               </div>
             </article>
             <article>
@@ -4177,122 +7183,252 @@ export function App() {
               </div>
               <div className="admin-book-compare-box edited">
                 {(adminBookPageContent || 'Sem texto no editor.')
-                  .split(/\n+/)
-                  .filter(Boolean)
-                  .map((paragraph, index) => <p key={`edited-${index}`}>{repairBrokenPdfCharacters(paragraph)}</p>)}
+                  .split('\n')
+                  .map((paragraph, index) => renderAdminBookPreviewLine(paragraph, `edited-${index}`))}
               </div>
             </article>
           </div>
         )}
-        <div className="admin-book-editor-grid">
-          <article className="account-card admin-panel">
-            <div className="admin-inline">
-              <label>
-                <span>Pagina do PDF</span>
-                <input
-                  value={adminBookPageNumber}
-                  min={1}
-                  max={Math.max(totalPdfPages, pdfTextPages.length || 1)}
-                  type="number"
-                  onChange={(event) => setAdminBookPageNumber(clamp(Number(event.target.value) || 1, 1, Math.max(totalPdfPages, pdfTextPages.length || 1)))}
-                />
-              </label>
-              <label>
-                <span>Status</span>
-                <select
-                  value={adminBookPageNumber}
-                  onChange={(event) => setAdminBookPageNumber(Number(event.target.value))}
-                >
-                  {adminBookPageOptions.map((pageNumber) => {
-                    const page = adminBookPages.find((item) => item.pageNumber === pageNumber);
-                    const label = page?.latestPublished ? 'publicada' : page?.latestDraft ? 'rascunho' : 'original';
-                    return <option key={pageNumber} value={pageNumber}>Pagina {pageNumber} - {label}</option>;
-                  })}
-                </select>
-              </label>
-            </div>
-            <div className="admin-book-status-strip">
-              <span className={adminCurrentBookPage?.latestPublished ? 'published' : 'original'}>
-                {adminCurrentBookPage?.latestPublished ? `Publicada v${adminCurrentBookPage.latestPublished.version}` : 'Original do PDF'}
-              </span>
-              {adminCurrentBookPage?.latestDraft && <span className="draft">Rascunho v{adminCurrentBookPage.latestDraft.version}</span>}
-              <small>{adminCurrentBookPage?.latestPublished?.updatedAt ? `Atualizada em ${formatDateTime(adminCurrentBookPage.latestPublished.updatedAt)}` : 'Sem publicação manual'}</small>
-            </div>
-            <label>
-              <span>Titulo interno opcional</span>
-              <input value={adminBookPageTitle} onChange={(event) => setAdminBookPageTitle(event.target.value)} placeholder="Ex.: Pilar I - Limiar" />
-            </label>
-            <label>
-              <span>Texto da pagina</span>
-              <textarea
-                ref={adminBookPageTextareaRef}
-                className="admin-book-textarea"
-                value={adminBookPageContent}
-                onChange={(event) => setAdminBookPageContent(event.target.value)}
-                placeholder="Cole ou corrija aqui o texto que deve aparecer no modo leitura."
-              />
-            </label>
-            <div className="admin-book-format-tools" aria-label="Formatacao do texto">
-              <button type="button" onClick={() => insertAdminBookPageSnippet('[br]')}>Quebra de linha</button>
-              <button type="button" onClick={() => insertAdminBookPageSnippet('---')}>Linha divisoria</button>
-              <button type="button" onClick={() => insertAdminBookPageSnippet('[[espaco:32]]')}>Espaco</button>
-              <button type="button" onClick={() => insertAdminBookPageSnippet('[[imagem:/media/imagens/livro/exemplo.jpg|Legenda da imagem]]')}>Imagem</button>
-              <button type="button" onClick={() => insertAdminBookPageSnippet('[[capa:/media/imagens/capas/capa.webp|Capa]]')}>Imagem pagina inteira</button>
-            </div>
-            <div className="workbook-actions">
-              <Button onClick={handleRepairAdminBookPageContent} variant="ghost">Corrigir caracteres</Button>
-              <Button onClick={handleCleanAdminBookPageContent} variant="ghost">Limpar texto</Button>
-              <Button onClick={handleSaveBookPageDraft} variant="secondary">Salvar rascunho</Button>
-              <Button onClick={handlePublishBookPage}>Publicar no leitor</Button>
-            </div>
-            <small>Use linha vazia para novo paragrafo, [br] para quebra dentro do mesmo paragrafo, --- para divisor, [[espaco:32]] para respiro, [[imagem:/media/imagens/livro/exemplo.jpg|Legenda]] para imagem e [[capa:/media/imagens/capas/capa.webp|Capa]] para pagina inteira.</small>
-            <small>Publicar cria uma nova versao e substitui o texto desta pagina para todos os leitores.</small>
-          </article>
+        {(() => {
+          const visualPage = getAdminVisualPage();
+          const selectedLine = adminSelectedBookLineIndex === null ? '' : getAdminBookLines()[adminSelectedBookLineIndex] || '';
+          const selectedBlock = parseAdminBlockCommand(selectedLine);
+          const blockSelected = adminSelectedBookLineIndex !== null;
+          return (
+            <div className="admin-book-visual-layout">
+              <article className="admin-visual-page-card">
+                <div className="admin-visual-page-toolbar">
+                  <span>Página {adminBookPageNumber}</span>
+                  <small>Clique no texto da página para editar. Dê dois cliques em linhas divisórias para remover.</small>
+                </div>
+                <div className="admin-visual-page">
+                  <div className="admin-visual-bookmark"><Bookmark fill="currentColor" size={30} /></div>
+                  <div className="admin-visual-meta">
+                    <span>Página {adminBookPageNumber} de {Math.max(totalPdfPages, pdfTextPages.length || 1)}</span>
+                    <span>{Math.round((adminBookPageNumber / Math.max(1, totalPdfPages || pdfTextPages.length || 1)) * 100)}% do livro</span>
+                  </div>
+                  {!visualPage.hideHeader && (
+                    <header className="admin-visual-header">
+                      <input
+                        className="admin-visual-eyebrow-input"
+                        value={visualPage.eyebrow}
+                        onChange={(event) => upsertAdminBookDirective('cabecalho-secao', event.target.value || 'Livro')}
+                        placeholder="Livro"
+                      />
+                      <input
+                        className="admin-visual-title-input"
+                        value={visualPage.title}
+                        onChange={(event) => {
+                          const nextTitle = event.target.value;
+                          if (nextTitle) upsertAdminBookDirective('cabecalho-titulo', nextTitle);
+                          else removeAdminBookDirective('cabecalho-titulo');
+                        }}
+                        placeholder="Título da página"
+                      />
+                    </header>
+                  )}
+                  <div className="admin-visual-copy">
+                    <div className="admin-rich-toolbar" aria-label="Editor de bloco">
+                      <select
+                        value={selectedBlock.kind}
+                        onChange={(event) => setAdminSelectedBlockKind(event.target.value as 'paragrafo' | 'titulo' | 'subtitulo')}
+                        disabled={!blockSelected}
+                        title="Tipo de bloco"
+                      >
+                        <option value="paragrafo">Parágrafo</option>
+                        <option value="titulo">Título</option>
+                        <option value="subtitulo">Subtítulo</option>
+                      </select>
+                      <button type="button" onMouseDown={(event) => event.preventDefault()} onClick={() => applyAdminInlineFormat('bold')} disabled={!blockSelected} title="Negrito no trecho selecionado"><Bold size={15} /></button>
+                      <button type="button" onMouseDown={(event) => event.preventDefault()} onClick={() => applyAdminInlineFormat('italic')} disabled={!blockSelected} title="Itálico no trecho selecionado"><Italic size={15} /></button>
+                      <button type="button" onClick={() => transformAdminSelectedBlockText('capitalize')} disabled={!blockSelected} title="Capitalizar">Aa</button>
+                      <button type="button" onClick={() => transformAdminSelectedBlockText('upper')} disabled={!blockSelected} title="Maiúsculas">AA</button>
+                      <button type="button" onClick={() => transformAdminSelectedBlockText('lower')} disabled={!blockSelected} title="Minúsculas">aa</button>
+                      <span />
+                      <button type="button" className={!selectedBlock.styles.includes('centralizado') && !selectedBlock.styles.includes('direita') ? 'active' : ''} onClick={() => setAdminSelectedBlockAlignment('esquerda')} disabled={!blockSelected} title="Alinhar à esquerda"><AlignLeft size={15} /></button>
+                      <button type="button" className={selectedBlock.styles.includes('centralizado') ? 'active' : ''} onClick={() => setAdminSelectedBlockAlignment('centralizado')} disabled={!blockSelected} title="Centralizar"><AlignCenter size={15} /></button>
+                      <button type="button" className={selectedBlock.styles.includes('direita') ? 'active' : ''} onClick={() => setAdminSelectedBlockAlignment('direita')} disabled={!blockSelected} title="Alinhar à direita"><AlignRight size={15} /></button>
+                      <span />
+                      <button type="button" onClick={() => setAdminSelectedBlockKind('titulo')} disabled={!blockSelected} title="Título"><Heading1 size={15} /></button>
+                      <button type="button" onClick={() => setAdminSelectedBlockKind('subtitulo')} disabled={!blockSelected} title="Subtítulo"><Heading2 size={15} /></button>
+                      <small>{blockSelected ? 'Editando bloco selecionado' : 'Clique em um bloco do miolo'}</small>
+                    </div>
+                    <div className="admin-visual-body">
+                      {visualPage.bodyLines.length
+                        ? visualPage.bodyLines.map(({ line, index }) => renderAdminVisualEditableLine(line, index))
+                        : (
+                          <textarea
+                            className="admin-clean-paste-area"
+                            placeholder="Cole aqui o texto corrido. Linhas quebradas do PDF serão unidas automaticamente em parágrafos limpos."
+                            onPaste={(event) => {
+                              event.preventDefault();
+                              replaceAdminVisualBodyWithPlainText(event.clipboardData.getData('text/plain'));
+                            }}
+                            onChange={(event) => replaceAdminVisualBodyWithPlainText(event.target.value)}
+                          />
+                        )}
+                    </div>
+                  </div>
+                  <div className="admin-visual-progress">
+                    <span>{Math.round((adminBookPageNumber / Math.max(1, totalPdfPages || pdfTextPages.length || 1)) * 100)}% do livro</span>
+                    <strong>Página {adminBookPageNumber} de {Math.max(totalPdfPages, pdfTextPages.length || 1)}</strong>
+                    <div><span style={{ width: `${Math.round((adminBookPageNumber / Math.max(1, totalPdfPages || pdfTextPages.length || 1)) * 100)}%` }} /></div>
+                  </div>
+                </div>
+              </article>
 
-          <article className="account-card admin-panel admin-book-preview">
-            <p className="kicker">Preview</p>
-            <h3>Pagina {adminBookPageNumber}</h3>
-            <div className="admin-book-preview-box">
-              {(adminBookPageContent || adminCurrentPageSource || 'Sem texto nesta pagina.')
-                .split(/\n+/)
-                .filter(Boolean)
-                .slice(0, 8)
-                .map((paragraph, index) => <p key={index}>{repairBrokenPdfCharacters(paragraph)}</p>)}
+              <aside className="account-card admin-panel admin-visual-sidepanel">
+                <div className="admin-inline">
+                  <label>
+                    <span>Página do PDF</span>
+                    <input
+                      value={adminBookPageNumber}
+                      min={1}
+                      max={Math.max(totalPdfPages, pdfTextPages.length || 1)}
+                      type="number"
+                      onChange={(event) => setAdminBookPageNumber(clamp(Number(event.target.value) || 1, 1, Math.max(totalPdfPages, pdfTextPages.length || 1)))}
+                    />
+                  </label>
+                  <label>
+                    <span>Status</span>
+                    <select value={adminBookPageNumber} onChange={(event) => setAdminBookPageNumber(Number(event.target.value))}>
+                      {adminBookPageOptions.map((pageNumber) => {
+                        const page = adminBookPages.find((item) => item.pageNumber === pageNumber);
+                        const label = page?.latestPublished ? 'publicada' : page?.latestDraft ? 'rascunho' : 'original';
+                        return <option key={pageNumber} value={pageNumber}>Página {pageNumber} - {label}</option>;
+                      })}
+                    </select>
+                  </label>
+                </div>
+                <div className="admin-book-status-strip">
+                  <span className={adminCurrentBookPage?.latestPublished ? 'published' : 'original'}>
+                    {adminCurrentBookPage?.latestPublished ? `Publicada v${adminCurrentBookPage.latestPublished.version}` : 'Original do PDF'}
+                  </span>
+                  {adminCurrentBookPage?.latestDraft && <span className="draft">Rascunho v{adminCurrentBookPage.latestDraft.version}</span>}
+                  <small>{adminCurrentBookPage?.latestPublished?.updatedAt ? `Atualizada em ${formatDateTime(adminCurrentBookPage.latestPublished.updatedAt)}` : 'Sem publicação manual'}</small>
+                </div>
+
+                <div className="admin-visual-section">
+                  <strong>Header da página</strong>
+                  <label>
+                    <span>Texto pequeno</span>
+                    <input value={visualPage.eyebrow} onChange={(event) => upsertAdminBookDirective('cabecalho-secao', event.target.value)} />
+                  </label>
+                  <label>
+                    <span>Título dourado</span>
+                    <input
+                      value={visualPage.title}
+                      onChange={(event) => {
+                        const nextTitle = event.target.value;
+                        if (nextTitle.trim()) upsertAdminBookDirective('cabecalho-titulo', nextTitle);
+                        else removeAdminBookDirective('cabecalho-titulo');
+                      }}
+                      placeholder="Edite aqui apenas quando quiser título no header"
+                    />
+                  </label>
+                  <div className="admin-book-format-tools compact" aria-label="Controle do cabecalho">
+                    <button type="button" onClick={() => upsertAdminBookDirective('cabecalho', 'ocultar')}>Ocultar header</button>
+                    <button type="button" onClick={() => removeAdminBookDirective('cabecalho')}>Mostrar header</button>
+                    <button type="button" onClick={() => removeAdminBookDirective('cabecalho-titulo')}>Limpar título</button>
+                    <button type="button" onClick={promoteFirstBodyLineToAdminHeader}>Puxar 1ª linha</button>
+                  </div>
+                </div>
+
+                <div className="admin-visual-section">
+                  <strong>Inserir no miolo</strong>
+                  <div className="admin-book-format-tools" aria-label="Formatação do texto">
+                    <button type="button" onClick={() => insertAdminBookPageSnippet('[br]')}>Quebra</button>
+                    <button type="button" onClick={() => insertAdminBookPageSnippet('---')}>Divisor</button>
+                    <button type="button" onClick={() => insertAdminBookPageSnippet('[[espaco:32]]')}>Espaço</button>
+                    <button type="button" onClick={() => insertAdminBookPageSnippet('[[imagem:/media/imagens/livro/exemplo.jpg|Legenda da imagem]]')}>Imagem</button>
+                    <button type="button" onClick={() => insertAdminBookPageSnippet('[[capa:/media/imagens/capas/capa.webp|Capa]]')}>Página inteira</button>
+                    <button type="button" onClick={() => insertAdminBookPageSnippet('[[titulo:Título no miolo]]')}>Título</button>
+                  </div>
+                  <div className="admin-clean-paste-panel">
+                    <span>Colar texto limpo</span>
+                    <textarea
+                      value={adminPlainPasteDraft}
+                      onChange={(event) => setAdminPlainPasteDraft(event.target.value)}
+                      onPaste={(event) => {
+                        event.preventDefault();
+                        const pasted = event.clipboardData.getData('text/plain');
+                        setAdminPlainPasteDraft(pasted);
+                        replaceAdminVisualBodyWithPlainText(pasted);
+                      }}
+                      placeholder="Cole aqui para substituir todo o miolo por um texto único, sem formatação e sem quebras soltas do PDF."
+                    />
+                    <div>
+                      <button type="button" onClick={() => replaceAdminVisualBodyWithPlainText(adminPlainPasteDraft)}>
+                        Substituir miolo
+                      </button>
+                      <button type="button" onClick={() => replaceAdminVisualBodyWithPlainText(adminPlainPasteDraft, true)}>
+                        Manter parágrafos
+                      </button>
+                    </div>
+                    <small>Substitui apenas o miolo. O header da página é preservado.</small>
+                  </div>
+                </div>
+
+                <label>
+                  <span>Título interno opcional</span>
+                  <input value={adminBookPageTitle} onChange={(event) => setAdminBookPageTitle(event.target.value)} placeholder="Ex.: Pilar I - Limiar" />
+                </label>
+
+                <div className="workbook-actions">
+                  <Button onClick={handleRepairAdminBookPageContent} variant="ghost">Corrigir caracteres</Button>
+                  <Button onClick={handleCleanAdminBookPageContent} variant="ghost">Limpar texto</Button>
+                  <Button onClick={handleSaveBookPageDraft} variant="secondary">Salvar rascunho</Button>
+                  <Button onClick={handlePublishBookPage}>Publicar no leitor</Button>
+                </div>
+
+                <details className="admin-source-editor">
+                  <summary>Código da página</summary>
+                  <textarea
+                    ref={adminBookPageTextareaRef}
+                    className="admin-book-textarea"
+                    value={adminBookPageContent}
+                    onChange={(event) => setAdminBookPageContent(event.target.value)}
+                    placeholder="Cole ou corrija aqui o texto que deve aparecer no modo leitura."
+                  />
+                  <small>Use linha vazia para novo parágrafo, [br] para quebra no mesmo parágrafo, --- para divisor, [[espaco:32]], [[imagem:/media/imagens/livro/exemplo.jpg|Legenda]], [[capa:/media/imagens/capas/capa.webp|Capa]], [[cabecalho:ocultar]], [[cabecalho-secao:Texto]], [[cabecalho-titulo:Texto]] e [[titulo:Texto|negrito,italico,maiusculo,espacado]]. Sem estilos, o texto aparece exatamente como digitado.</small>
+                </details>
+
+                <div className="admin-book-history">
+                  <strong>Histórico</strong>
+                  {adminBookPageHistory.length === 0 ? (
+                    <small>Nenhuma versão salva ainda.</small>
+                  ) : adminBookPageHistory.slice(0, 6).map((revision) => (
+                    <button
+                      key={revision.id}
+                      type="button"
+                      onClick={() => {
+                        setAdminBookPageTitle(revision.title || '');
+                        setAdminBookPageContent(revision.content);
+                      }}
+                    >
+                      <span>v{revision.version} - {revision.status === 'PUBLISHED' ? 'publicada' : 'rascunho'}</span>
+                      <small>{formatDateTime(revision.createdAt)}</small>
+                    </button>
+                  ))}
+                </div>
+              </aside>
             </div>
-            <div className="admin-book-history">
-              <strong>Historico</strong>
-              {adminBookPageHistory.length === 0 ? (
-                <small>Nenhuma versao salva ainda.</small>
-              ) : adminBookPageHistory.slice(0, 6).map((revision) => (
-                <button
-                  key={revision.id}
-                  type="button"
-                  onClick={() => {
-                    setAdminBookPageTitle(revision.title || '');
-                    setAdminBookPageContent(revision.content);
-                  }}
-                >
-                  <span>v{revision.version} - {revision.status === 'PUBLISHED' ? 'publicada' : 'rascunho'}</span>
-                  <small>{formatDateTime(revision.createdAt)}</small>
-                </button>
-              ))}
-            </div>
-          </article>
-        </div>
+          );
+        })()}
         </>
         )}
         {adminBookTab === 'audio' && (
         <article className="account-card admin-panel admin-audio-editor">
           <div className="admin-section-head compact">
             <div>
-              <p className="kicker">Audios do capitulo</p>
-              <h2>Titulos e arquivos</h2>
+              <p className="kicker">Áudios do capítulo</p>
+              <h2>Títulos e arquivos</h2>
             </div>
-            <span>{adminBookAudio.length} audio(s) editados</span>
+            <span>{adminBookAudio.length} áudio(s) editados</span>
           </div>
           <div className="admin-control-grid">
             <label>
-              <span>Capitulo</span>
+              <span>Capítulo</span>
               <select value={adminAudioChapterId} onChange={(event) => setAdminAudioChapterId(event.target.value)}>
                 {bookChapters.map((chapter) => (
                   <option key={chapter.id} value={chapter.id}>{repairMojibake(chapter.title)}</option>
@@ -4300,7 +7436,7 @@ export function App() {
               </select>
             </label>
             <label>
-              <span>Secao / faixa</span>
+              <span>Seção / faixa</span>
               <select value={adminAudioSectionKey} onChange={(event) => setAdminAudioSectionKey(event.target.value)}>
                 {adminAudioTracksForChapter.map((track) => (
                   <option key={audioTrackKey(track.label)} value={audioTrackKey(track.label)}>{repairMojibake(track.label)}</option>
@@ -4311,8 +7447,8 @@ export function App() {
           <div className="admin-audio-board">
             <div className="admin-audio-board-head">
               <div>
-                <strong>Mesa de producao</strong>
-                <small>Arraste para organizar. Clique em uma faixa para editar o caminho, titulo e publicar.</small>
+                <strong>Mesa de produção</strong>
+                <small>Arraste para organizar. Clique em uma faixa para editar o caminho, título e publicar.</small>
               </div>
               <button
                 type="button"
@@ -4340,7 +7476,7 @@ export function App() {
                     <span className="admin-audio-number">{index + 1}</span>
                     <span>
                       <strong>{repairMojibake(item.label)}</strong>
-                      <small>{item.published ? `Publicado v${item.published.version || 1}` : 'Usando caminho padrao'}</small>
+                      <small>{item.published ? `Publicado v${item.published.version || 1}` : 'Usando caminho padrão'}</small>
                     </span>
                   </button>
                   <div className="admin-audio-card-tools">
@@ -4359,7 +7495,7 @@ export function App() {
                   <textarea
                     value={item.production.note}
                     onChange={(event) => updateAdminAudioProduction(item.productionKey, { note: event.target.value })}
-                    placeholder="Observacao: texto inconsistente, voz errada, placeholder, precisa regenerar..."
+                    placeholder="Observação: texto inconsistente, voz errada, placeholder, precisa regenerar..."
                   />
                   <label className="admin-audio-cover-field">
                     <span>{item.production.coverUrl ? <img src={item.production.coverUrl} alt="" /> : <Music2 size={18} />}</span>
@@ -4376,12 +7512,12 @@ export function App() {
             </div>
           </div>
           <label>
-            <span>Titulo exibido</span>
+            <span>Título exibido</span>
             <input value={adminAudioLabel} onChange={(event) => setAdminAudioLabel(event.target.value)} placeholder="Ex.: Manifesto de abertura" />
           </label>
           <label>
             <span>Arquivo ou URL do audio</span>
-            <input value={adminAudioUrl} onChange={(event) => setAdminAudioUrl(event.target.value)} placeholder="/media/audios/livro/pilar-01-reconhecimento/p1-manifesto.wav" />
+            <input value={adminAudioUrl} onChange={(event) => setAdminAudioUrl(event.target.value)} placeholder="/media/audios/livro/6-ato1-sobrevivencia/pilar-01-reconhecimento/p1-manifesto.wav" />
           </label>
           <div className="admin-media-path-helper">
             <div>
@@ -4398,9 +7534,9 @@ export function App() {
             <Button onClick={handlePublishBookAudio}>Publicar audio</Button>
           </div>
           <div className="admin-book-history">
-            <strong>Historico desta faixa</strong>
+            <strong>Histórico desta faixa</strong>
             {!adminCurrentAudioSummary?.history?.length ? (
-              <small>Nenhuma substituicao publicada ainda.</small>
+              <small>Nenhuma substituição publicada ainda.</small>
             ) : adminCurrentAudioSummary.history.slice(0, 5).map((revision) => (
               <button
                 key={revision.id || `${revision.url}-${revision.version}`}
@@ -4421,6 +7557,93 @@ export function App() {
       </section>
       )}
 
+      {adminSection === 'sensory' && (
+      <section className="admin-control-grid admin-audio-support-grid">
+        <article className="account-card admin-panel">
+          <div className="admin-section-head compact">
+            <div>
+              <p className="kicker">Áudios de apoio</p>
+              <h2>Falas e conteúdos</h2>
+            </div>
+            <span>{supportAudios.length} áudio(s)</span>
+          </div>
+          <label>
+            <span>Título</span>
+            <input value={adminSupportAudioDraft.title} onChange={(event) => setAdminSupportAudioDraft((current) => ({ ...current, title: event.target.value }))} placeholder="Ex.: Sobrevivência" />
+          </label>
+          <label>
+            <span>Descrição</span>
+            <textarea value={adminSupportAudioDraft.text} onChange={(event) => setAdminSupportAudioDraft((current) => ({ ...current, text: event.target.value }))} placeholder="Quando esse áudio deve aparecer..." />
+          </label>
+          <label>
+            <span>URL do áudio</span>
+            <input value={adminSupportAudioDraft.audioUrl} onChange={(event) => setAdminSupportAudioDraft((current) => ({ ...current, audioUrl: event.target.value }))} placeholder="/media/audios/home/sobrevivencia.mp3" />
+          </label>
+          <label>
+            <span>Capa opcional</span>
+            <input value={adminSupportAudioDraft.coverUrl || ''} onChange={(event) => setAdminSupportAudioDraft((current) => ({ ...current, coverUrl: event.target.value }))} placeholder="/media/imagens/capas/audio-apoio.webp" />
+          </label>
+          <div className="workbook-actions">
+            <Button onClick={handleSaveSupportAudio}><Headphones size={16} /> Salvar apoio</Button>
+            <Button variant="ghost" onClick={() => setAdminSupportAudioDraft({ id: '', title: '', text: '', audioUrl: '', coverUrl: '' })}>Limpar</Button>
+          </div>
+          <div className="admin-sensory-list">
+            {supportAudios.map((track) => (
+              <div key={track.id} className="admin-sensory-row">
+                <button type="button" onClick={() => handleEditSupportAudio(track)}>
+                  <strong>{repairMojibake(track.title)}</strong>
+                  <small>{track.audioUrl}</small>
+                </button>
+                <button type="button" onClick={() => handlePlayAudio(track.audioUrl, repairMojibake(track.title), track.coverUrl)}>Testar</button>
+                <button type="button" onClick={() => handleRemoveSupportAudio(track.id)}><X size={15} /></button>
+              </div>
+            ))}
+          </div>
+        </article>
+
+        <article className="account-card admin-panel">
+          <div className="admin-section-head compact">
+            <div>
+              <p className="kicker">Trilhas de leitura</p>
+              <h2>Background do leitor</h2>
+            </div>
+            <span>{sensoryPlaylist.length} trilha(s)</span>
+          </div>
+          <label>
+            <span>Título</span>
+            <input value={adminSensoryDraft.title} onChange={(event) => setAdminSensoryDraft((current) => ({ ...current, title: event.target.value }))} placeholder="Ex.: Silêncio dourado" />
+          </label>
+          <label>
+            <span>Descrição</span>
+            <textarea value={adminSensoryDraft.text} onChange={(event) => setAdminSensoryDraft((current) => ({ ...current, text: event.target.value }))} placeholder="Quando usar essa trilha..." />
+          </label>
+          <label>
+            <span>URL do áudio</span>
+            <input value={adminSensoryDraft.audioUrl} onChange={(event) => setAdminSensoryDraft((current) => ({ ...current, audioUrl: event.target.value }))} placeholder="/media/audios/trilhas/silencio-dourado.mp3" />
+          </label>
+          <label>
+            <span>Capa opcional</span>
+            <input value={adminSensoryDraft.coverUrl || ''} onChange={(event) => setAdminSensoryDraft((current) => ({ ...current, coverUrl: event.target.value }))} placeholder="/media/imagens/capas/trilha.webp" />
+          </label>
+          <div className="workbook-actions">
+            <Button onClick={handleSaveSensoryTrack}><Music2 size={16} /> Salvar trilha</Button>
+            <Button variant="ghost" onClick={() => setAdminSensoryDraft({ id: '', title: '', text: '', audioUrl: '', coverUrl: '' })}>Limpar</Button>
+          </div>
+          <div className="admin-sensory-list">
+            {sensoryPlaylist.map((track) => (
+              <div key={track.id} className="admin-sensory-row">
+                <button type="button" onClick={() => handleEditSensoryTrack(track)}>
+                  <strong>{repairMojibake(track.title)}</strong>
+                  <small>{track.audioUrl}</small>
+                </button>
+                <button type="button" onClick={() => selectSensoryTrack(track, true)}>Testar</button>
+                <button type="button" onClick={() => handleRemoveSensoryTrack(track.id)}><X size={15} /></button>
+              </div>
+            ))}
+          </div>
+        </article>
+      </section>
+      )}
       {adminSection === 'kiwify' && (
       <section className="admin-events-panel">
         <div className="admin-section-head">
@@ -4585,7 +7808,7 @@ export function App() {
       case ROUTES.HOME: return HomeView();
       case ROUTES.BOOK: return hasReaderAccess ? BookView() : <LockedView title="Livro interativo bloqueado" offerKey="basic" />;
       case ROUTES.LIBRARY: return hasReaderAccess ? LibraryView() : <LockedView title="Jornada bloqueada" offerKey="basic" />;
-      case ROUTES.SESSIONS: return hasReaderAccess ? SessionsView() : <LockedView title="Audios bloqueados" offerKey="basic" />;
+      case ROUTES.SESSIONS: return hasReaderAccess ? SessionsView() : <LockedView title="Áudios bloqueados" offerKey="basic" />;
       case ROUTES.COMMUNITY: return hasGroupAccess ? CommunityView() : <LockedView title="Comunidade bloqueada" offerKey="group" />;
       case ROUTES.IGENT: return hasMindAccess ? IGentMindView() : <LockedView title="iGentMIND bloqueado" offerKey="igent30" />;
       case ROUTES.FAVORITES: return FavoritesView();
@@ -4616,8 +7839,56 @@ export function App() {
           <p>{workbookTransition}</p>
         </div>
       )}
+      {ambientAudioState.currentUrl && route === ROUTES.READER && (
+        <div className={`ambient-player ${ambientAudioState.isPlaying ? 'playing' : ''} ${ambientPlayerCollapsed ? 'collapsed' : ''}`} role="status" aria-live="polite">
+          <button
+            className="ambient-player-visual"
+            onClick={() => ambientPlayerCollapsed && setAmbientPlayerCollapsed(false)}
+            title={ambientPlayerCollapsed ? 'Abrir trilha de leitura' : 'Trilha de leitura ativa'}
+            aria-label={ambientPlayerCollapsed ? 'Abrir trilha de leitura' : 'Trilha de leitura ativa'}
+          >
+            <Music2 size={15} />
+            <span />
+            <span />
+            <span />
+            <span />
+          </button>
+          <div className="ambient-player-copy">
+            <p>Trilha de leitura</p>
+            <strong>{ambientAudioState.title}</strong>
+            {ambientAudioState.isPlaying && audioState.isPlaying && <small>Volume reduzido durante a narração</small>}
+          </div>
+          <label className="ambient-player-volume" style={{ '--ambient-volume': `${Math.round(ambientAudioState.volume * 100)}%` } as React.CSSProperties}>
+            <Volume2 size={15} />
+            <input
+              type="range"
+              min="0"
+              max="100"
+              value={Math.round(ambientAudioState.volume * 100)}
+              onChange={(event) => changeAmbientVolume(Number(event.target.value))}
+              aria-label="Volume da trilha de leitura"
+            />
+          </label>
+          <button className="ambient-player-skip" onClick={() => playAdjacentAmbientTrack(-1)} title="Trilha anterior">
+            <SkipBack size={14} />
+          </button>
+          <button className="ambient-player-toggle" onClick={toggleSelectedSensoryTrack} title={ambientAudioState.isPlaying ? 'Pausar trilha' : 'Tocar trilha'}>
+            {ambientAudioState.isPlaying ? <Pause size={16} /> : <Play size={16} fill="currentColor" />}
+          </button>
+          <button className="ambient-player-skip" onClick={() => playAdjacentAmbientTrack(1)} title="Próxima trilha">
+            <SkipForward size={14} />
+          </button>
+          <button className="ambient-player-close" onClick={stopAmbientTrack} title="Fechar trilha">
+            <X size={14} />
+          </button>
+          <button className="ambient-player-minimize" onClick={() => setAmbientPlayerCollapsed(true)} title="Minimizar trilha">
+            <span aria-hidden="true">-</span>
+          </button>
+        </div>
+      )}
       {audioState.currentUrl && (
         <>
+        {route !== ROUTES.READER && (
         <div className="audio-dock pro-player compact-audio-player">
           <div className="player-glow" />
           <button className="player-cover" onClick={() => setAudioFullOpen(true)} title="Abrir player completo">
@@ -4653,13 +7924,14 @@ export function App() {
           </button>
           <button className="player-close" onClick={closeAudio}><X size={22} /></button>
         </div>
+        )}
         {audioFullOpen && (
           <section className="audio-fullscreen-player" role="dialog" aria-modal="true" aria-label="Player de audiobook">
             <div className="audio-fullscreen-bg" />
             <button className="audio-full-close" onClick={() => setAudioFullOpen(false)} title="Voltar para barra"><X size={20} /></button>
             <div className="audio-full-card">
               <div className="audio-full-cover">
-                <img src={audioState.coverUrl || '/media/imagens/capas/capa-topo.jpg'} alt="" />
+                <img src={audioState.coverUrl || '/media/imagens/capas/capa.webp'} alt="" />
                 <div className="audio-orbit one" />
                 <div className="audio-orbit two" />
               </div>
@@ -4669,10 +7941,10 @@ export function App() {
                 {currentAudioQueueItem && (
                   <small>
                     Faixa {currentAudioQueueIndex + 1} de {audiobookQueue.length}
-                    {nextAudioQueueItem ? ` - proxima: ${nextAudioQueueItem.label}` : ' - fim da fila'}
+                    {nextAudioQueueItem ? ` - próxima: ${nextAudioQueueItem.label}` : ' - fim da fila'}
                   </small>
                 )}
-                <span>{audioState.isPlaying ? 'Em reprodução' : 'Pausado'} · {formatTime(audioState.currentTime)} de {formatTime(audioState.duration)}</span>
+                <span>{audioState.isPlaying ? 'Em reprodução' : 'Pausado'}  · {formatTime(audioState.currentTime)} de {formatTime(audioState.duration)}</span>
                 {currentAudioQueueItem && (
                   <button className="audio-open-page" onClick={openCurrentAudioPage}>
                     <BookOpen size={16} />
@@ -4709,4 +7981,6 @@ export function App() {
     </div>
   );
 }
+
+
 

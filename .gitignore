@@ -13,3 +13,7 @@ node-*.log
 server-*.log
 api-*.log
 login-api-*.log
+# Perfis de navegador/relatórios gerados por ferramentas de auditoria automatizada — nunca commitar
+# (podem conter Login Data, histórico e cookies do navegador usado no teste).
+artifacts/chrome-audit-profile/
+test-results/

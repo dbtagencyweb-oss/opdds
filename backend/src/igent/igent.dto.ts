@@ -14,11 +14,18 @@ export class MindChatDto {
 
   @IsOptional()
   @IsString()
+  @MaxLength(120)
   sessionId?: string;
 
   @IsOptional()
   @IsString()
+  @MaxLength(120)
   topic?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(80)
+  source?: string;
 
   @IsOptional()
   @IsArray()

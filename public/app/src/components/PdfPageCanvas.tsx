@@ -8,29 +8,48 @@ type Props = {
   url: string;
   page: number;
   zoom?: number;
+  rotation?: number;
   onDocumentReady?: (pages: number) => void;
 };
 
 let cachedUrl = '';
 let cachedDocument: PDFDocumentProxy | null = null;
+let cachedLoadingUrl = '';
+let cachedDocumentPromise: Promise<PDFDocumentProxy> | null = null;
 
-export default function PdfPageCanvas({ url, page, zoom = 1, onDocumentReady }: Props) {
+export default function PdfPageCanvas({ url, page, zoom = 1, rotation = 0, onDocumentReady }: Props) {
   const hostRef = useRef<HTMLDivElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const renderTaskRef = useRef<RenderTask | null>(null);
   const [document, setDocument] = useState<PDFDocumentProxy | null>(cachedUrl === url ? cachedDocument : null);
   const [width, setWidth] = useState(760);
-  const [status, setStatus] = useState('Carregando página...');
+  const [status, setStatus] = useState('');
+  const [shouldRender, setShouldRender] = useState(false);
 
   useEffect(() => {
+    const host = hostRef.current;
+    if (!host) return;
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) setShouldRender(true);
+    }, { rootMargin: '900px 0px' });
+    observer.observe(host);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!shouldRender) return;
     let active = true;
     if (cachedUrl === url && cachedDocument) {
       setDocument(cachedDocument);
       onDocumentReady?.(cachedDocument.numPages);
       return () => { active = false; };
     }
-    setStatus('Abrindo a edição completa...');
-    getDocument(url).promise
+    setStatus('Abrindo a edicao completa...');
+    if (cachedLoadingUrl !== url || !cachedDocumentPromise) {
+      cachedLoadingUrl = url;
+      cachedDocumentPromise = getDocument(url).promise;
+    }
+    cachedDocumentPromise
       .then((pdf) => {
         if (!active) return;
         cachedUrl = url;
@@ -38,31 +57,36 @@ export default function PdfPageCanvas({ url, page, zoom = 1, onDocumentReady }: 
         setDocument(pdf);
         onDocumentReady?.(pdf.numPages);
       })
-      .catch(() => active && setStatus('Não foi possível carregar esta página.'));
+      .catch(() => {
+        if (!active) return;
+        cachedLoadingUrl = '';
+        cachedDocumentPromise = null;
+        setStatus('Nao foi possivel carregar esta pagina.');
+      });
     return () => { active = false; };
-  }, [url, onDocumentReady]);
+  }, [shouldRender, url, onDocumentReady]);
 
   useEffect(() => {
     const host = hostRef.current;
     if (!host) return;
     const observer = new ResizeObserver(([entry]) => {
-      setWidth(Math.max(280, Math.min(980, entry.contentRect.width)));
+      setWidth(Math.max(280, entry.contentRect.width));
     });
     observer.observe(host);
     return () => observer.disconnect();
   }, []);
 
   useEffect(() => {
-    if (!document || !canvasRef.current) return;
+    if (!shouldRender || !document || !canvasRef.current) return;
     let active = true;
-    setStatus('Carregando página...');
+    setStatus('Carregando pagina...');
     renderTaskRef.current?.cancel();
     document.getPage(page).then((pdfPage) => {
       if (!active || !canvasRef.current) return;
       const base = pdfPage.getViewport({ scale: 1 });
       const cssScale = width / base.width;
       const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
-      const viewport = pdfPage.getViewport({ scale: cssScale * pixelRatio * zoom });
+      const viewport = pdfPage.getViewport({ scale: cssScale * pixelRatio * zoom, rotation });
       const canvas = canvasRef.current;
       const context = canvas.getContext('2d');
       if (!context) return;
@@ -73,19 +97,19 @@ export default function PdfPageCanvas({ url, page, zoom = 1, onDocumentReady }: 
       const task = pdfPage.render({ canvasContext: context, viewport });
       renderTaskRef.current = task;
       task.promise.then(() => active && setStatus('')).catch((error) => {
-        if (error?.name !== 'RenderingCancelledException' && active) setStatus('Não foi possível renderizar esta página.');
+        if (error?.name !== 'RenderingCancelledException' && active) setStatus('Nao foi possivel renderizar esta pagina.');
       });
     });
     return () => {
       active = false;
       renderTaskRef.current?.cancel();
     };
-  }, [document, page, width, zoom]);
+  }, [shouldRender, document, page, width, zoom, rotation]);
 
   return (
     <div className="pdf-page-host" ref={hostRef}>
       {status && <div className="pdf-page-status">{status}</div>}
-      <canvas ref={canvasRef} aria-label={`Página ${page} do livro`} />
+      <canvas ref={canvasRef} aria-label={`Pagina ${page} do livro`} />
     </div>
   );
 }

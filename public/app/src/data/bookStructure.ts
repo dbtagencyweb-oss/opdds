@@ -1,37 +1,67 @@
-export type BookGroupId = 'quebra' | 'fundamentos' | 'acolhimento' | 'sobrevivencia' | 'reconstrucao' | 'continuidade' | 'encerramento';
+export type BookGroupId =
+  | 'abertura'
+  | 'quebra'
+  | 'fundamentos'
+  | 'acolhimento'
+  | 'sobrevivencia'
+  | 'reconstrucao'
+  | 'continuidade'
+  | 'encerramento';
 
 export const bookGroups = [
-  { id: 'quebra', eyebrow: 'Quebra de expectativa', title: 'Antes de começar', description: 'O livro desmonta a promessa de solução rápida e apresenta quem é o desacreditado.' },
-  { id: 'fundamentos', eyebrow: 'Fundamentos da obra', title: 'A Tríade Humana Fundamental', description: 'Consciência, Julgamento e Presença formam a lente usada em toda a jornada.' },
-  { id: 'acolhimento', eyebrow: 'Acolhimento e orientação', title: 'Como atravessar o livro', description: 'Uma entrada sem pressa, cobrança ou obrigação de leitura linear.' },
-  { id: 'sobrevivencia', eyebrow: 'Ato I · Primeira Tríade', title: 'A Sobrevivência', description: 'Reconhecer o que existe, compreender as lealdades e dar nome às ausências.' },
-  { id: 'reconstrucao', eyebrow: 'Ato II · Segunda Tríade', title: 'A Reconstrução', description: 'Separar valor de desempenho, sustentar a dor e autorizar o desejo.' },
-  { id: 'continuidade', eyebrow: 'Ato III · Terceira Tríade', title: 'A Continuidade', description: 'Permanecer quando faltam certeza, abundância e respostas prontas.' },
-  { id: 'encerramento', eyebrow: 'Encerramento', title: 'Onde a presença continua', description: 'A carta final e um epílogo que devolvem o leitor à vida.' },
+  { id: 'abertura', eyebrow: 'Abertura', title: 'Abertura', description: 'Textos iniciais da versão física antes do índice: entrada, nota do autor e créditos.' },
+  { id: 'quebra', eyebrow: 'Quebra de expectativa', title: 'Quebra de expectativa', description: 'O livro desacelera promessas rápidas e apresenta quem é o desacreditado.' },
+  { id: 'fundamentos', eyebrow: 'Fundamento da obra', title: 'Fundamento da obra', description: 'Consciência, Julgamento e Presença formam a lente usada em toda a jornada.' },
+  { id: 'acolhimento', eyebrow: 'Acolhimento e orientação', title: 'Acolhimento e orientação', description: 'Uma entrada sem pressa, cobrança ou obrigação de leitura linear.' },
+  { id: 'sobrevivencia', eyebrow: 'Ato I — Tríade da Sobrevivência', title: 'Ato I — Tríade da Sobrevivência', description: 'Reconhecer o que existe, compreender as lealdades e dar nome às ausências.' },
+  { id: 'reconstrucao', eyebrow: 'Ato II — Tríade da Reconstrução', title: 'Ato II — Tríade da Reconstrução', description: 'Separar valor de desempenho, sustentar a dor e autorizar o desejo.' },
+  { id: 'continuidade', eyebrow: 'Ato III — Tríade da Continuidade', title: 'Ato III — Tríade da Continuidade', description: 'Permanecer quando faltam certeza, abundância e respostas prontas.' },
+  { id: 'encerramento', eyebrow: 'Encerramento', title: 'Encerramento', description: 'A carta final, o posfácio e a reflexão final devolvem o leitor à vida.' },
 ] as const;
 
-const pillarSections = ['Limiar', 'Manifesto de abertura', 'Narrativa profunda', 'Consciência', 'Julgamento', 'Presença', 'Âncora prática', 'Fecho do pilar'];
+const pillarSections = [
+  'Abertura',
+  'Limiar',
+  'Manifesto de Abertura',
+  'Narrativa Profunda',
+  'Consciência',
+  'Julgamento',
+  'Carta de Sustentação',
+  'Âncora Prática',
+  'A Regra',
+  'Fecho do Pilar',
+];
 
 export const bookStructure = [
-  { id: 'nao-e-autoajuda', title: 'Por que este livro não é autoajuda', shortTitle: 'Por que não é autoajuda', groupId: 'quebra', kind: 'capitulo', pdfPage: 10, summary: 'Uma obra que não promete vencer, consertar ou acelerar: oferece presença para quem continua.' },
-  { id: 'o-desacreditado', title: 'Sobre o Desacreditado', shortTitle: 'O Desacreditado', groupId: 'quebra', kind: 'capitulo', pdfPage: 20, summary: 'O desacreditado não é quem desistiu, mas quem permaneceu sem receber reconhecimento.' },
-  { id: 'alem-da-autoajuda', title: 'Além da Autoajuda', shortTitle: 'Além da Autoajuda', groupId: 'quebra', kind: 'capitulo', pdfPage: 31, summary: 'Um contraponto à obrigação de transformar dor em espetáculo, desempenho ou sucesso visível.' },
-  { id: 'triade-humana', title: 'A Tríade Humana Fundamental', shortTitle: 'A Tríade Humana', groupId: 'fundamentos', kind: 'capitulo', pdfPage: 37, summary: 'Consciência percebe, Julgamento interpreta e Presença permite permanecer sem se destruir.' },
-  { id: 'autor-ferramenta-presenca', title: 'Autor, Ferramenta e Presença', shortTitle: 'Autor, Ferramenta e Presença', groupId: 'fundamentos', kind: 'capitulo', pdfPage: 46, summary: 'A autoria como presença sustentada: experiência humana, ferramenta e responsabilidade.' },
-  { id: 'dualidade-trialidade', title: 'Da Dualidade à Trialidade', shortTitle: 'Da Dualidade à Trialidade', groupId: 'fundamentos', kind: 'capitulo', pdfPage: 53, summary: 'Entre sentir e reagir existe um terceiro espaço: a possibilidade de permanecer consciente.' },
-  { id: 'prefacio', title: 'Prefácio', shortTitle: 'Prefácio', groupId: 'acolhimento', kind: 'prefacio', pdfPage: 63, summary: 'Leia sem se cobrar. Pare quando tocar fundo e deixe para depois o que ainda não fizer sentido.' },
-  { id: 'introducao', title: 'Introdução', shortTitle: 'Introdução', groupId: 'acolhimento', kind: 'introducao', pdfPage: 66, summary: 'Os pilares são territórios emocionais, não metas nem fases obrigatórias.' },
-  { id: 'reconhecimento', title: 'Pilar I — Reconhecimento', shortTitle: 'Reconhecimento', groupId: 'sobrevivencia', kind: 'pilar', pillar: 1, roman: 'I', pdfPage: 72, summary: 'Onde a negação cessa e o indivíduo encontra o próprio ponto real.', sections: pillarSections },
-  { id: 'familia', title: 'Pilar II — Família', shortTitle: 'Família', groupId: 'sobrevivencia', kind: 'pilar', pillar: 2, roman: 'II', pdfPage: 109, summary: 'Lealdades invisíveis e o primeiro lugar onde aprendemos a nos calar.', sections: pillarSections },
-  { id: 'luto', title: 'Pilar III — Luto', shortTitle: 'Luto', groupId: 'sobrevivencia', kind: 'pilar', pillar: 3, roman: 'III', pdfPage: 154, summary: 'Mortes reais e simbólicas, ausências sem ritual e aquilo que continua doendo.', sections: pillarSections },
-  { id: 'trabalho', title: 'Pilar IV — Trabalho', shortTitle: 'Trabalho', groupId: 'reconstrucao', kind: 'pilar', pillar: 4, roman: 'IV', pdfPage: 173, summary: 'Quando produzir deixa de significar existir e o valor se separa da utilidade.', sections: pillarSections },
-  { id: 'dor', title: 'Pilar V — Dor', shortTitle: 'Dor', groupId: 'reconstrucao', kind: 'pilar', pillar: 5, roman: 'V', pdfPage: 189, summary: 'Dor, fuga e anestesia: rotas de escape que começaram como sobrevivência.', sections: pillarSections },
-  { id: 'desejo', title: 'Pilar VI — Desejo', shortTitle: 'Desejo', groupId: 'reconstrucao', kind: 'pilar', pillar: 6, roman: 'VI', pdfPage: 207, summary: 'Amor, projeção e frustração quando o vínculo deixa de ser encontro e vira prova.', sections: pillarSections },
-  { id: 'fe', title: 'Pilar VII — Fé', shortTitle: 'Fé', groupId: 'continuidade', kind: 'pilar', pillar: 7, roman: 'VII', pdfPage: 228, summary: 'Fé, sentido e desencanto para quem deixou de acreditar por cansaço.', sections: pillarSections },
-  { id: 'escassez', title: 'Pilar VIII — Escassez', shortTitle: 'Escassez', groupId: 'continuidade', kind: 'pilar', pillar: 8, roman: 'VIII', pdfPage: 243, summary: 'Ver a falta sem se tornar falta e recuperar escala diante da urgência.', sections: pillarSections },
-  { id: 'vazio', title: 'Pilar IX — Vazio', shortTitle: 'Vazio', groupId: 'continuidade', kind: 'pilar', pillar: 9, roman: 'IX', pdfPage: 255, summary: 'O silêncio deixa de ser ameaça e a continuidade se torna cuidado.', sections: pillarSections },
-  { id: 'carta-final', title: 'Carta Final do Autor', shortTitle: 'Carta Final', groupId: 'encerramento', kind: 'carta-final', pdfPage: 272, summary: 'Uma carta para quem não precisa de aplauso, mas de respeito pela própria permanência.' },
-  { id: 'epilogo', title: 'Epílogo — Onde a Presença Continua', shortTitle: 'Epílogo', groupId: 'encerramento', kind: 'epilogo', pdfPage: 277, summary: 'O livro termina sem exigir conclusão: a proposta continua na forma de presença.', sections: ['Epílogo', 'Posfácio', 'Caderno de Presença · Reflexão final'] },
+  { id: 'capa-digital', title: 'O Poder dos Desacreditados', shortTitle: 'Capa digital', groupId: 'abertura', kind: 'cover', pdfPage: 1, summary: 'Há um poder que só aparece na ausência de expectativa.' },
+  { id: 'epigrafe', title: 'Entre', shortTitle: 'Entrada', groupId: 'abertura', kind: 'chapter', pdfPage: 2, summary: 'Toda travessia começa antes do primeiro passo: no instante em que você deixa de lutar contra si mesmo.' },
+  { id: 'nota-do-autor', title: 'Nota do autor', shortTitle: 'Nota do autor', groupId: 'abertura', kind: 'chapter', pdfPage: 3, summary: 'Nota sobre o processo de escrita e o cuidado de não transformar presença em performance.' },
+  { id: 'creditos', title: 'Créditos', shortTitle: 'Créditos', groupId: 'abertura', kind: 'chapter', pdfPage: 4, summary: 'Dados autorais e direitos da obra.' },
+  { id: 'quebra1', title: 'Por que este livro não é autoajuda', shortTitle: 'Por que este livro não é autoajuda', groupId: 'quebra', kind: 'chapter', pdfPage: 5, summary: 'Este livro desacelera promessas rápidas e acompanha quem está tentando não se perder enquanto a vida acontece.' },
+  { id: 'quebra2', title: 'Sobre o Desacreditado', shortTitle: 'Sobre o Desacreditado', groupId: 'quebra', kind: 'chapter', pdfPage: 6, summary: 'Quem continuou sem testemunha, aplauso ou reconhecimento encontra aqui uma linguagem para o próprio ponto real.' },
+  { id: 'quebra3', title: 'Além da autoajuda', shortTitle: 'Além da autoajuda', groupId: 'quebra', kind: 'chapter', pdfPage: 7, summary: 'Um contraponto à obrigação de transformar dor em espetáculo, desempenho ou sucesso visível.' },
+  { id: 'fund1', title: 'A Tríade Humana Fundamental', shortTitle: 'A Tríade Humana Fundamental', groupId: 'fundamentos', kind: 'chapter', pdfPage: 8, summary: 'Consciência percebe, Julgamento interpreta e Presença permite permanecer sem se destruir.' },
+  { id: 'fund2', title: 'Autor, ferramenta e presença', shortTitle: 'Autor, ferramenta e presença', groupId: 'fundamentos', kind: 'chapter', pdfPage: 9, summary: 'A autoria como presença sustentada: experiência humana, ferramenta e responsabilidade.' },
+  { id: 'fund3', title: 'Da dualidade à trialidade', shortTitle: 'Da dualidade à trialidade', groupId: 'fundamentos', kind: 'chapter', pdfPage: 10, summary: 'Entre sentir e reagir existe um terceiro espaço: a possibilidade de permanecer consciente.' },
+  { id: 'acol1', title: 'Prefácio', shortTitle: 'Prefácio', groupId: 'acolhimento', kind: 'chapter', pdfPage: 11, summary: 'Leia sem se cobrar. Pare quando tocar fundo e deixe para depois o que ainda não fizer sentido.' },
+  { id: 'acol2', title: 'Introdução', shortTitle: 'Introdução', groupId: 'acolhimento', kind: 'chapter', pdfPage: 12, summary: 'Os pilares são territórios emocionais, não metas nem fases obrigatórias.' },
+  { id: 'pilar1', title: 'Pilar I — Reconhecimento', shortTitle: 'Reconhecimento', groupId: 'sobrevivencia', kind: 'chapter', pillar: 1, roman: 'I', pdfPage: 13, summary: 'Onde a negação cessa e o indivíduo encontra o próprio ponto real.', sections: pillarSections },
+  { id: 'pilar2', title: 'Pilar II — Família e lealdades invisíveis', shortTitle: 'Família', groupId: 'sobrevivencia', kind: 'chapter', pillar: 2, roman: 'II', pdfPage: 14, summary: 'Lealdades invisíveis e o primeiro lugar onde aprendemos a nos calar.', sections: pillarSections },
+  { id: 'interludio', title: 'Interlúdio — Pertencimento e rejeição', shortTitle: 'Interlúdio', groupId: 'sobrevivencia', kind: 'chapter', pdfPage: 15, summary: 'Uma dobra entre pertencimento, rejeição e o modo como o vínculo atravessa a sobrevivência.' },
+  { id: 'pilar3', title: 'Pilar III — Luto, ausência e quebra de laços', shortTitle: 'Luto', groupId: 'sobrevivencia', kind: 'chapter', pillar: 3, roman: 'III', pdfPage: 16, summary: 'Mortes reais e simbólicas, ausências sem ritual e aquilo que continua doendo.', sections: pillarSections },
+  { id: 'caderno1', title: 'Caderno de presença — Tríade da Sobrevivência', shortTitle: 'Caderno de presença', groupId: 'sobrevivencia', kind: 'caderno', pdfPage: 17, summary: 'Perguntas de escrita para integrar a primeira tríade.' },
+  { id: 'pilar4', title: 'Pilar IV — Trabalho, valor e identidade', shortTitle: 'Trabalho', groupId: 'reconstrucao', kind: 'chapter', pillar: 4, roman: 'IV', pdfPage: 18, summary: 'Quando produzir deixa de significar existir e o valor se separa da utilidade.', sections: pillarSections },
+  { id: 'pilar5', title: 'Pilar V — Dor, fuga e anestesia', shortTitle: 'Dor', groupId: 'reconstrucao', kind: 'chapter', pillar: 5, roman: 'V', pdfPage: 19, summary: 'Rotas de escape que começaram como sobrevivência.', sections: pillarSections },
+  { id: 'pilar6', title: 'Pilar VI — Desejo, amor e frustração', shortTitle: 'Desejo', groupId: 'reconstrucao', kind: 'chapter', pillar: 6, roman: 'VI', pdfPage: 20, summary: 'Quando o vínculo deixa de ser encontro e vira prova.', sections: pillarSections },
+  { id: 'caderno2', title: 'Caderno de presença — Tríade da Reconstrução', shortTitle: 'Caderno de presença', groupId: 'reconstrucao', kind: 'caderno', pdfPage: 21, summary: 'Perguntas de escrita para integrar a segunda tríade.' },
+  { id: 'pilar7', title: 'Pilar VII — Fé, sentido e desencanto', shortTitle: 'Fé', groupId: 'continuidade', kind: 'chapter', pillar: 7, roman: 'VII', pdfPage: 22, summary: 'Fé, sentido e desencanto para quem deixou de acreditar por cansaço.', sections: pillarSections },
+  { id: 'pilar8', title: 'Pilar VIII — Escassez, medo e sustentação', shortTitle: 'Escassez', groupId: 'continuidade', kind: 'chapter', pillar: 8, roman: 'VIII', pdfPage: 23, summary: 'Ver a falta sem se tornar falta e recuperar escala diante da urgência.', sections: pillarSections },
+  { id: 'pilar9', title: 'Pilar IX — Vazio, presença e continuidade', shortTitle: 'Vazio', groupId: 'continuidade', kind: 'chapter', pillar: 9, roman: 'IX', pdfPage: 24, summary: 'O silêncio deixa de ser ameaça e a continuidade se torna cuidado.', sections: pillarSections },
+  { id: 'caderno3', title: 'Caderno de presença — Tríade da Continuidade', shortTitle: 'Caderno de presença', groupId: 'continuidade', kind: 'caderno', pdfPage: 25, summary: 'Perguntas de escrita para integrar a terceira tríade.' },
+  { id: 'enc1', title: 'Epílogo — Onde a presença continua', shortTitle: 'Epílogo', groupId: 'encerramento', kind: 'chapter', pdfPage: 26, summary: 'O livro termina sem exigir conclusão: a proposta continua na forma de presença.' },
+  { id: 'caderno4', title: 'Caderno de presença — Reflexão final', shortTitle: 'Caderno de presença', groupId: 'encerramento', kind: 'caderno', pdfPage: 27, summary: 'Perguntas finais para registrar o que permanece depois da travessia.' },
+  { id: 'enc2', title: 'Carta final do autor', shortTitle: 'Carta final', groupId: 'encerramento', kind: 'chapter', pdfPage: 28, summary: 'Uma carta para quem não precisa de aplauso, mas de respeito pela própria permanência.' },
+  { id: 'enc3', title: 'Posfácio', shortTitle: 'Posfácio', groupId: 'encerramento', kind: 'chapter', pdfPage: 29, summary: 'Uma última pausa: não transforme estas páginas em meta.' },
 ] as const;
 
 export const pillarLetters = [

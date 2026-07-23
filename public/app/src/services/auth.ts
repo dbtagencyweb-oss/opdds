@@ -1,4 +1,5 @@
 import { accessTokenPlans, accessTokens } from '../data/book';
+import { runtimeConfig } from '../config/runtime';
 import { apiRequest } from './api';
 import { localEntitlements, LocalPlan } from './entitlements';
 
@@ -105,6 +106,7 @@ export type MindChatMessage = {
 export type MindChatRequest = {
   sessionId?: string;
   topic?: string;
+  source?: string;
   message: string;
   messages?: MindChatMessage[];
   context?: Record<string, unknown>;
@@ -114,6 +116,33 @@ export type MindChatResponse = {
   sessionId: string;
   message: string;
   fallback?: boolean;
+  provider?: 'openai' | 'gemini' | 'local';
+  references?: Array<{
+    chapterId: string;
+    chapterTitle: string;
+    sectionId: string;
+    sectionTitle: string;
+  }>;
+};
+
+export type MindServiceStatus = {
+  provider: 'openai' | 'gemini' | 'local';
+  connected: boolean;
+  canonicalVersion: string;
+  safety: string;
+};
+
+export type ReaderJourneySnapshot = {
+  workbookEntry: string;
+  workbookAnswers: Record<string, string>;
+  canonicalJournalAnswers: Record<string, string>;
+  workbookPrompt: string;
+  letters: Record<string, string>;
+  letterMeta: Record<string, unknown>;
+  readerNotes: unknown[];
+  anchors: unknown[];
+  audioProgress: Record<string, unknown>;
+  updatedAt?: string;
 };
 
 type AuthResponse = {
@@ -161,9 +190,14 @@ function persistAuth(response: AuthResponse) {
 }
 
 function localTokenPlan(token: string): LocalPlan | null {
+  if (!runtimeConfig.localMode) return null;
   const normalized = token.trim().toUpperCase();
   if (!accessTokens.includes(normalized)) return null;
   return accessTokenPlans[normalized] || 'basic';
+}
+
+function isLocalAuthToken(token?: string | null) {
+  return Boolean(runtimeConfig.localMode && token && (token.startsWith('LOCAL_') || accessTokens.includes(token)));
 }
 
 export function getStoredAuthUser(): AuthUser | null {
@@ -204,15 +238,16 @@ export async function registerAccount(input: { name: string; email: string; pass
       method: 'POST',
       body: JSON.stringify(input),
     })));
-  } catch {
+  } catch (error) {
+    if (!runtimeConfig.localMode) throw error;
     const normalizedToken = input.token.trim().toUpperCase();
-    const plan = localTokenPlan(normalizedToken) || (normalizedToken.startsWith('OPDDS_') ? 'vip' : null);
-    if (!plan) throw new Error('Token inválido ou ainda não liberado.');
+    const plan = localTokenPlan(normalizedToken);
+    if (!plan) throw new Error('Token inv\u00e1lido ou ainda n\u00e3o liberado.');
 
     const role: UserRole = ['FUNDADOR', 'VIP-ALMA'].includes(normalizedToken) ? 'ADMIN' : 'MEMBER';
     const users = loadLocalUsers();
     const email = input.email.trim().toLowerCase();
-    if (users.some((user) => user.email === email)) throw new Error('E-mail já cadastrado localmente.');
+    if (users.some((user) => user.email === email)) throw new Error('E-mail j\u00e1 cadastrado localmente.');
 
     const user: LocalUserRecord = {
       id: `local-${Date.now()}`,
@@ -235,7 +270,8 @@ export async function loginAccount(input: { email: string; password: string }) {
       method: 'POST',
       body: JSON.stringify(input),
     })));
-  } catch {
+  } catch (error) {
+    if (!runtimeConfig.localMode) throw error;
     const users = loadLocalUsers();
     const email = input.email.trim().toLowerCase();
     const user = users.find((item) => item.email === email && item.password === input.password);
@@ -260,7 +296,7 @@ export async function resetPassword(input: { token: string; password: string }) 
 
 export async function fetchCurrentUser() {
   const token = getStoredAuthToken();
-  if (!token || token.startsWith('LOCAL_') || accessTokens.includes(token)) return getStoredAuthUser();
+  if (!token || isLocalAuthToken(token)) return getStoredAuthUser();
   const response = await apiRequest<AuthResponse>('/api/auth/me', { token });
   persistAuth(response);
   return response.user;
@@ -268,19 +304,19 @@ export async function fetchCurrentUser() {
 
 export async function fetchAdminUsers() {
   const token = getStoredAuthToken();
-  if (!token || token.startsWith('LOCAL_') || accessTokens.includes(token)) return listLocalUsers();
+  if (!token || isLocalAuthToken(token)) return listLocalUsers();
   return apiRequest<LocalUserRecord[]>('/api/admin/users', { token });
 }
 
 export async function fetchAdminProducts() {
   const token = getStoredAuthToken();
-  if (!token || token.startsWith('LOCAL_') || accessTokens.includes(token)) return [];
+  if (!token || isLocalAuthToken(token)) return [];
   return apiRequest<AdminProduct[]>('/api/admin/products', { token });
 }
 
 export async function fetchAdminEvents() {
   const token = getStoredAuthToken();
-  if (!token || token.startsWith('LOCAL_') || accessTokens.includes(token)) return [];
+  if (!token || isLocalAuthToken(token)) return [];
   return apiRequest<AdminEvent[]>('/api/admin/events', { token });
 }
 
@@ -389,7 +425,7 @@ export async function saveAdminBookAudioOrder(input: { chapterId: string; sectio
 
 export async function sendMindMessage(input: MindChatRequest) {
   const token = getStoredAuthToken();
-  if (!token || token.startsWith('LOCAL_') || accessTokens.includes(token)) {
+  if (!token || isLocalAuthToken(token)) {
     throw new Error('Entre com uma conta online para usar o iGentMIND conectado.');
   }
 
@@ -398,4 +434,38 @@ export async function sendMindMessage(input: MindChatRequest) {
     method: 'POST',
     body: JSON.stringify(input),
   });
+}
+
+export async function fetchMindStatus() {
+  const token = getStoredAuthToken();
+  if (!token || isLocalAuthToken(token)) return null;
+  return apiRequest<MindServiceStatus>('/api/igent/status', { token });
+}
+
+export async function fetchReaderJourney() {
+  const token = getStoredAuthToken();
+  if (!token || isLocalAuthToken(token)) return null;
+  return apiRequest<ReaderJourneySnapshot>('/api/workbook/journey', { token });
+}
+
+export async function syncReaderJourney(input: Partial<ReaderJourneySnapshot>) {
+  const token = getStoredAuthToken();
+  if (!token || isLocalAuthToken(token)) return null;
+  return apiRequest<ReaderJourneySnapshot>('/api/workbook/journey', {
+    token,
+    method: 'POST',
+    body: JSON.stringify(input),
+  });
+}
+
+export async function deleteReaderJourney() {
+  const token = getStoredAuthToken();
+  if (!token || isLocalAuthToken(token)) return { deleted: 0 };
+  return apiRequest<{ deleted: number }>('/api/workbook/journey', { token, method: 'DELETE' });
+}
+
+export async function deleteMindSessions() {
+  const token = getStoredAuthToken();
+  if (!token || isLocalAuthToken(token)) return { deleted: 0 };
+  return apiRequest<{ deleted: number }>('/api/igent/sessions', { token, method: 'DELETE' });
 }

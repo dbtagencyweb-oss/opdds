@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react';
+﻿import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Bookmark,
   BookOpen,
@@ -7,22 +7,33 @@ import {
   DownloadCloud,
   Heart,
   Headphones,
-  Highlighter,
   Home,
   Mail,
   Maximize2,
   Menu,
   Minimize2,
   Minus,
+  Moon,
+  MoreVertical,
+  Pause,
   Plus,
   Play,
-  Share2,
+  Printer,
+  RotateCw,
   StickyNote,
+  Sun,
   Volume2,
   X,
 } from 'lucide-react';
+import type { CanonicalBookChapter } from '../data/canonicalBook';
 
 const PdfPageCanvas = lazy(() => import('./PdfPageCanvas'));
+
+type AudioTrack = {
+  label: string;
+  url: string;
+  coverUrl?: string | null;
+};
 
 type ChapterNavItem = {
   id: string;
@@ -31,12 +42,7 @@ type ChapterNavItem = {
   pdfPage: number;
   groupId: string;
   roman?: string;
-};
-
-type AudioTrack = {
-  label: string;
-  url: string;
-  coverUrl?: string | null;
+  audioTracks?: AudioTrack[];
 };
 
 type AudioProgressEntry = {
@@ -61,7 +67,27 @@ type TextBlock = {
   text: string;
   alt?: string;
   size?: number;
+  className?: string;
 };
+
+type ReaderHeaderDirectives = {
+  hideHeader: boolean;
+  hideEyebrow: boolean;
+  hideTitle: boolean;
+  eyebrow?: string;
+  title?: string;
+};
+
+const brokenSeparatorGlyphPattern = '[\\u0013\\u0014\\u25A0-\\u25A3\\u25A8-\\u25AB\\u25AD-\\u25AF\\u25CC\\u25FB-\\u25FE\\uFFFC]';
+
+const normalizeReaderSeparators = (value = '') =>
+  value
+    .replace(new RegExp(`\\b(Pilar\\s+[IVXLCDM]+)\\s*(?:${brokenSeparatorGlyphPattern}|\\uFFFD)+\\s*`, 'gi'), '$1 - ')
+    .replace(/[\u0013\u0014\u25A0-\u25A3\u25A8-\u25AB\u25AD-\u25AF\u25CC\u25FB-\u25FE\uFFFC]/g, '—')
+    .replace(/\s*[—–-]\s*/g, ' — ')
+    .replace(/\b(Pilar\s+[IVXLCDM]+)\s+—\s+/gi, '$1 - ')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
 
 type Props = {
   title: string;
@@ -76,11 +102,15 @@ type Props = {
   chapterIndex?: number;
   chapterTotal?: number;
   chapterKind?: string;
-  chapterSections?: string[];
+  chapterSections?: readonly string[];
+  canonicalChapter?: CanonicalBookChapter | null;
+  journalAnswers?: Record<string, string>;
+  onJournalAnswerChange?: (promptId: string, value: string) => void;
   coverImageUrl?: string;
   audioTracks?: AudioTrack[];
   pdfUrl?: string;
   pdfTextPages?: readonly string[];
+  pdfPageTitles?: Record<number, string>;
   pdfCurrentPage: number;
   totalPdfPages: number;
   chapters: ChapterNavItem[];
@@ -91,6 +121,15 @@ type Props = {
   audioProgress?: Record<string, AudioProgressEntry>;
   activeAudioUrl?: string | null;
   isAudioPlaying?: boolean;
+  audioCurrentTime?: number;
+  audioDuration?: number;
+  audioVolume?: number;
+  audioPlaybackRate?: number;
+  audioFrequencies?: number[];
+  onAudioSeek?: (value: number) => void;
+  onAudioVolumeChange?: (value: number) => void;
+  onAudioPlaybackRateChange?: () => void;
+  onOpenAudioFullscreen?: () => void;
   isFavorite: boolean;
   onToggleFavorite: () => void;
   isPageBookmarked?: boolean;
@@ -104,12 +143,19 @@ type Props = {
   onFontIncrease: () => void;
   onFontDecrease: () => void;
   onOpenPdf: () => void;
-  onShare: () => void;
   onExitReader?: () => void;
   showNarrationButton?: boolean;
+  sensoryTrackTitle?: string;
+  isSensoryTrackPlaying?: boolean;
+  onToggleSensoryTrack?: () => void;
+  darkMode?: boolean;
+  onToggleTheme?: () => void;
+  initialMode?: 'edition' | 'text';
 };
 
 const groupLabels: Record<string, string> = {
+  manifesto: '1 · Manifesto',
+  abertura: '2 · Abertura',
   quebra: 'Quebra de expectativa',
   fundamentos: 'Fundamentos da obra',
   acolhimento: 'Acolhimento e orientação',
@@ -129,64 +175,91 @@ const openingContents: Array<ChapterNavItem & { index: -1; kind: string }> = [
 ];
 
 const cleanLabel = (value = '') => {
-  let repaired = value;
+  let repaired = String(value ?? '');
   try {
-    if (/[Ãâð]/.test(value)) {
-      const bytes = Uint8Array.from(Array.from(value).map((char) => char.charCodeAt(0) & 255));
-      repaired = new TextDecoder('utf-8').decode(bytes);
+    if (/[ÃÂâð]/.test(repaired)) {
+      const bytes = Uint8Array.from(Array.from(repaired).map((char) => char.charCodeAt(0) & 255));
+      const decoded = new TextDecoder('utf-8', { fatal: false }).decode(bytes);
+      if (!decoded.includes('\uFFFD')) repaired = decoded;
     }
   } catch {
-    repaired = value
-      .replaceAll('Ã¡', 'á')
-      .replaceAll('Ã©', 'é')
-      .replaceAll('Ã­', 'í')
-      .replaceAll('Ã³', 'ó')
-      .replaceAll('Ãº', 'ú')
-      .replaceAll('Ã£', 'ã')
-      .replaceAll('Ãµ', 'õ')
-      .replaceAll('Ã§', 'ç')
-      .replaceAll('Ãª', 'ê')
-      .replaceAll('Ã´', 'ô')
-      .replaceAll('Â·', '·')
-      .replaceAll('â€”', '—')
-      .replaceAll('â€“', '–');
+    // Mantém o texto original e aplica correções pontuais abaixo.
   }
 
-  const badChar = '[\\uFFFD\\u00EF\\u00BF\\u00BD]';
+  const badChar = '[\\uFFFD\\u00EF\\u00BF\\u00BD]+';
   return repaired
-    .replace(new RegExp(`N${badChar}O`, 'g'), 'N\u00c3O')
-    .replace(new RegExp(`n${badChar}o`, 'g'), 'n\u00e3o')
-    .replace(new RegExp(`${badChar}\\s*AUTOAJUDA`, 'g'), '\u00c9 AUTOAJUDA')
-    .replace(new RegExp(`${badChar}\\s*autoajuda`, 'g'), '\u00e9 autoajuda')
-    .replace(new RegExp(`EXPERI${badChar}NCIA`, 'g'), 'EXPERI\u00caNCIA')
-    .replace(new RegExp(`experi${badChar}ncia`, 'g'), 'experi\u00eancia')
-    .replace(new RegExp(`${badChar}ncora pr${badChar}tica`, 'gi'), '\u00c2ncora pr\u00e1tica')
-    .replace(new RegExp(`${badChar}NCORA PR${badChar}TICA`, 'g'), '\u00c2NCORA PR\u00c1TICA')
-    .replace(new RegExp(`pr${badChar}tica`, 'g'), 'pr\u00e1tica')
-    .replace(new RegExp(`Pr${badChar}tica`, 'g'), 'Pr\u00e1tica')
-    .replace(new RegExp(`Presen${badChar}a`, 'g'), 'Presen\u00e7a')
-    .replace(new RegExp(`presen${badChar}a`, 'g'), 'presen\u00e7a')
-    .replace(new RegExp(`Consci${badChar}ncia`, 'g'), 'Consci\u00eancia')
-    .replace(new RegExp(`consci${badChar}ncia`, 'g'), 'consci\u00eancia')
-    .replace(new RegExp(`Tr${badChar}ade`, 'g'), 'Tr\u00edade')
-    .replace(new RegExp(`TR${badChar}ADE`, 'g'), 'TR\u00cdADE')
-    .replace(new RegExp(`Orienta${badChar}+o`, 'g'), 'Orientação')
-    .replace(new RegExp(`orienta${badChar}+o`, 'g'), 'orientação')
-    .replace(new RegExp(`ORIENTA${badChar}+O`, 'g'), 'ORIENTAÇÃO')
-    .replace(new RegExp(`Reconstru${badChar}+o`, 'g'), 'Reconstrução')
-    .replace(new RegExp(`reconstru${badChar}+o`, 'g'), 'reconstrução');
+    .replaceAll('Ã¡', 'á')
+    .replaceAll('Ãà', 'à')
+    .replaceAll('Ã¢', 'â')
+    .replaceAll('Ã£', 'ã')
+    .replaceAll('Ã©', 'é')
+    .replaceAll('Ãª', 'ê')
+    .replaceAll('Ã­', 'í')
+    .replaceAll('Ã³', 'ó')
+    .replaceAll('Ã´', 'ô')
+    .replaceAll('Ãµ', 'õ')
+    .replaceAll('Ãº', 'ú')
+    .replaceAll('Ã§', 'ç')
+    .replaceAll('Ã�', 'Í')
+    .replaceAll('Ã‰', 'É')
+    .replaceAll('ÃŠ', 'Ê')
+    .replaceAll('Ãƒ', 'Ã')
+    .replaceAll('Ã‡', 'Ç')
+    .replaceAll('Â·', '·')
+    .replaceAll('Â ', ' ')
+    .replaceAll('â€œ', '"')
+    .replaceAll('â€', '"')
+    .replaceAll('â€˜', "'")
+    .replaceAll('â€™', "'")
+    .replaceAll('â€”', '—')
+    .replaceAll('â€“', '–')
+    .replaceAll('–', '–')
+    .replaceAll('—', '—')
+    .replaceAll('−', '−')
+    .replace(new RegExp(`N${badChar}O`, 'g'), 'NÃO')
+    .replace(new RegExp(`n${badChar}o`, 'g'), 'não')
+    .replace(new RegExp(`${badChar}\\s*AUTOAJUDA`, 'g'), 'É AUTOAJUDA')
+    .replace(new RegExp(`${badChar}\\s*autoajuda`, 'g'), 'é autoajuda')
+    .replace(new RegExp(`EXPERI${badChar}NCIA`, 'g'), 'EXPERIÊNCIA')
+    .replace(new RegExp(`experi${badChar}ncia`, 'g'), 'experiência')
+    .replace(new RegExp(`${badChar}ncora pr${badChar}tica`, 'gi'), 'Âncora prática')
+    .replace(new RegExp(`${badChar}NCORA PR${badChar}TICA`, 'g'), 'ÂNCORA PRÁTICA')
+    .replace(new RegExp(`pr${badChar}tica`, 'g'), 'prática')
+    .replace(new RegExp(`Pr${badChar}tica`, 'g'), 'Prática')
+    .replace(new RegExp(`Presen${badChar}a`, 'g'), 'Presença')
+    .replace(new RegExp(`presen${badChar}a`, 'g'), 'presença')
+    .replace(new RegExp(`Consci${badChar}ncia`, 'g'), 'Consciência')
+    .replace(new RegExp(`consci${badChar}ncia`, 'g'), 'consciência')
+    .replace(new RegExp(`Tr${badChar}ade`, 'g'), 'Tríade')
+    .replace(new RegExp(`TR${badChar}ADE`, 'g'), 'TRÍADE')
+    .replace(new RegExp(`CONTEMPOR${badChar}NEAS`, 'g'), 'CONTEMPORÂNEAS')
+    .replace(new RegExp(`Contempor${badChar}neas`, 'g'), 'Contemporâneas')
+    .replace(new RegExp(`contempor${badChar}neas`, 'g'), 'contemporâneas')
+    .replace(new RegExp(`Orienta${badChar}o`, 'g'), 'Orientação')
+    .replace(new RegExp(`orienta${badChar}o`, 'g'), 'orientação')
+    .replace(new RegExp(`ORIENTA${badChar}O`, 'g'), 'ORIENTAÇÃO')
+    .replace(new RegExp(`Reconstru${badChar}o`, 'g'), 'Reconstrução')
+    .replace(new RegExp(`reconstru${badChar}o`, 'g'), 'reconstrução')
+    .replace(new RegExp(`Cr${badChar}ditos`, 'g'), 'Créditos')
+    .replace(new RegExp(`Sum${badChar}rio`, 'g'), 'Sumário')
+    .replace(new RegExp(`In${badChar}cio`, 'g'), 'Início')
+    .replace(new RegExp(`P${badChar}gina`, 'g'), 'Página')
+    .replace(new RegExp(`p${badChar}gina`, 'g'), 'página')
+    .replace(new RegExp(`se${badChar}${badChar}o`, 'g'), 'seção')
+    .replace(new RegExp(`anota${badChar}${badChar}es`, 'g'), 'anotações')
+    .replace(/[\u0013\u0014\u25A0-\u25A3\u25A8-\u25AB\u25AD-\u25AF\u25CC\u25FB-\u25FE\uFFFC]/g, '—');
 };
 
 const pageMarkerPattern = /^[-–—]\s*\d+\s*[-–—]\s*/;
 
 const repairReaderText = (value = '') =>
-  cleanLabel(value)
-    .replaceAll('Orienta\u00c3\u00a7\u00c3\u00a3o', 'Orienta\u00e7\u00e3o')
-    .replaceAll('orienta\u00c3\u00a7\u00c3\u00a3o', 'orienta\u00e7\u00e3o')
-    .replaceAll('ORIENTA\u00c3\u0087\u00c3\u0083O', 'ORIENTA\u00c7\u00c3O')
-    .replaceAll('Reconstru\u00c3\u00a7\u00c3\u00a3o', 'Reconstru\u00e7\u00e3o')
-    .replaceAll('reconstru\u00c3\u00a7\u00c3\u00a3o', 'reconstru\u00e7\u00e3o')
-    .replaceAll('RECONSTRU\u00c3\u0087\u00c3\u0083O', 'RECONSTRU\u00c7\u00c3O');
+  normalizeReaderSeparators(cleanLabel(value)
+    .replaceAll('Orienta??o', 'Orientação')
+    .replaceAll('orienta??o', 'orientação')
+    .replaceAll('ORIENTAÃ‡ÃƒO', 'ORIENTAÇÃO')
+    .replaceAll('Reconstru??o', 'Reconstrução')
+    .replaceAll('reconstru??o', 'reconstrução')
+    .replaceAll('RECONSTRUÃ‡ÃƒO', 'RECONSTRUÇÃO'));
 
 const compactSpacedHeading = (line: string) => {
   const clean = line.trim();
@@ -257,20 +330,40 @@ const normalizeAudioLookup = (value = '') =>
     .replace(/\p{Diacritic}/gu, '')
     .toLowerCase();
 
+const formatReaderAudioTime = (value = 0) => {
+  if (!Number.isFinite(value) || value <= 0) return '0:00';
+  const minutes = Math.floor(value / 60);
+  const seconds = Math.floor(value % 60);
+  return `${minutes}:${String(seconds).padStart(2, '0')}`;
+};
+
 const sectionAudioLabel = (section: string) => {
   const normalized = normalizeAudioLookup(section);
+  if (normalized.includes('abertura')) return 'abertura';
   if (normalized.includes('limiar')) return 'limiar';
+  if (normalized.includes('raiz')) return 'raiz';
+  if (normalized.includes('vazio')) return 'vazio';
+  if (normalized.includes('peso')) return 'peso';
+  if (normalized.includes('escape')) return 'escape';
+  if (normalized.includes('projecao')) return 'projecao';
+  if (normalized.includes('erosao')) return 'erosao';
+  if (normalized.includes('permanencia')) return 'permanencia';
+  if (normalized.includes('fenda')) return 'fenda';
   if (normalized.includes('manifesto')) return 'manifesto';
   if (normalized.includes('narrativa')) return 'narrativa';
   if (normalized.includes('consciencia')) return 'consciencia';
   if (normalized.includes('julgamento')) return 'julgamento';
   if (normalized.includes('presenca')) return 'presenca';
   if (normalized.includes('ancora')) return 'ancora';
-  if (normalized.includes('carta') || normalized.includes('fecho')) return 'fecho';
+  if (normalized.includes('carta')) return 'carta';
+  if (normalized.includes('regra')) return 'regra';
+  if (normalized.includes('fecho')) return 'fecho';
+  if (normalized.includes('reflexao')) return 'reflexao';
   return '';
 };
 
 const pdfZoomClamp = (value: number) => Math.max(0.8, Math.min(2.4, Number(value.toFixed(2))));
+const clampNumber = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value));
 
 const isHeadingLine = (line: string) => {
   const clean = line.trim();
@@ -281,6 +374,90 @@ const isHeadingLine = (line: string) => {
   return lowerLetters / letters.length < 0.28;
 };
 
+const readerCommandNamePattern = {
+  hideHeader: String.raw`(?:cabecalho|header)`,
+  eyebrow: String.raw`(?:cabecalho\s*[-—–]\s*sec(?:a|ã)o|header\s*[-—–]\s*eyebrow)`,
+  title: String.raw`(?:cabecalho\s*[-—–]\s*titulo|header\s*[-—–]\s*title)`,
+  bodyTitle: String.raw`(?:titulo|subtitulo|paragrafo|paragraph)`,
+};
+
+const readerCommandRegex = (namePattern: string, suffix = '') =>
+  new RegExp(String.raw`^\[\[\s*${namePattern}\s*${suffix}\s*\]\]$`, 'i');
+
+const matchReaderCommandValue = (line: string, namePattern: string) =>
+  line.trim().match(new RegExp(String.raw`^\[\[\s*${namePattern}\s*:\s*(.*?)\s*\]\]$`, 'i'));
+
+const isReaderCommandLine = (line: string) => {
+  const clean = line.trim();
+  return readerCommandRegex(readerCommandNamePattern.hideHeader, ':\\s*ocultar').test(clean)
+    || Boolean(matchReaderCommandValue(clean, readerCommandNamePattern.eyebrow))
+    || Boolean(matchReaderCommandValue(clean, readerCommandNamePattern.title))
+    || Boolean(matchReaderCommandValue(clean, readerCommandNamePattern.bodyTitle));
+};
+
+const parseReaderHeaderDirectives = (text: string): ReaderHeaderDirectives => {
+  const directives: ReaderHeaderDirectives = {
+    hideHeader: false,
+    hideEyebrow: false,
+    hideTitle: false,
+  };
+
+  text.replace(/\r/g, '').split('\n').forEach((rawLine) => {
+    const line = rawLine.trim();
+    if (readerCommandRegex(readerCommandNamePattern.hideHeader, ':\\s*ocultar').test(line)) directives.hideHeader = true;
+
+    const eyebrowMatch = matchReaderCommandValue(line, readerCommandNamePattern.eyebrow);
+    if (eyebrowMatch) {
+      const value = repairReaderText(eyebrowMatch[1].trim());
+      if (value) directives.eyebrow = value;
+      else directives.hideEyebrow = true;
+    }
+
+    const titleMatch = matchReaderCommandValue(line, readerCommandNamePattern.title);
+    if (titleMatch) {
+      const value = repairReaderText(titleMatch[1].trim());
+      if (value) directives.title = value;
+      else directives.hideTitle = true;
+    }
+  });
+
+  return directives;
+};
+
+const titleCommandClass = (styles = '') =>
+  styles
+    .split(/[,\s]+/)
+    .map((style) => style.trim().toLowerCase())
+    .filter(Boolean)
+    .map((style) => {
+      if (['bold', 'negrito'].includes(style)) return 'reader-title-bold';
+      if (['italic', 'italico', 'itálico'].includes(style)) return 'reader-title-italic';
+      if (['caps', 'maiusculo', 'maiúsculo', 'uppercase'].includes(style)) return 'reader-title-caps';
+      if (['espacado', 'espaçado', 'spaced', 'tracking'].includes(style)) return 'reader-title-spaced';
+      if (['dourado', 'gold'].includes(style)) return 'reader-title-gold';
+      if (['centralizado', 'centro', 'center'].includes(style)) return 'reader-align-center';
+      if (['direita', 'right'].includes(style)) return 'reader-align-right';
+      return '';
+    })
+    .filter(Boolean)
+    .join(' ');
+
+const paragraphCommandClass = (styles = '') =>
+  styles
+    .split(/[,\s]+/)
+    .map((style) => style.trim().toLowerCase())
+    .filter(Boolean)
+    .map((style) => {
+      if (['bold', 'negrito'].includes(style)) return 'reader-title-bold';
+      if (['italic', 'italico', 'itálico'].includes(style)) return 'reader-title-italic';
+      if (['caps', 'maiusculo', 'maiúsculo', 'uppercase'].includes(style)) return 'reader-title-caps';
+      if (['minusculo', 'minúsculo', 'lowercase'].includes(style)) return 'reader-title-lower';
+      if (['centralizado', 'centro', 'center'].includes(style)) return 'reader-align-center';
+      if (['direita', 'right'].includes(style)) return 'reader-align-right';
+      return '';
+    })
+    .filter(Boolean)
+    .join(' ');
 const parsePdfTextBlocks = (text: string): TextBlock[] => {
   const normalized = text
     .replace(/\uFB01/g, 'fi')
@@ -292,7 +469,11 @@ const parsePdfTextBlocks = (text: string): TextBlock[] => {
   let paragraph: string[] = [];
 
   const flushParagraph = () => {
-    const value = paragraph.join(' ').replace(/\s+/g, ' ').trim();
+    const value = paragraph
+      .join(' ')
+      .replace(/[ \t]+/g, ' ')
+      .replace(/\s*\[br\]\s*/gi, '[br]')
+      .trim();
     if (value) blocks.push({ kind: 'paragraph', text: value });
     paragraph = [];
   };
@@ -306,7 +487,36 @@ const parsePdfTextBlocks = (text: string): TextBlock[] => {
 
     line = line.replace(pageMarkerPattern, '').replace(/^—\s*\d+\s*—\s*/, '').trim();
     if (!line) return;
+    if (isReaderCommandLine(line) && !/^\[\[(?:titulo|subtitulo|paragrafo|paragraph):/i.test(line)) return;
     if (isDecorativeOrLooseMarker(line)) return;
+
+    const titleCommandMatch = line.match(/^\[\[(titulo|subtitulo):(.+?)(?:\|(.*?))?\]\]$/i);
+    if (titleCommandMatch) {
+      flushParagraph();
+      blocks.push({
+        kind: titleCommandMatch[1].toLowerCase() === 'subtitulo' ? 'subheading' : 'heading',
+        text: repairReaderText(titleCommandMatch[2].trim()),
+        className: titleCommandClass(titleCommandMatch[3] || ''),
+      });
+      return;
+    }
+
+    const paragraphCommandMatch = line.match(/^\[\[(?:paragrafo|paragraph):(.+?)(?:\|(.*?))?\]\]$/i);
+    if (paragraphCommandMatch) {
+      flushParagraph();
+      blocks.push({
+        kind: 'paragraph',
+        text: repairReaderText(paragraphCommandMatch[1].trim()),
+        className: paragraphCommandClass(paragraphCommandMatch[2] || ''),
+      });
+      return;
+    }
+
+    if (/^\[br\]$/i.test(line)) {
+      flushParagraph();
+      blocks.push({ kind: 'spacer', text: '', size: 18 });
+      return;
+    }
 
     if (/^(-{3,}|\*{3,}|_{3,})$/.test(line)) {
       flushParagraph();
@@ -350,16 +560,6 @@ const parsePdfTextBlocks = (text: string): TextBlock[] => {
       return;
     }
 
-    const heading = repairExtractedHeading(normalizePdfHeading(line));
-    if (heading.length > 2 && (isHeadingLine(line) || isHeadingLine(heading))) {
-      flushParagraph();
-      const kind = heading.length <= 18 ? 'subheading' : 'heading';
-      const previous = blocks[blocks.length - 1];
-      if (previous?.kind === kind) previous.text = repairExtractedHeading(`${previous.text} ${heading}`.replace(/\s+/g, ' ').trim());
-      else blocks.push({ kind, text: heading });
-      return;
-    }
-
     paragraph.push(line.replace(/\s+/g, ' '));
   });
 
@@ -381,10 +581,14 @@ export default function ReaderShell({
   chapterTotal = 1,
   chapterKind = 'Livro',
   chapterSections = [],
+  canonicalChapter = null,
+  journalAnswers = {},
+  onJournalAnswerChange,
   coverImageUrl,
   audioTracks = [],
   pdfUrl,
   pdfTextPages = [],
+  pdfPageTitles = {},
   pdfCurrentPage,
   totalPdfPages,
   chapters,
@@ -395,6 +599,15 @@ export default function ReaderShell({
   audioProgress = {},
   activeAudioUrl = null,
   isAudioPlaying = false,
+  audioCurrentTime = 0,
+  audioDuration = 0,
+  audioVolume = 0.84,
+  audioPlaybackRate = 1,
+  audioFrequencies = [],
+  onAudioSeek,
+  onAudioVolumeChange,
+  onAudioPlaybackRateChange,
+  onOpenAudioFullscreen,
   isFavorite,
   onToggleFavorite,
   isPageBookmarked = false,
@@ -408,31 +621,90 @@ export default function ReaderShell({
   onFontIncrease,
   onFontDecrease,
   onOpenPdf,
-  onShare,
   onExitReader,
   showNarrationButton = true,
+  sensoryTrackTitle,
+  isSensoryTrackPlaying = false,
+  onToggleSensoryTrack,
+  darkMode = true,
+  onToggleTheme,
+  initialMode = 'text',
 }: Props) {
-  const [mode, setMode] = useState<'edition' | 'text'>('text');
+  const [mode, setMode] = useState<'edition' | 'text'>(initialMode);
   const [contentsOpen, setContentsOpen] = useState(false);
   const [notesOpen, setNotesOpen] = useState(false);
   const [notesTab, setNotesTab] = useState<'current' | 'all'>('current');
   const [letterSpacing, setLetterSpacing] = useState(0);
-  const [lineHeight, setLineHeight] = useState(1.45);
+  const [lineHeight, setLineHeight] = useState(1.85);
   const [pdfZoom, setPdfZoom] = useState(1);
+  const [pdfRotation, setPdfRotation] = useState(0);
   const [pdfFullscreen, setPdfFullscreen] = useState(false);
+  const [pdfOptionsOpen, setPdfOptionsOpen] = useState(false);
   const [isNarratingPage, setIsNarratingPage] = useState(false);
   const [activeNarrationChar, setActiveNarrationChar] = useState<number | null>(null);
   const [expandedAudioTab, setExpandedAudioTab] = useState<number | null>(null);
   const [activeAudioTab, setActiveAudioTab] = useState<number | null>(null);
+  const [expandedContentsChapterId, setExpandedContentsChapterId] = useState<string | null>(null);
+  const [pageNavVisible, setPageNavVisible] = useState(true);
+  const [reflowPageIndex, setReflowPageIndex] = useState(0);
+  const [reflowTotalPages, setReflowTotalPages] = useState(1);
+  const [reflowPageStep, setReflowPageStep] = useState(1);
   const readerShellRef = useRef<HTMLElement | null>(null);
+  const textSurfaceRef = useRef<HTMLElement | null>(null);
+  const reflowViewportRef = useRef<HTMLDivElement | null>(null);
+  const reflowColumnsRef = useRef<HTMLDivElement | null>(null);
+  const pdfContinuousRef = useRef<HTMLDivElement | null>(null);
+  const pdfPageRefs = useRef<Record<number, HTMLDivElement | null>>({});
+  const pdfScrollFromUserRef = useRef(false);
   const sectionAnchorRefs = useRef<Record<string, HTMLElement | null>>({});
   const pinchRef = useRef<{ distance: number; zoom: number } | null>(null);
   const swipeRef = useRef<{ x: number; y: number; time: number; pinching: boolean } | null>(null);
+  const pageNavTimerRef = useRef<number | null>(null);
   const narrationRef = useRef<SpeechSynthesisUtterance | null>(null);
   const pdfProgress = Math.round((pdfCurrentPage / Math.max(1, totalPdfPages)) * 100);
   const heardInChapter = audioTracks.filter((track) => audioProgress[track.url]?.heard).length;
+  const pdfPageNumbers = useMemo(
+    () => Array.from({ length: Math.max(1, totalPdfPages) }, (_, index) => index + 1),
+    [totalPdfPages],
+  );
+
+  useEffect(() => {
+    setMode(initialMode);
+  }, [initialMode]);
+
+  useEffect(() => {
+    if (mode !== 'edition') return;
+    if (pdfScrollFromUserRef.current) {
+      pdfScrollFromUserRef.current = false;
+      return;
+    }
+    const target = pdfPageRefs.current[pdfCurrentPage];
+    target?.scrollIntoView({ block: 'start' });
+  }, [mode, pdfCurrentPage]);
+
+  const updatePdfCurrentPageFromScroll = () => {
+    const scroller = pdfContinuousRef.current;
+    if (!scroller) return;
+    const viewportTop = scroller.getBoundingClientRect().top + 72;
+    let closestPage = pdfCurrentPage;
+    let closestDistance = Number.POSITIVE_INFINITY;
+    Object.entries(pdfPageRefs.current).forEach(([page, element]) => {
+      if (!element) return;
+      const distance = Math.abs(element.getBoundingClientRect().top - viewportTop);
+      if (distance < closestDistance) {
+        closestDistance = distance;
+        closestPage = Number(page);
+      }
+    });
+    if (closestPage !== pdfCurrentPage) {
+      pdfScrollFromUserRef.current = true;
+      onPdfPageChange(closestPage);
+    }
+  };
+
   const openingEntry = openingContents.find((entry) => entry.pdfPage === pdfCurrentPage && pdfCurrentPage < (chapters[0]?.pdfPage ?? 1));
-  const displayTitle = repairReaderText(openingEntry?.title || title);
+  const overridePageTitle = repairReaderText(pdfPageTitles[pdfCurrentPage] || '');
+  const displayTitle = repairReaderText(overridePageTitle || openingEntry?.title || title);
   const displaySummary = repairReaderText(summary || '');
   const displayChapterKind = repairReaderText(openingEntry?.kind || chapterKind);
   const displayCurrentLetterTitle = repairReaderText(currentLetterTitle || '');
@@ -444,7 +716,92 @@ export default function ReaderShell({
     () => parsePdfTextBlocks(pdfTextPages[pdfCurrentPage - 1] || ''),
     [pdfCurrentPage, pdfTextPages],
   );
+  const headerDirectives = useMemo(
+    () => parseReaderHeaderDirectives(pdfTextPages[pdfCurrentPage - 1] || ''),
+    [pdfCurrentPage, pdfTextPages],
+  );
   const textBlocks = pdfTextBlocks.length ? pdfTextBlocks : [];
+  const firstBlockIsHeader = false;
+  const pageDisplayTitle = headerDirectives.title ?? displayTitle;
+  const pageDisplayEyebrow = headerDirectives.eyebrow ?? displayChapterKind;
+  const bodyTextBlocks = textBlocks;
+  const resolvedChapterIndex = typeof chapterIndex === 'number' && chapterIndex >= 0
+    ? chapterIndex
+    : Math.max(0, chapters.findIndex((chapter, index) => {
+        const next = chapters[index + 1];
+        return pdfCurrentPage >= chapter.pdfPage && (!next || pdfCurrentPage < next.pdfPage);
+      }));
+  const reflowChapter = chapters[resolvedChapterIndex];
+  const reflowStartPage = reflowChapter?.pdfPage ?? pdfCurrentPage;
+  const reflowEndPage = Math.max(
+    reflowStartPage,
+    Math.min(totalPdfPages, (chapters[resolvedChapterIndex + 1]?.pdfPage ?? totalPdfPages + 1) - 1),
+  );
+  const reflowTextSource = useMemo(
+    () => {
+      const start = Math.max(1, reflowStartPage);
+      const end = Math.max(start, reflowEndPage);
+      return pdfTextPages
+        .slice(start - 1, end)
+        .join('\n\n');
+    },
+    [pdfTextPages, reflowEndPage, reflowStartPage],
+  );
+  const activeCanonicalChapter = canonicalChapter?.id === reflowChapter?.id ? canonicalChapter : null;
+  const canonicalTextBlocks = useMemo<TextBlock[]>(
+    () => (activeCanonicalChapter?.blocks ?? [])
+      .filter((block) => block.kind !== 'image' && block.kind !== 'image-full')
+      .map((block) => ({
+        kind: block.kind === 'pause' ? 'paragraph' : block.kind,
+        text: block.text,
+        alt: block.alt,
+        size: block.size,
+        className: [block.className, block.kind === 'pause' ? 'reader-canonical-pause' : ''].filter(Boolean).join(' ') || undefined,
+      })),
+    [activeCanonicalChapter],
+  );
+  const reflowBlocks = useMemo(
+    () => canonicalTextBlocks.length ? canonicalTextBlocks : parsePdfTextBlocks(reflowTextSource),
+    [canonicalTextBlocks, reflowTextSource],
+  );
+  const firstDropcapBlockIndex = useMemo(
+    () => reflowBlocks.findIndex((block) => {
+      if (block.kind !== 'paragraph') return false;
+      if (block.className?.includes('reader-canonical-pause')) return false;
+      if (block.className?.includes('reader-digital-cover')) return false;
+      const cleanText = repairReaderText(block.text).replace(/\s+/g, ' ').trim();
+      return cleanText.length >= 90 && cleanText.split(/\s+/).length >= 14;
+    }),
+    [reflowBlocks],
+  );
+  const isJournalChapter = activeCanonicalChapter?.kind === 'caderno';
+  const journalPrompts = activeCanonicalChapter?.journalPrompts ?? [];
+  const reflowHeaderDirectives = useMemo(
+    () => parseReaderHeaderDirectives(reflowTextSource),
+    [reflowTextSource],
+  );
+  const reflowDisplayTitle = activeCanonicalChapter?.title
+    ?? reflowHeaderDirectives.title
+    ?? repairReaderText(reflowChapter?.title || pageDisplayTitle);
+  const reflowDisplayEyebrow = activeCanonicalChapter?.eyebrow
+    ?? reflowHeaderDirectives.eyebrow
+    ?? repairReaderText(groupLabels[reflowChapter?.groupId || ''] || pageDisplayEyebrow);
+  const reflowSourcePageStart = activeCanonicalChapter?.sourcePageStart ?? reflowStartPage;
+  const reflowSourcePageEnd = activeCanonicalChapter?.sourcePageEnd ?? reflowEndPage;
+  const progressBase = resolvedChapterIndex === 0 && reflowPageIndex === 0
+    ? 0
+    : (resolvedChapterIndex + (reflowPageIndex / Math.max(1, reflowTotalPages))) / Math.max(1, chapters.length);
+  const reflowProgress = Math.round(
+    Math.max(0, Math.min(1, progressBase)) * 100,
+  );
+  const activeReaderAudioTrack = audioTracks.find((track) => activeAudioUrl === track.url) ?? audioTracks[0] ?? null;
+  const activeReaderAudioPlaying = Boolean(activeReaderAudioTrack && activeAudioUrl === activeReaderAudioTrack.url && isAudioPlaying);
+  const activeReaderAudioProgress = audioDuration > 0 ? Math.max(0, Math.min(100, (audioCurrentTime / audioDuration) * 100)) : 0;
+  const activeReaderAudioBars = audioFrequencies.length ? audioFrequencies.slice(0, 18) : [20, 46, 32, 64, 38, 54, 30, 44, 26, 36, 22, 30];
+
+  useEffect(() => {
+    setExpandedContentsChapterId((current) => current ?? reflowChapter?.id ?? chapters[resolvedChapterIndex]?.id ?? null);
+  }, [chapters, reflowChapter?.id, resolvedChapterIndex]);
 
   const scrollToAudioSection = (section: string) => {
     const key = sectionAudioLabel(section);
@@ -457,14 +814,119 @@ export default function ReaderShell({
     if (key) sectionAnchorRefs.current[key] = element;
   };
 
-  const touchDistance = (touches: TouchList) => {
+  const audioTrackForBlock = (block: TextBlock) => {
+    const cleanText = repairReaderText(block.text).replace(/\[br\]/gi, ' ').replace(/\s+/g, ' ').trim();
+    const wordCount = cleanText ? cleanText.split(/\s+/).length : 0;
+    if (!cleanText || cleanText.length > 56 || wordCount > 5) return null;
+    const key = sectionAudioLabel(block.text);
+    if (!key) return null;
+    return audioTracks.find((track) => sectionAudioLabel(track.label) === key) ?? null;
+  };
+
+  const renderAudioCue = (block: TextBlock) => {
+    const track = audioTrackForBlock(block);
+    if (!track) return null;
+    const active = activeAudioUrl === track.url && isAudioPlaying;
+    return (
+      <button
+        type="button"
+        className={`reader-inline-audio-cue ${active ? 'active' : ''}`}
+        onClick={(event) => {
+          event.stopPropagation();
+          playAudio(track.url, `${displayTitle} · ${cleanLabel(track.label)}`, track.coverUrl);
+        }}
+        title={`Ouvir: ${cleanLabel(track.label)}`}
+        aria-label={`Ouvir ${cleanLabel(track.label)}`}
+      >
+        <Headphones size={13} />
+      </button>
+    );
+  };
+
+  const revealPageNavigation = () => {
+    setPageNavVisible(true);
+    if (pageNavTimerRef.current) window.clearTimeout(pageNavTimerRef.current);
+    pageNavTimerRef.current = window.setTimeout(() => {
+      setPageNavVisible(false);
+    }, 2800);
+  };
+
+  useEffect(() => {
+    revealPageNavigation();
+    return () => {
+      if (pageNavTimerRef.current) window.clearTimeout(pageNavTimerRef.current);
+    };
+  }, [mode, pdfCurrentPage]);
+
+  useEffect(() => {
+    if (mode !== 'text') return;
+    const alignTop = () => {
+      const surface = textSurfaceRef.current;
+      if (!surface) return;
+      const scrollArea = surface.querySelector<HTMLElement>('.page-copy');
+      if (scrollArea) scrollArea.scrollTop = 0;
+      surface.scrollTop = 0;
+      const bookbar = readerShellRef.current?.querySelector<HTMLElement>('.reader-bookbar');
+      const offset = (bookbar?.getBoundingClientRect().height || 0) + 10;
+      const top = surface.getBoundingClientRect().top + window.scrollY - offset;
+      window.scrollTo({ top: Math.max(0, top), behavior: 'auto' });
+    };
+    window.requestAnimationFrame(alignTop);
+    const timer = window.setTimeout(alignTop, 60);
+    const lateTimer = window.setTimeout(alignTop, 180);
+    return () => {
+      window.clearTimeout(timer);
+      window.clearTimeout(lateTimer);
+    };
+  }, [mode, pdfCurrentPage]);
+
+  useEffect(() => {
+    setReflowPageIndex(0);
+  }, [fontSize, letterSpacing, lineHeight, resolvedChapterIndex, reflowTextSource]);
+
+  useEffect(() => {
+    if (mode !== 'text') return;
+    const measure = () => {
+      const viewport = reflowViewportRef.current;
+      const columns = reflowColumnsRef.current;
+      if (!viewport || !columns) return;
+      const viewportStyle = window.getComputedStyle(viewport);
+      const horizontalPadding =
+        (Number.parseFloat(viewportStyle.paddingLeft) || 0) +
+        (Number.parseFloat(viewportStyle.paddingRight) || 0);
+      const parsedContentGuard = Number.parseFloat(viewportStyle.getPropertyValue('--reader-reflow-right-guard'));
+      const contentGuard = Number.isFinite(parsedContentGuard) ? parsedContentGuard : 0;
+      const measuredWidth = viewport.clientWidth - horizontalPadding - contentGuard;
+      const width = Math.max(320, Math.floor(measuredWidth));
+      const gap = Math.max(40, Math.min(72, Math.round(width * 0.08)));
+      columns.style.setProperty('--reader-reflow-colw', `${width}px`);
+      columns.style.setProperty('--reader-reflow-gap', `${gap}px`);
+      setReflowPageStep(width + gap);
+      const scrollWidth = Math.max(width, columns.scrollWidth);
+      const total = scrollWidth <= width + Math.ceil(gap * 0.35)
+        ? 1
+        : Math.max(1, Math.ceil((scrollWidth - Math.ceil(gap * 0.35)) / (width + gap)));
+      setReflowTotalPages(total);
+      setReflowPageIndex((current) => clampNumber(current, 0, total - 1));
+    };
+    const frame = window.requestAnimationFrame(measure);
+    const timer = window.setTimeout(measure, 90);
+    window.addEventListener('resize', measure);
+    return () => {
+      window.cancelAnimationFrame(frame);
+      window.clearTimeout(timer);
+      window.removeEventListener('resize', measure);
+    };
+  }, [fontSize, letterSpacing, lineHeight, mode, reflowBlocks.length, reflowTextSource]);
+
+  const touchDistance = (touches: React.TouchList) => {
     if (touches.length < 2) return 0;
     const first = touches[0];
     const second = touches[1];
     return Math.hypot(first.clientX - second.clientX, first.clientY - second.clientY);
   };
 
-  const handlePdfTouchStart = (event: React.TouchEvent<HTMLDivElement>) => {
+  const handlePdfTouchStart = (event: React.TouchEvent<HTMLElement>) => {
     if (event.touches.length === 2) {
       pinchRef.current = { distance: touchDistance(event.touches), zoom: pdfZoom };
       swipeRef.current = { x: 0, y: 0, time: 0, pinching: true };
@@ -481,14 +943,14 @@ export default function ReaderShell({
     }
   };
 
-  const handlePdfTouchMove = (event: React.TouchEvent<HTMLDivElement>) => {
+  const handlePdfTouchMove = (event: React.TouchEvent<HTMLElement>) => {
     if (event.touches.length !== 2 || !pinchRef.current?.distance) return;
     event.preventDefault();
     const ratio = touchDistance(event.touches) / pinchRef.current.distance;
     setPdfZoom(pdfZoomClamp(pinchRef.current.zoom * ratio));
   };
 
-  const handlePdfTouchEnd = (event: React.TouchEvent<HTMLDivElement>) => {
+  const handlePdfTouchEnd = (event: React.TouchEvent<HTMLElement>) => {
     if (event.touches.length < 2) pinchRef.current = null;
     const swipe = swipeRef.current;
     swipeRef.current = null;
@@ -498,6 +960,29 @@ export default function ReaderShell({
     const dy = touch.clientY - swipe.y;
     const elapsed = Date.now() - swipe.time;
     if (elapsed > 700 || Math.abs(dx) < 64 || Math.abs(dx) < Math.abs(dy) * 1.35) return;
+    if (mode === 'text') {
+      if (dx < 0) {
+        setReflowPageIndex((current) => {
+          if (current < reflowTotalPages - 1) return current + 1;
+          if (resolvedChapterIndex < chapters.length - 1) {
+            onSelectChapter(resolvedChapterIndex + 1);
+            return 0;
+          }
+          return current;
+        });
+      }
+      if (dx > 0) {
+        setReflowPageIndex((current) => {
+          if (current > 0) return current - 1;
+          if (resolvedChapterIndex > 0) {
+            onSelectChapter(resolvedChapterIndex - 1);
+            return 0;
+          }
+          return current;
+        });
+      }
+      return;
+    }
     if (dx < 0 && pdfCurrentPage < totalPdfPages) onPdfPageChange(pdfCurrentPage + 1);
     if (dx > 0 && pdfCurrentPage > 1) onPdfPageChange(pdfCurrentPage - 1);
   };
@@ -506,7 +991,8 @@ export default function ReaderShell({
     let cursor = 0;
     const ranges: Array<{ blockIndex: number; wordIndex: number; start: number; end: number }> = [];
     const textParts: string[] = [];
-    textBlocks.forEach((block, blockIndex) => {
+    const narrationBlocks = mode === 'text' ? reflowBlocks : textBlocks;
+    narrationBlocks.forEach((block, blockIndex) => {
       if (!['heading', 'subheading', 'paragraph'].includes(block.kind)) return;
       const cleanText = block.text.replace(/\[br\]/gi, ' ').replace(/\s+/g, ' ').trim();
       let wordIndex = 0;
@@ -524,7 +1010,7 @@ export default function ReaderShell({
     });
     const text = textParts.join('\n\n');
     return { text, ranges };
-  }, [textBlocks]);
+  }, [mode, reflowBlocks, textBlocks]);
 
   const activeNarrationWord = useMemo(() => {
     if (activeNarrationChar === null) return null;
@@ -541,7 +1027,7 @@ export default function ReaderShell({
       group.items.push({ ...chapter, index });
       return groups;
     }, []);
-    return [{ id: 'inicio', label: 'Início e sumário', items: openingContents }, ...chapterGroups];
+    return chapterGroups;
   }, [chapters]);
 
   useEffect(() => {
@@ -601,6 +1087,20 @@ export default function ReaderShell({
     });
   };
 
+  const renderFormattedText = (block: TextBlock, blockIndex: number) => {
+    if (!/(\*\*|__|\*)/.test(block.text)) return renderNarrationText(block, blockIndex);
+    const parts = block.text.split(/(\*\*.*?\*\*|__.*?__|\*[^*]+\*)/g).filter(Boolean);
+    return parts.map((part, index) => {
+      if (/^\*\*.*\*\*$/.test(part) || /^__.*__$/.test(part)) {
+        return <strong key={`${blockIndex}-fmt-${index}`}>{part.replace(/^(\*\*|__)|(\*\*|__)$/g, '')}</strong>;
+      }
+      if (/^\*[^*]+\*$/.test(part)) {
+        return <em key={`${blockIndex}-fmt-${index}`}>{part.slice(1, -1)}</em>;
+      }
+      return <span key={`${blockIndex}-fmt-${index}`}>{part.split(/\[br\]/i).map((piece, pieceIndex) => <span key={`${blockIndex}-fmt-${index}-${pieceIndex}`}>{pieceIndex > 0 && <br />}{piece}</span>)}</span>;
+    });
+  };
+
   useEffect(() => stopPageNarration, [pdfCurrentPage]);
 
   useEffect(() => {
@@ -618,12 +1118,35 @@ export default function ReaderShell({
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
+      if (mode === 'text') {
+        if (event.key === 'ArrowLeft') {
+          setReflowPageIndex((current) => {
+            if (current > 0) return current - 1;
+            if (resolvedChapterIndex > 0) {
+              onSelectChapter(resolvedChapterIndex - 1);
+              return 0;
+            }
+            return current;
+          });
+        }
+        if (event.key === 'ArrowRight') {
+          setReflowPageIndex((current) => {
+            if (current < reflowTotalPages - 1) return current + 1;
+            if (resolvedChapterIndex < chapters.length - 1) {
+              onSelectChapter(resolvedChapterIndex + 1);
+              return 0;
+            }
+            return current;
+          });
+        }
+        return;
+      }
       if (event.key === 'ArrowLeft') onPdfPageChange(Math.max(1, pdfCurrentPage - 1));
       if (event.key === 'ArrowRight') onPdfPageChange(Math.min(totalPdfPages, pdfCurrentPage + 1));
     };
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [onPdfPageChange, pdfCurrentPage, totalPdfPages]);
+  }, [chapters.length, mode, onPdfPageChange, onSelectChapter, pdfCurrentPage, reflowTotalPages, resolvedChapterIndex, totalPdfPages]);
 
   const selectChapter = (index: number) => {
     onSelectChapter(index);
@@ -661,45 +1184,43 @@ export default function ReaderShell({
   };
 
   return (
-    <section ref={readerShellRef} className={`reader-stage immersive-reader ${mode === 'text' ? 'reader-clean-mode' : ''} ${contentsOpen ? 'contents-open' : ''} ${pdfFullscreen ? 'native-fullscreen' : ''}`}>
+    <section
+      ref={readerShellRef}
+      className={`reader-stage immersive-reader ${mode === 'text' ? 'reader-clean-mode' : 'reader-pdf-mode'} ${contentsOpen ? 'contents-open' : ''} ${pdfFullscreen ? 'native-fullscreen' : ''} ${pageNavVisible ? 'reader-page-nav-visible' : 'reader-page-nav-hidden'}`}
+      onPointerDown={revealPageNavigation}
+      onMouseMove={revealPageNavigation}
+    >
+      <svg className="reader-gradient-defs" width="0" height="0" aria-hidden="true" focusable="false">
+        <defs>
+          <radialGradient id="opdds-premium-bookmark-gradient" cx="38%" cy="28%" r="76%">
+            <stop offset="0%" stopColor="#fff3bd" />
+            <stop offset="58%" stopColor="#b17545" />
+            <stop offset="100%" stopColor="#3b2d22" />
+          </radialGradient>
+        </defs>
+      </svg>
+      {mode === 'text' && (
       <div className="reader-bookbar">
-        <button className="reader-index-trigger" onClick={() => setContentsOpen(true)} title="Abrir índice">
+        <button className="reader-index-trigger" onClick={() => setContentsOpen(true)} title="Abrir sumário">
           <Menu size={21} />
-          <span>
-            <small>{chapterLabel}</small>
-            <strong>{displayTitle}</strong>
-          </span>
         </button>
+        <div className="reader-bookbar-current" aria-label="Seção aberta">
+          <span>{reflowDisplayEyebrow}</span>
+          <strong>{reflowDisplayTitle}</strong>
+        </div>
 
         <div className="reader-actions" aria-label="Controles do leitor">
-          <div className="segmented-control" role="tablist" aria-label="Modo de leitura">
-            <button className={mode === 'edition' ? 'active' : ''} onClick={() => setMode('edition')}>
-              <BookOpen size={16} />
-              <span>Edição</span>
-            </button>
-            <button className={mode === 'text' ? 'active' : ''} onClick={() => setMode('text')}>
-              <Highlighter size={16} />
-              <span>Texto</span>
-            </button>
-          </div>
           {mode === 'text' && (
             <div className="reader-format-controls" aria-label="Ajustes do texto">
-              <button onClick={onFontDecrease} title="Diminuir texto"><Minus size={15} /></button>
-              <span>{fontSize}px</span>
-              <button onClick={onFontIncrease} title="Aumentar texto"><Plus size={15} /></button>
-              <button onClick={() => setLetterSpacing((value) => value >= 1.2 ? 0 : Number((value + 0.2).toFixed(1)))}>Kerning {letterSpacing.toFixed(1)}</button>
-              <button onClick={() => setLineHeight((value) => value >= 1.9 ? 1.35 : Number((value + 0.1).toFixed(2)))}>Linha {lineHeight.toFixed(2)}</button>
+              <button onClick={onFontDecrease} title="Diminuir texto">A−</button>
+              <button onClick={onFontIncrease} title="Aumentar texto">A+</button>
+              <button onClick={() => setLineHeight((value) => value >= 2.08 ? 1.65 : Number((value + 0.12).toFixed(2)))} title={`Ajuste das linhas: ${lineHeight.toFixed(2)}`}>≡</button>
             </div>
           )}
-          {mode === 'edition' && (
-            <div className="reader-format-controls" aria-label="Zoom do PDF">
-              <button onClick={() => setPdfZoom((value) => pdfZoomClamp(value - 0.1))}>−</button>
-              <span>{Math.round(pdfZoom * 100)}%</span>
-              <button onClick={() => setPdfZoom((value) => pdfZoomClamp(value + 0.1))}>+</button>
-              <button onClick={togglePdfFullscreen} title={pdfFullscreen ? 'Sair da tela cheia' : 'Tela cheia'}>
-                {pdfFullscreen ? <Minimize2 size={15} /> : <Maximize2 size={15} />}
-              </button>
-            </div>
+          {mode === 'text' && onToggleTheme && (
+            <button className="icon-button reader-theme-button" onClick={onToggleTheme} title={darkMode ? 'Ativar modo claro' : 'Ativar modo escuro'}>
+              {darkMode ? <Sun size={18} /> : <Moon size={18} />}
+            </button>
           )}
           <button
             className={`icon-button reader-page-bookmark-button ${isPageBookmarked ? 'active' : ''}`}
@@ -715,7 +1236,6 @@ export default function ReaderShell({
           >
             <Heart size={18} fill={isFavorite ? 'currentColor' : 'none'} />
           </button>
-          <button className="icon-button" onClick={onShare} title="Compartilhar capítulo"><Share2 size={18} /></button>
           <button
             className={`icon-button reader-notes-button ${pageNote.trim() ? 'has-note' : ''}`}
             onClick={() => {
@@ -726,9 +1246,20 @@ export default function ReaderShell({
           >
             <StickyNote size={18} />
           </button>
-          <button className="icon-button" onClick={onOpenPdf} title="Baixar PDF"><DownloadCloud size={18} /></button>
+          {mode === 'text' && onExitReader ? (
+            <button
+              className="icon-button reader-home-top-button"
+              onClick={onExitReader}
+              title="Voltar para a home"
+            >
+              <Home size={18} />
+            </button>
+          ) : (
+            <button className="icon-button" onClick={onOpenPdf} title="Baixar PDF"><DownloadCloud size={18} /></button>
+          )}
         </div>
       </div>
+      )}
 
       {notesOpen && (
         <div className="reader-notes-backdrop" onClick={() => setNotesOpen(false)}>
@@ -804,16 +1335,57 @@ export default function ReaderShell({
           {groupedChapters.map((group) => (
             <section key={group.id}>
               <p>{group.label}</p>
-              {group.items.map((chapter) => (
-                <button
-                  key={chapter.id}
-                  className={chapter.index >= 0 ? (chapter.index === chapterIndex ? 'active' : '') : (chapter.pdfPage === pdfCurrentPage ? 'active' : '')}
-                  onClick={() => chapter.index >= 0 ? selectChapter(chapter.index) : selectPdfPage(chapter.pdfPage)}
-                >
-                  <small>{chapter.roman ? `Pilar ${chapter.roman}` : `Página ${chapter.pdfPage}`}</small>
-                  <strong>{cleanLabel(chapter.title)}</strong>
-                </button>
-              ))}
+              {group.items.map((chapter) => {
+                const isActiveChapter = chapter.index >= 0 ? chapter.index === chapterIndex : chapter.pdfPage === pdfCurrentPage;
+                const isExpanded = expandedContentsChapterId === chapter.id || isActiveChapter;
+                const chapterAudioTracks = chapter.index === chapterIndex
+                  ? audioTracks
+                  : (chapter.audioTracks ?? []);
+                return (
+                  <div className={`reader-toc-chapter ${isExpanded ? 'open' : ''}`} key={chapter.id}>
+                    <button
+                      className={`reader-toc-chapter-row ${isActiveChapter ? 'active' : ''}`}
+                      onClick={() => {
+                        setExpandedContentsChapterId(isExpanded && !isActiveChapter ? null : chapter.id);
+                        if (chapter.index >= 0) onSelectChapter(chapter.index);
+                        else onPdfPageChange(chapter.pdfPage);
+                      }}
+                    >
+                      <span>
+                        {chapter.roman && <small>Pilar {chapter.roman}</small>}
+                        <strong>{repairReaderText(chapter.title)}</strong>
+                      </span>
+                      <ChevronRight size={12} />
+                    </button>
+                    {isExpanded && chapterAudioTracks.length > 0 && (
+                      <div className="reader-toc-audio-list">
+                        {chapterAudioTracks.map((track) => {
+                          const heard = Boolean(audioProgress[track.url]?.heard);
+                          const active = activeAudioUrl === track.url;
+                          return (
+                            <button
+                              type="button"
+                              key={`${chapter.id}-${track.url}`}
+                              className={`reader-toc-audio-row ${active ? 'active' : ''} ${heard ? 'heard' : ''}`}
+                              onClick={(event) => {
+                                event.stopPropagation();
+                                if (chapter.index >= 0 && chapter.index !== chapterIndex) {
+                                  onSelectChapter(chapter.index);
+                                }
+                                playAudio(track.url, `${repairReaderText(chapter.title)} · ${cleanLabel(track.label)}`, track.coverUrl);
+                                setContentsOpen(false);
+                              }}
+                            >
+                              <span>{cleanLabel(track.label)}</span>
+                              <strong>{heard ? 'Ouvido' : 'Não ouvido'}</strong>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </section>
           ))}
           {onExitReader && (
@@ -828,201 +1400,158 @@ export default function ReaderShell({
       </aside>
 
       {mode === 'edition' ? (
-        <div className={`pdf-reader-shell ${pdfFullscreen ? 'pdf-fullscreen-shell' : ''}`}>
+        <div className={`pdf-reader-shell pdf-continuous-shell ${pdfFullscreen ? 'pdf-fullscreen-shell' : ''}`}>
           {pdfFullscreen && (
             <button
               className="pdf-fullscreen-close"
-              onClick={() => setPdfFullscreen(false)}
+              onClick={togglePdfFullscreen}
               title="Fechar tela cheia"
               aria-label="Fechar tela cheia"
             >
               <X size={22} />
             </button>
           )}
-          <div className="pdf-reader-meta">
-            <span>Página {pdfCurrentPage} de {totalPdfPages}</span>
-            <span>{displayChapterKind} · seção {chapterIndex + 1}/{chapterTotal}</span>
-            <span>{pdfProgress}% do livro</span>
+          <div className="pdf-chrome-toolbar">
+            <button className="pdf-toolbar-menu-button" onClick={() => setContentsOpen(true)} title="Abrir índice">
+              <Menu size={18} />
+            </button>
+            <strong className="pdf-document-title">O_Poder_dos_Desacreditados_FINAL_17-07-26.pdf</strong>
+            <div className="pdf-toolbar-spacer pdf-toolbar-title-spacer" />
+            <label className="pdf-page-counter">
+              <input
+                value={pdfCurrentPage}
+                type="number"
+                min={1}
+                max={totalPdfPages}
+                onChange={(event) => onPdfPageChange(clampNumber(Number(event.target.value) || 1, 1, totalPdfPages))}
+              />
+              <span>/ {totalPdfPages}</span>
+            </label>
+            <div className="pdf-toolbar-divider" />
+            <button onClick={() => setPdfZoom((value) => pdfZoomClamp(value - 0.1))} title="Diminuir zoom"><Minus size={17} /></button>
+            <span className="pdf-zoom-label">{Math.round(pdfZoom * 100)}%</span>
+            <button onClick={() => setPdfZoom((value) => pdfZoomClamp(value + 0.1))} title="Aumentar zoom"><Plus size={17} /></button>
+            <div className="pdf-toolbar-divider" />
+            <button onClick={() => setPdfZoom(1)} title="Ajustar à página"><Maximize2 size={17} /></button>
+            <button onClick={() => setPdfRotation((value) => (value + 90) % 360)} title="Girar visualização"><RotateCw size={17} /></button>
+            <div className="pdf-toolbar-spacer" />
+            <button className="pdf-app-home-button" onClick={onExitReader} title="Voltar para home"><Home size={18} /></button>
+            <button onClick={onOpenPdf} title="Baixar PDF"><DownloadCloud size={18} /></button>
+            <button onClick={() => window.print()} title="Imprimir"><Printer size={18} /></button>
+            <div className="pdf-options-wrap">
+              <button
+                className="pdf-more-button"
+                onClick={() => setPdfOptionsOpen((value) => !value)}
+                title="Mais opções"
+                aria-haspopup="menu"
+                aria-expanded={pdfOptionsOpen}
+              >
+                <MoreVertical size={18} />
+              </button>
+              {pdfOptionsOpen && (
+                <div className="pdf-options-menu" role="menu">
+                  <button type="button" role="menuitem" onClick={() => setPdfOptionsOpen(false)}>Visualização de duas páginas</button>
+                  <button type="button" role="menuitem" onClick={() => { togglePdfFullscreen(); setPdfOptionsOpen(false); }}>Apresentação</button>
+                  <button type="button" role="menuitem" onClick={() => setPdfOptionsOpen(false)}>Propriedades do documento</button>
+                </div>
+              )}
+            </div>
           </div>
 
           <div
-            className="pdf-page-stage"
-            onTouchStart={handlePdfTouchStart}
-            onTouchMove={handlePdfTouchMove}
-            onTouchEnd={handlePdfTouchEnd}
-            onTouchCancel={handlePdfTouchEnd}
+            ref={pdfContinuousRef}
+            className="pdf-continuous-scroll"
+            onScroll={updatePdfCurrentPageFromScroll}
           >
             {pdfUrl ? (
               <Suspense fallback={<div className="pdf-page-status">Preparando a edição completa...</div>}>
-                <PdfPageCanvas url={pdfUrl} page={pdfCurrentPage} zoom={pdfZoom} onDocumentReady={onPdfDocumentReady} />
+                {pdfPageNumbers.map((page) => (
+                  <div
+                    className="pdf-continuous-page"
+                    key={page}
+                    ref={(element) => { pdfPageRefs.current[page] = element; }}
+                  >
+                    <PdfPageCanvas url={pdfUrl} page={page} zoom={pdfZoom} rotation={pdfRotation} onDocumentReady={onPdfDocumentReady} />
+                  </div>
+                ))}
               </Suspense>
             ) : (
               <div className="pdf-page-status">PDF não disponível.</div>
             )}
           </div>
-
-          <div className="reader-view-controls pdf-zoom-controls">
-            <button onClick={() => setPdfZoom((value) => pdfZoomClamp(value - 0.1))}>−</button>
-            <span>Zoom {Math.round(pdfZoom * 100)}%</span>
-            <button onClick={() => setPdfZoom((value) => pdfZoomClamp(value + 0.1))}>+</button>
-            <button
-              className="reader-fullscreen-toggle"
-              onClick={() => setPdfFullscreen((value) => !value)}
-              title={pdfFullscreen ? 'Sair da tela cheia' : 'Tela cheia'}
-              aria-label={pdfFullscreen ? 'Sair da tela cheia' : 'Tela cheia'}
-            >
-              {pdfFullscreen ? <Minimize2 size={17} /> : <Maximize2 size={17} />}
-            </button>
-          </div>
-
-          {audioTracks.length > 0 && (
-            <div className="reader-audio-chapters">
-              <span><Headphones size={17} /> Ouvir esta parte {heardInChapter > 0 ? `· ${heardInChapter}/${audioTracks.length} ouvidos` : ''}</span>
-              <div>
-                {audioTracks.map((track) => (
-                  <button
-                    key={track.url}
-                    className={activeAudioUrl === track.url && isAudioPlaying ? 'active-audio' : ''}
-                    onClick={() => playAudio(track.url, `${displayTitle} · ${cleanLabel(track.label)}`, track.coverUrl)}
-                  >
-                    {cleanLabel(track.label)}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          <div className="reader-reflection-panel">
-            <div>
-              <p className="kicker">Minha marca nesta página</p>
-              <h3>Página {pdfCurrentPage}</h3>
-            </div>
-            <textarea
-              value={pageNote}
-              onChange={(event) => onPageNoteChange?.(event.target.value)}
-              placeholder="Anote uma frase, um incômodo ou uma lembrança para voltar depois..."
-              aria-label="Nota da página atual"
-            />
-          </div>
-
-          <div className="pdf-reader-navigation">
-            <button
-              className="page-button"
-              onClick={() => onPdfPageChange(Math.max(1, pdfCurrentPage - 1))}
-              disabled={pdfCurrentPage <= 1}
-              title="Página anterior"
-            >
-              <ChevronLeft size={21} />
-            </button>
-            <div>
-              <div className="progress-track reader-global-progress">
-                <span style={{ width: `${pdfProgress}%` }} />
-              </div>
-              <small>{displayTitle}</small>
-            </div>
-            <button
-              className="page-button"
-              onClick={() => onPdfPageChange(Math.min(totalPdfPages, pdfCurrentPage + 1))}
-              disabled={pdfCurrentPage >= totalPdfPages}
-              title="Próxima página"
-            >
-              <ChevronRight size={21} />
-            </button>
-          </div>
         </div>
       ) : (
         <>
-        <div className="reader-chapter-strip">
-          {chapterSections.length > 0 && (
-            <div className="reader-section-tabs compact">
-              {chapterSections.map((section, index) => {
-                const audioLabel = sectionAudioLabel(section);
-                const sectionTrack = audioLabel
-                  ? audioTracks.find((track) => normalizeAudioLookup(track.label).includes(audioLabel))
-                  : null;
-                const active = Boolean(sectionTrack && activeAudioUrl === sectionTrack.url && isAudioPlaying && activeAudioTab === index);
-                const expanded = expandedAudioTab === index || active;
-                const tabLabel = cleanLabel(section);
-                return (
-                  <div
-                    key={`${section}-${index}`}
-                    className={`reader-section-audio-tab ${expanded ? 'expanded' : ''} ${active ? 'active-audio' : ''}`}
-                    onClickCapture={() => setActiveAudioTab(index)}
-                    title={sectionTrack ? `Ouvir ${cleanLabel(sectionTrack.label)}` : tabLabel}
-                  >
-                    <button
-                      type="button"
-                      className="reader-section-audio-trigger"
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        setExpandedAudioTab((current) => current === index ? null : index);
-                      }}
-                    >
-                      <span>{index + 1}</span>
-                      <strong>{tabLabel}</strong>
-                    </button>
-                    {sectionTrack && (
-                      <button
-                        type="button"
-                        className="reader-section-audio-play"
-                        onClick={(event) => {
-                          event.stopPropagation();
-                          setActiveAudioTab(index);
-                          scrollToAudioSection(section);
-                          playAudio(sectionTrack.url, `${displayTitle} - ${cleanLabel(sectionTrack.label)}`, sectionTrack.coverUrl);
-                        }}
-                        aria-label={`Ouvir ${tabLabel}`}
-                      >
-                        <Play size={13} fill="currentColor" />
-                      </button>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          )}
-          {audioTracks.length > 0 && chapterSections.length === 0 && (
-            <div className="reader-strip-audio">
-              <strong><Headphones size={16} /> Ouvir esta parte</strong>
-              {audioTracks.map((track) => (
-                <button
-                  key={track.url}
-                  className={activeAudioUrl === track.url && isAudioPlaying ? 'active-audio' : ''}
-                  onClick={() => playAudio(track.url, `${displayTitle} · ${cleanLabel(track.label)}`, track.coverUrl)}
-                >
-                  {cleanLabel(track.label)}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-        <article className="kindle-surface reader-text-surface">
+        <article
+          ref={textSurfaceRef}
+          className={`kindle-surface reader-text-surface reader-chapter-${(reflowChapter?.id || 'page').replace(/[^a-z0-9-]/gi, '-')} ${(activeReaderAudioTrack || (showNarrationButton && onToggleSensoryTrack)) ? 'reader-has-bottom-audio' : ''}`}
+          style={{
+            '--reader-extra-height': `${Math.max(0, fontSize - 16) * 42}px`,
+          } as React.CSSProperties}
+          onTouchStart={handlePdfTouchStart}
+          onTouchEnd={handlePdfTouchEnd}
+          onTouchCancel={handlePdfTouchEnd}
+        >
           {isPageBookmarked && (
             <div className="reader-page-bookmark-ribbon" aria-hidden="true">
               <Bookmark fill="currentColor" size={42} />
             </div>
           )}
           <div className="book-meta">
-            <span>Página {pdfCurrentPage} de {totalPdfPages}</span>
-            <span>{displayChapterKind}</span>
-            <span>{pdfProgress}% do livro</span>
+            <span>Fôlego {reflowPageIndex + 1} de {reflowTotalPages}</span>
+            <span>{reflowDisplayEyebrow}</span>
+            <span>{reflowProgress}% do livro</span>
           </div>
+          {!reflowHeaderDirectives.hideHeader && (
           <div className="chapter-coverlet">
             <div className="chapter-cover-art" style={coverImageUrl ? { backgroundImage: `linear-gradient(180deg, rgba(6,7,8,.08), rgba(6,7,8,.76)), url(${coverImageUrl})` } : undefined} />
             <div className="chapter-cover-copy">
-              <p className="kicker">{displayChapterKind}</p>
-              <h1>{displayTitle}</h1>
-              <span>Texto extraído da página {pdfCurrentPage} da edição completa</span>
+              {!reflowHeaderDirectives.hideEyebrow && <p className="kicker">{reflowDisplayEyebrow}</p>}
+              {!reflowHeaderDirectives.hideTitle && <h1>{reflowDisplayTitle}</h1>}
+              <span>Leitura reflow · páginas-fonte {reflowSourcePageStart}–{reflowSourcePageEnd}</span>
             </div>
           </div>
-          <div className="page-copy pdf-text-copy" style={{ fontSize: `${fontSize}px`, letterSpacing: `${letterSpacing}px`, lineHeight }}>
-            {textBlocks.length ? textBlocks.map((block, index) => {
-              if (block.kind === 'heading') return <h2 ref={(element) => registerSectionAnchor(block, element)} key={`${pdfCurrentPage}-${index}`}>{renderNarrationText(block, index)}</h2>;
-              if (block.kind === 'subheading') return <h3 ref={(element) => registerSectionAnchor(block, element)} key={`${pdfCurrentPage}-${index}`}>{renderNarrationText(block, index)}</h3>;
-              if (block.kind === 'divider') return <hr className="reader-content-divider" key={`${pdfCurrentPage}-${index}`} />;
+          )}
+          <div className="reader-reflow-viewport" ref={reflowViewportRef}>
+            <div
+              ref={reflowColumnsRef}
+              className="page-copy pdf-text-copy reader-reflow-columns"
+              style={{
+                '--reader-font-size': `${fontSize}px`,
+                '--reader-line-height': lineHeight,
+                fontSize: `${fontSize}px`,
+                letterSpacing: `${letterSpacing}px`,
+                lineHeight,
+                transform: `translateX(-${reflowPageIndex * reflowPageStep}px)`,
+              } as React.CSSProperties}
+            >
+            {isJournalChapter ? (
+              <section className="reader-journal-form" aria-label="Caderno de presença">
+                <p className="kicker">Caderno de presença</p>
+                <h2>{reflowDisplayTitle}</h2>
+                <span>Escreva sem obrigação de concluir. As respostas ficam na sua jornada privada e sincronizam quando sua conta está conectada.</span>
+                <div className="reader-journal-fields">
+                  {journalPrompts.map((prompt, promptIndex) => (
+                    <label key={prompt.id} className="reader-journal-field">
+                      <strong>{String(promptIndex + 1).padStart(2, '0')}</strong>
+                      <span>{prompt.text}</span>
+                      <textarea
+                        value={journalAnswers[prompt.id] ?? ''}
+                        onChange={(event) => onJournalAnswerChange?.(prompt.id, event.target.value)}
+                        placeholder="Escreva aqui..."
+                      />
+                    </label>
+                  ))}
+                </div>
+              </section>
+            ) : reflowBlocks.length ? reflowBlocks.map((block, index) => {
+              const blockIndex = index;
+              if (block.kind === 'heading') return <h2 className={`${block.className || ''} reader-audio-markable`.trim()} ref={(element) => registerSectionAnchor(block, element)} key={`${pdfCurrentPage}-${blockIndex}`}>{renderFormattedText(block, blockIndex)}{renderAudioCue(block)}</h2>;
+              if (block.kind === 'subheading') return <h3 className={`${block.className || ''} reader-audio-markable`.trim()} ref={(element) => registerSectionAnchor(block, element)} key={`${pdfCurrentPage}-${blockIndex}`}>{renderFormattedText(block, blockIndex)}{renderAudioCue(block)}</h3>;
+              if (block.kind === 'divider') return <hr className="reader-content-divider" key={`${pdfCurrentPage}-${blockIndex}`} />;
               if (block.kind === 'image') {
                 return (
-                  <figure className="reader-content-image" key={`${pdfCurrentPage}-${index}`}>
+                  <figure className="reader-content-image" key={`${pdfCurrentPage}-${blockIndex}`}>
                     <img src={block.text} alt={block.alt || ''} loading="lazy" />
                     {block.alt && <figcaption>{block.alt}</figcaption>}
                   </figure>
@@ -1030,22 +1559,32 @@ export default function ReaderShell({
               }
               if (block.kind === 'image-full') {
                 return (
-                  <figure className="reader-content-image reader-content-image-full" key={`${pdfCurrentPage}-${index}`}>
+                  <figure className="reader-content-image reader-content-image-full" key={`${pdfCurrentPage}-${blockIndex}`}>
                     <img src={block.text} alt={block.alt || ''} loading="lazy" />
                     {block.alt && <figcaption>{block.alt}</figcaption>}
                   </figure>
                 );
               }
-              if (block.kind === 'spacer') return <div className="reader-content-spacer" style={{ height: `${block.size ?? 24}px` }} key={`${pdfCurrentPage}-${index}`} />;
-              return <p className={/^\d+\.\s+/.test(block.text) ? 'reader-list-line' : undefined} key={`${pdfCurrentPage}-${index}`}>{renderNarrationText(block, index)}</p>;
+              if (block.kind === 'spacer') return <div className="reader-content-spacer" style={{ height: `${block.size ?? 24}px` }} key={`${pdfCurrentPage}-${blockIndex}`} />;
+              const inlineAudioCue = renderAudioCue(block);
+              const cleanParagraphText = repairReaderText(block.text).replace(/\s+/g, ' ').trim();
+              const isShortHighlight = cleanParagraphText.length < 120 || cleanParagraphText.split(/\s+/).length < 18 || block.className?.includes('reader-canonical-pause');
+              const paragraphClasses = [
+                /^\d+\.\s+/.test(block.text) ? 'reader-list-line' : '',
+                inlineAudioCue ? 'reader-audio-markable reader-audio-section-line' : '',
+                !isShortHighlight && blockIndex === firstDropcapBlockIndex ? 'reader-dropcap-enabled' : '',
+                block.className || '',
+              ].filter(Boolean).join(' ');
+              return <p className={paragraphClasses || undefined} key={`${pdfCurrentPage}-${blockIndex}`}>{inlineAudioCue}{renderFormattedText(block, blockIndex)}</p>;
             }) : (
-              <p>Não foi possível extrair texto desta página. Use o modo Edição para visualizar a página original.</p>
+              <p>Não foi possível montar o texto deste capítulo. Use o modo Edição para visualizar a página original.</p>
             )}
+            </div>
           </div>
-          <div className="reader-text-note-panel">
+          <div className="reader-text-note-panel reader-reflow-note-panel">
             <div>
               <p className="kicker">Minha marca nesta página</p>
-              <h3>Página {pdfCurrentPage}</h3>
+              <h3>Fôlego {reflowPageIndex + 1}</h3>
               <small className={`save-feedback ${noteSaveStatus}`}>
                 {noteSaveStatus === 'saving' ? 'Salvando...' : noteSaveStatus === 'saved' ? 'Salvo' : pageNote.trim() ? 'Salvo localmente' : 'Digite para salvar'}
               </small>
@@ -1057,44 +1596,137 @@ export default function ReaderShell({
               aria-label="Nota da página atual"
             />
           </div>
-          <div className="reader-text-tools">
-            <button onClick={onFontDecrease}><Minus size={16} /></button>
-            <span>{fontSize}px</span>
-            <button onClick={onFontIncrease}><Plus size={16} /></button>
-            <button onClick={() => setLetterSpacing((value) => value >= 1.2 ? 0 : Number((value + 0.2).toFixed(1)))}>Kerning {letterSpacing.toFixed(1)}</button>
-            <button onClick={() => setLineHeight((value) => value >= 1.9 ? 1.35 : Number((value + 0.1).toFixed(2)))}>Linha {lineHeight.toFixed(2)}</button>
-            {displaySummary && <small>{displaySummary}</small>}
-          </div>
-          <div className="pdf-reader-navigation">
-            <button className="page-button" onClick={() => onPdfPageChange(Math.max(1, pdfCurrentPage - 1))} disabled={pdfCurrentPage <= 1}><ChevronLeft size={21} /></button>
-            <div className="reader-nav-divider" aria-hidden="true" />
-            <button className="page-button" onClick={() => onPdfPageChange(Math.min(totalPdfPages, pdfCurrentPage + 1))} disabled={pdfCurrentPage >= totalPdfPages}><ChevronRight size={21} /></button>
-          </div>
-          <div className="reader-page-progress-footer">
-            <span>{pdfProgress}% do livro</span>
-            <strong>Página {pdfCurrentPage} de {totalPdfPages}</strong>
-            <div className="progress-track reader-global-progress"><span style={{ width: `${pdfProgress}%` }} /></div>
+          <button
+            className="reader-side-page-button reader-side-page-prev floating-page-nav"
+            onClick={() => {
+              if (reflowPageIndex > 0) setReflowPageIndex((current) => current - 1);
+              else if (resolvedChapterIndex > 0) onSelectChapter(resolvedChapterIndex - 1);
+            }}
+            disabled={reflowPageIndex <= 0 && resolvedChapterIndex <= 0}
+            aria-label="Fôlego anterior"
+          >
+            <ChevronLeft size={21} />
+          </button>
+          <button
+            className="reader-side-page-button reader-side-page-next floating-page-nav"
+            onClick={() => {
+              if (reflowPageIndex < reflowTotalPages - 1) setReflowPageIndex((current) => current + 1);
+              else if (resolvedChapterIndex < chapters.length - 1) onSelectChapter(resolvedChapterIndex + 1);
+            }}
+            disabled={reflowPageIndex >= reflowTotalPages - 1 && resolvedChapterIndex >= chapters.length - 1}
+            aria-label="Próximo fôlego"
+          >
+            <ChevronRight size={21} />
+          </button>
+          <div className="reader-bottom-stack">
+            <div className="reader-page-progress-footer">
+              <span>{reflowProgress}% do livro</span>
+              <strong>Fôlego {reflowPageIndex + 1} de {reflowTotalPages}</strong>
+              <div className="progress-track reader-global-progress"><span style={{ width: `${reflowProgress}%` }} /></div>
+            </div>
+            {(activeReaderAudioTrack || (showNarrationButton && onToggleSensoryTrack)) && mode === 'text' && (
+              <div className="reader-bottom-audio-slot">
+                {showNarrationButton && onToggleSensoryTrack && (
+                  <button
+                    type="button"
+                    className={`reader-bottom-sensory-button ${isSensoryTrackPlaying ? 'active' : ''}`}
+                    onClick={onToggleSensoryTrack}
+                    title={isSensoryTrackPlaying ? 'Pausar trilha de fundo' : `Tocar trilha de fundo${sensoryTrackTitle ? `: ${sensoryTrackTitle}` : ''}`}
+                    aria-label={isSensoryTrackPlaying ? 'Pausar trilha de fundo' : `Tocar trilha de fundo${sensoryTrackTitle ? `: ${sensoryTrackTitle}` : ''}`}
+                  >
+                    <Volume2 size={15} />
+                  </button>
+                )}
+                {activeReaderAudioTrack && (
+                  <div className="reader-top-audio-wrap">
+                    <div className={`reader-top-audio-chip reader-compact-audio-player ${activeReaderAudioPlaying ? 'playing' : ''}`}>
+                      <button
+                        type="button"
+                        className="reader-top-audio-play"
+                        onClick={() => playAudio(activeReaderAudioTrack.url, `${displayTitle} · ${cleanLabel(activeReaderAudioTrack.label)}`, activeReaderAudioTrack.coverUrl)}
+                        title={activeReaderAudioPlaying ? 'Pausar áudio desta parte' : 'Ouvir esta parte'}
+                        aria-label={activeReaderAudioPlaying ? 'Pausar áudio desta parte' : 'Ouvir esta parte'}
+                      >
+                        {activeReaderAudioPlaying ? <Pause size={21} /> : <Play size={22} fill="currentColor" />}
+                      </button>
+                      <div className="reader-top-audio-current">
+                        <span>{activeReaderAudioPlaying ? 'Ouvindo' : 'Ouvir'}</span>
+                        <strong>{cleanLabel(activeReaderAudioTrack.label)}</strong>
+                        <div className="reader-mini-audio-meter" aria-hidden="true">
+                          {activeReaderAudioBars.map((value, index) => (
+                            <i
+                              key={`${index}-${value}`}
+                              style={{ height: `${Math.max(4, Math.min(28, value / 3))}px` }}
+                            />
+                          ))}
+                        </div>
+                        <div className="reader-mini-audio-time">
+                          <small>{formatReaderAudioTime(activeAudioUrl === activeReaderAudioTrack.url ? audioCurrentTime : audioProgress[activeReaderAudioTrack.url]?.currentTime || 0)}</small>
+                          <small>{formatReaderAudioTime(activeAudioUrl === activeReaderAudioTrack.url ? audioDuration : audioProgress[activeReaderAudioTrack.url]?.duration || 0)}</small>
+                        </div>
+                        <div className="reader-mini-audio-progress">
+                          <span style={{ width: `${activeAudioUrl === activeReaderAudioTrack.url ? activeReaderAudioProgress : 0}%` }} />
+                          <input
+                            type="range"
+                            min="0"
+                            max="100"
+                            value={activeAudioUrl === activeReaderAudioTrack.url ? activeReaderAudioProgress : 0}
+                            onChange={(event) => onAudioSeek?.(Number(event.target.value))}
+                            aria-label="Progresso do áudio desta parte"
+                            disabled={activeAudioUrl !== activeReaderAudioTrack.url || !onAudioSeek}
+                          />
+                        </div>
+                      </div>
+                      <label className="reader-mini-volume" style={{ '--reader-volume-progress': `${Math.round(audioVolume * 100)}%` } as React.CSSProperties}>
+                        <Volume2 size={15} />
+                        <input
+                          type="range"
+                          min="0"
+                          max="100"
+                          value={Math.round(audioVolume * 100)}
+                          onChange={(event) => onAudioVolumeChange?.(Number(event.target.value))}
+                          aria-label="Volume do áudio"
+                        />
+                      </label>
+                      <button
+                        type="button"
+                        className="reader-mini-speed"
+                        onClick={onAudioPlaybackRateChange}
+                        title="Velocidade do áudio"
+                      >
+                        {audioPlaybackRate % 1 === 0 ? audioPlaybackRate.toFixed(0) : audioPlaybackRate.toFixed(2).replace(/0$/, '')}x
+                      </button>
+                      <button
+                        type="button"
+                        className="reader-top-audio-minimize"
+                        onClick={onOpenAudioFullscreen}
+                        aria-label="Abrir player em tela cheia"
+                        title="Abrir player em tela cheia"
+                      >
+                        <Maximize2 size={17} />
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </article>
         <div className="reader-footer-actions">
-        {showNarrationButton && (
-          <div className="reader-narration-controls reader-narration-footer">
-            <button
-              onClick={togglePageNarration}
-              className={isNarratingPage ? 'active' : ''}
-              title={isNarratingPage ? 'Parar narração' : 'Narrar página'}
-              aria-label={isNarratingPage ? 'Parar narração' : 'Narrar página'}
-            >
-              <Volume2 size={15} />
-            </button>
-          </div>
-        )}
-        {onExitReader && (
-          <button className="reader-footer-exit-button" onClick={onExitReader} title="Voltar ao menu principal">
-            <Home size={16} />
-            <span>Voltar ao menu</span>
-          </button>
-        )}
+        <div className="reader-footer-right-controls">
+          {false && showNarrationButton && onToggleSensoryTrack && (
+            <div className="reader-narration-controls reader-narration-footer">
+              <button
+                onClick={onToggleSensoryTrack}
+                className={isSensoryTrackPlaying ? 'active' : ''}
+                title={isSensoryTrackPlaying ? 'Pausar trilha sensorial' : `Tocar trilha sensorial${sensoryTrackTitle ? `: ${sensoryTrackTitle}` : ''}`}
+                aria-label={isSensoryTrackPlaying ? 'Pausar trilha sensorial' : `Tocar trilha sensorial${sensoryTrackTitle ? `: ${sensoryTrackTitle}` : ''}`}
+              >
+                <Volume2 size={15} />
+              </button>
+            </div>
+          )}
+        </div>
         </div>
         </>
       )}

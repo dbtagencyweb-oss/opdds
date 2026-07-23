@@ -2,13 +2,46 @@
   "name": "opdds-platform",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": "24.x",
+    "npm": "11.x"
+  },
   "scripts": {
     "dev:frontend": "npm --prefix public/app run dev",
     "build:frontend": "npm --prefix public/app run build",
     "dev:backend": "npm --prefix backend run start:dev",
     "build:backend": "npm --prefix backend run build",
     "build": "npm run build:frontend",
+    "canonical:generate": "npm --prefix backend run canonical:generate",
+    "validate:content": "npm run canonical:generate && tsx scripts/validate-content.ts",
+    "test:integration": "npm run canonical:generate && vitest run tests/integration",
     "prisma:generate": "npm --prefix backend run prisma:generate",
-    "prisma:migrate": "npm --prefix backend run prisma:migrate"
+    "prisma:migrate": "npm --prefix backend run prisma:migrate",
+    "typecheck:igentmind": "tsc -p tsconfig.igentmind.json --noEmit",
+    "test:block20": "vitest run tests/igentmind/pillar-01/block-20/block20.spec.ts",
+    "test:block21": "vitest run tests/igentmind/block-21/block21.spec.ts",
+    "test:block23": "vitest run tests/igentmind/pillar-02/block-23/block23.spec.ts",
+    "test:block24": "vitest run tests/igentmind/pillar-02/block-24/block24.spec.ts",
+    "test:block25": "vitest run tests/igentmind/pillar-02/block-25/block25.spec.ts",
+    "test:igentmind:p02:block26": "vitest run tests/igentmind/pillar-02/block-26/block26.spec.ts",
+    "check:igentmind:p02:block26": "npm run typecheck:igentmind && npm run test:igentmind:p02:block26",
+    "test:igentmind:interlude-fenda:block27": "vitest run tests/igentmind/interlude-fenda/block-27/block27.spec.ts",
+    "check:igentmind:interlude-fenda:block27": "npm run typecheck:igentmind && npm run test:igentmind:interlude-fenda:block27",
+    "test:igentmind:p03:block28": "vitest run tests/igentmind/pillar-03/block-28/block28.spec.ts",
+    "check:igentmind:p03:block28": "npm run typecheck:igentmind && npm run test:igentmind:p03:block28",
+    "test:igentmind:p03:block29": "vitest run tests/igentmind/pillar-03/block-29/block29.spec.ts",
+    "check:igentmind:p03:block29": "npm run typecheck:igentmind && npm run test:igentmind:p03:block29",
+    "test:igentmind:final:block56": "vitest run tests/igentmind/final-project/block-56.spec.ts",
+    "check:igentmind:final:block56": "npm run typecheck:igentmind && npm run test:igentmind:final:block56",
+    "verify:igentmind": "npm run typecheck:igentmind && npm run test:block21 && npm run test:block20",
+    "verify:pillar02-blueprint": "npm run typecheck:igentmind && npm run test:block23",
+    "verify:pillar02-questions": "npm run typecheck:igentmind && npm run test:block23 && npm run test:block24",
+    "verify:pillar02-resources": "npm run typecheck:igentmind && npm run test:block23 && npm run test:block24 && npm run test:block25"
+  },
+  "devDependencies": {
+    "@types/node": "^26.1.1",
+    "tsx": "^4.23.0",
+    "typescript": "~5.8.2",
+    "vitest": "^4.1.10"
   }
 }

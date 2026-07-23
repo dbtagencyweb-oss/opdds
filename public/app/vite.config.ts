@@ -90,6 +90,20 @@ export default defineConfig(({ mode }) => {
         '@': path.resolve(__dirname, './src'),
       },
     },
+    build: {
+      rollupOptions: {
+        output: {
+          manualChunks(id) {
+            const normalized = id.replace(/\\/g, '/');
+            if (normalized.includes('node_modules/react') || normalized.includes('node_modules/lucide-react')) return 'ui-vendor';
+            if (normalized.includes('/data/igentMindPillar01')) return 'igent-pillar01';
+            if (normalized.includes('/data/igentMind')) return 'igent-engine';
+            if (normalized.includes('/data/artifactBookData') || normalized.includes('/data/pdfTextPages') || normalized.includes('/bkp/livro')) return 'canonical-content';
+            return undefined;
+          },
+        },
+      },
+    },
     define: {
       'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY || ''),
     },

@@ -5,11 +5,12 @@ import { AuthService } from './auth.service';
 import { AdminGuard } from './admin.guard';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { MailService } from './mail.service';
+import { getJwtSecret } from '../config/env';
 
 @Module({
   imports: [
     JwtModule.register({
-      secret: process.env.JWT_SECRET || 'local-opdds-secret',
+      secret: getJwtSecret(),
       signOptions: { expiresIn: '30d' },
     }),
   ],

@@ -41,9 +41,9 @@ export const DownloadCloud = ({ size = 16 }: any) => (
   </svg>
 );
 
-export const Bookmark = ({ size = 16 }: any) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M6 2h12v20l-6-4-6 4V2z" fill="currentColor" />
+export const Bookmark = ({ size = 16, fill = 'currentColor', ...props }: any) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
+    <path d="M6 2h12v20l-6-4-6 4V2z" fill={fill} stroke="currentColor" strokeWidth="1.35" strokeLinejoin="round" />
   </svg>
 );
 
