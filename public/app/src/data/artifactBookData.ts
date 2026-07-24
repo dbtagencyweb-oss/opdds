@@ -231,7 +231,7 @@ export const artifactBookData = {
           "blocks": [
             {
               "type": "pause",
-              "text": "SOBRE O DESACREDITADO Quem é a pessoa para quem este livro foi escrito"
+              "text": "SOBRE O DESACREDITADO. Quem é a pessoa para quem este livro foi escrito"
             },
             {
               "type": "p",
@@ -248,11 +248,7 @@ export const artifactBookData = {
           "blocks": [
             {
               "type": "p",
-              "text": "Desde cedo, o desacreditado costuma carregar uma sensação difícil de nomear: a impressão de estar levemente fora de lugar. Não o bastante para ser excluído, mas o suficiente para nunca se sentir completamente pertencente. Ele observa os outros parecerem mais seguros, mais estáveis, mais alinhados com as expectativas do mundo. Enquanto isso, por dentro, vive uma combinação confusa de"
-            },
-            {
-              "type": "pause",
-              "text": "sensibilidade, inquietação, curiosidade intensa e cansaço precoce."
+              "text": "Desde cedo, o desacreditado costuma carregar uma sensação difícil de nomear: a impressão de estar levemente fora de lugar. Não o bastante para ser excluído, mas o suficiente para nunca se sentir completamente pertencente. Ele observa os outros parecerem mais seguros, mais estáveis, mais alinhados com as expectativas do mundo. Enquanto isso, por dentro, vive uma combinação confusa de sensibilidade, inquietação, curiosidade intensa e cansaço precoce."
             },
             {
               "type": "p",
@@ -267,12 +263,8 @@ export const artifactBookData = {
           "listened": false,
           "blocks": [
             {
-              "type": "pause",
-              "text": "Grande parte dos desacreditados compartilha traços semelhantes: mente criativa, pensamento associativo, sensibilidade ampliada,"
-            },
-            {
-              "type": "pause",
-              "text": "dificuldade de sustentar foco contínuo em ambientes rígidos e exigentes."
+              "type": "p",
+              "text": "Grande parte dos desacreditados compartilha traços semelhantes: mente criativa, pensamento associativo, sensibilidade ampliada, dificuldade de sustentar foco contínuo em ambientes rígidos e exigentes."
             },
             {
               "type": "p",
@@ -332,11 +324,7 @@ export const artifactBookData = {
             },
             {
               "type": "p",
-              "text": "Essa culpa não vem necessariamente de acusações explícitas. Ela nasce de olhares, comparações, silêncios, expectativas não ditas. Com"
-            },
-            {
-              "type": "pause",
-              "text": "o tempo, vira uma voz interna que acompanha todas as tentativas de recomeço."
+              "text": "Essa culpa não vem necessariamente de acusações explícitas. Ela nasce de olhares, comparações, silêncios, expectativas não ditas. Com o tempo, vira uma voz interna que acompanha todas as tentativas de recomeço."
             },
             {
               "type": "pause",
@@ -421,11 +409,7 @@ export const artifactBookData = {
             },
             {
               "type": "p",
-              "text": "Pessoas em sofrimento emocional costumam ter a capacidade de atenção reduzida. A mente oscila, o corpo cansa rápido, a leitura longa se"
-            },
-            {
-              "type": "pause",
-              "text": "torna difícil. Insistir em textos extensos, repetitivos ou excessivamente metafóricos não aprofunda — afasta."
+              "text": "Pessoas em sofrimento emocional costumam ter a capacidade de atenção reduzida. A mente oscila, o corpo cansa rápido, a leitura longa se torna difícil. Insistir em textos extensos, repetitivos ou excessivamente metafóricos não aprofunda — afasta."
             },
             {
               "type": "p",
@@ -598,11 +582,7 @@ export const artifactBookData = {
           "blocks": [
             {
               "type": "p",
-              "text": "Presença é o terceiro movimento. Não é positividade. Não é força. Não é solução. Presença é a capacidade de permanecer"
-            },
-            {
-              "type": "pause",
-              "text": "consigo mesmo depois que a consciência percebeu o estado e o julgamento contou sua história."
+              "text": "Presença é o terceiro movimento. Não é positividade. Não é força. Não é solução. Presença é a capacidade de permanecer consigo mesmo depois que a consciência percebeu o estado e o julgamento contou sua história."
             },
             {
               "type": "p",
@@ -731,11 +711,7 @@ export const artifactBookData = {
             },
             {
               "type": "p",
-              "text": "Este capítulo existe porque, assim como muitos leitores deste livro, eu também sei o que é ser desacreditado antes mesmo de terminar uma frase. Sei o que é ter a intenção questionada, a legitimidade colocada em dúvida, a autoria reduzida a explicações simples demais. Antes que isso aconteça em silêncio dentro de"
-            },
-            {
-              "type": "pause",
-              "text": "você — ou dentro de mim — este capítulo coloca algo no lugar certo."
+              "text": "Este capítulo existe porque, assim como muitos leitores deste livro, eu também sei o que é ser desacreditado antes mesmo de terminar uma frase. Sei o que é ter a intenção questionada, a legitimidade colocada em dúvida, a autoria reduzida a explicações simples demais. Antes que isso aconteça em silêncio dentro de você — ou dentro de mim — este capítulo coloca algo no lugar certo."
             }
           ]
         },
@@ -771,11 +747,7 @@ export const artifactBookData = {
           "blocks": [
             {
               "type": "p",
-              "text": "Quando alguém escreve algo que toca camadas profundas da experiência humana, o julgamento costuma vir rápido. Questiona-se a autoridade. Questiona-se a legitimidade. Questiona-se a origem. No meu caso, esse julgamento assume uma forma específica: a ideia de que o uso de ferramentas de inteligência artificial invalidaria a"
-            },
-            {
-              "type": "pause",
-              "text": "ia, diluiria a experiência ou tornaria a obra menos verdadeira"
+              "text": "Quando alguém escreve algo que toca camadas profundas da experiência humana, o julgamento costuma vir rápido. Questiona-se a autoridade. Questiona-se a legitimidade. Questiona-se a origem. No meu caso, esse julgamento assume uma forma específica: a ideia de que o uso de ferramentas de inteligência artificial invalidaria a autoria, diluiria a experiência ou tornaria a obra menos verdadeira"
             },
             {
               "type": "pause",
@@ -884,11 +856,7 @@ export const artifactBookData = {
             },
             {
               "type": "p",
-              "text": "Para quem está em sofrimento emocional, a dualidade costuma virar armadilha. Se você está mal, então está errado. Se falhou, então é"
-            },
-            {
-              "type": "pause",
-              "text": "fraco. Se sente demais, então perdeu o controle. Este livro propõe uma saída diferente."
+              "text": "Para quem está em sofrimento emocional, a dualidade costuma virar armadilha. Se você está mal, então está errado. Se falhou, então é fraco. Se sente demais, então perdeu o controle. Este livro propõe uma saída diferente."
             }
           ]
         },
@@ -932,11 +900,7 @@ export const artifactBookData = {
             },
             {
               "type": "p",
-              "text": "Esse é o espaço da trialidade. Não se trata de eliminar a sombra nem glorificar o controle. Trata-se de reconhecer que"
-            },
-            {
-              "type": "pause",
-              "text": "ambos existem — e que você não é nenhum deles isoladamente."
+              "text": "Esse é o espaço da trialidade. Não se trata de eliminar a sombra nem glorificar o controle. Trata-se de reconhecer que ambos existem — e que você não é nenhum deles isoladamente."
             }
           ]
         },
@@ -1082,11 +1046,7 @@ export const artifactBookData = {
             },
             {
               "type": "p",
-              "text": "O Poder dos Desacreditados nasce como contraponto a essa lógica. Ele parte de uma constatação simples e pouco explorada: existem pessoas que não desistiram, mas também não se encaixaram no discurso da superação tradicional. Pessoas que seguiram em frente, mas carregando dúvidas, cansaço e a sensação de não pertencimento. Pessoas que sobreviveram, se reconstruíram"
-            },
-            {
-              "type": "pause",
-              "text": "parcialmente e agora tentam continuar com mais consciência."
+              "text": "O Poder dos Desacreditados nasce como contraponto a essa lógica. Ele parte de uma constatação simples e pouco explorada: existem pessoas que não desistiram, mas também não se encaixaram no discurso da superação tradicional. Pessoas que seguiram em frente, mas carregando dúvidas, cansaço e a sensação de não pertencimento. Pessoas que sobreviveram, se reconstruíram parcialmente e agora tentam continuar com mais consciência."
             },
             {
               "type": "p",
@@ -1106,11 +1066,7 @@ export const artifactBookData = {
             },
             {
               "type": "p",
-              "text": "Este livro não pede que você deixe de ser quem é enquanto tenta mudar a própria vida. Se você se sente desacreditado — pelo mundo, pelas circunstâncias ou por você mesmo — saiba: isso não te desqualifica. Muitas vezes,"
-            },
-            {
-              "type": "pause",
-              "text": "apenas indica que você sobreviveu por caminhos que não são celebrados."
+              "text": "Este livro não pede que você deixe de ser quem é enquanto tenta mudar a própria vida. Se você se sente desacreditado — pelo mundo, pelas circunstâncias ou por você mesmo — saiba: isso não te desqualifica. Muitas vezes, apenas indica que você sobreviveu por caminhos que não são celebrados."
             },
             {
               "type": "p",
@@ -1263,11 +1219,7 @@ export const artifactBookData = {
             },
             {
               "type": "p",
-              "text": "Consciência aqui não é “entender”. É perceber. Perceber sem corrigir. Perceber sem comentar. Perceber sem transformar em teoria. Você não precisa se explicar para reconhecer. Você precisa sentir o fato. Três perguntas simples — simples demais para a mente gostar — sustentam a Consciência do Reconhecimento: 1. O que em mim está pedindo para ser visto e eu estou ignorando? Não o que é bonito de responder. O que é verdadeiro. 2. Onde meu corpo está segurando o que eu não admito? Garganta? Peito? Estômago? Lombar? Mandíbula? O corpo é um"
-            },
-            {
-              "type": "pause",
-              "text": "arquivo. Ele guarda o que a cabeça racionaliza."
+              "text": "Consciência aqui não é “entender”. É perceber. Perceber sem corrigir. Perceber sem comentar. Perceber sem transformar em teoria. Você não precisa se explicar para reconhecer. Você precisa sentir o fato. Três perguntas simples — simples demais para a mente gostar — sustentam a Consciência do Reconhecimento: 1. O que em mim está pedindo para ser visto e eu estou ignorando? Não o que é bonito de responder. O que é verdadeiro. 2. Onde meu corpo está segurando o que eu não admito? Garganta? Peito? Estômago? Lombar? Mandíbula? O corpo é um arquivo. Ele guarda o que a cabeça racionaliza."
             },
             {
               "type": "p",
@@ -1355,11 +1307,7 @@ export const artifactBookData = {
             },
             {
               "type": "pause",
-              "text": "Presença não é meditação. Presença não é performance espiritual. Presença é muito mais"
-            },
-            {
-              "type": "pause",
-              "text": "concreta: ficar com você quando você não é conveniente."
+              "text": "Presença não é meditação. Presença não é performance espiritual. Presença é muito mais concreta: ficar com você quando você não é conveniente."
             },
             {
               "type": "p",
@@ -1374,12 +1322,8 @@ export const artifactBookData = {
               "text": "1) O minuto sem fuga. Um minuto em que você não abre o celular. Um minuto em que você não muda de assunto dentro da cabeça. Um minuto em que você só percebe: respiração, corpo, pensamento. E quando vier a vontade de escapar, você nota: “vontade de escapar.” E fica mais dez segundos."
             },
             {
-              "type": "pause",
-              "text": "2) A frase de retorno (sem motivação) Não é afirmação positiva. É frase de retorno"
-            },
-            {
               "type": "p",
-              "text": "ao real: “Eu estou aqui.” “Eu não preciso me explicar agora.” “Eu posso sentir isso sem resolver hoje.” Você repete como quem finca o pé no chão. Não para melhorar. Para sustentar."
+              "text": "2) A frase de retorno (sem motivação). Não é afirmação positiva. É frase de retorno ao real: “Eu estou aqui.” “Eu não preciso me explicar agora.” “Eu posso sentir isso sem resolver hoje.” Você repete como quem finca o pé no chão. Não para melhorar. Para sustentar."
             },
             {
               "type": "p",
@@ -2153,11 +2097,7 @@ export const artifactBookData = {
             },
             {
               "type": "p",
-              "text": "Se você sente que algo em você ficou para trás, isso não é defeito. É memória viva. Você não precisa “superar” para seguir. Você precisa integrar. Algumas ausências nunca deixam de doer completamente — e isso não te impede de viver. Apenas te torna mais cuidadoso com o"
-            },
-            {
-              "type": "pause",
-              "text": "que importa. Honrar o luto não é parar; é parar de fugir."
+              "text": "Se você sente que algo em você ficou para trás, isso não é defeito. É memória viva. Você não precisa “superar” para seguir. Você precisa integrar. Algumas ausências nunca deixam de doer completamente — e isso não te impede de viver. Apenas te torna mais cuidadoso com o que importa. Honrar o luto não é parar; é parar de fugir."
             }
           ]
         },
@@ -2391,11 +2331,7 @@ export const artifactBookData = {
             },
             {
               "type": "p",
-              "text": "O julgamento aqui é severo e constante. Ele diz que parar é preguiça. Que errar é incompetência. Que falhar é vergonha. Que pedir ajuda é fraqueza. Esse julgamento não vem apenas de fora; ele se instala dentro e passa a operar como regulador interno. Você se vigia. Se cobra. Se pressiona. E, ao fazer isso, acredita que"
-            },
-            {
-              "type": "pause",
-              "text": "está sendo responsável, quando, na verdade, está se punindo preventivamente."
+              "text": "O julgamento aqui é severo e constante. Ele diz que parar é preguiça. Que errar é incompetência. Que falhar é vergonha. Que pedir ajuda é fraqueza. Esse julgamento não vem apenas de fora; ele se instala dentro e passa a operar como regulador interno. Você se vigia. Se cobra. Se pressiona. E, ao fazer isso, acredita que está sendo responsável, quando, na verdade, está se punindo preventivamente."
             },
             {
               "type": "p",
@@ -2539,12 +2475,8 @@ export const artifactBookData = {
               "lead": true
             },
             {
-              "type": "pause",
-              "text": "O desacreditado costuma desenvolver uma relação íntima com a anestesia. Não"
-            },
-            {
               "type": "p",
-              "text": "necessariamente química. Às vezes mental. Às vezes emocional. Às vezes comportamental. Pode ser trabalho demais, estímulo demais, sexo demais, controle demais, isolamento demais, consumo demais, pensamento demais. O padrão muda; o princípio é o mesmo. Sempre que algo ameaça encostar fundo — tristeza, vazio, raiva, medo, sensação de não pertencimento — surge um impulso quase automático de sair de si. Não por covardia, mas por aprendizado. Em algum ponto da vida, ficar foi perigoso. Então o corpo aprendeu a ir."
+              "text": "O desacreditado costuma desenvolver uma relação íntima com a anestesia. Não necessariamente química. Às vezes mental. Às vezes emocional. Às vezes comportamental. Pode ser trabalho demais, estímulo demais, sexo demais, controle demais, isolamento demais, consumo demais, pensamento demais. O padrão muda; o princípio é o mesmo. Sempre que algo ameaça encostar fundo — tristeza, vazio, raiva, medo, sensação de não pertencimento — surge um impulso quase automático de sair de si. Não por covardia, mas por aprendizado. Em algum ponto da vida, ficar foi perigoso. Então o corpo aprendeu a ir."
             },
             {
               "type": "p",
@@ -2552,11 +2484,7 @@ export const artifactBookData = {
             },
             {
               "type": "p",
-              "text": "A fuga, então, vira estilo de vida. Você não foge mais de algo específico; você vive evitando contato prolongado consigo mesmo. O silêncio incomoda. O vazio assusta. A pausa gera ansiedade. O desacreditado aprende a estar sempre ocupado, sempre estimulado, sempre resolvendo, sempre reagindo. Porque reagir é mais fácil do que sentir. E sentir, sem apoio, pode parecer ameaça de colapso. A anestesia mantém você funcional. Só que funcional não é vivo. E, com o tempo, essa funcionalidade anestesiada cobra preço: a perda gradual de"
-            },
-            {
-              "type": "pause",
-              "text": "sensibilidade, de prazer real, de presença. Você continua existindo, mas em volume baixo."
+              "text": "A fuga, então, vira estilo de vida. Você não foge mais de algo específico; você vive evitando contato prolongado consigo mesmo. O silêncio incomoda. O vazio assusta. A pausa gera ansiedade. O desacreditado aprende a estar sempre ocupado, sempre estimulado, sempre resolvendo, sempre reagindo. Porque reagir é mais fácil do que sentir. E sentir, sem apoio, pode parecer ameaça de colapso. A anestesia mantém você funcional. Só que funcional não é vivo. E, com o tempo, essa funcionalidade anestesiada cobra preço: a perda gradual de sensibilidade, de prazer real, de presença. Você continua existindo, mas em volume baixo."
             }
           ]
         },
@@ -2579,20 +2507,12 @@ export const artifactBookData = {
               "text": "O desacreditado costuma viver esse ciclo em silêncio. Porque ele aprendeu a se julgar por precisar de anestesia. Ele se chama de fraco. De descontrolado. De viciado. De incapaz. E esse julgamento só reforça o ciclo, porque aumenta a dor que precisa ser anestesiada. A compulsão não cria o sofrimento sozinha; ela responde a um sofrimento que já existe. E quanto mais você tenta arrancá-la sem olhar para a raiz, mais o corpo se defende criando novas rotas de fuga. Você larga uma coisa e pega outra. Muda a forma, mas mantém a função."
             },
             {
-              "type": "pause",
-              "text": "Há também um aspecto importante: a anestesia protege você do contato com perdas"
+              "type": "p",
+              "text": "Há também um aspecto importante: a anestesia protege você do contato com perdas antigas, com raivas não expressas, com tristezas sem ritual, com desejos reprimidos. Ela mantém essas camadas sob controle. Quando você tenta interromper a fuga de forma abrupta, tudo isso ameaça subir de uma vez. E o medo disso é real. O corpo teme ser inundado. Por isso, presença aqui não é força bruta. É aproximação gradual. É aprender a ficar um pouco mais, não tudo de uma vez. É reconhecer que a compulsão não é só hábito; é guarda-costas emocional."
             },
             {
               "type": "p",
-              "text": "antigas, com raivas não expressas, com tristezas sem ritual, com desejos reprimidos. Ela mantém essas camadas sob controle. Quando você tenta interromper a fuga de forma abrupta, tudo isso ameaça subir de uma vez. E o medo disso é real. O corpo teme ser inundado. Por isso, presença aqui não é força bruta. É aproximação gradual. É aprender a ficar um pouco mais, não tudo de uma vez. É reconhecer que a compulsão não é só hábito; é guarda-costas emocional."
-            },
-            {
-              "type": "p",
-              "text": "Com o tempo, a vida anestesiada cria uma sensação estranha: nada dói muito, mas nada toca fundo. O prazer perde intensidade. A tristeza perde linguagem. A alegria vira estímulo rápido. O desacreditado se sente distante de si mesmo, como se estivesse sempre assistindo a própria vida por uma tela. E essa distância dói de um jeito difícil de explicar, porque não é dor"
-            },
-            {
-              "type": "pause",
-              "text": "aguda — é falta de contato. E falta de contato, quando prolongada, gera desespero silencioso."
+              "text": "Com o tempo, a vida anestesiada cria uma sensação estranha: nada dói muito, mas nada toca fundo. O prazer perde intensidade. A tristeza perde linguagem. A alegria vira estímulo rápido. O desacreditado se sente distante de si mesmo, como se estivesse sempre assistindo a própria vida por uma tela. E essa distância dói de um jeito difícil de explicar, porque não é dor aguda — é falta de contato. E falta de contato, quando prolongada, gera desespero silencioso."
             }
           ]
         },
@@ -2813,11 +2733,7 @@ export const artifactBookData = {
             },
             {
               "type": "p",
-              "text": "Há também um tipo específico de frustração que quase ninguém admite: a frustração de perceber que, mesmo amado, você ainda carrega insegurança. Mesmo com alguém ao lado, o medo não some. Porque o medo não nasceu do presente; nasceu de uma história antiga de não reconhecimento, de rejeições, de lealdades invisíveis, de perdas não elaboradas. O amor não resolve isso sozinho. Ele expõe. Ele revela. Ele amplifica. E isso pode ser brutal. Mas também pode ser o lugar onde você"
-            },
-            {
-              "type": "pause",
-              "text": "começa a ver, com clareza, o padrão que antes estava escondido."
+              "text": "Há também um tipo específico de frustração que quase ninguém admite: a frustração de perceber que, mesmo amado, você ainda carrega insegurança. Mesmo com alguém ao lado, o medo não some. Porque o medo não nasceu do presente; nasceu de uma história antiga de não reconhecimento, de rejeições, de lealdades invisíveis, de perdas não elaboradas. O amor não resolve isso sozinho. Ele expõe. Ele revela. Ele amplifica. E isso pode ser brutal. Mas também pode ser o lugar onde você começa a ver, com clareza, o padrão que antes estava escondido."
             }
           ]
         },
@@ -2841,11 +2757,7 @@ export const artifactBookData = {
             },
             {
               "type": "p",
-              "text": "Consciência é notar onde você se abandona para ser amado. Onde você não fala o que sente para não perder. Onde você aceita menos do que merece para não ficar sozinho. Onde você se molda para caber no desejo do outro. Onde você chama de “amor” aquilo que é medo de abandono. E perceber isso não para tomar decisão imediata, mas para ver o padrão operando. Porque, enquanto você não vê, você repete. E o desacreditado é especialmente vulnerável à repetição, porque ele confunde intensidade com verdade. Consciência é separar"
-            },
-            {
-              "type": "pause",
-              "text": "intensidade de presença. Separar ansiedade de amor. Separar urgência de conexão."
+              "text": "Consciência é notar onde você se abandona para ser amado. Onde você não fala o que sente para não perder. Onde você aceita menos do que merece para não ficar sozinho. Onde você se molda para caber no desejo do outro. Onde você chama de “amor” aquilo que é medo de abandono. E perceber isso não para tomar decisão imediata, mas para ver o padrão operando. Porque, enquanto você não vê, você repete. E o desacreditado é especialmente vulnerável à repetição, porque ele confunde intensidade com verdade. Consciência é separar intensidade de presença. Separar ansiedade de amor. Separar urgência de conexão."
             }
           ]
         },
@@ -2861,11 +2773,7 @@ export const artifactBookData = {
             },
             {
               "type": "p",
-              "text": "O julgamento no amor é cruel porque ele toca na parte mais sensível: a sensação de ser escolhível. Você se julga por sentir demais. Se julga por precisar. Se julga por se importar. Se julga por ter expectativas. Se julga por se frustrar. E, ao se julgar, você tenta virar alguém mais “fácil”, mais “forte”, mais “independente”, como se independência emocional fosse ausência de necessidade. Mas o julgamento não te torna mais inteiro; ele te torna mais duro. E dureza"
-            },
-            {
-              "type": "pause",
-              "text": "não sustenta amor — apenas sustenta controle."
+              "text": "O julgamento no amor é cruel porque ele toca na parte mais sensível: a sensação de ser escolhível. Você se julga por sentir demais. Se julga por precisar. Se julga por se importar. Se julga por ter expectativas. Se julga por se frustrar. E, ao se julgar, você tenta virar alguém mais “fácil”, mais “forte”, mais “independente”, como se independência emocional fosse ausência de necessidade. Mas o julgamento não te torna mais inteiro; ele te torna mais duro. E dureza não sustenta amor — apenas sustenta controle."
             },
             {
               "type": "p",
