@@ -135,11 +135,7 @@ export const artifactBookData = {
             },
             {
               "type": "p",
-              "text": "A maioria dos livros de autoajuda parte de um pressuposto silencioso: o de que a pessoa está inteira o suficiente para aplicar métodos, sustentar disciplina e transformar intenção em"
-            },
-            {
-              "type": "p",
-              "text": "ação contínua. Parte do princípio de que há energia disponível, clareza mental mínima e um senso de identidade relativamente estável."
+              "text": "A maioria dos livros de autoajuda parte de um pressuposto silencioso: o de que a pessoa está inteira o suficiente para aplicar métodos, sustentar disciplina e transformar intenção em ação contínua. Parte do princípio de que há energia disponível, clareza mental mínima e um senso de identidade relativamente estável."
             },
             {
               "type": "p",
@@ -239,12 +235,8 @@ export const artifactBookData = {
             },
             {
               "type": "p",
-              "text": "Este livro não foi escrito para um público genérico. Ele não foi pensado para qualquer pessoa que queira melhorar de vida, organizar metas ou alcançar desempenho máximo. Ele foi escrito para um tipo específico de pessoa — alguém que, mesmo tentando, sente que nunca ocupou completamente o lugar que parecia destinado aos outros. O desacreditado não é alguém que desistiu. É alguém que continuou. Continuou mesmo sem aplauso. Continuou mesmo sem validação. Continuou mesmo quando a energia interna já não sustentava a",
+              "text": "Este livro não foi escrito para um público genérico. Ele não foi pensado para qualquer pessoa que queira melhorar de vida, organizar metas ou alcançar desempenho máximo. Ele foi escrito para um tipo específico de pessoa — alguém que, mesmo tentando, sente que nunca ocupou completamente o lugar que parecia destinado aos outros. O desacreditado não é alguém que desistiu. É alguém que continuou. Continuou mesmo sem aplauso. Continuou mesmo sem validação. Continuou mesmo quando a energia interna já não sustentava a narrativa da força constante. O desacreditado não se reconhece nos discursos tradicionais de sucesso porque, na maior parte do tempo, sua luta não foi para vencer — foi para não se perder.",
               "lead": true
-            },
-            {
-              "type": "p",
-              "text": "narrativa da força constante. O desacreditado não se reconhece nos discursos tradicionais de sucesso porque, na maior parte do tempo, sua luta não foi para vencer — foi para não se perder."
             }
           ]
         },
@@ -1146,10 +1138,6 @@ export const artifactBookData = {
             },
             {
               "type": "pause",
-              "text": "Toda travessia começa antes do primeiro passo. Ela começa quando você decide não fugir de si."
-            },
-            {
-              "type": "pause",
               "text": "\"Toda transformação começa quando deixamos de lutar para parecer fortes e passamos a reconhecer aquilo que apenas sobreviveu.\""
             },
             {
@@ -1195,15 +1183,7 @@ export const artifactBookData = {
             },
             {
               "type": "p",
-              "text": "Reconhecimento não é “se valorizar”. Reconhecimento não é “pensar positivo”. Reconhecimento não é uma técnica de autoestima com nome bonito. Reconhecimento é uma coisa mais simples e mais brutal: parar de fingir que você não está onde está. Tem um jeito de viver que parece produtivo, mas é só evasão bem vestida. Você segue andando, faz planos, responde mensagens, conversa, trabalha, compra, promete. E por fora tudo continua. Mas por dentro existe um ponto fixo — um ponto que você evita encostar. Você gira em torno dele como quem não quer olhar o centro do próprio quarto. Você evita o lugar onde a verdade mora, porque você sabe que, se encostar ali, alguma coisa vai cair. E cair dá"
-            },
-            {
-              "type": "p",
-              "text": "medo. Porque a gente aprendeu cedo que cair tem plateia. Reconhecer é encostar. É ficar perto do que você desviou a vida inteira. É olhar sem buscar frase de saída. É olhar sem procurar justificativa bonita. É dizer: “é isso”. E aguentar o peso de dizer “é isso” sem emendar com “mas”. Sem virar advogado de si mesmo. Sem querer convencer ninguém. Sem querer ser entendido. Sem querer ser perdoado. Reconhecimento é um gesto interno de honestidade que não pede aplauso. Ele não precisa de legenda. Ele não precisa virar post. Ele não precisa virar discurso. Ele acontece no silêncio, e geralmente acontece tarde — depois de muita tentativa de resolver pela força. E aqui tem uma verdade que dói porque tira a fantasia: você não sofre só pelo que te aconteceu. Você sofre também pelo tanto que você passou a vida negando que aconteceu. Você"
-            },
-            {
-              "type": "p",
-              "text": "sofre pelo que fizeram. E sofre pelo que você fez. E sofre pelo que você não fez. E sofre — principalmente — pelo quanto você tentou ser outra pessoa para não precisar encostar em quem você era."
+              "text": "Reconhecimento não é “se valorizar”. Reconhecimento não é “pensar positivo”. Reconhecimento não é uma técnica de autoestima com nome bonito. Reconhecimento é uma coisa mais simples e mais brutal: parar de fingir que você não está onde está. Tem um jeito de viver que parece produtivo, mas é só evasão bem vestida. Você segue andando, faz planos, responde mensagens, conversa, trabalha, compra, promete. E por fora tudo continua. Mas por dentro existe um ponto fixo — um ponto que você evita encostar. Você gira em torno dele como quem não quer olhar o centro do próprio quarto. Você evita o lugar onde a verdade mora, porque você sabe que, se encostar ali, alguma coisa vai cair. E cair dá medo. Porque a gente aprendeu cedo que cair tem plateia. Reconhecer é encostar. É ficar perto do que você desviou a vida inteira. É olhar sem buscar frase de saída. É olhar sem procurar justificativa bonita. É dizer: “é isso”. E aguentar o peso de dizer “é isso” sem emendar com “mas”. Sem virar advogado de si mesmo. Sem querer convencer ninguém. Sem querer ser entendido. Sem querer ser perdoado. Reconhecimento é um gesto interno de honestidade que não pede aplauso. Ele não precisa de legenda. Ele não precisa virar post. Ele não precisa virar discurso. Ele acontece no silêncio, e geralmente acontece tarde — depois de muita tentativa de resolver pela força. E aqui tem uma verdade que dói porque tira a fantasia: você não sofre só pelo que te aconteceu. Você sofre também pelo tanto que você passou a vida negando que aconteceu. Você sofre pelo que fizeram. E sofre pelo que você fez. E sofre pelo que você não fez. E sofre — principalmente — pelo quanto você tentou ser outra pessoa para não precisar encostar em quem você era."
             },
             {
               "type": "p",
@@ -1211,11 +1191,7 @@ export const artifactBookData = {
             },
             {
               "type": "p",
-              "text": "O desacreditado conhece essa duplicidade. Ele conhece o olhar de quem já decidiu antes de ouvir. Ele conhece o gosto de falar e sentir que a frase volta vazia. Ele conhece aquela sensação de entrar numa sala e já estar pedindo desculpas por existir — mesmo que ninguém tenha dito nada. O desacreditado aprende cedo uma arte perigosa: se invisibilizar para não ser"
-            },
-            {
-              "type": "p",
-              "text": "ferido. Depois, adulto, ele chama isso de “ser de boa”, “ser low profile”, “não incomodar”. Mas a verdade é que muita “leveza” é só trauma bem treinado."
+              "text": "O desacreditado conhece essa duplicidade. Ele conhece o olhar de quem já decidiu antes de ouvir. Ele conhece o gosto de falar e sentir que a frase volta vazia. Ele conhece aquela sensação de entrar numa sala e já estar pedindo desculpas por existir — mesmo que ninguém tenha dito nada. O desacreditado aprende cedo uma arte perigosa: se invisibilizar para não ser ferido. Depois, adulto, ele chama isso de “ser de boa”, “ser low profile”, “não incomodar”. Mas a verdade é que muita “leveza” é só trauma bem treinado."
             },
             {
               "type": "p",
@@ -1227,11 +1203,7 @@ export const artifactBookData = {
             },
             {
               "type": "p",
-              "text": "E talvez esse seja o primeiro poder real do desacreditado: ele já viveu a dor de não ser"
-            },
-            {
-              "type": "p",
-              "text": "reconhecido por fora. Agora ele pode aprender — pela primeira vez — a reconhecer por dentro. Não como prêmio. Como ponto de partida. Como cessar-fogo."
+              "text": "E talvez esse seja o primeiro poder real do desacreditado: ele já viveu a dor de não ser reconhecido por fora. Agora ele pode aprender — pela primeira vez — a reconhecer por dentro. Não como prêmio. Como ponto de partida. Como cessar-fogo."
             },
             {
               "type": "p",
@@ -1439,11 +1411,7 @@ export const artifactBookData = {
             },
             {
               "type": "p",
-              "text": "Eu não vou te pedir coragem. Coragem é uma palavra bonita que, às vezes, só coloca mais peso em cima de quem já está pesado. Eu não vou te pedir “força”. Força também vira chicote. Eu vou te dizer o que talvez ninguém tenha dito do jeito certo: Se você está cansado, isso não prova fracasso. Se você está confuso, isso não prova"
-            },
-            {
-              "type": "p",
-              "text": "incapacidade. Se você está duro por dentro, isso não prova frieza. Se você está irritado sem motivo, isso não prova que você é ruim. Se você sente vergonha de existir às vezes, isso não prova que você é menor. Isso prova, muitas vezes, que você passou tempo demais tentando sobreviver sem ser visto. E sobreviver assim deixa marca. Reconhecimento é você parar de se tratar como erro. É você parar de se tratar como algo que precisa ser consertado para merecer paz. Talvez ninguém tenha te reconhecido quando você precisava. Talvez te olharam e te reduziram. Talvez te interpretaram errado. Talvez te deram rótulos em vez de presença."
+              "text": "Eu não vou te pedir coragem. Coragem é uma palavra bonita que, às vezes, só coloca mais peso em cima de quem já está pesado. Eu não vou te pedir “força”. Força também vira chicote. Eu vou te dizer o que talvez ninguém tenha dito do jeito certo: Se você está cansado, isso não prova fracasso. Se você está confuso, isso não prova incapacidade. Se você está duro por dentro, isso não prova frieza. Se você está irritado sem motivo, isso não prova que você é ruim. Se você sente vergonha de existir às vezes, isso não prova que você é menor. Isso prova, muitas vezes, que você passou tempo demais tentando sobreviver sem ser visto. E sobreviver assim deixa marca. Reconhecimento é você parar de se tratar como erro. É você parar de se tratar como algo que precisa ser consertado para merecer paz. Talvez ninguém tenha te reconhecido quando você precisava. Talvez te olharam e te reduziram. Talvez te interpretaram errado. Talvez te deram rótulos em vez de presença."
             },
             {
               "type": "p",
@@ -1562,11 +1530,7 @@ export const artifactBookData = {
             },
             {
               "type": "p",
-              "text": "Agora faça a si mesmo uma única pergunta: \"O que eu tenho evitado reconhecer em mim?\" Responda sem enfeitar. Sem explicar. Sem defender. Sem tentar parecer forte. Talvez apareça: • cansaço"
-            },
-            {
-              "type": "p",
-              "text": "medo de fracassar • raiva antiga • solidão • necessidade de ser cuidado • sensação de não pertencer • vergonha • sensação de estar atrasado na vida • ressentimento • tristeza O que surgir é o suficiente."
+              "text": "Agora faça a si mesmo uma única pergunta: \"O que eu tenho evitado reconhecer em mim?\" Responda sem enfeitar. Sem explicar. Sem defender. Sem tentar parecer forte. Talvez apareça: • cansaço • medo de fracassar • raiva antiga • solidão • necessidade de ser cuidado • sensação de não pertencer • vergonha • sensação de estar atrasado na vida • ressentimento • tristeza. O que surgir é o suficiente."
             }
           ]
         },
@@ -1679,35 +1643,11 @@ export const artifactBookData = {
             },
             {
               "type": "p",
-              "text": "Família não começa na palavra “amor”. Ela começa no clima. Antes de você ter linguagem para chamar algo de injusto, antes de você ter maturidade para diferenciar cuidado de controle, antes de você ter vocabulário para nomear o que sente, você já está respirando um ambiente que te educa por dentro. E essa educação não vem como explicação; ela vem como repetição, como padrão, como micro mensagens diárias que o corpo capta e registra sem transformar em pensamento. O tom com que"
+              "text": "Família não começa na palavra “amor”. Ela começa no clima. Antes de você ter linguagem para chamar algo de injusto, antes de você ter maturidade para diferenciar cuidado de controle, antes de você ter vocabulário para nomear o que sente, você já está respirando um ambiente que te educa por dentro. E essa educação não vem como explicação; ela vem como repetição, como padrão, como micro mensagens diárias que o corpo capta e registra sem transformar em pensamento. O tom com que seu nome é chamado quando você entra num cômodo. O silêncio que se instala quando você fala algo que não combina com o que esperavam de você. O jeito como um erro é tratado: como parte da vida, ou como falha moral. O tipo de riso permitido: o riso solto, ou o riso que precisa medir o momento. O tipo de tristeza tolerada: a tristeza acolhida, ou a tristeza que “atrapalha”. O tipo de pergunta que pode existir: a pergunta curiosa, ou a pergunta vista como afronta. Em algum ponto, sem ninguém dizer “seja assim”, você aprende a se tornar alguém que cabe. E caber, numa família, pode significar coisas muito diferentes: pode significar apenas conviver, ou pode significar se reduzir. Quando a gente fala de “lealdades invisíveis”, não estamos falando de ingratidão, nem de acusação fácil, nem de transformar pai e mãe em vilões. Isso é superficial e, além de tudo, é cômodo — porque mantém você numa história onde a causa está sempre fora. Lealdade invisível é um mecanismo mais antigo e mais íntimo: é a forma como o pertencimento se torna condicional sem precisar ser declarado. Você não precisa ouvir “seja perfeito” para viver como se errar fosse perigo; basta perceber que o erro muda o olhar, muda a paciência, muda o calor do vínculo. Você não precisa ouvir “não me decepcione” para sentir que decepcionar é ameaça; basta perceber que a alegria do outro depende do seu desempenho, que o humor da casa depende do seu comportamento, que a tranquilidade do ambiente exige que alguém se controle — e muitas vezes esse alguém vira você. Em famílias assim, o desacreditado aprende cedo que existe um preço para ser aceito: não o preço de obedecer regras claras, mas o preço de ajustar sua própria verdade ao que mantém a casa estável. E estabilidade, em certas casas, significa silenciar o que incomoda, esconder o que é intenso, maquiar o que é vulnerável, e chamar isso de “ser forte”. O problema não é ter sido educado. O problema é quando a educação vira formatação emocional. Você cresce achando que amor vem com uma lista invisível de condições: não contrarie demais; não sinta demais; não exponha demais; não precise demais; não fracasse demais. E como criança não tem poder para discutir contrato, ela faz o que sabe fazer: ela se adapta. Só que adaptação contínua não é maturidade; é sobrevivência. Com o tempo, o corpo aprende um tipo de vigilância: uma atenção exagerada ao humor do outro, uma leitura constante do ambiente, uma antecipação de conflitos para que nada piore. Você vira alguém que “sabe lidar”, alguém que “entende”, alguém que “não dá trabalho”. Isso costuma ser elogiado. Só que, por dentro, esse elogio cobra juros: ele te treina a ser amado pela utilidade e pela estabilidade que você fornece, não pela verdade que você é. E o desacreditado, que já tem uma ferida pronta de não ser visto como realmente é, confunde esse elogio com reconhecimento — quando, muitas vezes, é só recompensa por autoabandono bem executado. E aqui eu preciso ser honesto de um jeito que não alivia: grande parte do que te prende à família não é a família em si; é o clima que ficou dentro. Porque a lealdade invisível não depende mais da presença física de ninguém. Você pode ter saído de casa, você pode morar longe, você pode ter vida própria, pode até ter cortado relações. Ainda assim, o corpo continua reagindo como se a casa estivesse ali. A culpa acende no mesmo lugar. O medo de decepcionar aparece como reflexo. A necessidade de se justificar surge antes de você perceber. A sensação de estar em dívida se impõe mesmo quando não há cobrança objetiva. E isso é o que torna esse pilar tão delicado: não é sobre apontar para a família e dizer “vocês fizeram”. É sobre perceber que uma parte do seu sistema emocional ainda vive como se precisasse manter o pacto, como se o pertencimento estivesse sempre em risco, como se o amor fosse algo que você precisa merecer diariamente. E enquanto isso não é reconhecido, você continua tentando ganhar um tipo de aprovação que nunca vem completa — porque ela não é entrega, é condição. Família também é o lugar onde muita gente aprende uma confusão perigosa: confundir respeito com medo, confundir gratidão com silêncio, confundir honra com submissão, confundir paz com ausência de conflito. E quando isso entra, entra como moral — e moral pesa mais que argumento. Você se pega pensando"
             },
             {
               "type": "p",
-              "text": "seu nome é chamado quando você entra num cômodo. O silêncio que se instala quando você fala algo que não combina com o que esperavam de você. O jeito como um erro é tratado: como parte da vida, ou como falha moral. O tipo de riso permitido: o riso solto, ou o riso que precisa medir o momento. O tipo de tristeza tolerada: a tristeza acolhida, ou a tristeza que “atrapalha”. O tipo de pergunta que pode existir: a pergunta curiosa, ou a pergunta vista como afronta. Em algum ponto, sem ninguém dizer “seja assim”, você aprende a se tornar alguém que cabe. E caber, numa família, pode significar coisas muito diferentes: pode significar apenas conviver, ou pode significar se reduzir. Quando a gente fala de “lealdades invisíveis”, não estamos falando de ingratidão, nem de acusação fácil, nem de transformar pai e mãe em vilões. Isso é superficial e, além de tudo, é"
-            },
-            {
-              "type": "p",
-              "text": "cômodo — porque mantém você numa história onde a causa está sempre fora. Lealdade invisível é um mecanismo mais antigo e mais íntimo: é a forma como o pertencimento se torna condicional sem precisar ser declarado. Você não precisa ouvir “seja perfeito” para viver como se errar fosse perigo; basta perceber que o erro muda o olhar, muda a paciência, muda o calor do vínculo. Você não precisa ouvir “não me decepcione” para sentir que decepcionar é ameaça; basta perceber que a alegria do outro depende do seu desempenho, que o humor da casa depende do seu comportamento, que a tranquilidade do ambiente exige que alguém se controle — e muitas vezes esse alguém vira você. Em famílias assim, o desacreditado aprende cedo que existe um preço para ser aceito: não o preço de obedecer regras claras, mas o preço de ajustar sua própria verdade ao que mantém a casa estável. E estabilidade, em"
-            },
-            {
-              "type": "p",
-              "text": "certas casas, significa silenciar o que incomoda, esconder o que é intenso, maquiar o que é vulnerável, e chamar isso de “ser forte”. O problema não é ter sido educado. O problema é quando a educação vira formatação emocional. Você cresce achando que amor vem com uma lista invisível de condições: não contrarie demais; não sinta demais; não exponha demais; não precise demais; não fracasse demais. E como criança não tem poder para discutir contrato, ela faz o que sabe fazer: ela se adapta. Só que adaptação contínua não é maturidade; é sobrevivência. Com o tempo, o corpo aprende um tipo de vigilância: uma atenção exagerada ao humor do outro, uma leitura constante do ambiente, uma antecipação de conflitos para que nada piore. Você vira alguém que “sabe lidar”, alguém que “entende”, alguém que “não dá trabalho”. Isso costuma ser elogiado. Só que, por dentro, esse elogio"
-            },
-            {
-              "type": "p",
-              "text": "cobra juros: ele te treina a ser amado pela utilidade e pela estabilidade que você fornece, não pela verdade que você é. E o desacreditado, que já tem uma ferida pronta de não ser visto como realmente é, confunde esse elogio com reconhecimento — quando, muitas vezes, é só recompensa por autoabandono bem executado. E aqui eu preciso ser honesto de um jeito que não alivia: grande parte do que te prende à família não é a família em si; é o clima que ficou dentro. Porque a lealdade invisível não depende mais da presença física de ninguém. Você pode ter saído de casa, você pode morar longe, você pode ter vida própria, pode até ter cortado relações. Ainda assim, o corpo continua reagindo como se a casa estivesse ali. A culpa acende no mesmo lugar. O medo de decepcionar aparece como reflexo. A necessidade de se justificar surge antes de você"
-            },
-            {
-              "type": "p",
-              "text": "perceber. A sensação de estar em dívida se impõe mesmo quando não há cobrança objetiva. E isso é o que torna esse pilar tão delicado: não é sobre apontar para a família e dizer “vocês fizeram”. É sobre perceber que uma parte do seu sistema emocional ainda vive como se precisasse manter o pacto, como se o pertencimento estivesse sempre em risco, como se o amor fosse algo que você precisa merecer diariamente. E enquanto isso não é reconhecido, você continua tentando ganhar um tipo de aprovação que nunca vem completa — porque ela não é entrega, é condição. Família também é o lugar onde muita gente aprende uma confusão perigosa: confundir respeito com medo, confundir gratidão com silêncio, confundir honra com submissão, confundir paz com ausência de conflito. E quando isso entra, entra como moral — e moral pesa mais que argumento. Você se pega pensando"
-            },
-            {
-              "type": "p",
-              "text": "“mas são meus pais”, “mas é minha mãe”, “mas é meu sangue”, “mas família é família”, como se isso encerrasse a conversa interna. Só que essas frases não encerram nada; elas apenas trancam. Elas colocam um cadeado em cima da sua experiência para que você não olhe de verdade para o que viveu e para o que ainda vive. E olhar não significa condenar. Olhar significa parar de mentir para si mesmo, parar de romantizar feridas antigas, parar de chamar de “normal” o que foi, na prática, uma infância aprendendo a caber num ambiente onde você não podia existir inteiro. O desacreditado não vira desacreditado no vácuo. Em muitos casos, ele vira desacreditado no lugar onde deveria ter sido visto primeiro. Este pilar não é para você criar uma narrativa contra a sua família. Ele é para você parar de construir sua identidade em cima de um contrato que nunca foi dito e nunca foi assinado,"
-            },
-            {
-              "type": "p",
-              "text": "mas foi cumprido. Ele é para você perceber como o seu corpo foi treinado a servir a uma estabilidade que não incluía você por inteiro. Ele é para você encostar, com calma e sem espetáculo, na pergunta que quase ninguém sustenta tempo suficiente para ouvir responder dentro: quem eu precisei ser para ser amado aqui? E depois encostar na pergunta seguinte, que é mais perigosa, porque não tem resposta bonita: o que eu deixei de ser para não perder esse amor? Se você não fizer essas perguntas com permanência, você segue chamando de “personalidade” aquilo que foi defesa, segue chamando de “caráter” aquilo que foi medo, segue chamando de “maturidade” aquilo que foi silêncio treinado. E isso não é acusação. Isso é retorno."
+              "text": "“mas são meus pais”, “mas é minha mãe”, “mas é meu sangue”, “mas família é família”, como se isso encerrasse a conversa interna. Só que essas frases não encerram nada; elas apenas trancam. Elas colocam um cadeado em cima da sua experiência para que você não olhe de verdade para o que viveu e para o que ainda vive. E olhar não significa condenar. Olhar significa parar de mentir para si mesmo, parar de romantizar feridas antigas, parar de chamar de “normal” o que foi, na prática, uma infância aprendendo a caber num ambiente onde você não podia existir inteiro. O desacreditado não vira desacreditado no vácuo. Em muitos casos, ele vira desacreditado no lugar onde deveria ter sido visto primeiro. Este pilar não é para você criar uma narrativa contra a sua família. Ele é para você parar de construir sua identidade em cima de um contrato que nunca foi dito e nunca foi assinado, mas foi cumprido. Ele é para você perceber como o seu corpo foi treinado a servir a uma estabilidade que não incluía você por inteiro. Ele é para você encostar, com calma e sem espetáculo, na pergunta que quase ninguém sustenta tempo suficiente para ouvir responder dentro: quem eu precisei ser para ser amado aqui? E depois encostar na pergunta seguinte, que é mais perigosa, porque não tem resposta bonita: o que eu deixei de ser para não perder esse amor? Se você não fizer essas perguntas com permanência, você segue chamando de “personalidade” aquilo que foi defesa, segue chamando de “caráter” aquilo que foi medo, segue chamando de “maturidade” aquilo que foi silêncio treinado. E isso não é acusação. Isso é retorno."
             }
           ]
         },
@@ -1723,23 +1663,7 @@ export const artifactBookData = {
             },
             {
               "type": "p",
-              "text": "Esse pacto invisível não termina quando a infância acaba. Ele amadurece junto com você. Ele muda de forma, mas não perde força. O adulto que saiu de casa continua carregando a casa por dentro, não como lembrança, mas como estrutura de resposta emocional. Você entra em relações como quem entra no antigo ambiente familiar: medindo, antecipando, se preparando para não desagradar demais. Você entra no trabalho como quem entra na sala de estar da infância: tentando ser útil, tentando não errar, tentando justificar sua presença pelo que entrega. Você entra no amor com o mesmo medo antigo de perder o vínculo se for inteiro demais. E, quando algo dá errado, o corpo reage com a mesma culpa primária,"
-            },
-            {
-              "type": "p",
-              "text": "como se tivesse quebrado uma regra invisível que nunca foi escrita, mas sempre foi cobrada. A dívida emocional funciona assim: você sente que deve continuar sendo quem foi necessário um dia, mesmo que esse papel já não faça sentido. Você se sente responsável pelo equilíbrio emocional de pessoas que já são adultas. Você se sente culpado por crescer, por mudar, por discordar, por escolher caminhos que não estavam previstos no roteiro familiar. E muitas vezes você não sabe explicar isso em palavras, porque não houve uma frase clara que tenha dito “faça isso”. Houve apenas uma repetição silenciosa de recompensas e retiradas de afeto. Houve apenas o aprendizado de que certas versões suas eram melhor recebidas do que outras. E isso basta para criar um sistema interno de vigilância permanente. O desacreditado costuma ser aquele que tenta manter a harmonia mesmo quando isso custa"
-            },
-            {
-              "type": "p",
-              "text": "caro. Ele internaliza a função de sustentador emocional: aquele que não explode, que entende, que relativiza, que “leva numa boa”. Só que esse papel tem um preço alto: ele impede o contato honesto com a própria raiva, com a própria frustração, com a própria dor não reconhecida. A raiva, quando não encontra lugar, não desaparece; ela se volta para dentro. Ela vira rigidez, autocrítica, cansaço crônico, irritação difusa, sensação de estar sempre em falta. A frustração vira resignação. A dor vira silêncio. E o silêncio vira identidade. Você começa a se definir como alguém “mais fechado”, “mais frio”, “mais racional”, quando, na verdade, você só aprendeu cedo demais que sentir dava trabalho para o ambiente. Existe também um luto pouco falado nesse campo: o luto pela família que poderia ter sido. Não uma família perfeita, mas uma família onde houvesse espaço real para falhar, para"
-            },
-            {
-              "type": "p",
-              "text": "discordar, para não corresponder. Esse luto é difícil porque ele não é autorizado socialmente. Você pode lamentar a morte de alguém, mas não pode lamentar a ausência emocional de quem está vivo sem ser visto como ingrato. Então você engole. E o que é engolido sem digestão emocional vira peso interno. Vira aquela sensação estranha de estar sempre devendo algo que nunca foi combinado. Vira aquela dificuldade de descansar sem culpa. Vira aquela necessidade constante de provar valor, de mostrar resultado, de justificar escolhas. Em muitas famílias, o amor não foi negado — ele foi condicionado. E amor condicionado ensina uma lição perigosa: que você só merece vínculo se cumprir determinados requisitos. Essa lição não fica no passado. Ela estrutura o futuro. Ela faz com que o desacreditado confunda proximidade com obrigação, cuidado"
-            },
-            {
-              "type": "p",
-              "text": "com sacrifício, presença com autoabandono. Ele aprende que amar é se adaptar. Que pertencer é se moldar. Que ser aceito é não ser problema. E quando a vida adulta começa a exigir escolhas mais próprias, mais autênticas, esse sistema entra em conflito. O corpo sente, mas a mente justifica. O corpo contrai, mas a narrativa tenta manter tudo “normal”. É aí que surgem sintomas: ansiedade sem causa clara, cansaço sem excesso aparente, dificuldade de se posicionar, sensação de estar sempre aquém ou além do esperado. Não é fraqueza. É memória emocional em funcionamento."
+              "text": "Esse pacto invisível não termina quando a infância acaba. Ele amadurece junto com você. Ele muda de forma, mas não perde força. O adulto que saiu de casa continua carregando a casa por dentro, não como lembrança, mas como estrutura de resposta emocional. Você entra em relações como quem entra no antigo ambiente familiar: medindo, antecipando, se preparando para não desagradar demais. Você entra no trabalho como quem entra na sala de estar da infância: tentando ser útil, tentando não errar, tentando justificar sua presença pelo que entrega. Você entra no amor com o mesmo medo antigo de perder o vínculo se for inteiro demais. E, quando algo dá errado, o corpo reage com a mesma culpa primária, como se tivesse quebrado uma regra invisível que nunca foi escrita, mas sempre foi cobrada. A dívida emocional funciona assim: você sente que deve continuar sendo quem foi necessário um dia, mesmo que esse papel já não faça sentido. Você se sente responsável pelo equilíbrio emocional de pessoas que já são adultas. Você se sente culpado por crescer, por mudar, por discordar, por escolher caminhos que não estavam previstos no roteiro familiar. E muitas vezes você não sabe explicar isso em palavras, porque não houve uma frase clara que tenha dito “faça isso”. Houve apenas uma repetição silenciosa de recompensas e retiradas de afeto. Houve apenas o aprendizado de que certas versões suas eram melhor recebidas do que outras. E isso basta para criar um sistema interno de vigilância permanente. O desacreditado costuma ser aquele que tenta manter a harmonia mesmo quando isso custa caro. Ele internaliza a função de sustentador emocional: aquele que não explode, que entende, que relativiza, que “leva numa boa”. Só que esse papel tem um preço alto: ele impede o contato honesto com a própria raiva, com a própria frustração, com a própria dor não reconhecida. A raiva, quando não encontra lugar, não desaparece; ela se volta para dentro. Ela vira rigidez, autocrítica, cansaço crônico, irritação difusa, sensação de estar sempre em falta. A frustração vira resignação. A dor vira silêncio. E o silêncio vira identidade. Você começa a se definir como alguém “mais fechado”, “mais frio”, “mais racional”, quando, na verdade, você só aprendeu cedo demais que sentir dava trabalho para o ambiente. Existe também um luto pouco falado nesse campo: o luto pela família que poderia ter sido. Não uma família perfeita, mas uma família onde houvesse espaço real para falhar, para discordar, para não corresponder. Esse luto é difícil porque ele não é autorizado socialmente. Você pode lamentar a morte de alguém, mas não pode lamentar a ausência emocional de quem está vivo sem ser visto como ingrato. Então você engole. E o que é engolido sem digestão emocional vira peso interno. Vira aquela sensação estranha de estar sempre devendo algo que nunca foi combinado. Vira aquela dificuldade de descansar sem culpa. Vira aquela necessidade constante de provar valor, de mostrar resultado, de justificar escolhas. Em muitas famílias, o amor não foi negado — ele foi condicionado. E amor condicionado ensina uma lição perigosa: que você só merece vínculo se cumprir determinados requisitos. Essa lição não fica no passado. Ela estrutura o futuro. Ela faz com que o desacreditado confunda proximidade com obrigação, cuidado com sacrifício, presença com autoabandono. Ele aprende que amar é se adaptar. Que pertencer é se moldar. Que ser aceito é não ser problema. E quando a vida adulta começa a exigir escolhas mais próprias, mais autênticas, esse sistema entra em conflito. O corpo sente, mas a mente justifica. O corpo contrai, mas a narrativa tenta manter tudo “normal”. É aí que surgem sintomas: ansiedade sem causa clara, cansaço sem excesso aparente, dificuldade de se posicionar, sensação de estar sempre aquém ou além do esperado. Não é fraqueza. É memória emocional em funcionamento."
             }
           ]
         },
@@ -1763,11 +1687,7 @@ export const artifactBookData = {
             },
             {
               "type": "p",
-              "text": "Aqui, a consciência dói porque desmonta a narrativa confortável de que “foi tudo normal”. Não foi tudo trauma, mas também não foi neutro. Existiram marcas. Existiram ausências. Existiram exigências não verbalizadas. E reconhecer isso não diminui ninguém; apenas"
-            },
-            {
-              "type": "p",
-              "text": "devolve você para a própria história sem maquiagem. Consciência é aceitar que o amor recebido pode ter sido real e, ainda assim, insuficiente para sustentar quem você era. As duas coisas podem coexistir. E só quando você suporta essa ambiguidade sem se apressar é que algo começa a se reorganizar por dentro."
+              "text": "Aqui, a consciência dói porque desmonta a narrativa confortável de que “foi tudo normal”. Não foi tudo trauma, mas também não foi neutro. Existiram marcas. Existiram ausências. Existiram exigências não verbalizadas. E reconhecer isso não diminui ninguém; apenas devolve você para a própria história sem maquiagem. Consciência é aceitar que o amor recebido pode ter sido real e, ainda assim, insuficiente para sustentar quem você era. As duas coisas podem coexistir. E só quando você suporta essa ambiguidade sem se apressar é que algo começa a se reorganizar por dentro."
             }
           ]
         },
@@ -1783,11 +1703,7 @@ export const artifactBookData = {
             },
             {
               "type": "p",
-              "text": "O julgamento nesse campo costuma ser pesado e silencioso. Ele não aparece como crítica explícita, mas como moral internalizada. “Família é tudo.” “Pai e mãe são sagrados.” “Não se vira as costas.” “Tem que honrar.” Essas frases, repetidas direta ou indiretamente, criam um tribunal interno onde qualquer tentativa de se"
-            },
-            {
-              "type": "p",
-              "text": "priorizar vira crime. Você se julga por sentir raiva. Se julga por querer distância. Se julga por não sentir gratidão o tempo todo. E, ao se julgar, você se corrige antes mesmo de tentar algo diferente. O julgamento não te protege; ele te mantém obediente a um sistema que já não está mais ativo fora, mas continua vivo dentro."
+              "text": "O julgamento nesse campo costuma ser pesado e silencioso. Ele não aparece como crítica explícita, mas como moral internalizada. “Família é tudo.” “Pai e mãe são sagrados.” “Não se vira as costas.” “Tem que honrar.” Essas frases, repetidas direta ou indiretamente, criam um tribunal interno onde qualquer tentativa de se priorizar vira crime. Você se julga por sentir raiva. Se julga por querer distância. Se julga por não sentir gratidão o tempo todo. E, ao se julgar, você se corrige antes mesmo de tentar algo diferente. O julgamento não te protege; ele te mantém obediente a um sistema que já não está mais ativo fora, mas continua vivo dentro."
             },
             {
               "type": "p",
@@ -1811,11 +1727,7 @@ export const artifactBookData = {
             },
             {
               "type": "p",
-              "text": "Presença, aqui, é talvez a parte mais difícil, porque ela não envolve ação externa. Envolve ficar com o desconforto de não cumprir imediatamente o papel esperado. Ficar com a sensação de culpa sem se explicar. Ficar com o medo de desaprovação sem correr para agradar. Ficar com a tensão no corpo sem transformá-la em justificativa mental. Presença é sustentar o estado sem corrigi-lo. É permitir que o corpo experimente algo novo: a possibilidade de existir sem se ajustar o tempo todo. Isso não significa confrontar a família, fazer discursos ou romper relações. Presença não é movimento externo; é postura interna. É perceber quando o velho reflexo aparece e escolher não segui-lo imediatamente. É dar alguns segundos a mais antes de se desculpar. É"
-            },
-            {
-              "type": "p",
-              "text": "permitir-se discordar internamente, mesmo que externamente você ainda não faça nada. É começar a separar amor de obrigação dentro de você. E isso é um treino lento, repetitivo, nada heroico. Presença é ficar no corpo quando ele quer fugir. É respirar quando a culpa sobe. É reconhecer o impulso de agradar e, por alguns instantes, não obedecer."
+              "text": "Presença, aqui, é talvez a parte mais difícil, porque ela não envolve ação externa. Envolve ficar com o desconforto de não cumprir imediatamente o papel esperado. Ficar com a sensação de culpa sem se explicar. Ficar com o medo de desaprovação sem correr para agradar. Ficar com a tensão no corpo sem transformá-la em justificativa mental. Presença é sustentar o estado sem corrigi-lo. É permitir que o corpo experimente algo novo: a possibilidade de existir sem se ajustar o tempo todo. Isso não significa confrontar a família, fazer discursos ou romper relações. Presença não é movimento externo; é postura interna. É perceber quando o velho reflexo aparece e escolher não segui-lo imediatamente. É dar alguns segundos a mais antes de se desculpar. É permitir-se discordar internamente, mesmo que externamente você ainda não faça nada. É começar a separar amor de obrigação dentro de você. E isso é um treino lento, repetitivo, nada heroico. Presença é ficar no corpo quando ele quer fugir. É respirar quando a culpa sobe. É reconhecer o impulso de agradar e, por alguns instantes, não obedecer."
             },
             {
               "type": "p",
@@ -1835,11 +1747,7 @@ export const artifactBookData = {
             },
             {
               "type": "p",
-              "text": "Se você leu isso e sentiu um peso familiar, não interprete isso como acusação. Interprete como contato. Você não está errado por sentir o que sente. Você não está quebrado por carregar culpa. Você apenas aprendeu cedo demais que precisava se moldar para pertencer. E isso não é falha moral; é adaptação. Só que agora essa adaptação cobra um preço que talvez você não queira mais pagar. Você não precisa romper com sua família para romper com a lealdade que te diminui. Às vezes, o rompimento mais profundo é interno. É parar de se exigir o mesmo papel. É parar de sustentar a mesma dívida. É permitir que o amor exista sem a obrigação de ser perfeito, estável, disponível o tempo todo. Você pode"
-            },
-            {
-              "type": "p",
-              "text": "honrar sua história sem continuar preso a ela. Você pode reconhecer o que foi dado sem negar o que faltou. Essas duas coisas não se anulam. Elas convivem."
+              "text": "Se você leu isso e sentiu um peso familiar, não interprete isso como acusação. Interprete como contato. Você não está errado por sentir o que sente. Você não está quebrado por carregar culpa. Você apenas aprendeu cedo demais que precisava se moldar para pertencer. E isso não é falha moral; é adaptação. Só que agora essa adaptação cobra um preço que talvez você não queira mais pagar. Você não precisa romper com sua família para romper com a lealdade que te diminui. Às vezes, o rompimento mais profundo é interno. É parar de se exigir o mesmo papel. É parar de sustentar a mesma dívida. É permitir que o amor exista sem a obrigação de ser perfeito, estável, disponível o tempo todo. Você pode honrar sua história sem continuar preso a ela. Você pode reconhecer o que foi dado sem negar o que faltou. Essas duas coisas não se anulam. Elas convivem."
             }
           ]
         },
@@ -1948,11 +1856,7 @@ export const artifactBookData = {
             },
             {
               "type": "p",
-              "text": "Pertencer, nesse campo, deixa de ser algo que acontece e vira algo que se sustenta. Você sustenta o clima. Sustenta o ritmo. Sustenta a harmonia. Sustenta a expectativa do outro. E,"
-            },
-            {
-              "type": "p",
-              "text": "enquanto sustenta, vai se afastando de si. O corpo fica atento demais. A mente fica ocupada demais. O silêncio interno desaparece. Você se torna bom em ler os outros e ruim em ouvir a si mesmo. E isso não acontece de uma vez. Acontece aos poucos, em micro ajustes diários que parecem inofensivos, mas que, acumulados, constroem uma vida inteira baseada na adaptação contínua. O pertencimento, assim, é conquistado — mas a um custo alto: a perda progressiva da espontaneidade."
+              "text": "Pertencer, nesse campo, deixa de ser algo que acontece e vira algo que se sustenta. Você sustenta o clima. Sustenta o ritmo. Sustenta a harmonia. Sustenta a expectativa do outro. E, enquanto sustenta, vai se afastando de si. O corpo fica atento demais. A mente fica ocupada demais. O silêncio interno desaparece. Você se torna bom em ler os outros e ruim em ouvir a si mesmo. E isso não acontece de uma vez. Acontece aos poucos, em micro ajustes diários que parecem inofensivos, mas que, acumulados, constroem uma vida inteira baseada na adaptação contínua. O pertencimento, assim, é conquistado — mas a um custo alto: a perda progressiva da espontaneidade."
             }
           ]
         },
@@ -1968,15 +1872,7 @@ export const artifactBookData = {
             },
             {
               "type": "p",
-              "text": "A rejeição nem sempre vem como abandono explícito. Muitas vezes, ela vem como ausência de espelho. Você fala e não é realmente ouvido. Você se mostra e recebe indiferença. Você"
-            },
-            {
-              "type": "p",
-              "text": "sente algo importante e percebe que aquilo não encontra lugar no outro. Não há agressão clara. Não há expulsão. Mas há um recuo sutil que o corpo registra. E esse registro é suficiente para ensinar uma lição profunda: não sou bem-vindo do jeito que sou. A partir daí, a rejeição deixa de ser um evento pontual e passa a se tornar uma possibilidade constante. Você começa a viver antecipando-a. E viver antecipando rejeição é viver se editando. O desacreditado, muitas vezes, não lembra de grandes cenas de rejeição. Ele lembra de pequenos gestos. De olhares que desviaram. De respostas que não vieram. De convites que não se repetiram. De risadas que não incluíam. De comparações silenciosas. E essas pequenas experiências, repetidas ao longo do tempo, constroem uma narrativa interna poderosa: a narrativa de que algo em você é excessivo, inadequado, insuficiente ou inconveniente. Essa"
-            },
-            {
-              "type": "p",
-              "text": "narrativa não se formula em palavras claras; ela se instala como sensação. Uma sensação de estar sempre um pouco fora de lugar. Um pouco deslocado. Um pouco errado. Mesmo quando tudo parece bem. Para lidar com isso, o desacreditado desenvolve estratégias. Ele aprende a se antecipar. Aprende a agradar. Aprende a ser útil. Aprende a ser interessante. Aprende a ser forte. Aprende a não precisar. Aprende a não incomodar. Cada uma dessas estratégias funciona — por um tempo. Elas garantem acesso. Garantem vínculo. Garantem permanência. Mas nenhuma delas garante descanso. Porque todas exigem vigilância constante. E viver vigiando a própria presença é exaustivo. O corpo nunca desarma. A mente nunca silencia. O vínculo nunca é plenamente habitável. Você está ali, mas não está inteiro. Está presente, mas não está solto. Está junto, mas não está em casa."
+              "text": "A rejeição nem sempre vem como abandono explícito. Muitas vezes, ela vem como ausência de espelho. Você fala e não é realmente ouvido. Você se mostra e recebe indiferença. Você sente algo importante e percebe que aquilo não encontra lugar no outro. Não há agressão clara. Não há expulsão. Mas há um recuo sutil que o corpo registra. E esse registro é suficiente para ensinar uma lição profunda: não sou bem-vindo do jeito que sou. A partir daí, a rejeição deixa de ser um evento pontual e passa a se tornar uma possibilidade constante. Você começa a viver antecipando-a. E viver antecipando rejeição é viver se editando. O desacreditado, muitas vezes, não lembra de grandes cenas de rejeição. Ele lembra de pequenos gestos. De olhares que desviaram. De respostas que não vieram. De convites que não se repetiram. De risadas que não incluíam. De comparações silenciosas. E essas pequenas experiências, repetidas ao longo do tempo, constroem uma narrativa interna poderosa: a narrativa de que algo em você é excessivo, inadequado, insuficiente ou inconveniente. Essa narrativa não se formula em palavras claras; ela se instala como sensação. Uma sensação de estar sempre um pouco fora de lugar. Um pouco deslocado. Um pouco errado. Mesmo quando tudo parece bem. Para lidar com isso, o desacreditado desenvolve estratégias. Ele aprende a se antecipar. Aprende a agradar. Aprende a ser útil. Aprende a ser interessante. Aprende a ser forte. Aprende a não precisar. Aprende a não incomodar. Cada uma dessas estratégias funciona — por um tempo. Elas garantem acesso. Garantem vínculo. Garantem permanência. Mas nenhuma delas garante descanso. Porque todas exigem vigilância constante. E viver vigiando a própria presença é exaustivo. O corpo nunca desarma. A mente nunca silencia. O vínculo nunca é plenamente habitável. Você está ali, mas não está inteiro. Está presente, mas não está solto. Está junto, mas não está em casa."
             },
             {
               "type": "p",
@@ -2000,11 +1896,7 @@ export const artifactBookData = {
             },
             {
               "type": "p",
-              "text": "Você pode perceber que, em muitos vínculos, você está mais ocupado em não ser rejeitado do que em estar presente. Isso não aparece como medo explícito, mas como tensão sutil: uma vigilância constante sobre si mesmo, uma atenção exagerada ao outro, uma dificuldade real de relaxar completamente. Você percebe que adapta sua linguagem, suas opiniões, seus desejos, seus limites, dependendo de quem está à sua frente. Não porque é falso, mas porque aprendeu que ser inteiro tem custo. Consciência é admitir que, para você, o pertencimento ainda é vivido como algo instável — algo que pode ser perdido se você errar, exagerar, cansar ou simplesmente existir do seu jeito. E talvez a percepção mais incômoda seja essa: você não teme apenas ser rejeitado pelos outros; você teme se rejeitar primeiro para não correr o risco de ser excluído. Você se antecipa. Se corta. Se reduz. Se ajusta. Consciência é"
-            },
-            {
-              "type": "p",
-              "text": "olhar para esse movimento sem tentar corrigilo imediatamente. É admitir que ele existe. Que ele opera. Que ele organizou muitos dos seus vínculos. E que ele ainda organiza."
+              "text": "Você pode perceber que, em muitos vínculos, você está mais ocupado em não ser rejeitado do que em estar presente. Isso não aparece como medo explícito, mas como tensão sutil: uma vigilância constante sobre si mesmo, uma atenção exagerada ao outro, uma dificuldade real de relaxar completamente. Você percebe que adapta sua linguagem, suas opiniões, seus desejos, seus limites, dependendo de quem está à sua frente. Não porque é falso, mas porque aprendeu que ser inteiro tem custo. Consciência é admitir que, para você, o pertencimento ainda é vivido como algo instável — algo que pode ser perdido se você errar, exagerar, cansar ou simplesmente existir do seu jeito. E talvez a percepção mais incômoda seja essa: você não teme apenas ser rejeitado pelos outros; você teme se rejeitar primeiro para não correr o risco de ser excluído. Você se antecipa. Se corta. Se reduz. Se ajusta. Consciência é olhar para esse movimento sem tentar corrigilo imediatamente. É admitir que ele existe. Que ele opera. Que ele organizou muitos dos seus vínculos. E que ele ainda organiza."
             }
           ]
         },
@@ -2020,15 +1912,7 @@ export const artifactBookData = {
             },
             {
               "type": "p",
-              "text": "O julgamento que atravessa esse pilar é silencioso e persistente. Ele diz que precisar é fraqueza. Que desejar proximidade é carência. Que sentir medo de rejeição é imaturidade. Você aprende a se julgar por querer aquilo que é estruturalmente humano. E ao se julgar, você se afasta ainda mais dos outros, criando um paradoxo cruel: quanto mais você quer"
-            },
-            {
-              "type": "p",
-              "text": "pertencer, mais você se fecha para não parecer necessitado. Esse julgamento também se expressa na forma como você se compara. Você se mede pelo lugar que ocupa nos vínculos. Pela atenção que recebe. Pela facilidade que os outros parecem ter em serem aceitos. E cada comparação reforça a sensação de inadequação. O julgamento transforma experiências relacionais em identidade fixa: “eu sou difícil”, “eu sou demais”, “eu sou pouco”, “eu não sei me relacionar”. E enquanto você acredita nisso, você não questiona o padrão — você apenas o repete. Julgar-se por desejar vínculo é uma forma sofisticada de se abandonar. É dizer a si mesmo que sua necessidade básica é um erro. E esse tipo de julgamento não fortalece; ele seca. Ele impede o risco saudável, impede a entrega gradual, impede a experiência de vínculos onde não há negociação constante da própria"
-            },
-            {
-              "type": "p",
-              "text": "presença. Reconhecer o julgamento é começar a separar desejo de vergonha. É perceber que o problema não é querer pertencer — é ter aprendido que isso precisa ser pago com a própria verdade."
+              "text": "O julgamento que atravessa esse pilar é silencioso e persistente. Ele diz que precisar é fraqueza. Que desejar proximidade é carência. Que sentir medo de rejeição é imaturidade. Você aprende a se julgar por querer aquilo que é estruturalmente humano. E ao se julgar, você se afasta ainda mais dos outros, criando um paradoxo cruel: quanto mais você quer pertencer, mais você se fecha para não parecer necessitado. Esse julgamento também se expressa na forma como você se compara. Você se mede pelo lugar que ocupa nos vínculos. Pela atenção que recebe. Pela facilidade que os outros parecem ter em serem aceitos. E cada comparação reforça a sensação de inadequação. O julgamento transforma experiências relacionais em identidade fixa: “eu sou difícil”, “eu sou demais”, “eu sou pouco”, “eu não sei me relacionar”. E enquanto você acredita nisso, você não questiona o padrão — você apenas o repete. Julgar-se por desejar vínculo é uma forma sofisticada de se abandonar. É dizer a si mesmo que sua necessidade básica é um erro. E esse tipo de julgamento não fortalece; ele seca. Ele impede o risco saudável, impede a entrega gradual, impede a experiência de vínculos onde não há negociação constante da própria presença. Reconhecer o julgamento é começar a separar desejo de vergonha. É perceber que o problema não é querer pertencer — é ter aprendido que isso precisa ser pago com a própria verdade."
             }
           ]
         },
@@ -2161,15 +2045,7 @@ export const artifactBookData = {
             },
             {
               "type": "p",
-              "text": "O luto não começa quando alguém morre. O luto começa quando algo deixa de existir do jeito que existia — e você continua existindo. Antes da linguagem, antes da elaboração, antes da compreensão, o corpo já percebeu a ausência. E ausência não é vazio abstrato; é mudança concreta de clima interno. Algo que ocupava espaço não ocupa mais. Algo que respondia não responde. Algo que sustentava rotina não sustenta. Algo que estava ali — mesmo falho, mesmo difícil — não está mais. O corpo sente antes de a mente aceitar. E quando a mente tenta acelerar, o corpo cobra. Há lutos reconhecidos socialmente e há lutos que não recebem nome. A morte tem ritual; a ausência emocional, não. A perda concreta"
-            },
-            {
-              "type": "p",
-              "text": "tem velório; a quebra de vínculo vivo não tem. E o desacreditado costuma carregar muitos lutos sem ritual. Lutos por pessoas que continuam vivas, mas inacessíveis. Lutos por versões de relação que nunca se cumpriram. Lutos por promessas implícitas que se desfizeram sem anúncio. Lutos por laços que se romperam não por falta de amor, mas por excesso de ferida. Esses lutos não são autorizados. E o que não é autorizado não se expressa; se acumula. Quando o luto não encontra espaço, ele não desaparece. Ele se desloca. Vira cansaço antigo. Vira irritação sem alvo. Vira rigidez. Vira dificuldade de confiar. Vira medo de perder de novo. Vira apego excessivo ou afastamento precoce. O desacreditado aprende cedo que sentir luto incomoda os outros. Então ele aprende a engolir. Aprende a ser forte. Aprende a “seguir em frente”. Só que seguir em"
-            },
-            {
-              "type": "p",
-              "text": "frente sem passar por dentro cria um corpo que anda e uma alma que ficou. Ausência é um professor silencioso. Ela ensina que algo pode acabar sem aviso, que vínculos podem se desfazer mesmo quando houve tentativa, que amor não garante permanência. E essa lição, quando não elaborada, vira expectativa defensiva: você começa a se preparar para perdas futuras mesmo quando nada está acontecendo. Você ama com cautela. Se entrega com reserva. Se aproxima já calculando distância. Não porque não quer amar, mas porque aprendeu que amar dói quando não há despedida possível."
+              "text": "O luto não começa quando alguém morre. O luto começa quando algo deixa de existir do jeito que existia — e você continua existindo. Antes da linguagem, antes da elaboração, antes da compreensão, o corpo já percebeu a ausência. E ausência não é vazio abstrato; é mudança concreta de clima interno. Algo que ocupava espaço não ocupa mais. Algo que respondia não responde. Algo que sustentava rotina não sustenta. Algo que estava ali — mesmo falho, mesmo difícil — não está mais. O corpo sente antes de a mente aceitar. E quando a mente tenta acelerar, o corpo cobra. Há lutos reconhecidos socialmente e há lutos que não recebem nome. A morte tem ritual; a ausência emocional, não. A perda concreta tem velório; a quebra de vínculo vivo não tem. E o desacreditado costuma carregar muitos lutos sem ritual. Lutos por pessoas que continuam vivas, mas inacessíveis. Lutos por versões de relação que nunca se cumpriram. Lutos por promessas implícitas que se desfizeram sem anúncio. Lutos por laços que se romperam não por falta de amor, mas por excesso de ferida. Esses lutos não são autorizados. E o que não é autorizado não se expressa; se acumula. Quando o luto não encontra espaço, ele não desaparece. Ele se desloca. Vira cansaço antigo. Vira irritação sem alvo. Vira rigidez. Vira dificuldade de confiar. Vira medo de perder de novo. Vira apego excessivo ou afastamento precoce. O desacreditado aprende cedo que sentir luto incomoda os outros. Então ele aprende a engolir. Aprende a ser forte. Aprende a “seguir em frente”. Só que seguir em frente sem passar por dentro cria um corpo que anda e uma alma que ficou. Ausência é um professor silencioso. Ela ensina que algo pode acabar sem aviso, que vínculos podem se desfazer mesmo quando houve tentativa, que amor não garante permanência. E essa lição, quando não elaborada, vira expectativa defensiva: você começa a se preparar para perdas futuras mesmo quando nada está acontecendo. Você ama com cautela. Se entrega com reserva. Se aproxima já calculando distância. Não porque não quer amar, mas porque aprendeu que amar dói quando não há despedida possível."
             }
           ]
         },
@@ -2185,19 +2061,11 @@ export const artifactBookData = {
             },
             {
               "type": "p",
-              "text": "Existem perdas que não permitem colapso. Você precisa continuar. Trabalhar. Cuidar. Resolver. Ser funcional. E, enquanto você continua, o luto fica suspenso. Ele não cai. Ele paira. O corpo entra em modo de manutenção, não de processamento. O desacreditado costuma ser aquele que “segura tudo” quando algo se rompe. Ele organiza, resolve, ampara, cuida dos outros. E ninguém pergunta onde ele colocou a própria dor. Porque ele aparenta estar bem. E aparentar estar bem, nesse campo, é uma forma sofisticada de desaparecer. A quebra de laços vivos é especialmente cruel. Não há data clara. Não há fim definitivo. Há afastamento. Silêncio. Desalinhamento. Há tentativas frustradas. Há conversas que não chegam. Há a sensação de que algo morreu,"
+              "text": "Existem perdas que não permitem colapso. Você precisa continuar. Trabalhar. Cuidar. Resolver. Ser funcional. E, enquanto você continua, o luto fica suspenso. Ele não cai. Ele paira. O corpo entra em modo de manutenção, não de processamento. O desacreditado costuma ser aquele que “segura tudo” quando algo se rompe. Ele organiza, resolve, ampara, cuida dos outros. E ninguém pergunta onde ele colocou a própria dor. Porque ele aparenta estar bem. E aparentar estar bem, nesse campo, é uma forma sofisticada de desaparecer. A quebra de laços vivos é especialmente cruel. Não há data clara. Não há fim definitivo. Há afastamento. Silêncio. Desalinhamento. Há tentativas frustradas. Há conversas que não chegam. Há a sensação de que algo morreu, mas continua respirando em algum lugar inacessível. Esse tipo de perda confunde. Você não sabe se chora, se espera, se insiste, se aceita. E, enquanto hesita, o luto se estende. Não há fechamento. Há suspensão. O corpo fica em alerta prolongado, como se aguardasse um retorno que talvez não venha. O desacreditado aprende, então, a conviver com a ausência como estado permanente. Ele se adapta. Cria rotina. Cria sentido. Mas algo fica intocado. Algo não foi atravessado. E isso aparece mais tarde, em outros vínculos, como medo de abandono, como dificuldade de confiar, como necessidade de controle, como fuga emocional quando a proximidade aumenta. O luto não elaborado não fica no passado; ele organiza o futuro."
             },
             {
               "type": "p",
-              "text": "mas continua respirando em algum lugar inacessível. Esse tipo de perda confunde. Você não sabe se chora, se espera, se insiste, se aceita. E, enquanto hesita, o luto se estende. Não há fechamento. Há suspensão. O corpo fica em alerta prolongado, como se aguardasse um retorno que talvez não venha. O desacreditado aprende, então, a conviver com a ausência como estado permanente. Ele se adapta. Cria rotina. Cria sentido. Mas algo fica intocado. Algo não foi atravessado. E isso aparece mais tarde, em outros vínculos, como medo de abandono, como dificuldade de confiar, como necessidade de controle, como fuga emocional quando a proximidade aumenta. O luto não elaborado não fica no passado; ele organiza o futuro."
-            },
-            {
-              "type": "p",
-              "text": "Há também o luto por si mesmo. Pelo que você foi antes de perder. Pela inocência que não volta. Pela espontaneidade que ficou associada"
-            },
-            {
-              "type": "p",
-              "text": "à dor. Pela versão sua que acreditava em permanência. Esse luto é silencioso porque ninguém valida. Mas ele pesa. Pesa porque você percebe que algo em você mudou sem pedir permissão. E mudar assim gera tristeza, mas também raiva. Raiva de ter que ser mais duro. Raiva de ter que ser mais cuidadoso. Raiva de ter aprendido cedo demais que tudo pode acabar."
+              "text": "Há também o luto por si mesmo. Pelo que você foi antes de perder. Pela inocência que não volta. Pela espontaneidade que ficou associada à dor. Pela versão sua que acreditava em permanência. Esse luto é silencioso porque ninguém valida. Mas ele pesa. Pesa porque você percebe que algo em você mudou sem pedir permissão. E mudar assim gera tristeza, mas também raiva. Raiva de ter que ser mais duro. Raiva de ter que ser mais cuidadoso. Raiva de ter aprendido cedo demais que tudo pode acabar."
             }
           ]
         },
@@ -2213,11 +2081,7 @@ export const artifactBookData = {
             },
             {
               "type": "p",
-              "text": "Consciência, neste pilar, é reconhecer que existem ausências que continuam operando mesmo depois que a vida aparentemente andou. Você trabalha, se relaciona, cria rotina, mas algo não está lá. Algo não responde. Algo"
-            },
-            {
-              "type": "p",
-              "text": "não volta. E você percebe isso em pequenos momentos: numa conversa que não tem mais para quem ser contada, numa decisão que não pode mais ser compartilhada, num silêncio que antes era dividido e agora é só seu. Consciência é admitir que essas ausências não são passado; elas são presença negativa. Elas ocupam espaço."
+              "text": "Consciência, neste pilar, é reconhecer que existem ausências que continuam operando mesmo depois que a vida aparentemente andou. Você trabalha, se relaciona, cria rotina, mas algo não está lá. Algo não responde. Algo não volta. E você percebe isso em pequenos momentos: numa conversa que não tem mais para quem ser contada, numa decisão que não pode mais ser compartilhada, num silêncio que antes era dividido e agora é só seu. Consciência é admitir que essas ausências não são passado; elas são presença negativa. Elas ocupam espaço."
             },
             {
               "type": "p",
@@ -2241,11 +2105,7 @@ export const artifactBookData = {
             },
             {
               "type": "p",
-              "text": "O julgamento do luto costuma vir na forma de cobrança temporal. Uma cobrança que diz que já passou tempo suficiente, que você deveria estar melhor, que insistir em sentir é sinal de fraqueza. Esse julgamento não vem apenas de fora; ele se instala dentro. Você se apressa. Se corrige. Se envergonha por ainda sentir. E ao"
-            },
-            {
-              "type": "p",
-              "text": "fazer isso, você empurra o luto para uma camada mais profunda, onde ele perde linguagem e vira sintoma."
+              "text": "O julgamento do luto costuma vir na forma de cobrança temporal. Uma cobrança que diz que já passou tempo suficiente, que você deveria estar melhor, que insistir em sentir é sinal de fraqueza. Esse julgamento não vem apenas de fora; ele se instala dentro. Você se apressa. Se corrige. Se envergonha por ainda sentir. E ao fazer isso, você empurra o luto para uma camada mais profunda, onde ele perde linguagem e vira sintoma."
             },
             {
               "type": "p",
@@ -2467,11 +2327,7 @@ export const artifactBookData = {
             },
             {
               "type": "p",
-              "text": "Nesse ponto, o trabalho deixa de ser atividade e vira identidade. Você não faz algo; você é aquilo que faz. E quando isso acontece, qualquer instabilidade profissional deixa de ser"
-            },
-            {
-              "type": "p",
-              "text": "apenas desafio externo e passa a ser ameaça interna. Perder um projeto não é perder um projeto; é perder chão. Receber crítica não é receber feedback; é ser questionado como pessoa. Ficar sem produzir não é descansar; é desaparecer. O corpo reage como se estivesse em risco, porque, em algum lugar profundo, ele aprendeu que existir sem função é perigoso."
+              "text": "Nesse ponto, o trabalho deixa de ser atividade e vira identidade. Você não faz algo; você é aquilo que faz. E quando isso acontece, qualquer instabilidade profissional deixa de ser apenas desafio externo e passa a ser ameaça interna. Perder um projeto não é perder um projeto; é perder chão. Receber crítica não é receber feedback; é ser questionado como pessoa. Ficar sem produzir não é descansar; é desaparecer. O corpo reage como se estivesse em risco, porque, em algum lugar profundo, ele aprendeu que existir sem função é perigoso."
             }
           ]
         },
@@ -2487,19 +2343,11 @@ export const artifactBookData = {
             },
             {
               "type": "p",
-              "text": "O desacreditado costuma se orgulhar da própria resistência. Ele aguenta mais. Dorme menos. Entrega mais. Resolve o que os outros não resolvem. E isso é elogiado. Só que esse elogio reforça um padrão que cobra caro: a incapacidade de parar sem se sentir culpado. O corpo"
+              "text": "O desacreditado costuma se orgulhar da própria resistência. Ele aguenta mais. Dorme menos. Entrega mais. Resolve o que os outros não resolvem. E isso é elogiado. Só que esse elogio reforça um padrão que cobra caro: a incapacidade de parar sem se sentir culpado. O corpo entra num estado de alerta permanente. Mesmo nos momentos de descanso, há tensão. A mente continua girando. A sensação de estar “atrasado” nunca some completamente. Você descansa, mas não repousa. Porque repousar exigiria sentir que você é suficiente mesmo sem produzir — e isso o desacreditado nunca aprendeu."
             },
             {
               "type": "p",
-              "text": "entra num estado de alerta permanente. Mesmo nos momentos de descanso, há tensão. A mente continua girando. A sensação de estar “atrasado” nunca some completamente. Você descansa, mas não repousa. Porque repousar exigiria sentir que você é suficiente mesmo sem produzir — e isso o desacreditado nunca aprendeu."
-            },
-            {
-              "type": "p",
-              "text": "Com o tempo, essa lógica cria uma autoexploração silenciosa. Você se exige mais do que exigiriam. Se cobra antes que alguém cobre. Se pune antes que alguém puna. O trabalho vira um campo onde você tenta compensar outras áreas da vida que parecem frágeis. Se os vínculos são instáveis, você investe mais no desempenho. Se o reconhecimento afetivo falhou, você busca reconhecimento profissional. E isso funciona por um tempo. Você cresce. Conquista. Entrega. Mas algo não acompanha: a"
-            },
-            {
-              "type": "p",
-              "text": "sensação de valor interno. Porque valor interno não se constrói por desempenho contínuo; ele se constrói por presença reconhecida. E o trabalho, por mais importante que seja, não oferece isso de forma durável."
+              "text": "Com o tempo, essa lógica cria uma autoexploração silenciosa. Você se exige mais do que exigiriam. Se cobra antes que alguém cobre. Se pune antes que alguém puna. O trabalho vira um campo onde você tenta compensar outras áreas da vida que parecem frágeis. Se os vínculos são instáveis, você investe mais no desempenho. Se o reconhecimento afetivo falhou, você busca reconhecimento profissional. E isso funciona por um tempo. Você cresce. Conquista. Entrega. Mas algo não acompanha: a sensação de valor interno. Porque valor interno não se constrói por desempenho contínuo; ele se constrói por presença reconhecida. E o trabalho, por mais importante que seja, não oferece isso de forma durável."
             },
             {
               "type": "p",
@@ -2571,11 +2419,7 @@ export const artifactBookData = {
             },
             {
               "type": "p",
-              "text": "Essa presença cria um espaço novo onde o trabalho pode voltar a ser trabalho, não identidade. Onde produzir pode ser expressão, não defesa. Onde descansar pode ser reparação,"
-            },
-            {
-              "type": "p",
-              "text": "não culpa. Esse espaço não surge de uma vez. Ele surge em pequenas pausas sustentadas. Em limites respeitados. Em momentos em que você escolhe não se punir por existir. E, aos poucos, o corpo aprende algo que nunca aprendeu: que ele pode estar em segurança mesmo sem estar em desempenho máximo."
+              "text": "Essa presença cria um espaço novo onde o trabalho pode voltar a ser trabalho, não identidade. Onde produzir pode ser expressão, não defesa. Onde descansar pode ser reparação, não culpa. Esse espaço não surge de uma vez. Ele surge em pequenas pausas sustentadas. Em limites respeitados. Em momentos em que você escolhe não se punir por existir. E, aos poucos, o corpo aprende algo que nunca aprendeu: que ele pode estar em segurança mesmo sem estar em desempenho máximo."
             }
           ]
         },
@@ -2591,11 +2435,7 @@ export const artifactBookData = {
             },
             {
               "type": "p",
-              "text": "Se você sente que precisa provar valor o tempo todo, isso não significa que você é ambicioso demais. Significa que, em algum momento, você aprendeu que existir não bastava. E isso dói. Mas não precisa continuar organizando sua vida inteira. O trabalho pode ser"
-            },
-            {
-              "type": "p",
-              "text": "importante sem ser o único lugar onde você se reconhece. Você não precisa se desmontar para merecer espaço. Você nunca precisou produzir para merecer existir."
+              "text": "Se você sente que precisa provar valor o tempo todo, isso não significa que você é ambicioso demais. Significa que, em algum momento, você aprendeu que existir não bastava. E isso dói. Mas não precisa continuar organizando sua vida inteira. O trabalho pode ser importante sem ser o único lugar onde você se reconhece. Você não precisa se desmontar para merecer espaço. Você nunca precisou produzir para merecer existir."
             }
           ]
         },
@@ -2708,11 +2548,7 @@ export const artifactBookData = {
             },
             {
               "type": "p",
-              "text": "Compulsão não é falta de caráter. É memória de alívio. O corpo lembra que, quando faz aquilo, a tensão diminui. Mesmo que volte depois. Mesmo que volte maior. O alívio imediato vale mais do que o custo futuro quando o presente é insuportável. E aqui mora o engano mais comum: achar que a compulsão é o"
-            },
-            {
-              "type": "p",
-              "text": "problema principal. Na verdade, ela é a solução que o corpo encontrou para não afundar. Uma solução imperfeita, cara, desgastante — mas solução. Enquanto você trata a anestesia como inimiga, você não olha para o que está sendo anestesiado."
+              "text": "Compulsão não é falta de caráter. É memória de alívio. O corpo lembra que, quando faz aquilo, a tensão diminui. Mesmo que volte depois. Mesmo que volte maior. O alívio imediato vale mais do que o custo futuro quando o presente é insuportável. E aqui mora o engano mais comum: achar que a compulsão é o problema principal. Na verdade, ela é a solução que o corpo encontrou para não afundar. Uma solução imperfeita, cara, desgastante — mas solução. Enquanto você trata a anestesia como inimiga, você não olha para o que está sendo anestesiado."
             },
             {
               "type": "p",
@@ -2736,11 +2572,7 @@ export const artifactBookData = {
             },
             {
               "type": "p",
-              "text": "O ciclo é quase sempre o mesmo, embora se disfarce de mil formas. Algo aperta por dentro. Um pensamento retorna. Uma emoção sobe. Uma sensação de inadequação, de solidão, de vazio, de tensão sem nome. O corpo reconhece esse estado como conhecido e perigoso. Antes que a mente formule, surge o impulso. Abrir algo. Consumir algo. Pensar algo. Fazer algo. Qualquer coisa que desloque a atenção para fora ou para um ponto controlável. E funciona. Por alguns minutos, talvez horas. A tensão diminui. O corpo relaxa um pouco. O"
-            },
-            {
-              "type": "p",
-              "text": "pensamento desacelera. Você respira. E então, depois, vem o retorno — muitas vezes acompanhado de culpa, vergonha ou autocrítica."
+              "text": "O ciclo é quase sempre o mesmo, embora se disfarce de mil formas. Algo aperta por dentro. Um pensamento retorna. Uma emoção sobe. Uma sensação de inadequação, de solidão, de vazio, de tensão sem nome. O corpo reconhece esse estado como conhecido e perigoso. Antes que a mente formule, surge o impulso. Abrir algo. Consumir algo. Pensar algo. Fazer algo. Qualquer coisa que desloque a atenção para fora ou para um ponto controlável. E funciona. Por alguns minutos, talvez horas. A tensão diminui. O corpo relaxa um pouco. O pensamento desacelera. Você respira. E então, depois, vem o retorno — muitas vezes acompanhado de culpa, vergonha ou autocrítica."
             },
             {
               "type": "p",
@@ -2804,11 +2636,7 @@ export const artifactBookData = {
             },
             {
               "type": "p",
-              "text": "Esse julgamento também impede ajuda. Porque admitir a anestesia vira exposição. E exposição, para o desacreditado, sempre foi arriscada. Então ele esconde. Minimiza. Justifica. E continua sozinho com o ciclo. Reconhecer o julgamento é separar responsabilidade de crueldade. Você pode assumir responsabilidade"
-            },
-            {
-              "type": "p",
-              "text": "sem se violentar. Pode desejar mudança sem se destruir. Pode reconhecer o padrão sem se reduzir a ele."
+              "text": "Esse julgamento também impede ajuda. Porque admitir a anestesia vira exposição. E exposição, para o desacreditado, sempre foi arriscada. Então ele esconde. Minimiza. Justifica. E continua sozinho com o ciclo. Reconhecer o julgamento é separar responsabilidade de crueldade. Você pode assumir responsabilidade sem se violentar. Pode desejar mudança sem se destruir. Pode reconhecer o padrão sem se reduzir a ele."
             },
             {
               "type": "p",
@@ -2828,11 +2656,7 @@ export const artifactBookData = {
             },
             {
               "type": "p",
-              "text": "Presença, neste pilar, não é cortar a anestesia. É atrasar a fuga. Alguns segundos. Um minuto. Um pouco mais. Presença é sentir o impulso e não obedecer imediatamente. É deixar a"
-            },
-            {
-              "type": "p",
-              "text": "sensação existir sem resolvê-la. É ficar com o desconforto sem se punir por isso. Essa presença é mínima, mas poderosa, porque ela ensina algo novo ao corpo: que o estado passa. Que a onda sobe e desce. Que sentir não é o mesmo que ser destruído pelo que se sente."
+              "text": "Presença, neste pilar, não é cortar a anestesia. É atrasar a fuga. Alguns segundos. Um minuto. Um pouco mais. Presença é sentir o impulso e não obedecer imediatamente. É deixar a sensação existir sem resolvê-la. É ficar com o desconforto sem se punir por isso. Essa presença é mínima, mas poderosa, porque ela ensina algo novo ao corpo: que o estado passa. Que a onda sobe e desce. Que sentir não é o mesmo que ser destruído pelo que se sente."
             },
             {
               "type": "p",
@@ -2961,11 +2785,7 @@ export const artifactBookData = {
             },
             {
               "type": "p",
-              "text": "O amor, então, passa a ser vivido como risco constante. Você ama e vigia. Ama e mede. Ama"
-            },
-            {
-              "type": "p",
-              "text": "e interpreta. Ama e se corrige. Ama e se sacrifica. Porque você acredita que, se fizer direito, você garante permanência. E aqui mora a armadilha: você tenta garantir permanência entregando controle. Você tenta garantir vínculo entregando a própria liberdade. Você tenta garantir amor oferecendo versão editada de si mesmo — mais fácil, mais forte, mais disponível, menos exigente, menos humano. E isso cansa. E quando cansa, você se culpa por cansar. E a culpa vira mais esforço. E o ciclo se repete."
+              "text": "O amor, então, passa a ser vivido como risco constante. Você ama e vigia. Ama e mede. Ama e interpreta. Ama e se corrige. Ama e se sacrifica. Porque você acredita que, se fizer direito, você garante permanência. E aqui mora a armadilha: você tenta garantir permanência entregando controle. Você tenta garantir vínculo entregando a própria liberdade. Você tenta garantir amor oferecendo versão editada de si mesmo — mais fácil, mais forte, mais disponível, menos exigente, menos humano. E isso cansa. E quando cansa, você se culpa por cansar. E a culpa vira mais esforço. E o ciclo se repete."
             }
           ]
         },
@@ -2989,11 +2809,7 @@ export const artifactBookData = {
             },
             {
               "type": "p",
-              "text": "Frustração, então, aparece não só quando o outro falha, mas quando você percebe que não consegue usar o amor como anestesia do passado. O desacreditado, muitas vezes, sente"
-            },
-            {
-              "type": "p",
-              "text": "frustração como vergonha: vergonha de ter esperado demais, vergonha de ter se exposto, vergonha de ter acreditado. E por sentir essa vergonha, ele tenta se proteger de um jeito que piora tudo: ele se fecha ou ele pressiona. Ele se fecha para não sentir, ou ele pressiona para garantir. Em ambos os casos, o amor vira tensão. E tensão constante corrói vínculo."
+              "text": "Frustração, então, aparece não só quando o outro falha, mas quando você percebe que não consegue usar o amor como anestesia do passado. O desacreditado, muitas vezes, sente frustração como vergonha: vergonha de ter esperado demais, vergonha de ter se exposto, vergonha de ter acreditado. E por sentir essa vergonha, ele tenta se proteger de um jeito que piora tudo: ele se fecha ou ele pressiona. Ele se fecha para não sentir, ou ele pressiona para garantir. Em ambos os casos, o amor vira tensão. E tensão constante corrói vínculo."
             },
             {
               "type": "p",
@@ -3069,11 +2885,7 @@ export const artifactBookData = {
             },
             {
               "type": "p",
-              "text": "Presença no amor é sustentar o desconforto de não ter garantia. Sustentar o fato de que o outro é humano, oscila, falha, tem limites. E sustentar, principalmente, que você não precisa controlar o vínculo para não desabar. Isso não é simples. Para o desacreditado, a tendência é controlar por dentro: interpretar demais, monitorar sinais, testar, provocar, exigir prova, pedir confirmação constante. Ou controlar por fora: se fechar, sumir, punir com silêncio, se afastar antes que o outro afaste. Presença é interromper esse impulso e ficar com a ansiedade sem transformá-la em estratégia. Isso exige algo específico: a capacidade de permanecer em si mesmo enquanto ama. De sentir medo sem agir a partir dele. De sentir"
-            },
-            {
-              "type": "p",
-              "text": "frustração sem transformá-la em acusação. De desejar proximidade sem se humilhar. De colocar limite sem culpa. Presença não garante permanência do outro; ela garante que, aconteça o que acontecer, você não precisa se abandonar para tentar manter. E esse é o ponto central: o amor mais digno não é o que dura a qualquer custo; é o que não exige que você desapareça para existir."
+              "text": "Presença no amor é sustentar o desconforto de não ter garantia. Sustentar o fato de que o outro é humano, oscila, falha, tem limites. E sustentar, principalmente, que você não precisa controlar o vínculo para não desabar. Isso não é simples. Para o desacreditado, a tendência é controlar por dentro: interpretar demais, monitorar sinais, testar, provocar, exigir prova, pedir confirmação constante. Ou controlar por fora: se fechar, sumir, punir com silêncio, se afastar antes que o outro afaste. Presença é interromper esse impulso e ficar com a ansiedade sem transformá-la em estratégia. Isso exige algo específico: a capacidade de permanecer em si mesmo enquanto ama. De sentir medo sem agir a partir dele. De sentir frustração sem transformá-la em acusação. De desejar proximidade sem se humilhar. De colocar limite sem culpa. Presença não garante permanência do outro; ela garante que, aconteça o que acontecer, você não precisa se abandonar para tentar manter. E esse é o ponto central: o amor mais digno não é o que dura a qualquer custo; é o que não exige que você desapareça para existir."
             }
           ]
         },
@@ -3089,11 +2901,7 @@ export const artifactBookData = {
             },
             {
               "type": "p",
-              "text": "Se você sente que ama com medo, isso não significa que você ama errado. Significa que você ama com história. E história pesa. Mas você não precisa colocar esse peso nas costas do outro como se ele fosse responsável por salvar"
-            },
-            {
-              "type": "p",
-              "text": "você de si. Amor pode ser lugar de encontro, de companhia, de construção — mas ele não é substituto de reconhecimento, nem de luto, nem de pertencimento interno. Quando você entende isso por dentro, não como conceito, mas como corpo, algo muda: você para de exigir prova e começa a buscar presença. E presença é mais rara, mas é mais real."
+              "text": "Se você sente que ama com medo, isso não significa que você ama errado. Significa que você ama com história. E história pesa. Mas você não precisa colocar esse peso nas costas do outro como se ele fosse responsável por salvar você de si. Amor pode ser lugar de encontro, de companhia, de construção — mas ele não é substituto de reconhecimento, nem de luto, nem de pertencimento interno. Quando você entende isso por dentro, não como conceito, mas como corpo, algo muda: você para de exigir prova e começa a buscar presença. E presença é mais rara, mas é mais real."
             }
           ]
         },
@@ -3109,11 +2917,7 @@ export const artifactBookData = {
             },
             {
               "type": "p",
-              "text": "Durante sete dias, toda vez que surgir o impulso de controlar — seja perguntando, testando, cobrando, sumindo, se fechando — você faz uma única coisa antes: pausa de trinta segundos. Só isso. Trinta segundos em que você sente o corpo. Sente a ansiedade. Sente a"
-            },
-            {
-              "type": "p",
-              "text": "urgência. E não age. Depois, se ainda quiser agir, você age. Mas essa pausa cria espaço entre ferida e movimento. E esse espaço, repetido, começa a reeducar o amor."
+              "text": "Durante sete dias, toda vez que surgir o impulso de controlar — seja perguntando, testando, cobrando, sumindo, se fechando — você faz uma única coisa antes: pausa de trinta segundos. Só isso. Trinta segundos em que você sente o corpo. Sente a ansiedade. Sente a urgência. E não age. Depois, se ainda quiser agir, você age. Mas essa pausa cria espaço entre ferida e movimento. E esse espaço, repetido, começa a reeducar o amor."
             }
           ]
         },
@@ -3259,19 +3063,11 @@ export const artifactBookData = {
             },
             {
               "type": "p",
-              "text": "Desencanto não é cinismo. É exaustão espiritual. É quando continuar acreditando parece exigir um esforço que já não vale o custo. Você não vira alguém que nega tudo; você vira"
+              "text": "Desencanto não é cinismo. É exaustão espiritual. É quando continuar acreditando parece exigir um esforço que já não vale o custo. Você não vira alguém que nega tudo; você vira alguém que não espera mais nada. E isso é perigoso não porque te torna pessimista, mas porque te torna anestesiado em outro nível. Quando o sentido desaparece, a vida vira sequência de tarefas. Você faz o que precisa ser feito, mas algo profundo não participa. O corpo anda, a mente resolve, mas a alma — se quisermos usar essa palavra sem romantizar — fica à margem."
             },
             {
               "type": "p",
-              "text": "alguém que não espera mais nada. E isso é perigoso não porque te torna pessimista, mas porque te torna anestesiado em outro nível. Quando o sentido desaparece, a vida vira sequência de tarefas. Você faz o que precisa ser feito, mas algo profundo não participa. O corpo anda, a mente resolve, mas a alma — se quisermos usar essa palavra sem romantizar — fica à margem."
-            },
-            {
-              "type": "p",
-              "text": "A fé, nesse campo, não precisa ser religiosa. Ela pode ser fé nas pessoas, nos vínculos, no futuro, no próprio esforço, na possibilidade de mudança. E quando essa fé quebra, o mundo fica mais estreito. Você começa a viver no curto prazo. No controlável. No imediato. Porque esperar dói quando você já se decepcionou demais. O desacreditado aprende a não criar expectativa de sentido para não se frustrar de novo. Só que, ao fazer isso, ele também fecha a"
-            },
-            {
-              "type": "p",
-              "text": "porta para experiências que exigem abertura. Ele troca esperança por previsibilidade. E previsibilidade sem sentido vira sobrevivência prolongada."
+              "text": "A fé, nesse campo, não precisa ser religiosa. Ela pode ser fé nas pessoas, nos vínculos, no futuro, no próprio esforço, na possibilidade de mudança. E quando essa fé quebra, o mundo fica mais estreito. Você começa a viver no curto prazo. No controlável. No imediato. Porque esperar dói quando você já se decepcionou demais. O desacreditado aprende a não criar expectativa de sentido para não se frustrar de novo. Só que, ao fazer isso, ele também fecha a porta para experiências que exigem abertura. Ele troca esperança por previsibilidade. E previsibilidade sem sentido vira sobrevivência prolongada."
             }
           ]
         },
@@ -3287,19 +3083,11 @@ export const artifactBookData = {
             },
             {
               "type": "p",
-              "text": "Existe um ponto silencioso na trajetória do desacreditado em que ele percebe que continuar acreditando o deixa vulnerável demais. Vulnerável a se decepcionar. Vulnerável a investir energia em algo que talvez não responda. Vulnerável a se expor de novo. E, para alguém que já atravessou perdas, rejeições, frustrações e lutos não elaborados, essa vulnerabilidade parece imprudência. Então ele faz um"
+              "text": "Existe um ponto silencioso na trajetória do desacreditado em que ele percebe que continuar acreditando o deixa vulnerável demais. Vulnerável a se decepcionar. Vulnerável a investir energia em algo que talvez não responda. Vulnerável a se expor de novo. E, para alguém que já atravessou perdas, rejeições, frustrações e lutos não elaborados, essa vulnerabilidade parece imprudência. Então ele faz um movimento interno quase imperceptível: ele reduz o alcance da própria fé. Não espera muito. Não sonha alto. Não se projeta longe. Vive com o pé no chão — mas também com o olhar baixo."
             },
             {
               "type": "p",
-              "text": "movimento interno quase imperceptível: ele reduz o alcance da própria fé. Não espera muito. Não sonha alto. Não se projeta longe. Vive com o pé no chão — mas também com o olhar baixo."
-            },
-            {
-              "type": "p",
-              "text": "Esse desencanto costuma vir acompanhado de uma narrativa racional: “é melhor não esperar”, “é melhor não acreditar”, “é melhor aceitar como é”. E há maturidade aparente nisso. Só que, por baixo, há uma desistência não declarada. Você não diz que desistiu; você diz que amadureceu. Mas amadurecer não deveria significar perder contato com sentido. O problema é que, para o desacreditado, acreditar sempre esteve associado a dor. Então o corpo confunde fé com risco. E risco, para quem já se machucou muito, parece irresponsabilidade. Com o tempo, esse desencanto cria um vazio específico: não é tristeza, nem raiva, nem"
-            },
-            {
-              "type": "p",
-              "text": "medo. É uma espécie de apatia existencial. Nada empolga profundamente. Nada revolta profundamente. Tudo parece meio igual. Você funciona, mas não vibra. Você entende, mas não se envolve. Você observa, mas não se entrega. E isso é confortável por um tempo, porque reduz sofrimento. Mas também reduz vida. O desacreditado se torna alguém que aguenta, não alguém que espera."
+              "text": "Esse desencanto costuma vir acompanhado de uma narrativa racional: “é melhor não esperar”, “é melhor não acreditar”, “é melhor aceitar como é”. E há maturidade aparente nisso. Só que, por baixo, há uma desistência não declarada. Você não diz que desistiu; você diz que amadureceu. Mas amadurecer não deveria significar perder contato com sentido. O problema é que, para o desacreditado, acreditar sempre esteve associado a dor. Então o corpo confunde fé com risco. E risco, para quem já se machucou muito, parece irresponsabilidade. Com o tempo, esse desencanto cria um vazio específico: não é tristeza, nem raiva, nem medo. É uma espécie de apatia existencial. Nada empolga profundamente. Nada revolta profundamente. Tudo parece meio igual. Você funciona, mas não vibra. Você entende, mas não se envolve. Você observa, mas não se entrega. E isso é confortável por um tempo, porque reduz sofrimento. Mas também reduz vida. O desacreditado se torna alguém que aguenta, não alguém que espera."
             }
           ]
         },
@@ -3315,11 +3103,7 @@ export const artifactBookData = {
             },
             {
               "type": "p",
-              "text": "Consciência, neste pilar, é reconhecer onde você fechou a porta do sentido para se proteger. É perceber em que áreas da vida você não espera mais nada — não por sabedoria, mas"
-            },
-            {
-              "type": "p",
-              "text": "por cansaço. É notar quando você chama de “realismo” aquilo que é desistência silenciosa. Consciência é admitir que você não perdeu a fé porque ela era falsa, mas porque você ficou sozinho demais tentando sustentá-la."
+              "text": "Consciência, neste pilar, é reconhecer onde você fechou a porta do sentido para se proteger. É perceber em que áreas da vida você não espera mais nada — não por sabedoria, mas por cansaço. É notar quando você chama de “realismo” aquilo que é desistência silenciosa. Consciência é admitir que você não perdeu a fé porque ela era falsa, mas porque você ficou sozinho demais tentando sustentá-la."
             },
             {
               "type": "p",
@@ -3363,11 +3147,7 @@ export const artifactBookData = {
             },
             {
               "type": "p",
-              "text": "Essa presença cria algo raro: um espaço onde o sentido pode surgir de novo sem ser imposto. Não como promessa grandiosa, mas como"
-            },
-            {
-              "type": "p",
-              "text": "pequenas experiências de significado real. Um encontro. Um gesto. Um cuidado. Uma escolha alinhada. Presença é deixar o sentido reaparecer aos poucos, sem exigir que ele seja absoluto. Para o desacreditado, isso é profundamente desafiador, porque exige abrir mão do controle que o desencanto oferece. Mas é também o único caminho para uma fé que não seja ingênua nem cínica — uma fé habitável."
+              "text": "Essa presença cria algo raro: um espaço onde o sentido pode surgir de novo sem ser imposto. Não como promessa grandiosa, mas como pequenas experiências de significado real. Um encontro. Um gesto. Um cuidado. Uma escolha alinhada. Presença é deixar o sentido reaparecer aos poucos, sem exigir que ele seja absoluto. Para o desacreditado, isso é profundamente desafiador, porque exige abrir mão do controle que o desencanto oferece. Mas é também o único caminho para uma fé que não seja ingênua nem cínica — uma fé habitável."
             }
           ]
         },
@@ -3383,11 +3163,7 @@ export const artifactBookData = {
             },
             {
               "type": "p",
-              "text": "Se você sente que não acredita mais como antes, isso não te torna vazio. Te torna alguém que tentou. E tentou de verdade. Você não precisa voltar a ser quem acreditava sem questionar. Mas também não precisa viver fechado"
-            },
-            {
-              "type": "p",
-              "text": "para sempre. Existe um meio possível entre ingenuidade e cinismo. E esse meio não se constrói com discurso — se constrói com presença repetida."
+              "text": "Se você sente que não acredita mais como antes, isso não te torna vazio. Te torna alguém que tentou. E tentou de verdade. Você não precisa voltar a ser quem acreditava sem questionar. Mas também não precisa viver fechado para sempre. Existe um meio possível entre ingenuidade e cinismo. E esse meio não se constrói com discurso — se constrói com presença repetida."
             }
           ]
         },
@@ -3500,15 +3276,7 @@ export const artifactBookData = {
             },
             {
               "type": "p",
-              "text": "O desacreditado que atravessa a escassez carrega uma calculadora interna que nunca desliga. Antes de aceitar um convite, ele calcula o custo. Antes de descansar, calcula se merece. Antes de pedir ajuda, calcula quanto vai dever — não em dinheiro, mas em gratidão, em constrangimento, em vulnerabilidade exposta. Essa aritmética não aparece como pensamento consciente e organizado. Aparece como um aperto no peito diante de qualquer gasto, qualquer pausa, qualquer desejo que exija recurso: tempo, energia, atenção, dinheiro. O corpo faz a conta antes que a mente perceba que está calculando. Isso não nasce à toa. Quem cresce, em algum momento, sentindo que o básico não estava"
-            },
-            {
-              "type": "p",
-              "text": "garantido — seja recurso material, seja atenção emocional, seja segurança afetiva — aprende cedo que desejar é arriscado. Desejar alguma coisa que pode não vir cria uma dor dupla: a falta em si, e a humilhação de ter esperado. Para se proteger dessa segunda dor, o desacreditado aprende a desejar pouco, pedir pouco, esperar pouco. Ele chama isso de simplicidade, de resiliência, de não ser ganancioso. Mas, por baixo, muitas vezes é medo disfarçado de virtude. Essa lógica se espalha para áreas da vida que nada têm a ver com dinheiro. Você aceita menos carinho do que precisa porque pedir mais parece exagero. Você trabalha além do limite porque descansar parece desperdício que não pode se dar ao luxo de ter. Você guarda opiniões, desejos, alegria — porque ocupar espaço, de alguma forma, também entrou na conta do que é escasso e precisa ser racionado. A"
-            },
-            {
-              "type": "p",
-              "text": "escassez deixa de ser sobre recursos e passa a ser sobre o quanto de você mesmo você acha que tem permissão de gastar existindo. E o mais cruel é que essa vigilância constante consome exatamente aquilo que ela tenta economizar: energia. Uma pessoa que calcula o tempo todo se pode desejar, pode descansar, pode pedir, gasta em vigilância mais do que jamais gastaria permitindo-se, de vez em quando, simplesmente receber."
+              "text": "O desacreditado que atravessa a escassez carrega uma calculadora interna que nunca desliga. Antes de aceitar um convite, ele calcula o custo. Antes de descansar, calcula se merece. Antes de pedir ajuda, calcula quanto vai dever — não em dinheiro, mas em gratidão, em constrangimento, em vulnerabilidade exposta. Essa aritmética não aparece como pensamento consciente e organizado. Aparece como um aperto no peito diante de qualquer gasto, qualquer pausa, qualquer desejo que exija recurso: tempo, energia, atenção, dinheiro. O corpo faz a conta antes que a mente perceba que está calculando. Isso não nasce à toa. Quem cresce, em algum momento, sentindo que o básico não estava garantido — seja recurso material, seja atenção emocional, seja segurança afetiva — aprende cedo que desejar é arriscado. Desejar alguma coisa que pode não vir cria uma dor dupla: a falta em si, e a humilhação de ter esperado. Para se proteger dessa segunda dor, o desacreditado aprende a desejar pouco, pedir pouco, esperar pouco. Ele chama isso de simplicidade, de resiliência, de não ser ganancioso. Mas, por baixo, muitas vezes é medo disfarçado de virtude. Essa lógica se espalha para áreas da vida que nada têm a ver com dinheiro. Você aceita menos carinho do que precisa porque pedir mais parece exagero. Você trabalha além do limite porque descansar parece desperdício que não pode se dar ao luxo de ter. Você guarda opiniões, desejos, alegria — porque ocupar espaço, de alguma forma, também entrou na conta do que é escasso e precisa ser racionado. A escassez deixa de ser sobre recursos e passa a ser sobre o quanto de você mesmo você acha que tem permissão de gastar existindo. E o mais cruel é que essa vigilância constante consome exatamente aquilo que ela tenta economizar: energia. Uma pessoa que calcula o tempo todo se pode desejar, pode descansar, pode pedir, gasta em vigilância mais do que jamais gastaria permitindo-se, de vez em quando, simplesmente receber."
             }
           ]
         },
@@ -3524,11 +3292,7 @@ export const artifactBookData = {
             },
             {
               "type": "p",
-              "text": "Consciência, neste pilar, é perceber onde a escassez realmente existe — e onde ela foi ampliada pela comparação, pelo medo ou pela memória de antigas inseguranças. Às vezes falta dinheiro. Às vezes falta estrutura. Às vezes falta rede de apoio. Às vezes falta energia emocional. Nomear isso com honestidade é diferente de se reduzir a isso. O desacreditado costuma viver como se precisasse compensar a falta o tempo inteiro. Trabalha demais para provar valor. Aceita pouco por medo de perder. Guarda desejos porque acha que desejar é luxo. Reduz a própria presença para não incomodar. Consciência é notar essa contração. É perceber o corpo endurecendo. A respiração ficando"
-            },
-            {
-              "type": "p",
-              "text": "curta. A mente calculando risco o tempo todo. É admitir: “existe medo aqui”. Não para dramatizar. Para parar de fingir que não pesa."
+              "text": "Consciência, neste pilar, é perceber onde a escassez realmente existe — e onde ela foi ampliada pela comparação, pelo medo ou pela memória de antigas inseguranças. Às vezes falta dinheiro. Às vezes falta estrutura. Às vezes falta rede de apoio. Às vezes falta energia emocional. Nomear isso com honestidade é diferente de se reduzir a isso. O desacreditado costuma viver como se precisasse compensar a falta o tempo inteiro. Trabalha demais para provar valor. Aceita pouco por medo de perder. Guarda desejos porque acha que desejar é luxo. Reduz a própria presença para não incomodar. Consciência é notar essa contração. É perceber o corpo endurecendo. A respiração ficando curta. A mente calculando risco o tempo todo. É admitir: “existe medo aqui”. Não para dramatizar. Para parar de fingir que não pesa."
             }
           ]
         },
@@ -3673,11 +3437,7 @@ export const artifactBookData = {
             },
             {
               "type": "p",
-              "text": "Ninguém preparou você para o vazio. Prepararam você para lidar com crise, com perda, com cobrança, com performance — o mundo inteiro te deu vocabulário para sofrimento com nome e endereço. Mas o vazio não tem nome. Ele não ataca, não cobra, não exige resposta. E é exatamente por não exigir nada que ele desorganiza um corpo que só aprendeu a funcionar reagindo. Para o desacreditado, que sobreviveu por anos através do movimento — resolvendo, apagando incêndio, sustentando os outros, se antecipando à próxima queda —, o vazio costuma chegar disfarçado de fracasso pessoal. \"Por que eu não sinto nada, mesmo estando bem?\" \"Por que, sem problema nenhum agora, ainda"
-            },
-            {
-              "type": "p",
-              "text": "parece que estou perdido?\" \"Isso não deveria ser alívio? Por que parece vertigem?\" A ausência de crise não é recebida como descanso. É recebida como ameaça, porque um corpo treinado para o combate não reconhece paz como estado seguro — reconhece como o momento que antecede o próximo golpe. Existem dois vazios, e confundi-los é o erro central de quem chega até aqui. Existe o vazio que esvazia de verdade: o que isola, que apaga, que anestesia, que empurra para a desistência silenciosa. E existe outro — mais raro, porque exige atravessar o primeiro sem fugir dele — que só parece vazio porque, pela primeira vez, não há ruído suficiente para abafar o que sempre esteve ali, embaixo de tudo. Este pilar não existe para preencher o silêncio. Existe para ensinar, na prática e no corpo, a diferença entre os dois."
+              "text": "Ninguém preparou você para o vazio. Prepararam você para lidar com crise, com perda, com cobrança, com performance — o mundo inteiro te deu vocabulário para sofrimento com nome e endereço. Mas o vazio não tem nome. Ele não ataca, não cobra, não exige resposta. E é exatamente por não exigir nada que ele desorganiza um corpo que só aprendeu a funcionar reagindo. Para o desacreditado, que sobreviveu por anos através do movimento — resolvendo, apagando incêndio, sustentando os outros, se antecipando à próxima queda —, o vazio costuma chegar disfarçado de fracasso pessoal. \"Por que eu não sinto nada, mesmo estando bem?\" \"Por que, sem problema nenhum agora, ainda parece que estou perdido?\" \"Isso não deveria ser alívio? Por que parece vertigem?\" A ausência de crise não é recebida como descanso. É recebida como ameaça, porque um corpo treinado para o combate não reconhece paz como estado seguro — reconhece como o momento que antecede o próximo golpe. Existem dois vazios, e confundi-los é o erro central de quem chega até aqui. Existe o vazio que esvazia de verdade: o que isola, que apaga, que anestesia, que empurra para a desistência silenciosa. E existe outro — mais raro, porque exige atravessar o primeiro sem fugir dele — que só parece vazio porque, pela primeira vez, não há ruído suficiente para abafar o que sempre esteve ali, embaixo de tudo. Este pilar não existe para preencher o silêncio. Existe para ensinar, na prática e no corpo, a diferença entre os dois."
             }
           ]
         },
@@ -3693,15 +3453,7 @@ export const artifactBookData = {
             },
             {
               "type": "p",
-              "text": "Durante muito tempo, o desacreditado sobreviveu por meio do movimento. Havia sempre uma crise para administrar, uma ferida para conter, um vínculo para sustentar, um medo para calar, um valor para provar. O corpo aprendeu, cedo, que ficar parado era perigoso — porque parar significava sentir tudo aquilo que a correria mantinha à distância. E então, em algum momento, depois de atravessar reconhecimento, vínculo, luto, trabalho, desejo e fé, o barulho começa a diminuir. Não porque a vida ficou perfeita. Mas porque você, de fato, sustentou a travessia. E o que aparece no lugar do barulho não é alívio imediato. É vazio. Esse vazio, no começo, assusta mais do que a dor assustava. A dor, por pior que fosse, dava direção: havia algo específico para resolver,"
-            },
-            {
-              "type": "p",
-              "text": "alguém para culpar, uma próxima etapa para buscar, uma narrativa para contar sobre o que estava acontecendo. O vazio não dá nada disso. Ele apenas fica. Sem estímulo, sem urgência, sem próxima crise no horizonte — e o corpo, que só conhece o idioma da reação, entra em pânico silencioso diante da falta de estímulo. É por isso que tantas pessoas, no instante exato em que finalmente têm espaço para respirar, se apressam em preenchê-lo: uma meta nova, ainda sem necessidade real. Um vínculo novo, buscado mais por medo do silêncio do que por desejo verdadeiro. Um projeto, uma crise emprestada, qualquer ruído que evite o encontro com a própria quietude. Mas existe uma segunda camada, mais silenciosa, que só se revela para quem não foge dessa primeira onda de pânico. Quando o vazio deixa de ser preenchido às pressas — quando você aguenta ficar nele um pouco mais do que o"
-            },
-            {
-              "type": "p",
-              "text": "corpo pede para fugir —, ele para de operar como ameaça e começa a operar como espaço. E é exatamente nesse espaço, sem crise para administrar e sem ninguém para agradar, que uma pergunta antiga finalmente encontra silêncio suficiente para ser ouvida: quem sou eu quando não estou sobrevivendo a nada? Essa pergunta não vem com resposta pronta. Ela vem, no início, como desconforto puro — como se algo estivesse faltando. Mas não está faltando nada. Está, pela primeira vez, sobrando espaço. E espaço, para quem nunca teve, também dói. Não porque seja ruim. Mas porque é desconhecido."
+              "text": "Durante muito tempo, o desacreditado sobreviveu por meio do movimento. Havia sempre uma crise para administrar, uma ferida para conter, um vínculo para sustentar, um medo para calar, um valor para provar. O corpo aprendeu, cedo, que ficar parado era perigoso — porque parar significava sentir tudo aquilo que a correria mantinha à distância. E então, em algum momento, depois de atravessar reconhecimento, vínculo, luto, trabalho, desejo e fé, o barulho começa a diminuir. Não porque a vida ficou perfeita. Mas porque você, de fato, sustentou a travessia. E o que aparece no lugar do barulho não é alívio imediato. É vazio. Esse vazio, no começo, assusta mais do que a dor assustava. A dor, por pior que fosse, dava direção: havia algo específico para resolver, alguém para culpar, uma próxima etapa para buscar, uma narrativa para contar sobre o que estava acontecendo. O vazio não dá nada disso. Ele apenas fica. Sem estímulo, sem urgência, sem próxima crise no horizonte — e o corpo, que só conhece o idioma da reação, entra em pânico silencioso diante da falta de estímulo. É por isso que tantas pessoas, no instante exato em que finalmente têm espaço para respirar, se apressam em preenchê-lo: uma meta nova, ainda sem necessidade real. Um vínculo novo, buscado mais por medo do silêncio do que por desejo verdadeiro. Um projeto, uma crise emprestada, qualquer ruído que evite o encontro com a própria quietude. Mas existe uma segunda camada, mais silenciosa, que só se revela para quem não foge dessa primeira onda de pânico. Quando o vazio deixa de ser preenchido às pressas — quando você aguenta ficar nele um pouco mais do que o corpo pede para fugir —, ele para de operar como ameaça e começa a operar como espaço. E é exatamente nesse espaço, sem crise para administrar e sem ninguém para agradar, que uma pergunta antiga finalmente encontra silêncio suficiente para ser ouvida: quem sou eu quando não estou sobrevivendo a nada? Essa pergunta não vem com resposta pronta. Ela vem, no início, como desconforto puro — como se algo estivesse faltando. Mas não está faltando nada. Está, pela primeira vez, sobrando espaço. E espaço, para quem nunca teve, também dói. Não porque seja ruim. Mas porque é desconhecido."
             }
           ]
         },
@@ -3717,11 +3469,7 @@ export const artifactBookData = {
             },
             {
               "type": "p",
-              "text": "Consciência, neste pilar, é notar o impulso quase automático de encher o silêncio no instante em que ele aparece. Uma notificação verificada sem necessidade. Uma tarefa nova criada só para ter algo em movimento. Uma conversa iniciada para não ficar a sós com o próprio pensamento. Esses gestos raramente são percebidos como fuga — parecem produtividade, parecem cuidado, parecem vida social normal. Mas, olhados de perto, muitas vezes são o mesmo mecanismo antigo: preencher para não sentir o que o silêncio revelaria. É perceber, também, que nem todo desconforto dentro do vazio é sinal de que algo está errado. Às vezes é só o corpo reaprendendo a existir sem tarefa — e isso é estranho antes de"
-            },
-            {
-              "type": "p",
-              "text": "ser tranquilo. Consciência não é ficar parado por princípio, como prova de evolução. É admitir, com honestidade: \"isso incomoda, e mesmo assim eu posso ficar mais alguns minutos antes de sair correndo atrás de alguma coisa para fazer.\""
+              "text": "Consciência, neste pilar, é notar o impulso quase automático de encher o silêncio no instante em que ele aparece. Uma notificação verificada sem necessidade. Uma tarefa nova criada só para ter algo em movimento. Uma conversa iniciada para não ficar a sós com o próprio pensamento. Esses gestos raramente são percebidos como fuga — parecem produtividade, parecem cuidado, parecem vida social normal. Mas, olhados de perto, muitas vezes são o mesmo mecanismo antigo: preencher para não sentir o que o silêncio revelaria. É perceber, também, que nem todo desconforto dentro do vazio é sinal de que algo está errado. Às vezes é só o corpo reaprendendo a existir sem tarefa — e isso é estranho antes de ser tranquilo. Consciência não é ficar parado por princípio, como prova de evolução. É admitir, com honestidade: \"isso incomoda, e mesmo assim eu posso ficar mais alguns minutos antes de sair correndo atrás de alguma coisa para fazer.\""
             }
           ]
         },
@@ -3737,11 +3485,7 @@ export const artifactBookData = {
             },
             {
               "type": "p",
-              "text": "O julgamento chega rápido e usa uma linguagem que soa como responsabilidade: \"isso é preguiça.\" \"Você deveria estar fazendo algo com a sua vida.\" \"Gente que tem propósito não fica assim, sem rumo.\" \"Talvez você simplesmente não tenha nada que te mova de verdade.\" Ele pega uma pausa legítima — o corpo"
-            },
-            {
-              "type": "p",
-              "text": "descansando depois de anos em alerta — e a transforma em sentença de inutilidade. Esse julgamento é especialmente cruel porque ataca exatamente o momento em que o desacreditado, pela primeira vez, não está em crise. Depois de anos sendo julgado por não dar conta, agora ele se julga por não estar mais precisando dar conta de nada. Reconhecer esse julgamento não faz o vazio desaparecer. Mas impede que o silêncio seja transformado em mais uma prova de que algo, nele, é fundamentalmente falho."
+              "text": "O julgamento chega rápido e usa uma linguagem que soa como responsabilidade: \"isso é preguiça.\" \"Você deveria estar fazendo algo com a sua vida.\" \"Gente que tem propósito não fica assim, sem rumo.\" \"Talvez você simplesmente não tenha nada que te mova de verdade.\" Ele pega uma pausa legítima — o corpo descansando depois de anos em alerta — e a transforma em sentença de inutilidade. Esse julgamento é especialmente cruel porque ataca exatamente o momento em que o desacreditado, pela primeira vez, não está em crise. Depois de anos sendo julgado por não dar conta, agora ele se julga por não estar mais precisando dar conta de nada. Reconhecer esse julgamento não faz o vazio desaparecer. Mas impede que o silêncio seja transformado em mais uma prova de que algo, nele, é fundamentalmente falho."
             }
           ]
         },
@@ -3757,11 +3501,7 @@ export const artifactBookData = {
             },
             {
               "type": "p",
-              "text": "Presença, aqui, é a capacidade de permanecer dentro do vazio tempo suficiente para que ele pare de ser ameaça e comece a revelar alguma"
-            },
-            {
-              "type": "p",
-              "text": "coisa. Não é buscar sentido à força, nem inventar propósito para acalmar a ansiedade de estar sem rumo. É esperar, com o corpo, sem sair correndo. É deixar o silêncio ficar desconfortável um pouco mais do que o normal, sem correr para resolvê-lo com a primeira distração disponível. É nesse espaço sustentado — sem crise para administrar, sem performance para justificar a própria existência — que algo novo se torna possível: você pode escolher ficar mais inteiro. Não para chegar a uma conclusão definitiva sobre quem você é. Só para, finalmente, se ouvir sem interferência."
+              "text": "Presença, aqui, é a capacidade de permanecer dentro do vazio tempo suficiente para que ele pare de ser ameaça e comece a revelar alguma coisa. Não é buscar sentido à força, nem inventar propósito para acalmar a ansiedade de estar sem rumo. É esperar, com o corpo, sem sair correndo. É deixar o silêncio ficar desconfortável um pouco mais do que o normal, sem correr para resolvê-lo com a primeira distração disponível. É nesse espaço sustentado — sem crise para administrar, sem performance para justificar a própria existência — que algo novo se torna possível: você pode escolher ficar mais inteiro. Não para chegar a uma conclusão definitiva sobre quem você é. Só para, finalmente, se ouvir sem interferência."
             }
           ]
         },
