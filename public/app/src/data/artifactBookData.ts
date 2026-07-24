@@ -344,7 +344,7 @@ export const artifactBookData = {
             },
             {
               "type": "p",
-              "text": "Este livro existe para interromper esse ciclo. Se você se reconhece aqui Se, ao ler estas páginas, você sente que algo foi descrito com precisão desconfortável, saiba: isso não é coincidência. Este livro não foi escrito para te diagnosticar nem para te rotular. Foi escrito para te reconhecer."
+              "text": "Este livro existe para interromper esse ciclo. Se você se reconhece aqui, se, ao ler estas páginas, você sente que algo foi descrito com precisão desconfortável, saiba: isso não é coincidência. Este livro não foi escrito para te diagnosticar nem para te rotular. Foi escrito para te reconhecer."
             },
             {
               "type": "p",
@@ -574,7 +574,7 @@ export const artifactBookData = {
           "blocks": [
             {
               "type": "p",
-              "text": "Depois da consciência, quase sempre surge uma segunda camada: a interpretação. A mente começa a contar histórias: — Isso não deveria estar acontecendo — eu sou assim mesmo — sempre acaba desse jeito — tem algo errado comigo Isso é o julgamento"
+              "text": "Depois da consciência, quase sempre surge uma segunda camada: a interpretação. A mente começa a contar histórias: — Isso não deveria estar acontecendo — eu sou assim mesmo — sempre acaba desse jeito — tem algo errado comigo. Isso é o julgamento."
             },
             {
               "type": "p",
@@ -638,7 +638,7 @@ export const artifactBookData = {
             },
             {
               "type": "p",
-              "text": "A maioria das leituras humanas trabalha com dualidades: — razão e emoção — força e fraqueza — controle e impulso — médico e monstro O problema das dualidades é que elas criam conflito permanente. Você precisa escolher lados. Controlar um polo. Eliminar o outro."
+              "text": "A maioria das leituras humanas trabalha com dualidades: — razão e emoção — força e fraqueza — controle e impulso — médico e monstro. O problema das dualidades é que elas criam conflito permanente. Você precisa escolher lados. Controlar um polo. Eliminar o outro."
             },
             {
               "type": "pause",
@@ -682,11 +682,11 @@ export const artifactBookData = {
             },
             {
               "type": "pause",
-              "text": "A Tríade ainda funciona. Consciência. Julgamento. Presença Perceber. Diferenciar. Permanecer. Isso já é movimento."
+              "text": "A Tríade ainda funciona. Consciência. Julgamento. Presença. Perceber. Diferenciar. Permanecer. Isso já é movimento."
             },
             {
               "type": "pause",
-              "text": "ntes de seguir"
+              "text": "Antes de seguir"
             },
             {
               "type": "p",
@@ -694,7 +694,7 @@ export const artifactBookData = {
             },
             {
               "type": "pause",
-              "text": "partir daqui os pilares não são temas isolados"
+              "text": "A partir daqui os pilares não são temas isolados"
             },
             {
               "type": "pause",
@@ -968,7 +968,7 @@ export const artifactBookData = {
             },
             {
               "type": "p",
-              "text": "A trialidade oferece um terceiro caminho: — Reconhecer o impulso — reconhecer o controle — permanecer sem se destruir Isso não resolve o conflito. Mas impede que ele vire identidade."
+              "text": "A trialidade oferece um terceiro caminho: — Reconhecer o impulso — reconhecer o controle — permanecer sem se destruir. Isso não resolve o conflito. Mas impede que ele vire identidade."
             }
           ]
         },
@@ -1371,7 +1371,7 @@ export const artifactBookData = {
             },
             {
               "type": "p",
-              "text": "1) O minuto sem fuga Um minuto em que você não abre o celular. Um minuto em que você não muda de assunto dentro da cabeça. Um minuto em que você só percebe: respiração, corpo, pensamento. E quando vier a vontade de escapar, você nota: “vontade de escapar.” E fica mais dez segundos."
+              "text": "1) O minuto sem fuga. Um minuto em que você não abre o celular. Um minuto em que você não muda de assunto dentro da cabeça. Um minuto em que você só percebe: respiração, corpo, pensamento. E quando vier a vontade de escapar, você nota: “vontade de escapar.” E fica mais dez segundos."
             },
             {
               "type": "pause",
@@ -1383,7 +1383,7 @@ export const artifactBookData = {
             },
             {
               "type": "p",
-              "text": "3) O contato com o corpo como prova Mão no peito. Mão no abdômen. Encostar no próprio braço. Não como carinho romântico. Como evidência física: “eu existo aqui.” O corpo aprende pelo contato. Ele não aprende por argumento."
+              "text": "3) O contato com o corpo como prova. Mão no peito. Mão no abdômen. Encostar no próprio braço. Não como carinho romântico. Como evidência física: “eu existo aqui.” O corpo aprende pelo contato. Ele não aprende por argumento."
             },
             {
               "type": "pause",
@@ -2008,7 +2008,7 @@ export const artifactBookData = {
             },
             {
               "type": "p",
-              "text": "PILAR III — Luto, Ausência & Quebra de Laços \"Nem toda perda termina quando alguém parte. Algumas continuam vivendo dentro de nós.\"",
+              "text": "PILAR III — Luto, Ausência & Quebra de Laços. \"Nem toda perda termina quando alguém parte. Algumas continuam vivendo dentro de nós.\"",
               "lead": true
             }
           ]

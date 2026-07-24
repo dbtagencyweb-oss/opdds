@@ -262,7 +262,7 @@ export const buildCanonicalBookChapters = (
 
     return {
       id: chapter.id,
-      title: repairCanonicalText(pageTitles[start] || chapter.title),
+      title: repairCanonicalText(chapter.title),
       eyebrow: repairCanonicalText(group?.eyebrow || chapter.chapter?.toString() || 'Livro'),
       summary: repairCanonicalText(chapter.summary),
       kind: chapter.kind,
@@ -510,7 +510,7 @@ export const buildArtifactCanonicalBookChapters = (
       : undefined;
     return {
       id: chapter.id,
-      title: repairCanonicalText(pageTitles[chapter.pdfPage] || firstArtifact.title || chapter.title),
+      title: repairCanonicalText(firstArtifact.title || chapter.title),
       eyebrow: repairCanonicalText(firstArtifact.part || group?.eyebrow || chapter.chapter?.toString() || 'Livro'),
       summary: repairCanonicalText(chapter.summary),
       kind: firstArtifact.kind || chapter.kind,
