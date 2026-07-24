@@ -1,4 +1,5 @@
 import { Body, Controller, Headers, HttpCode, Post, Query, RawBodyRequest, Req, UnauthorizedException } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import type { Request } from 'express';
 import * as crypto from 'crypto';
 import { AuthService } from '../auth/auth.service';
@@ -148,6 +149,7 @@ export class KiwifyWebhookController {
     private readonly prisma: PrismaService,
   ) {}
 
+  @Throttle({ default: { limit: 60, ttl: 60_000 } })
   @Post('webhook')
   @HttpCode(200)
   async handle(

@@ -30,6 +30,18 @@ type StoredMindMessage = MindHistoryMessage & {
   createdAt: string;
 };
 
+const AI_PROVIDER_TIMEOUT_MS = 20_000;
+
+async function fetchWithTimeout(url: string, options: RequestInit, timeoutMs = AI_PROVIDER_TIMEOUT_MS): Promise<Response> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(url, { ...options, signal: controller.signal });
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 type AIAnswer = {
   message: string;
   fallback: boolean;
@@ -321,7 +333,7 @@ export class IGentService {
     readerContext?: string,
   ): Promise<AIAnswer> {
     try {
-      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      const response = await fetchWithTimeout('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${apiKey}`,
@@ -377,7 +389,7 @@ export class IGentService {
     ];
 
     try {
-      const response = await fetch(endpoint, {
+      const response = await fetchWithTimeout(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

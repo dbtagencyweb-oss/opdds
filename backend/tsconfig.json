@@ -13,5 +13,7 @@
     "incremental": true,
     "skipLibCheck": true,
     "strict": true
-  }
+  },
+  "include": ["src/**/*.ts", "prisma/**/*.ts"],
+  "exclude": ["node_modules", "dist"]
 }

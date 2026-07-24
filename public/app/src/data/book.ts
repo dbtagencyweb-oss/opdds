@@ -292,9 +292,9 @@ const canonicalContentFor = (id: string) => {
   const chapter = canonicalChapterById.get(id);
   if (!chapter) return [];
   return chapter.sections.flatMap((section) =>
-    section.blocks.flatMap((block) => {
+    section.blocks.flatMap((block: { type: string; text?: string; items?: string[] }) => {
       if (block.type === 'list' && Array.isArray(block.items)) return block.items.map((item) => repairText(String(item ?? '')));
-      if ('text' in block && block.text) return [repairText(String(block.text))];
+      if (block.text) return [repairText(String(block.text))];
       return [];
     }),
   );
