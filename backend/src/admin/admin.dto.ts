@@ -45,16 +45,6 @@ export class AdminGrantProductDto {
   expiresInDays?: number;
 }
 
-export class AdminBookPageContentDto {
-  @IsOptional()
-  @IsString()
-  @MaxLength(180)
-  title?: string;
-
-  @IsString()
-  content!: string;
-}
-
 export class AdminBookAudioDto {
   @IsString()
   @MaxLength(80)

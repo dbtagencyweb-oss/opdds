@@ -140,7 +140,6 @@ import {
   saveLocalWorkbookPrompt,
 } from './services/workbookStore';
 import {
-  AdminBookPageSummary,
   AdminBookAudioSummary,
   AdminEvent,
   AdminInviteResponse,
@@ -149,9 +148,7 @@ import {
   createAdminInvite,
   deleteMindSessions,
   deleteReaderJourney,
-  fetchAdminBookPageHistory,
   fetchAdminBookAudio,
-  fetchAdminBookPages,
   fetchAdminEvents,
   fetchAdminProducts,
   fetchAdminUsers,
@@ -159,13 +156,11 @@ import {
   fetchMindStatus,
   fetchReaderJourney,
   fetchPublishedAudioTracks,
-  fetchPublishedBookPages,
   getStoredAuthUser,
   grantAdminPlan,
   grantAdminProduct,
   LocalUserRecord,
   loginAccount,
-  publishAdminBookPage,
   publishAdminBookAudio,
   registerAccount,
   requestPasswordReset,
@@ -173,7 +168,6 @@ import {
   resetPassword,
   saveAdminBookAudioMeta,
   saveAdminBookAudioOrder,
-  saveAdminBookPageDraft,
   sendMindMessage,
   syncReaderJourney,
   updateStoredAuthUser,
@@ -282,13 +276,7 @@ export function App() {
   const [adminReaders, setAdminReaders] = useState<LocalUserRecord[]>([]);
   const [adminProducts, setAdminProducts] = useState<AdminProduct[]>([]);
   const [adminEvents, setAdminEvents] = useState<AdminEvent[]>([]);
-  const [adminBookPages, setAdminBookPages] = useState<AdminBookPageSummary[]>([]);
   const [adminBookAudio, setAdminBookAudio] = useState<AdminBookAudioSummary[]>([]);
-  const [adminBookPageHistory, setAdminBookPageHistory] = useState<any[]>([]);
-  const [adminBookPageNumber, setAdminBookPageNumber] = useState(1);
-  const [adminBookPageTitle, setAdminBookPageTitle] = useState('');
-  const [adminBookPageContent, setAdminBookPageContent] = useState('');
-  const [adminSelectedBookLineIndex, setAdminSelectedBookLineIndex] = useState<number | null>(null);
   const [adminAudioChapterId, setAdminAudioChapterId] = useState(bookChapters[0]?.id || '');
   const [adminAudioSectionKey, setAdminAudioSectionKey] = useState('');
   const [adminAudioLabel, setAdminAudioLabel] = useState('');
@@ -348,10 +336,7 @@ export function App() {
   const [adminResult, setAdminResult] = useState<AdminInviteResponse | null>(null);
   const [adminMessage, setAdminMessage] = useState('');
   const [adminSection, setAdminSection] = useState<AdminSection>('overview');
-  const [adminBookTab, setAdminBookTab] = useState<'canonical' | 'pages' | 'audio'>('canonical');
-  const [adminBookSearch, setAdminBookSearch] = useState('');
-  const [adminBookCompareOpen, setAdminBookCompareOpen] = useState(false);
-  const [adminPlainPasteDraft, setAdminPlainPasteDraft] = useState('');
+  const [adminBookTab, setAdminBookTab] = useState<'canonical' | 'audio'>('canonical');
   const [adminCanonicalChapterId, setAdminCanonicalChapterId] = useState(bookChapters[0]?.id || '');
   const [adminCanonicalDrafts, setAdminCanonicalDrafts] = useState<Record<string, CanonicalBookBlock[]>>(() => {
     try {
@@ -368,8 +353,6 @@ export function App() {
   const [marketingOffer, setMarketingOffer] = useState('acesso ao app de leitura, Áudios e jornada guiada');
   const [marketingObjection, setMarketingObjection] = useState('não tenho energia para mais um método de autoajuda');
   const [marketingCopied, setMarketingCopied] = useState('');
-  const [bookPageOverrides, setBookPageOverrides] = useState<Record<number, string>>({});
-  const [bookPageTitleOverrides, setBookPageTitleOverrides] = useState<Record<number, string>>({});
   const [bookAudioOverrides, setBookAudioOverrides] = useState<Record<string, { chapterId: string; sectionKey: string; label: string; url: string; coverUrl?: string | null }>>({});
   const [upgradeModal, setUpgradeModal] = useState<UpgradeKey | null>(null);
   const [token, setToken] = useState('');
@@ -494,7 +477,6 @@ export function App() {
   const audioProgressMapRef = useRef<Record<string, AudioProgressEntry>>({});
   const audiobookQueueRef = useRef<AudioQueueItem[]>([]);
   const audioSettingsRef = useRef({ volume: 0.84, playbackRate: 1 });
-  const adminBookPageTextareaRef = useRef<HTMLTextAreaElement | null>(null);
   const adminCanonicalImportRef = useRef<HTMLInputElement | null>(null);
   const saveFeedbackTimersRef = useRef<Record<string, { saved?: number; idle?: number }>>({});
   const journeyHydratedRef = useRef(false);
@@ -565,12 +547,12 @@ export function App() {
   const currentPageNote = readerNotes.find((note) => note.page === pdfPage);
   const currentPillarLetter = selectedChapter.pillar ? pillarLetters[selectedChapter.pillar - 1] : null;
   const mergedPdfTextPages = useMemo(
-    () => pdfTextPages.map((text, index) => repairBrokenPdfCharacters(bookPageOverrides[index + 1] || text)),
-    [bookPageOverrides],
+    () => pdfTextPages.map((text) => repairBrokenPdfCharacters(text)),
+    [],
   );
   const canonicalBookChapters = useMemo(
-    () => buildArtifactCanonicalBookChapters(bookChapters, mergedPdfTextPages, bookPageTitleOverrides, bookGroups),
-    [bookPageTitleOverrides, mergedPdfTextPages],
+    () => buildArtifactCanonicalBookChapters(bookChapters, mergedPdfTextPages, bookGroups),
+    [mergedPdfTextPages],
   );
   const effectiveCanonicalBookChapters = useMemo(
     () => canonicalBookChapters.map((chapter) => {
@@ -840,16 +822,6 @@ export function App() {
       .filter(({ chapter }) => !query || `${chapter.title} ${chapter.summary}`.toLowerCase().includes(query));
   }, [searchQuery]);
 
-  const adminCurrentBookPage = useMemo(
-    () => adminBookPages.find((page) => page.pageNumber === adminBookPageNumber),
-    [adminBookPageNumber, adminBookPages],
-  );
-
-  const adminCurrentPageSource = useMemo(
-    () => pdfTextPages[adminBookPageNumber - 1] || '',
-    [adminBookPageNumber],
-  );
-
   const adminAudioChapter = useMemo(
     () => bookChapters.find((chapter) => chapter.id === adminAudioChapterId) ?? bookChapters[0],
     [adminAudioChapterId],
@@ -907,26 +879,6 @@ export function App() {
       }>;
   }, [adminAudioChapterId, adminAudioOrder, adminAudioProduction, adminAudioTracksForChapter, adminBookAudio]);
 
-  const adminVisualAudioChapter = useMemo(() => {
-    return [...bookChapters]
-      .reverse()
-      .find((chapter) => chapter.pdfPage <= adminBookPageNumber) ?? adminAudioChapter;
-  }, [adminAudioChapter, adminBookPageNumber]);
-
-  const adminVisualAudioItems = useMemo(() => {
-    if (!adminVisualAudioChapter) return [];
-    return adminVisualAudioChapter.audioTracks.map((track) => {
-      const sectionKey = audioTrackKey(track.label);
-      const published = adminBookAudio.find((item) => item.chapterId === adminVisualAudioChapter.id && item.sectionKey === sectionKey)?.latestPublished;
-      return {
-        chapterId: adminVisualAudioChapter.id,
-        sectionKey,
-        label: published?.label || track.label,
-        url: published?.url || track.url,
-      };
-    });
-  }, [adminBookAudio, adminVisualAudioChapter]);
-
   const adminAudioPathWarning = useMemo(() => {
     const path = adminAudioUrl.trim();
     if (!path) return '';
@@ -935,27 +887,6 @@ export function App() {
   if (!/\.(mp3|wav|m4a|ogg)(\?.*)?$/i.test(path)) return 'Confira a extensão: recomendamos .mp3, .wav, .m4a ou .ogg.';
     return '';
   }, [adminAudioUrl]);
-
-  const adminPublishedPageCount = useMemo(
-    () => adminBookPages.filter((page) => page.latestPublished).length,
-    [adminBookPages],
-  );
-
-  const adminDraftPageCount = useMemo(
-    () => adminBookPages.filter((page) => page.latestDraft).length,
-    [adminBookPages],
-  );
-
-  const adminBookPageOptions = useMemo(() => {
-    const total = Math.max(totalPdfPages, pdfTextPages.length || 1);
-    const query = normalizeForSearch(adminBookSearch);
-    return Array.from({ length: total }, (_, index) => index + 1).filter((pageNumber) => {
-      if (!query) return true;
-      const page = adminBookPages.find((item) => item.pageNumber === pageNumber);
-      const source = `${pageNumber} ${page?.latestDraft?.title || ''} ${page?.latestPublished?.title || ''} ${pdfTextPages[pageNumber - 1] || ''}`;
-      return normalizeForSearch(source).includes(query);
-    });
-  }, [adminBookPages, adminBookSearch, totalPdfPages]);
 
   const playClick = (kind: keyof typeof sensoryClicks = 'soft') => {
     try {
@@ -1241,28 +1172,6 @@ export function App() {
   }, []);
 
   useEffect(() => {
-    fetchPublishedBookPages()
-      .then((pages) => {
-        setBookPageOverrides(
-          pages.reduce<Record<number, string>>((acc, page) => {
-            acc[page.pageNumber] = page.content;
-            return acc;
-          }, {}),
-        );
-        setBookPageTitleOverrides(
-          pages.reduce<Record<number, string>>((acc, page) => {
-            if (page.title) acc[page.pageNumber] = repairBrokenPdfCharacters(page.title);
-            return acc;
-          }, {}),
-        );
-      })
-      .catch(() => {
-        setBookPageOverrides({});
-        setBookPageTitleOverrides({});
-      });
-  }, []);
-
-  useEffect(() => {
     fetchPublishedAudioTracks()
       .then((tracks) => {
       setBookAudioOverrides(
@@ -1283,12 +1192,11 @@ export function App() {
 
   useEffect(() => {
     if (route !== ROUTES.ADMIN || !isAdmin) return;
-    Promise.all([fetchAdminUsers(), fetchAdminProducts(), fetchAdminEvents(), fetchAdminBookPages(), fetchAdminBookAudio()])
-      .then(([users, products, events, bookPages, bookAudio]) => {
+    Promise.all([fetchAdminUsers(), fetchAdminProducts(), fetchAdminEvents(), fetchAdminBookAudio()])
+      .then(([users, products, events, bookAudio]) => {
         setAdminReaders(users);
         setAdminProducts(products);
         setAdminEvents(events);
-        setAdminBookPages(bookPages);
         setAdminBookAudio(bookAudio);
         if (!adminSelectedUserId && users[0]) setAdminSelectedUserId(users[0].id);
       })
@@ -1296,7 +1204,6 @@ export function App() {
         setAdminReaders([]);
         setAdminProducts([]);
         setAdminEvents([]);
-        setAdminBookPages([]);
         setAdminBookAudio([]);
       });
   }, [route, isAdmin]);
@@ -1354,16 +1261,6 @@ export function App() {
   useEffect(() => {
     localStorage.setItem(ADMIN_CANONICAL_DRAFTS_KEY, JSON.stringify(adminCanonicalDrafts));
   }, [adminCanonicalDrafts]);
-
-  useEffect(() => {
-    if (route !== ROUTES.ADMIN || !isAdmin) return;
-    const revision = adminCurrentBookPage?.latestDraft || adminCurrentBookPage?.latestPublished;
-    setAdminBookPageTitle(revision?.title || '');
-    setAdminBookPageContent(revision?.content || adminCurrentPageSource);
-    fetchAdminBookPageHistory(adminBookPageNumber)
-      .then(setAdminBookPageHistory)
-      .catch(() => setAdminBookPageHistory([]));
-  }, [route, isAdmin, adminBookPageNumber, adminCurrentBookPage, adminCurrentPageSource]);
 
   useEffect(() => {
     localStorage.setItem('opd_page_index', String(pageIndex));
@@ -1955,11 +1852,10 @@ export function App() {
   };
 
   const refreshAdminData = async () => {
-    const [users, products, events, bookPages, bookAudio] = await Promise.all([fetchAdminUsers(), fetchAdminProducts(), fetchAdminEvents(), fetchAdminBookPages(), fetchAdminBookAudio()]);
+    const [users, products, events, bookAudio] = await Promise.all([fetchAdminUsers(), fetchAdminProducts(), fetchAdminEvents(), fetchAdminBookAudio()]);
     setAdminReaders(users);
     setAdminProducts(products);
     setAdminEvents(events);
-    setAdminBookPages(bookPages);
     setAdminBookAudio(bookAudio);
     if (!adminSelectedUserId && users[0]) setAdminSelectedUserId(users[0].id);
     return users;
@@ -2047,28 +1943,6 @@ export function App() {
     navigate(ROUTES.READER);
   };
 
-  const refreshBookPageContent = async () => {
-    const [adminPages, publishedPages, history] = await Promise.all([
-      fetchAdminBookPages(),
-      fetchPublishedBookPages(),
-      fetchAdminBookPageHistory(adminBookPageNumber),
-    ]);
-    setAdminBookPages(adminPages);
-    setAdminBookPageHistory(history);
-    setBookPageOverrides(
-      publishedPages.reduce<Record<number, string>>((acc, page) => {
-        acc[page.pageNumber] = page.content;
-        return acc;
-      }, {}),
-    );
-    setBookPageTitleOverrides(
-      publishedPages.reduce<Record<number, string>>((acc, page) => {
-        if (page.title) acc[page.pageNumber] = repairBrokenPdfCharacters(page.title);
-        return acc;
-      }, {}),
-    );
-  };
-
   const refreshBookAudioContent = async () => {
     const [adminAudio, publishedAudio] = await Promise.all([fetchAdminBookAudio(), fetchPublishedAudioTracks()]);
     setAdminBookAudio(adminAudio);
@@ -2084,147 +1958,6 @@ export function App() {
         return acc;
       }, {}),
     );
-  };
-
-  const handleSaveBookPageDraft = async () => {
-    setAdminMessage('');
-    try {
-      const visualTitle = getAdminVisualPage().title;
-      const readerContent = composeAdminBookPageForReader(adminBookPageContent);
-      await saveAdminBookPageDraft(adminBookPageNumber, {
-        title: visualTitle || adminBookPageTitle || undefined,
-        content: readerContent,
-      });
-      setAdminBookPageContent(readerContent);
-      setAdminBookPageTitle(visualTitle || adminBookPageTitle);
-      await refreshBookPageContent();
-      setAdminMessage(`Rascunho salvo para a pagina ${adminBookPageNumber}.`);
-    } catch (error: any) {
-      setAdminMessage(error?.message || 'Não foi possível salvar o rascunho.');
-    }
-  };
-
-  const handleRepairAdminBookPageContent = () => {
-    setAdminBookPageTitle((current) => repairBrokenPdfCharacters(current));
-    setAdminBookPageContent((current) => repairBrokenPdfCharacters(current));
-    setAdminMessage('Caracteres corrigidos no editor. Revise antes de publicar.');
-  };
-
-  const handleCleanAdminBookPageContent = () => {
-    setAdminBookPageTitle((current) => cleanBookEditorText(current));
-    setAdminBookPageContent((current) => cleanBookEditorText(current));
-    setAdminMessage('Texto limpo no editor. Revise os paragrafos antes de publicar.');
-  };
-
-  const insertAdminBookPageSnippet = (snippet: string) => {
-    const textarea = adminBookPageTextareaRef.current;
-    if (!textarea) {
-      setAdminBookPageContent((current) => `${current.trimEnd()}\n\n${snippet}\n\n`);
-      return;
-    }
-
-    const start = textarea.selectionStart;
-    const end = textarea.selectionEnd;
-    if (snippet === '[br]') {
-      setAdminBookPageContent((current) => `${current.slice(0, start)}[br]${current.slice(end)}`);
-      window.requestAnimationFrame(() => {
-        textarea.focus();
-        textarea.setSelectionRange(start + snippet.length, start + snippet.length);
-      });
-      return;
-    }
-
-    setAdminBookPageContent((current) => {
-      const before = current.slice(0, start);
-      const after = current.slice(end);
-      const prefix = before && !before.endsWith('\n') ? '\n' : '';
-      const suffix = after && !after.startsWith('\n') ? '\n' : '';
-      return `${before}${prefix}${snippet}${suffix}${after}`;
-    });
-    window.requestAnimationFrame(() => {
-      textarea.focus();
-      const nextPosition = start + snippet.length + (textarea.value.slice(0, start).endsWith('\n') ? 0 : 1);
-      textarea.setSelectionRange(nextPosition, nextPosition);
-    });
-  };
-
-  const adminHeaderPattern = {
-    hide: /^\[\[\s*(?:cabecalho|header)\s*:\s*ocultar\s*\]\]$/i,
-    eyebrow: /^\[\[\s*(?:cabecalho\s*[-—–]\s*sec(?:a|ã)o|header\s*[-—–]\s*eyebrow)\s*:/i,
-    title: /^\[\[\s*(?:cabecalho\s*[-—–]\s*titulo|header\s*[-—–]\s*title)\s*:/i,
-  };
-  const matchAdminHeaderValue = (line: string, kind: 'eyebrow' | 'title') => {
-    const name = kind === 'eyebrow'
-      ? String.raw`(?:cabecalho\s*[-—–]\s*sec(?:a|ã)o|header\s*[-—–]\s*eyebrow)`
-      : String.raw`(?:cabecalho\s*[-—–]\s*titulo|header\s*[-—–]\s*title)`;
-    return line.match(new RegExp(String.raw`^\[\[\s*${name}\s*:\s*(.*?)\s*\]\]$`, 'i'));
-  };
-
-  const renderAdminBookPreviewLine = (rawLine: string, key: string | number) => {
-    const line = repairBrokenPdfCharacters(rawLine.trim());
-    if (!line) return null;
-
-    if (adminHeaderPattern.hide.test(line) || adminHeaderPattern.eyebrow.test(line) || adminHeaderPattern.title.test(line)) {
-      return <p className="admin-preview-command" key={key}>{line}</p>;
-    }
-
-    const titleCommandMatch = line.match(/^\[\[(titulo|subtitulo):(.+?)(?:\|(.*?))?\]\]$/i);
-    if (titleCommandMatch) {
-      const Tag = titleCommandMatch[1].toLowerCase() === 'subtitulo' ? 'h3' : 'h2';
-      return <Tag className="admin-preview-command" key={key}>{titleCommandMatch[2].trim()}</Tag>;
-    }
-
-    if (/^\[br\]$/i.test(line)) {
-      return <div className="admin-preview-spacer" key={key} aria-label="Quebra de linha" />;
-    }
-
-    if (/^(-{3,}|\*{3,}|_{3,})$/.test(line)) {
-      return <hr className="admin-preview-divider" key={key} />;
-    }
-
-    const spacerMatch = line.match(/^\[\[espaco:(\d{1,3})\]\]$/i);
-    if (spacerMatch) {
-      return <div className="admin-preview-spacer" style={{ height: `${Math.min(120, Math.max(8, Number(spacerMatch[1]) || 24))}px` }} key={key} />;
-    }
-
-    const imageMatch = line.match(/^\[\[(?:imagem|capa):(.+?)(?:\|(.*?))?\]\]$/i);
-    if (imageMatch) {
-      return <p className="admin-preview-command" key={key}>Imagem: {imageMatch[1].trim()}</p>;
-    }
-
-    return (
-      <p key={key}>
-        {line.split(/\[br\]/i).map((part, index) => (
-          <span key={`${key}-${index}`}>{index > 0 && <br />}{part}</span>
-        ))}
-      </p>
-    );
-  };
-
-  const getAdminBookLines = () => adminBookPageContent.replace(/\r/g, '').split('\n');
-
-  const updateAdminBookLine = (lineIndex: number, nextValue: string) => {
-    setAdminBookPageContent((current) => {
-      const lines = current.replace(/\r/g, '').split('\n');
-      lines[lineIndex] = nextValue;
-      return lines.join('\n');
-    });
-  };
-
-  const insertAdminBookLineAfter = (lineIndex: number, value = '') => {
-    setAdminBookPageContent((current) => {
-      const lines = current.replace(/\r/g, '').split('\n');
-      lines.splice(lineIndex + 1, 0, value);
-      return lines.join('\n');
-    });
-  };
-
-  const removeAdminBookLine = (lineIndex: number) => {
-    setAdminBookPageContent((current) => {
-      const lines = current.replace(/\r/g, '').split('\n');
-      lines.splice(lineIndex, 1);
-      return lines.join('\n');
-    });
   };
 
   const eraseJourneyData = async () => {
@@ -2258,517 +1991,6 @@ export function App() {
       setAccountMessage('Histórico do iGentMIND apagado.');
     } catch {
       setAccountMessage('Não foi possível apagar as conversas agora. Tente novamente.');
-    }
-  };
-
-  const parseAdminBlockCommand = (rawLine = '') => {
-    const line = rawLine.trim();
-    const match = line.match(/^\[\[(titulo|subtitulo|paragrafo|paragraph):(.+?)(?:\|(.*?))?\]\]$/i);
-    if (!match) {
-      return {
-        kind: 'paragrafo',
-        text: rawLine,
-        styles: [] as string[],
-      };
-    }
-    return {
-      kind: match[1].toLowerCase() === 'paragraph' ? 'paragrafo' : match[1].toLowerCase(),
-      text: match[2],
-      styles: (match[3] || '').split(/[,\s]+/).map((item) => item.trim()).filter(Boolean),
-    };
-  };
-
-  const buildAdminBlockCommand = (kind: string, text: string, styles: string[] = []) => {
-    const cleanText = repairCanonicalText(text).trim();
-    const uniqueStyles = Array.from(new Set(styles.map((style) => style.trim()).filter(Boolean)));
-    if (!cleanText) return '';
-    const command = kind === 'subtitulo' ? 'subtitulo' : kind === 'titulo' ? 'titulo' : 'paragrafo';
-    return `[[${command}:${cleanText}${uniqueStyles.length ? `|${uniqueStyles.join(',')}` : ''}]]`;
-  };
-
-  const isAdminCanonicalBodyLine = (line = '') => {
-    const clean = line.trim();
-    return /^\[\[(titulo|subtitulo|h1|h2|paragrafo|paragraph|imagem|capa|espaco):/i.test(clean)
-      || /^\[br\]$/i.test(clean)
-      || /^(-{3,}|\*{3,}|_{3,})$/.test(clean);
-  };
-
-  const adminBlockStyleClass = (styles: string[] = []) => styles
-    .map((style) => {
-      if (style === 'negrito') return 'is-bold';
-      if (style === 'italico') return 'is-italic';
-      if (style === 'maiusculo') return 'is-uppercase';
-      if (style === 'minusculo') return 'is-lowercase';
-      if (style === 'centralizado') return 'is-center';
-      if (style === 'direita') return 'is-right';
-      return '';
-    })
-    .filter(Boolean)
-    .join(' ');
-
-  const escapeAdminInlineHtml = (value = '') => value
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
-
-  const adminInlineTextToHtml = (value = '') => {
-    const parts = value.split(/(\*\*.*?\*\*|__.*?__|\*[^*]+\*)/g).filter(Boolean);
-    return parts.map((part) => {
-      const renderPlain = (text: string) => escapeAdminInlineHtml(text).replace(/\[br\]/gi, '<br />');
-      if (/^\*\*.*\*\*$/.test(part) || /^__.*__$/.test(part)) {
-        return `<strong>${renderPlain(part.replace(/^(\*\*|__)|(\*\*|__)$/g, ''))}</strong>`;
-      }
-      if (/^\*[^*]+\*$/.test(part)) {
-        return `<em>${renderPlain(part.slice(1, -1))}</em>`;
-      }
-      return renderPlain(part);
-    }).join('');
-  };
-
-  const serializeAdminInlineHtml = (root: HTMLElement) => {
-    const walk = (node: Node): string => {
-      if (node.nodeType === Node.TEXT_NODE) return node.textContent || '';
-      if (node.nodeType !== Node.ELEMENT_NODE) return '';
-      const element = node as HTMLElement;
-      const content = Array.from(element.childNodes).map(walk).join('');
-      const tag = element.tagName.toLowerCase();
-      if (['strong', 'b'].includes(tag)) return `**${content}**`;
-      if (['em', 'i'].includes(tag)) return `*${content}*`;
-      if (tag === 'br') return '[br]';
-      if (['div', 'p'].includes(tag)) return `\n${content}`;
-      return content;
-    };
-    return Array.from(root.childNodes)
-      .map(walk)
-      .join('')
-      .replace(/\u00a0/g, ' ')
-      .replace(/\n{3,}/g, '\n\n')
-      .replace(/[ \t]*\n[ \t]*/g, '\n')
-      .replace(/\s*\[br\]\s*/gi, '[br]')
-      .replace(/[ \t]{2,}/g, ' ')
-      .trim();
-  };
-
-  const buildAdminReplacementLinesFromText = (kind: string, text: string, styles: string[] = []) => {
-    if (kind === 'titulo' || kind === 'subtitulo') {
-      return [buildAdminBlockCommand(kind, text.replace(/\n+/g, ' '), styles)].filter(Boolean);
-    }
-    return text
-      .split(/\n+/)
-      .map((line) => line.trim())
-      .filter(Boolean)
-      .map((line) => buildAdminBlockCommand('paragrafo', line, styles));
-  };
-
-  const updateAdminBookLineFromSerializedBlock = (lineIndex: number, sourceLine: string, serializedText: string) => {
-    const block = parseAdminBlockCommand(sourceLine);
-    const replacementLines = buildAdminReplacementLinesFromText(block.kind, serializedText, block.styles);
-    setAdminBookPageContent((current) => {
-      const lines = current.replace(/\r/g, '').split('\n');
-      if (lines[lineIndex] === undefined) return current;
-      lines.splice(lineIndex, 1, ...(replacementLines.length ? replacementLines : ['']));
-      return lines.join('\n');
-    });
-  };
-
-  const getAdminSelectedInlineElement = () => {
-    const selection = window.getSelection();
-    if (!selection || selection.rangeCount === 0 || selection.isCollapsed) return null;
-    const node = selection.getRangeAt(0).commonAncestorContainer;
-    const element = node.nodeType === Node.ELEMENT_NODE ? node as Element : node.parentElement;
-    return element?.closest<HTMLElement>('[data-admin-line-index]') || null;
-  };
-
-  const saveAdminInlineElement = (element: HTMLElement) => {
-    const lineIndex = Number(element.dataset.adminLineIndex);
-    if (!Number.isFinite(lineIndex)) return;
-    setAdminSelectedBookLineIndex(lineIndex);
-    const currentLine = getAdminBookLines()[lineIndex] || '';
-    const nextText = serializeAdminInlineHtml(element);
-    updateAdminBookLineFromSerializedBlock(lineIndex, currentLine, nextText);
-  };
-
-  const applyAdminInlineFormat = (command: 'bold' | 'italic') => {
-    const element = getAdminSelectedInlineElement();
-    if (!element) {
-      setAdminMessage('Selecione uma palavra ou frase dentro do texto para aplicar este estilo.');
-      return;
-    }
-    document.execCommand(command);
-    saveAdminInlineElement(element);
-  };
-
-  const updateAdminSelectedBlock = (updater: (block: { kind: string; text: string; styles: string[] }) => { kind: string; text: string; styles: string[] }) => {
-    if (adminSelectedBookLineIndex === null) {
-      setAdminMessage('Selecione um parágrafo ou título na página para formatar.');
-      return;
-    }
-    setAdminBookPageContent((current) => {
-      const lines = current.replace(/\r/g, '').split('\n');
-      const currentLine = lines[adminSelectedBookLineIndex];
-      if (currentLine === undefined) return current;
-      const block = parseAdminBlockCommand(currentLine);
-      const next = updater(block);
-      lines[adminSelectedBookLineIndex] = buildAdminBlockCommand(next.kind, next.text, next.styles);
-      return lines.join('\n');
-    });
-  };
-
-  const setAdminSelectedBlockKind = (kind: 'paragrafo' | 'titulo' | 'subtitulo') => {
-    updateAdminSelectedBlock((block) => ({ ...block, kind }));
-  };
-
-  const toggleAdminSelectedBlockStyle = (style: string) => {
-    updateAdminSelectedBlock((block) => {
-      const hasStyle = block.styles.includes(style);
-      return {
-        ...block,
-        styles: hasStyle ? block.styles.filter((item) => item !== style) : [...block.styles, style],
-      };
-    });
-  };
-
-  const setAdminSelectedBlockAlignment = (style: 'esquerda' | 'centralizado' | 'direita') => {
-    updateAdminSelectedBlock((block) => ({
-      ...block,
-      styles: style === 'esquerda'
-        ? block.styles.filter((item) => !['centralizado', 'direita'].includes(item))
-        : [...block.styles.filter((item) => !['centralizado', 'direita'].includes(item)), style],
-    }));
-  };
-
-  const transformAdminSelectedBlockText = (mode: 'upper' | 'lower' | 'capitalize') => {
-    updateAdminSelectedBlock((block) => {
-      const text = mode === 'upper'
-        ? block.text.toUpperCase()
-        : mode === 'lower'
-          ? block.text.toLocaleLowerCase('pt-BR')
-          : block.text.toLocaleLowerCase('pt-BR').replace(/(^|[.!?]\s+)(\p{L})/gu, (_, prefix, letter) => `${prefix}${letter.toLocaleUpperCase('pt-BR')}`);
-      return { ...block, text };
-    });
-  };
-
-  const composeAdminBookPageForReader = (content = adminBookPageContent) =>
-    content
-      .replace(/\r/g, '')
-      .split('\n')
-      .map((rawLine) => {
-        const line = repairCanonicalText(rawLine).trim();
-        if (!line) return '';
-        if (isAdminHeaderDirectiveLine(line) || isAdminCanonicalBodyLine(line)) return line;
-        return buildAdminBlockCommand('paragrafo', line);
-      })
-      .join('\n')
-      .replace(/\n{3,}/g, '\n\n')
-      .trim();
-
-  const upsertAdminBookDirective = (kind: 'cabecalho' | 'cabecalho-secao' | 'cabecalho-titulo', value = '') => {
-    const patterns = {
-      cabecalho: /^\[\[\s*(?:cabecalho|header)\s*:/i,
-      'cabecalho-secao': adminHeaderPattern.eyebrow,
-      'cabecalho-titulo': adminHeaderPattern.title,
-    };
-    const directive = kind === 'cabecalho' ? '[[cabecalho:ocultar]]' : `[[${kind}:${value}]]`;
-    setAdminBookPageContent((current) => {
-      const lines = current.replace(/\r/g, '').split('\n');
-      const index = lines.findIndex((line) => patterns[kind].test(line.trim()));
-      if (index >= 0) lines[index] = directive;
-      else lines.unshift(directive);
-      return lines.join('\n');
-    });
-  };
-
-  const removeAdminBookDirective = (kind: 'cabecalho' | 'cabecalho-secao' | 'cabecalho-titulo') => {
-    const patterns = {
-      cabecalho: /^\[\[\s*(?:cabecalho|header)\s*:/i,
-      'cabecalho-secao': adminHeaderPattern.eyebrow,
-      'cabecalho-titulo': adminHeaderPattern.title,
-    };
-    setAdminBookPageContent((current) => current
-      .replace(/\r/g, '')
-      .split('\n')
-      .filter((line) => !patterns[kind].test(line.trim()))
-      .join('\n'));
-  };
-
-  const getAdminVisualPage = () => {
-    const sourceLines = getAdminBookLines();
-    const data = {
-      hideHeader: false,
-      eyebrow: 'Livro',
-      title: adminBookPageTitle || '',
-      titleLineIndex: -1,
-      bodyLines: [] as Array<{ line: string; index: number }>,
-    };
-
-    sourceLines.forEach((rawLine, index) => {
-      const line = rawLine.trim();
-      if (adminHeaderPattern.hide.test(line)) {
-        data.hideHeader = true;
-        return;
-      }
-      const eyebrow = matchAdminHeaderValue(line, 'eyebrow');
-      if (eyebrow) {
-        data.eyebrow = eyebrow[1].trim() || 'Livro';
-        return;
-      }
-      const title = matchAdminHeaderValue(line, 'title');
-      if (title) {
-        data.title = title[1].trim();
-        return;
-      }
-      data.bodyLines.push({ line: rawLine, index });
-    });
-
-    return data;
-  };
-
-  const promoteFirstBodyLineToAdminHeader = () => {
-    let promoted = '';
-    setAdminBookPageContent((current) => {
-      const lines = current.replace(/\r/g, '').split('\n');
-      const firstBodyIndex = lines.findIndex((rawLine) => {
-        const line = rawLine.trim();
-        return line
-          && !adminHeaderPattern.hide.test(line)
-          && !adminHeaderPattern.eyebrow.test(line)
-          && !adminHeaderPattern.title.test(line)
-          && !/^\[\[/.test(line)
-          && !/^(-{3,}|\*{3,}|_{3,})$/.test(line);
-      });
-      if (firstBodyIndex < 0) return current;
-      promoted = repairBrokenPdfCharacters(lines[firstBodyIndex].trim());
-      lines.splice(firstBodyIndex, 1);
-      const titleDirective = `[[cabecalho-titulo:${promoted}]]`;
-      const existingTitleIndex = lines.findIndex((line) => adminHeaderPattern.title.test(line.trim()));
-      if (existingTitleIndex >= 0) lines[existingTitleIndex] = titleDirective;
-      else lines.unshift(titleDirective);
-      return lines.join('\n');
-    });
-    setAdminMessage(promoted ? 'Primeira linha do miolo movida para o título do header.' : 'Não encontrei uma linha de miolo para usar como título.');
-  };
-
-  const getAdminVisualBodyText = (bodyLines: Array<{ line: string; index: number }>) =>
-    bodyLines.map(({ line }) => line).join('\n');
-
-  const updateAdminVisualBodyText = (bodyLines: Array<{ line: string; index: number }>, nextValue: string) => {
-    setAdminBookPageContent((current) => {
-      const lines = current.replace(/\r/g, '').split('\n');
-      const nextLines = nextValue.replace(/\r/g, '').split('\n');
-      if (!bodyLines.length) return [...lines, '', ...nextLines].join('\n');
-      const first = bodyLines[0].index;
-      const last = bodyLines[bodyLines.length - 1].index;
-      lines.splice(first, last - first + 1, ...nextLines);
-      return lines.join('\n');
-    });
-  };
-
-  const isAdminHeaderDirectiveLine = (line: string) => {
-    const clean = line.trim();
-    return adminHeaderPattern.hide.test(clean)
-      || adminHeaderPattern.eyebrow.test(clean)
-      || adminHeaderPattern.title.test(clean);
-  };
-
-  const normalizeAdminPlainPaste = (value = '', keepParagraphs = false) => {
-    const clean = repairBrokenPdfCharacters(value)
-      .replace(/\r/g, '')
-      .replace(/\u00a0/g, ' ')
-      .replace(/-\n(?=\p{Ll})/gu, '')
-      .replace(/[ \t]+/g, ' ')
-      .trim();
-    if (!clean) return '';
-
-    const paragraphs = clean
-      .split(/\n\s*\n+/)
-      .map((paragraph) => paragraph
-        .split('\n')
-        .map((line) => line.trim())
-        .filter(Boolean)
-        .join(' ')
-        .replace(/\s{2,}/g, ' ')
-        .trim())
-      .filter(Boolean)
-    return keepParagraphs ? paragraphs.join('\n\n') : paragraphs.join(' ');
-  };
-
-  const replaceAdminVisualBodyWithPlainText = (nextText: string, keepParagraphs = false) => {
-    const normalized = normalizeAdminPlainPaste(nextText, keepParagraphs);
-    if (!normalized) return;
-    const nextLines = normalized
-      .split(/\n{2,}|\n/)
-      .map((line) => buildAdminBlockCommand('paragrafo', line))
-      .filter(Boolean);
-    setAdminBookPageContent((current) => {
-      const lines = current.replace(/\r/g, '').split('\n');
-      const headerLines = lines.filter(isAdminHeaderDirectiveLine);
-      return [...headerLines, ...nextLines].join('\n');
-    });
-    setAdminPlainPasteDraft('');
-    setAdminSelectedBookLineIndex(null);
-    setAdminMessage('Miolo substituído por texto limpo. Agora selecione trechos para formatar.');
-  };
-
-  const renderAdminVisualEditableLine = (rawLine: string, lineIndex: number) => {
-    const line = repairBrokenPdfCharacters(rawLine.trim());
-    const blockCommand = parseAdminBlockCommand(line);
-    const selected = adminSelectedBookLineIndex === lineIndex;
-    const audioCue = (() => {
-      const clean = line.replace(/\[br\]/gi, ' ').replace(/\s+/g, ' ').trim();
-      if (!clean || clean.length > 56 || clean.split(/\s+/).length > 5) return null;
-      const key = audioTrackKey(clean);
-      return adminVisualAudioItems.find((item) => item.sectionKey === key) ?? null;
-    })();
-    const audioCueNode = audioCue ? (
-      <button
-        type="button"
-        className="admin-visual-audio-cue"
-        onClick={() => {
-          setAdminBookTab('audio');
-          setAdminAudioChapterId(audioCue.chapterId);
-          setAdminAudioSectionKey(audioCue.sectionKey);
-          setAdminAudioLabel(audioCue.label);
-          setAdminAudioUrl(audioCue.url);
-        }}
-        title={`Editar áudio: ${audioCue.label}`}
-      >
-        <Headphones size={12} />
-        <span>{audioCue.label}</span>
-      </button>
-    ) : null;
-    const editableProps = {
-      contentEditable: true,
-      suppressContentEditableWarning: true,
-      'data-admin-line-index': lineIndex,
-      onFocus: () => setAdminSelectedBookLineIndex(lineIndex),
-      onClick: () => setAdminSelectedBookLineIndex(lineIndex),
-      onBlur: (event: FocusEvent<HTMLElement>) => {
-        const nextText = serializeAdminInlineHtml(event.currentTarget);
-        updateAdminBookLineFromSerializedBlock(lineIndex, line, nextText);
-      },
-    };
-
-    if (!line) {
-      return (
-        <div className="admin-visual-empty-line" key={`visual-${lineIndex}`}>
-          <button type="button" onClick={() => insertAdminBookLineAfter(lineIndex, '')}>+ parágrafo</button>
-          <button type="button" onClick={() => insertAdminBookLineAfter(lineIndex, '---')}>+ divisor</button>
-        </div>
-      );
-    }
-
-    if (adminHeaderPattern.hide.test(line) || adminHeaderPattern.eyebrow.test(line) || adminHeaderPattern.title.test(line)) return null;
-    if (/^(-{3,}|\*{3,}|_{3,})$/.test(line)) {
-      return <hr className="admin-visual-divider" key={`visual-${lineIndex}`} onDoubleClick={() => removeAdminBookLine(lineIndex)} />;
-    }
-    if (/^\[br\]$/i.test(line)) {
-      return <div className="admin-visual-line-break" key={`visual-${lineIndex}`} onDoubleClick={() => removeAdminBookLine(lineIndex)}>quebra</div>;
-    }
-    const spacerMatch = line.match(/^\[\[espaco:(\d{1,3})\]\]$/i);
-    if (spacerMatch) {
-      return (
-        <div className="admin-visual-spacer" style={{ height: `${Math.min(120, Math.max(8, Number(spacerMatch[1]) || 24))}px` }} key={`visual-${lineIndex}`}>
-          <span>espaço {spacerMatch[1]}px</span>
-          <button type="button" onClick={() => removeAdminBookLine(lineIndex)}>remover</button>
-        </div>
-      );
-    }
-
-    const titleCommandMatch = line.match(/^\[\[(titulo|subtitulo):(.+?)(?:\|(.*?))?\]\]$/i);
-    if (titleCommandMatch) {
-      const Tag = titleCommandMatch[1].toLowerCase() === 'subtitulo' ? 'h3' : 'h2';
-      const styles = blockCommand.styles;
-      const titleAudioCue = (() => {
-        const clean = repairBrokenPdfCharacters(titleCommandMatch[2].trim()).replace(/\s+/g, ' ');
-        const key = audioTrackKey(clean);
-        return adminVisualAudioItems.find((item) => item.sectionKey === key) ?? null;
-      })();
-      const titleAudioCueNode = titleAudioCue ? (
-        <button
-          type="button"
-          className="admin-visual-audio-cue"
-          onClick={() => {
-            setAdminBookTab('audio');
-            setAdminAudioChapterId(titleAudioCue.chapterId);
-            setAdminAudioSectionKey(titleAudioCue.sectionKey);
-            setAdminAudioLabel(titleAudioCue.label);
-            setAdminAudioUrl(titleAudioCue.url);
-          }}
-          title={`Editar áudio: ${titleAudioCue.label}`}
-        >
-          <Headphones size={12} />
-          <span>{titleAudioCue.label}</span>
-        </button>
-      ) : null;
-      return (
-        <div className={`admin-visual-audio-line admin-visual-block ${selected ? 'selected' : ''}`} key={`visual-${lineIndex}`} onClick={() => setAdminSelectedBookLineIndex(lineIndex)}>
-          <Tag
-            className={`admin-visual-title ${adminBlockStyleClass(styles)}`}
-            contentEditable
-            suppressContentEditableWarning
-            data-admin-line-index={lineIndex}
-            onFocus={() => setAdminSelectedBookLineIndex(lineIndex)}
-            onBlur={(event) => updateAdminBookLineFromSerializedBlock(lineIndex, line, serializeAdminInlineHtml(event.currentTarget))}
-            dangerouslySetInnerHTML={{ __html: adminInlineTextToHtml(repairBrokenPdfCharacters(titleCommandMatch[2].trim())) }}
-          />
-          {titleAudioCueNode}
-        </div>
-      );
-    }
-
-    const paragraphCommandMatch = line.match(/^\[\[(?:paragrafo|paragraph):(.+?)(?:\|(.*?))?\]\]$/i);
-    if (paragraphCommandMatch) {
-      const cleanText = repairBrokenPdfCharacters(paragraphCommandMatch[1].trim());
-      return (
-        <div className={`admin-visual-audio-line admin-visual-block ${selected ? 'selected' : ''}`} key={`visual-${lineIndex}`} onClick={() => setAdminSelectedBookLineIndex(lineIndex)}>
-          <p
-            className={`admin-visual-paragraph ${adminBlockStyleClass(blockCommand.styles)}`}
-            {...editableProps}
-            dangerouslySetInnerHTML={{ __html: adminInlineTextToHtml(cleanText) }}
-          />
-          {audioCueNode}
-        </div>
-      );
-    }
-
-    const imageMatch = line.match(/^\[\[(?:imagem|capa):(.+?)(?:\|(.*?))?\]\]$/i);
-    if (imageMatch) {
-      return (
-        <figure className="admin-visual-image" key={`visual-${lineIndex}`}>
-          <img src={imageMatch[1].trim()} alt={imageMatch[2]?.trim() || ''} />
-          <figcaption {...editableProps}>{imageMatch[2]?.trim() || 'Legenda da imagem'}</figcaption>
-        </figure>
-      );
-    }
-
-    return (
-      <div className={`admin-visual-audio-line admin-visual-block ${audioCue ? 'has-audio' : ''} ${selected ? 'selected' : ''}`} key={`visual-${lineIndex}`} onClick={() => setAdminSelectedBookLineIndex(lineIndex)}>
-        <p
-          className="admin-visual-paragraph"
-          {...editableProps}
-          dangerouslySetInnerHTML={{ __html: adminInlineTextToHtml(line) }}
-        />
-        {audioCueNode}
-      </div>
-    );
-  };
-
-  const handlePublishBookPage = async () => {
-    setAdminMessage('');
-    try {
-      const visualTitle = getAdminVisualPage().title;
-      const readerContent = composeAdminBookPageForReader(adminBookPageContent);
-      await publishAdminBookPage(adminBookPageNumber, {
-        title: visualTitle || adminBookPageTitle || undefined,
-        content: readerContent,
-      });
-      setAdminBookPageContent(readerContent);
-      setAdminBookPageTitle(visualTitle || adminBookPageTitle);
-      await refreshBookPageContent();
-      setAdminMessage(`Pagina ${adminBookPageNumber} publicada no modo leitura.`);
-    } catch (error: any) {
-      setAdminMessage(error?.message || 'Não foi possível publicar a pagina.');
     }
   };
 
@@ -2954,24 +2176,6 @@ export function App() {
   const handleRemoveSupportAudio = (trackId: string) => {
     persistSupportAudios(supportAudios.filter((track) => track.id !== trackId));
     setAdminMessage('Áudio de apoio removido.');
-  };
-
-  const handleOpenAdminBookPageInReader = () => {
-    const visualTitle = getAdminVisualPage().title;
-    const readerContent = composeAdminBookPageForReader(adminBookPageContent);
-    setAdminBookPageContent(readerContent);
-    setAdminBookPageTitle(visualTitle || adminBookPageTitle);
-    setBookPageOverrides((current) => ({
-      ...current,
-      [adminBookPageNumber]: readerContent,
-    }));
-    setBookPageTitleOverrides((current) => ({
-      ...current,
-      [adminBookPageNumber]: repairBrokenPdfCharacters(visualTitle || adminBookPageTitle || ''),
-    }));
-    goToPdfPage(adminBookPageNumber);
-    setPageIndex(0);
-    navigate(ROUTES.READER);
   };
 
   const goToPdfPage = (nextPage: number) => {
@@ -5001,7 +4205,6 @@ export function App() {
         audioTracks={selectedChapterAudioTracks}
         pdfUrl={pdfUrl}
         pdfTextPages={mergedPdfTextPages}
-        pdfPageTitles={bookPageTitleOverrides}
         pdfCurrentPage={pdfPage}
         totalPdfPages={totalPdfPages}
         chapters={bookChapters}
@@ -5727,8 +4930,8 @@ export function App() {
           </article>
           <article className="account-card admin-stat-card">
             <p className="kicker">Livro</p>
-            <strong>{adminBookPages.length}</strong>
-            <span>Paginas com revisao editorial</span>
+            <strong>{adminBookAudio.length}</strong>
+            <span>Áudios publicados</span>
           </article>
           <article className="account-card admin-stat-card">
             <p className="kicker">Kiwify</p>
@@ -5853,16 +5056,12 @@ export function App() {
             <p className="kicker">Livro</p>
             <h2>Editor do modo leitura</h2>
           </div>
-          <span>{adminPublishedPageCount} publicadas · {adminDraftPageCount} rascunho(s) · {adminBookAudio.length} áudio(s)</span>
+          <span>{adminBookAudio.length} áudio(s)</span>
         </div>
         <div className="admin-book-subnav" role="tablist" aria-label="Editor do livro">
           <button className={adminBookTab === 'canonical' ? 'active' : ''} onClick={() => setAdminBookTab('canonical')}>
             <BookOpen size={16} />
             Canônico
-          </button>
-          <button className={adminBookTab === 'pages' ? 'active' : ''} onClick={() => setAdminBookTab('pages')}>
-            <FileText size={16} />
-            PDF antigo
           </button>
           <button className={adminBookTab === 'audio' ? 'active' : ''} onClick={() => setAdminBookTab('audio')}>
             <Headphones size={16} />
@@ -5999,272 +5198,6 @@ export function App() {
               </>
             )}
           </article>
-        )}
-        {adminBookTab === 'pages' && (
-        <>
-        <div className="admin-book-toolbar">
-          <label>
-            <span>Buscar página ou trecho</span>
-            <input value={adminBookSearch} onChange={(event) => setAdminBookSearch(event.target.value)} placeholder="Ex.: Pilar I, culpa, página 74..." />
-          </label>
-          <Button onClick={() => setAdminBookCompareOpen((value) => !value)} variant="secondary">
-            {adminBookCompareOpen ? 'Ocultar comparação' : 'Comparar com original'}
-          </Button>
-          <Button onClick={handleOpenAdminBookPageInReader} variant="ghost">Ver no leitor</Button>
-        </div>
-        {adminBookCompareOpen && (
-          <div className="admin-book-compare">
-            <article>
-              <div>
-                <p className="kicker">Original do PDF</p>
-                <strong>Página {adminBookPageNumber}</strong>
-              </div>
-              <div className="admin-book-compare-box">
-                {(adminCurrentPageSource || 'Sem texto extraído para esta página.')
-                  .split('\n')
-                  .map((paragraph, index) => renderAdminBookPreviewLine(paragraph, `source-${index}`))}
-              </div>
-            </article>
-            <article>
-              <div>
-                <p className="kicker">Texto em edição</p>
-                <strong>{adminCurrentBookPage?.latestPublished ? `Publicado v${adminCurrentBookPage.latestPublished.version}` : 'Ainda não publicado'}</strong>
-              </div>
-              <div className="admin-book-compare-box edited">
-                {(adminBookPageContent || 'Sem texto no editor.')
-                  .split('\n')
-                  .map((paragraph, index) => renderAdminBookPreviewLine(paragraph, `edited-${index}`))}
-              </div>
-            </article>
-          </div>
-        )}
-        {(() => {
-          const visualPage = getAdminVisualPage();
-          const selectedLine = adminSelectedBookLineIndex === null ? '' : getAdminBookLines()[adminSelectedBookLineIndex] || '';
-          const selectedBlock = parseAdminBlockCommand(selectedLine);
-          const blockSelected = adminSelectedBookLineIndex !== null;
-          return (
-            <div className="admin-book-visual-layout">
-              <article className="admin-visual-page-card">
-                <div className="admin-visual-page-toolbar">
-                  <span>Página {adminBookPageNumber}</span>
-                  <small>Clique no texto da página para editar. Dê dois cliques em linhas divisórias para remover.</small>
-                </div>
-                <div className="admin-visual-page">
-                  <div className="admin-visual-bookmark"><Bookmark fill="currentColor" size={30} /></div>
-                  <div className="admin-visual-meta">
-                    <span>Página {adminBookPageNumber} de {Math.max(totalPdfPages, pdfTextPages.length || 1)}</span>
-                    <span>{Math.round((adminBookPageNumber / Math.max(1, totalPdfPages || pdfTextPages.length || 1)) * 100)}% do livro</span>
-                  </div>
-                  {!visualPage.hideHeader && (
-                    <header className="admin-visual-header">
-                      <input
-                        className="admin-visual-eyebrow-input"
-                        value={visualPage.eyebrow}
-                        onChange={(event) => upsertAdminBookDirective('cabecalho-secao', event.target.value || 'Livro')}
-                        placeholder="Livro"
-                      />
-                      <input
-                        className="admin-visual-title-input"
-                        value={visualPage.title}
-                        onChange={(event) => {
-                          const nextTitle = event.target.value;
-                          if (nextTitle) upsertAdminBookDirective('cabecalho-titulo', nextTitle);
-                          else removeAdminBookDirective('cabecalho-titulo');
-                        }}
-                        placeholder="Título da página"
-                      />
-                    </header>
-                  )}
-                  <div className="admin-visual-copy">
-                    <div className="admin-rich-toolbar" aria-label="Editor de bloco">
-                      <select
-                        value={selectedBlock.kind}
-                        onChange={(event) => setAdminSelectedBlockKind(event.target.value as 'paragrafo' | 'titulo' | 'subtitulo')}
-                        disabled={!blockSelected}
-                        title="Tipo de bloco"
-                      >
-                        <option value="paragrafo">Parágrafo</option>
-                        <option value="titulo">Título</option>
-                        <option value="subtitulo">Subtítulo</option>
-                      </select>
-                      <button type="button" onMouseDown={(event) => event.preventDefault()} onClick={() => applyAdminInlineFormat('bold')} disabled={!blockSelected} title="Negrito no trecho selecionado"><Bold size={15} /></button>
-                      <button type="button" onMouseDown={(event) => event.preventDefault()} onClick={() => applyAdminInlineFormat('italic')} disabled={!blockSelected} title="Itálico no trecho selecionado"><Italic size={15} /></button>
-                      <button type="button" onClick={() => transformAdminSelectedBlockText('capitalize')} disabled={!blockSelected} title="Capitalizar">Aa</button>
-                      <button type="button" onClick={() => transformAdminSelectedBlockText('upper')} disabled={!blockSelected} title="Maiúsculas">AA</button>
-                      <button type="button" onClick={() => transformAdminSelectedBlockText('lower')} disabled={!blockSelected} title="Minúsculas">aa</button>
-                      <span />
-                      <button type="button" className={!selectedBlock.styles.includes('centralizado') && !selectedBlock.styles.includes('direita') ? 'active' : ''} onClick={() => setAdminSelectedBlockAlignment('esquerda')} disabled={!blockSelected} title="Alinhar à esquerda"><AlignLeft size={15} /></button>
-                      <button type="button" className={selectedBlock.styles.includes('centralizado') ? 'active' : ''} onClick={() => setAdminSelectedBlockAlignment('centralizado')} disabled={!blockSelected} title="Centralizar"><AlignCenter size={15} /></button>
-                      <button type="button" className={selectedBlock.styles.includes('direita') ? 'active' : ''} onClick={() => setAdminSelectedBlockAlignment('direita')} disabled={!blockSelected} title="Alinhar à direita"><AlignRight size={15} /></button>
-                      <span />
-                      <button type="button" onClick={() => setAdminSelectedBlockKind('titulo')} disabled={!blockSelected} title="Título"><Heading1 size={15} /></button>
-                      <button type="button" onClick={() => setAdminSelectedBlockKind('subtitulo')} disabled={!blockSelected} title="Subtítulo"><Heading2 size={15} /></button>
-                      <small>{blockSelected ? 'Editando bloco selecionado' : 'Clique em um bloco do miolo'}</small>
-                    </div>
-                    <div className="admin-visual-body">
-                      {visualPage.bodyLines.length
-                        ? visualPage.bodyLines.map(({ line, index }) => renderAdminVisualEditableLine(line, index))
-                        : (
-                          <textarea
-                            className="admin-clean-paste-area"
-                            placeholder="Cole aqui o texto corrido. Linhas quebradas do PDF serão unidas automaticamente em parágrafos limpos."
-                            onPaste={(event) => {
-                              event.preventDefault();
-                              replaceAdminVisualBodyWithPlainText(event.clipboardData.getData('text/plain'));
-                            }}
-                            onChange={(event) => replaceAdminVisualBodyWithPlainText(event.target.value)}
-                          />
-                        )}
-                    </div>
-                  </div>
-                  <div className="admin-visual-progress">
-                    <span>{Math.round((adminBookPageNumber / Math.max(1, totalPdfPages || pdfTextPages.length || 1)) * 100)}% do livro</span>
-                    <strong>Página {adminBookPageNumber} de {Math.max(totalPdfPages, pdfTextPages.length || 1)}</strong>
-                    <div><span style={{ width: `${Math.round((adminBookPageNumber / Math.max(1, totalPdfPages || pdfTextPages.length || 1)) * 100)}%` }} /></div>
-                  </div>
-                </div>
-              </article>
-
-              <aside className="account-card admin-panel admin-visual-sidepanel">
-                <div className="admin-inline">
-                  <label>
-                    <span>Página do PDF</span>
-                    <input
-                      value={adminBookPageNumber}
-                      min={1}
-                      max={Math.max(totalPdfPages, pdfTextPages.length || 1)}
-                      type="number"
-                      onChange={(event) => setAdminBookPageNumber(clamp(Number(event.target.value) || 1, 1, Math.max(totalPdfPages, pdfTextPages.length || 1)))}
-                    />
-                  </label>
-                  <label>
-                    <span>Status</span>
-                    <select value={adminBookPageNumber} onChange={(event) => setAdminBookPageNumber(Number(event.target.value))}>
-                      {adminBookPageOptions.map((pageNumber) => {
-                        const page = adminBookPages.find((item) => item.pageNumber === pageNumber);
-                        const label = page?.latestPublished ? 'publicada' : page?.latestDraft ? 'rascunho' : 'original';
-                        return <option key={pageNumber} value={pageNumber}>Página {pageNumber} - {label}</option>;
-                      })}
-                    </select>
-                  </label>
-                </div>
-                <div className="admin-book-status-strip">
-                  <span className={adminCurrentBookPage?.latestPublished ? 'published' : 'original'}>
-                    {adminCurrentBookPage?.latestPublished ? `Publicada v${adminCurrentBookPage.latestPublished.version}` : 'Original do PDF'}
-                  </span>
-                  {adminCurrentBookPage?.latestDraft && <span className="draft">Rascunho v{adminCurrentBookPage.latestDraft.version}</span>}
-                  <small>{adminCurrentBookPage?.latestPublished?.updatedAt ? `Atualizada em ${formatDateTime(adminCurrentBookPage.latestPublished.updatedAt)}` : 'Sem publicação manual'}</small>
-                </div>
-
-                <div className="admin-visual-section">
-                  <strong>Header da página</strong>
-                  <label>
-                    <span>Texto pequeno</span>
-                    <input value={visualPage.eyebrow} onChange={(event) => upsertAdminBookDirective('cabecalho-secao', event.target.value)} />
-                  </label>
-                  <label>
-                    <span>Título dourado</span>
-                    <input
-                      value={visualPage.title}
-                      onChange={(event) => {
-                        const nextTitle = event.target.value;
-                        if (nextTitle.trim()) upsertAdminBookDirective('cabecalho-titulo', nextTitle);
-                        else removeAdminBookDirective('cabecalho-titulo');
-                      }}
-                      placeholder="Edite aqui apenas quando quiser título no header"
-                    />
-                  </label>
-                  <div className="admin-book-format-tools compact" aria-label="Controle do cabecalho">
-                    <button type="button" onClick={() => upsertAdminBookDirective('cabecalho', 'ocultar')}>Ocultar header</button>
-                    <button type="button" onClick={() => removeAdminBookDirective('cabecalho')}>Mostrar header</button>
-                    <button type="button" onClick={() => removeAdminBookDirective('cabecalho-titulo')}>Limpar título</button>
-                    <button type="button" onClick={promoteFirstBodyLineToAdminHeader}>Puxar 1ª linha</button>
-                  </div>
-                </div>
-
-                <div className="admin-visual-section">
-                  <strong>Inserir no miolo</strong>
-                  <div className="admin-book-format-tools" aria-label="Formatação do texto">
-                    <button type="button" onClick={() => insertAdminBookPageSnippet('[br]')}>Quebra</button>
-                    <button type="button" onClick={() => insertAdminBookPageSnippet('---')}>Divisor</button>
-                    <button type="button" onClick={() => insertAdminBookPageSnippet('[[espaco:32]]')}>Espaço</button>
-                    <button type="button" onClick={() => insertAdminBookPageSnippet('[[imagem:/media/imagens/livro/exemplo.jpg|Legenda da imagem]]')}>Imagem</button>
-                    <button type="button" onClick={() => insertAdminBookPageSnippet('[[capa:/media/imagens/capas/capa.webp|Capa]]')}>Página inteira</button>
-                    <button type="button" onClick={() => insertAdminBookPageSnippet('[[titulo:Título no miolo]]')}>Título</button>
-                  </div>
-                  <div className="admin-clean-paste-panel">
-                    <span>Colar texto limpo</span>
-                    <textarea
-                      value={adminPlainPasteDraft}
-                      onChange={(event) => setAdminPlainPasteDraft(event.target.value)}
-                      onPaste={(event) => {
-                        event.preventDefault();
-                        const pasted = event.clipboardData.getData('text/plain');
-                        setAdminPlainPasteDraft(pasted);
-                        replaceAdminVisualBodyWithPlainText(pasted);
-                      }}
-                      placeholder="Cole aqui para substituir todo o miolo por um texto único, sem formatação e sem quebras soltas do PDF."
-                    />
-                    <div>
-                      <button type="button" onClick={() => replaceAdminVisualBodyWithPlainText(adminPlainPasteDraft)}>
-                        Substituir miolo
-                      </button>
-                      <button type="button" onClick={() => replaceAdminVisualBodyWithPlainText(adminPlainPasteDraft, true)}>
-                        Manter parágrafos
-                      </button>
-                    </div>
-                    <small>Substitui apenas o miolo. O header da página é preservado.</small>
-                  </div>
-                </div>
-
-                <label>
-                  <span>Título interno opcional</span>
-                  <input value={adminBookPageTitle} onChange={(event) => setAdminBookPageTitle(event.target.value)} placeholder="Ex.: Pilar I - Limiar" />
-                </label>
-
-                <div className="workbook-actions">
-                  <Button onClick={handleRepairAdminBookPageContent} variant="ghost">Corrigir caracteres</Button>
-                  <Button onClick={handleCleanAdminBookPageContent} variant="ghost">Limpar texto</Button>
-                  <Button onClick={handleSaveBookPageDraft} variant="secondary">Salvar rascunho</Button>
-                  <Button onClick={handlePublishBookPage}>Publicar no leitor</Button>
-                </div>
-
-                <details className="admin-source-editor">
-                  <summary>Código da página</summary>
-                  <textarea
-                    ref={adminBookPageTextareaRef}
-                    className="admin-book-textarea"
-                    value={adminBookPageContent}
-                    onChange={(event) => setAdminBookPageContent(event.target.value)}
-                    placeholder="Cole ou corrija aqui o texto que deve aparecer no modo leitura."
-                  />
-                  <small>Use linha vazia para novo parágrafo, [br] para quebra no mesmo parágrafo, --- para divisor, [[espaco:32]], [[imagem:/media/imagens/livro/exemplo.jpg|Legenda]], [[capa:/media/imagens/capas/capa.webp|Capa]], [[cabecalho:ocultar]], [[cabecalho-secao:Texto]], [[cabecalho-titulo:Texto]] e [[titulo:Texto|negrito,italico,maiusculo,espacado]]. Sem estilos, o texto aparece exatamente como digitado.</small>
-                </details>
-
-                <div className="admin-book-history">
-                  <strong>Histórico</strong>
-                  {adminBookPageHistory.length === 0 ? (
-                    <small>Nenhuma versão salva ainda.</small>
-                  ) : adminBookPageHistory.slice(0, 6).map((revision) => (
-                    <button
-                      key={revision.id}
-                      type="button"
-                      onClick={() => {
-                        setAdminBookPageTitle(revision.title || '');
-                        setAdminBookPageContent(revision.content);
-                      }}
-                    >
-                      <span>v{revision.version} - {revision.status === 'PUBLISHED' ? 'publicada' : 'rascunho'}</span>
-                      <small>{formatDateTime(revision.createdAt)}</small>
-                    </button>
-                  ))}
-                </div>
-              </aside>
-            </div>
-          );
-        })()}
-        </>
         )}
         {adminBookTab === 'audio' && (
         <article className="account-card admin-panel admin-audio-editor">

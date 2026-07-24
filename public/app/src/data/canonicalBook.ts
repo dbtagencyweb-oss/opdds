@@ -248,7 +248,6 @@ export const parseCanonicalBookPage = (
 export const buildCanonicalBookChapters = (
   chapters: BookChapter[],
   pageTexts: readonly string[],
-  pageTitles: Record<number, string>,
   groups: readonly BookGroupLike[],
 ): CanonicalBookChapter[] =>
   chapters.map((chapter, index) => {
@@ -369,10 +368,9 @@ const artifactSectionToCanonicalBlocks = (
 export const buildArtifactCanonicalBookChapters = (
   chapters: BookChapter[],
   pageTexts: readonly string[],
-  pageTitles: Record<number, string>,
   groups: readonly BookGroupLike[],
 ): CanonicalBookChapter[] => {
-  const fallback = buildCanonicalBookChapters(chapters, pageTexts, pageTitles, groups);
+  const fallback = buildCanonicalBookChapters(chapters, pageTexts, groups);
   const artifactById = new Map<string, ArtifactChapter>(artifactBookData.chapters.map((chapter) => [chapter.id, chapter]));
 
   return chapters.map((chapter, index) => {
