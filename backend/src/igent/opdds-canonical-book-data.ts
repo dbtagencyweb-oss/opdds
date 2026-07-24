@@ -123,7 +123,7 @@ export const OPDDS_CANONICAL_BOOK_INDEX = {
           "id": "quebra1--experiencia-vivida-nao-teoria-emprestada",
           "title": "Experiência Vivida, Não Teoria Emprestada",
           "audioId": "quebra1--experiencia-vivida-nao-teoria-emprestada",
-          "text": "Nada do que está aqui foi escrito a partir de observação distante. Este livro nasce de vivências reais: ansiedade crônica, perdas que não se resolvem, episódios depressivos, uso de drogas e sexo como anestesia, dificuldade de foco, sensação de inadequação constante, tentativas repetidas de reconstrução e a experiência íntima de se sentir desacreditado — pelos outros e por si mesmo. Isso não transforma o livro em confissão nem em vitimismo. Transforma em responsabilidade. Responsabilidade de não romantizar a dor. Responsabilidade de não prometer o que não se pode sustentar. Responsabilidade de escrever algo que realmente acompanhe quem está no chão — não quem já está em pé.\n\nUM OBRA QUE RESPEITA QUEM PRECISA DE ALÍVIO IMEDIATO\n\nOutro ponto central: este livro não foi pensado para ser lido como obrigação intelectual. Ele pode ser aberto em qualquer página. Pode ser interrompido. Pode ser retomado semanas depois. Ele foi escrito considerando pessoas que, em determinados momentos, só conseguem sustentar pequenos blocos de atenção. Pessoas que precisam de alívio emocional imediato, não de longas argumentações. Cada texto existe porque precisa existir. Cada conceito é apresentado porque sustenta algo real. Cada silêncio é intencional. Este livro não quer impressionar. Quer servir.\n\nSe isso não é autoajuda, o que é?\n\nEste livro é um espaço. Um espaço estruturado para quem vive em estados internos difíceis. Um espaço que organiza a experiência humana em três movimentos fundamentais: Consciência, Julgamento e Presença. Um espaço que reconhece que o ser humano não é feito apenas de dualidades — força e fraqueza, razão e impulso, controle e caos — mas também de um terceiro elemento: aquele que observa tudo isso sem desaparecer. Você não encontrará aqui promessas de sucesso. Encontrará algo mais raro: Um lugar onde você pode existir sem precisar se consertar imediatamente. E, para quem já esteve perto de desistir, isso não é pouco. É o começo possível."
+          "text": "Nada do que está aqui foi escrito a partir de observação distante. Este livro nasce de vivências reais: ansiedade crônica, perdas que não se resolvem, episódios depressivos, uso de drogas e sexo como anestesia, dificuldade de foco, sensação de inadequação constante, tentativas repetidas de reconstrução e a experiência íntima de se sentir desacreditado — pelos outros e por si mesmo. Isso não transforma o livro em confissão nem em vitimismo. Transforma em responsabilidade. Responsabilidade de não romantizar a dor. Responsabilidade de não prometer o que não se pode sustentar. Responsabilidade de escrever algo que realmente acompanhe quem está no chão — não quem já está em pé.\n\nUMA OBRA QUE RESPEITA QUEM PRECISA DE ALÍVIO IMEDIATO\n\nOutro ponto central: este livro não foi pensado para ser lido como obrigação intelectual. Ele pode ser aberto em qualquer página. Pode ser interrompido. Pode ser retomado semanas depois. Ele foi escrito considerando pessoas que, em determinados momentos, só conseguem sustentar pequenos blocos de atenção. Pessoas que precisam de alívio emocional imediato, não de longas argumentações. Cada texto existe porque precisa existir. Cada conceito é apresentado porque sustenta algo real. Cada silêncio é intencional. Este livro não quer impressionar. Quer servir.\n\nSe isso não é autoajuda, o que é?\n\nEste livro é um espaço. Um espaço estruturado para quem vive em estados internos difíceis. Um espaço que organiza a experiência humana em três movimentos fundamentais: Consciência, Julgamento e Presença. Um espaço que reconhece que o ser humano não é feito apenas de dualidades — força e fraqueza, razão e impulso, controle e caos — mas também de um terceiro elemento: aquele que observa tudo isso sem desaparecer. Você não encontrará aqui promessas de sucesso. Encontrará algo mais raro: Um lugar onde você pode existir sem precisar se consertar imediatamente. E, para quem já esteve perto de desistir, isso não é pouco. É o começo possível."
         }
       ]
     },
@@ -411,7 +411,7 @@ export const OPDDS_CANONICAL_BOOK_INDEX = {
           "id": "fund2--presenca-como-autoria",
           "title": "Presença Como Autoria",
           "audioId": "fund2--presenca-como-autoria",
-          "text": "ia não é ausência de mediação. Autoria é presença\n\nÉ assumir o que foi dito. É sustentar o que foi escrito. É reconhecer as próprias referências, limites e escolhas. Eu escrevi este livro. Escrevi com consciência do que carrego. Com julgamento sobre como isso poderia ser recebido. E com presença suficiente para não recuar. Se alguém “desacreditar”, isso diz mais sobre o olhar do outro do que sobre a verdade da obra."
+          "text": "Autoria não é ausência de mediação. Autoria é presença.\n\nÉ assumir o que foi dito. É sustentar o que foi escrito. É reconhecer as próprias referências, limites e escolhas. Eu escrevi este livro. Escrevi com consciência do que carrego. Com julgamento sobre como isso poderia ser recebido. E com presença suficiente para não recuar. Se alguém “desacreditar”, isso diz mais sobre o olhar do outro do que sobre a verdade da obra."
         },
         {
           "id": "fund2--um-movimento-que-se-estende",
@@ -597,7 +597,7 @@ export const OPDDS_CANONICAL_BOOK_INDEX = {
           "id": "pilar1--abertura",
           "title": "Abertura",
           "audioId": "pilar1--abertura",
-          "text": "Toda travessia começa antes do primeiro passo. Ela começa quando você decide não fugir de si.\n\n\"Toda transformação começa quando deixamos de lutar para parecer fortes e passamos a reconhecer aquilo que apenas sobreviveu.\"\n\nEu não estou quebrado\n\nTodo reconhecimento começa quando você deixa de se tratar como inimigo."
+          "text": "Toda travessia começa antes do primeiro passo. Ela começa quando você decide não fugir de si.\n\nToda travessia começa antes do primeiro passo. Ela começa quando você decide não fugir de si.\n\n\"Toda transformação começa quando deixamos de lutar para parecer fortes e passamos a reconhecer aquilo que apenas sobreviveu.\"\n\nEu não estou quebrado.\n\nTodo reconhecimento começa quando você deixa de se tratar como inimigo."
         },
         {
           "id": "pilar1--limiar",
@@ -1167,7 +1167,7 @@ export const OPDDS_CANONICAL_BOOK_INDEX = {
           "id": "pilar5--abertura",
           "title": "Abertura",
           "audioId": "pilar5--abertura",
-          "text": "Aquilo que ainda permanece vivo\n\n\"A dor não revela fraqueza. Revela exatamente onde a vida ainda — insiste 194 —em existir.\"\n\nHoje eu não vou tentar explicar sua dor."
+          "text": "Aquilo que ainda permanece vivo\n\n\"A dor não revela fraqueza. Revela exatamente onde a vida ainda insiste em existir.\"\n\nHoje eu não vou tentar explicar sua dor."
         },
         {
           "id": "pilar5--escape",
@@ -1891,7 +1891,13 @@ export const OPDDS_CANONICAL_BOOK_INDEX = {
           "id": "enc3--abertura",
           "title": "Abertura",
           "audioId": "enc3--abertura",
-          "text": "Não leve este livro com pressa. Não transforme estas páginas em meta. Não tente organizar tudo agora. Se alguma coisa ficou ecoando... deixe ecoar.\n\nSe alguma coisa doeu... não a silencie. Se alguma coisa abriu... não a feche depressa. Você não precisa concluir. Não precisa entender tudo. Não precisa decidir hoje. Apenas permaneça.\n\nPorque este livro nunca pediu respostas. Pediu presença."
+          "text": "Não leve este livro com pressa. Não transforme estas páginas em meta. Não tente organizar tudo agora. Se alguma coisa ficou ecoando... deixe ecoar.\n\nSe alguma coisa doeu... não a silencie. Se alguma coisa abriu... não a feche depressa. Você não precisa concluir. Não precisa entender tudo. Não precisa decidir hoje. Apenas permaneça.\n\nPorque este livro nunca pediu respostas. Pediu presença.\n\nE talvez... desde a primeira página... fosse exatamente isso que você estivesse procurando.\n\nSilêncio. Respire. Continue.\n\nSilêncio. Respire. Continue.\n\nO verdadeiro poder nunca esteve em vencer. Sempre esteve em permanecer."
+        },
+        {
+          "id": "enc3--experiencia-expandida",
+          "title": "Experiência Expandida",
+          "audioId": "enc3--experiencia-expandida",
+          "text": "O livro também pode ser vivido por meio de áudios, dilemas interativos, registros de presença e conversas guiadas pelo agente da obra. Acesse o espaço digital para revisitar os pilares no seu ritmo. opoderdosdesacreditados.online\n\nO mundo costuma celebrar quem chega. Pouco se fala sobre quem continua quando ninguém está olhando. O Poder dos Desacreditados foi escrito para quem atravessou quedas silenciosas, carregou dúvidas por dentro e aprendeu a sobreviver sem necessariamente se sentir inteiro. Este não é um livro de promessas rápidas, fórmulas de sucesso ou superação performática. É uma travessia por nove territórios humanos — vínculo, família, luto, trabalho, dor, desejo, fé, escassez e vazio — atravessados por três movimentos fundamentais: Consciência. Julgamento. Presença. Ao longo das páginas, sobrevivência, reconstrução e continuidade deixam de ser etapas ideais e passam a ser movimentos reais da vida. O livro não pede que você vença a própria história. Pede algo mais difícil: que você pare de se abandonar enquanto a atravessa. Porque o verdadeiro poder nunca esteve em vencer. Sempre esteve em permanecer."
         }
       ]
     }

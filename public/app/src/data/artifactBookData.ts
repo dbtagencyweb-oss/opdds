@@ -199,7 +199,7 @@ export const artifactBookData = {
             },
             {
               "type": "pause",
-              "text": "UM OBRA QUE RESPEITA QUEM PRECISA DE ALÍVIO IMEDIATO"
+              "text": "UMA OBRA QUE RESPEITA QUEM PRECISA DE ALÍVIO IMEDIATO"
             },
             {
               "type": "p",
@@ -787,7 +787,7 @@ export const artifactBookData = {
           "blocks": [
             {
               "type": "pause",
-              "text": "ia não é ausência de mediação. Autoria é presença"
+              "text": "Autoria não é ausência de mediação. Autoria é presença."
             },
             {
               "type": "p",
@@ -1094,11 +1094,15 @@ export const artifactBookData = {
             },
             {
               "type": "pause",
+              "text": "Toda travessia começa antes do primeiro passo. Ela começa quando você decide não fugir de si."
+            },
+            {
+              "type": "pause",
               "text": "\"Toda transformação começa quando deixamos de lutar para parecer fortes e passamos a reconhecer aquilo que apenas sobreviveu.\""
             },
             {
               "type": "pause",
-              "text": "Eu não estou quebrado"
+              "text": "Eu não estou quebrado."
             },
             {
               "type": "pause",
@@ -2431,7 +2435,7 @@ export const artifactBookData = {
             },
             {
               "type": "pause",
-              "text": "\"A dor não revela fraqueza. Revela exatamente onde a vida ainda — insiste 194 —em existir.\""
+              "text": "\"A dor não revela fraqueza. Revela exatamente onde a vida ainda insiste em existir.\""
             },
             {
               "type": "pause",
@@ -3719,6 +3723,38 @@ export const artifactBookData = {
             {
               "type": "pause",
               "text": "Porque este livro nunca pediu respostas. Pediu presença."
+            },
+            {
+              "type": "pause",
+              "text": "E talvez... desde a primeira página... fosse exatamente isso que você estivesse procurando."
+            },
+            {
+              "type": "pause",
+              "text": "Silêncio. Respire. Continue."
+            },
+            {
+              "type": "pause",
+              "text": "Silêncio. Respire. Continue."
+            },
+            {
+              "type": "pause",
+              "text": "O verdadeiro poder nunca esteve em vencer. Sempre esteve em permanecer."
+            }
+          ]
+        },
+        {
+          "id": "enc3--experiencia-expandida",
+          "title": "Experiência Expandida",
+          "audioId": "enc3--experiencia-expandida",
+          "listened": false,
+          "blocks": [
+            {
+              "type": "p",
+              "text": "O livro também pode ser vivido por meio de áudios, dilemas interativos, registros de presença e conversas guiadas pelo agente da obra. Acesse o espaço digital para revisitar os pilares no seu ritmo. opoderdosdesacreditados.online"
+            },
+            {
+              "type": "p",
+              "text": "O mundo costuma celebrar quem chega. Pouco se fala sobre quem continua quando ninguém está olhando. O Poder dos Desacreditados foi escrito para quem atravessou quedas silenciosas, carregou dúvidas por dentro e aprendeu a sobreviver sem necessariamente se sentir inteiro. Este não é um livro de promessas rápidas, fórmulas de sucesso ou superação performática. É uma travessia por nove territórios humanos — vínculo, família, luto, trabalho, dor, desejo, fé, escassez e vazio — atravessados por três movimentos fundamentais: Consciência. Julgamento. Presença. Ao longo das páginas, sobrevivência, reconstrução e continuidade deixam de ser etapas ideais e passam a ser movimentos reais da vida. O livro não pede que você vença a própria história. Pede algo mais difícil: que você pare de se abandonar enquanto a atravessa. Porque o verdadeiro poder nunca esteve em vencer. Sempre esteve em permanecer."
             }
           ]
         }
