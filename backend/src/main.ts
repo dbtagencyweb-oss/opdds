@@ -1,5 +1,6 @@
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
+import helmet from 'helmet';
 import { AppModule } from './app.module';
 import { assertProductionEnv, IS_PRODUCTION } from './config/env';
 
@@ -14,6 +15,7 @@ async function bootstrap() {
   assertProductionEnv();
 
   const app = await NestFactory.create(AppModule, { rawBody: true });
+  app.use(helmet());
   const origins = parseOrigins(process.env.CORS_ORIGINS);
 
   // Em produção, nunca refletir qualquer origem com credenciais habilitadas.
