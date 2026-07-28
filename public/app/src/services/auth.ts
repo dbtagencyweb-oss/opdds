@@ -453,6 +453,22 @@ export async function fetchMetaAdsAdSets(campaignId: string, params: { period?: 
   return apiRequest<{ data: MetaAdsAdSet[]; meta: Record<string, any> }>(`/api/admin/meta-ads/campaigns/${encodeURIComponent(campaignId)}/adsets${query ? `?${query}` : ''}`, { token });
 }
 
+export type MetaAdsReconciliation = {
+  period: string;
+  since: string;
+  until: string;
+  spend: number;
+  meta: { purchases: number; revenue: number; roas: number };
+  kiwify: { purchases: number; revenue: number; roas: number; missingValueCount: number };
+  delta: { purchases: number; revenue: number };
+};
+
+export async function fetchMetaAdsReconciliation(params: { period?: string; accountId?: string; q?: string } = {}) {
+  const token = getStoredAuthToken();
+  const query = new URLSearchParams(Object.entries(params).filter(([, value]) => Boolean(value)) as [string, string][]).toString();
+  return apiRequest<MetaAdsReconciliation>(`/api/admin/meta-ads/reconciliation${query ? `?${query}` : ''}`, { token });
+}
+
 export async function publishAdminBookAudio(input: { chapterId: string; sectionKey: string; label: string; url: string; coverUrl?: string }) {
   const token = getStoredAuthToken();
   return apiRequest<BookAudioRevision>('/api/admin/book/audio/publish', {

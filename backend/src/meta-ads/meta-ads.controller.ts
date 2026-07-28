@@ -37,4 +37,9 @@ export class MetaAdsController {
   getAdvisor(@Query() query: any) {
     return this.metaAds.getAdvisor(query);
   }
+
+  @Get('reconciliation')
+  getReconciliation(@Query() query: any) {
+    return this.metaAds.getReconciliation(query);
+  }
 }

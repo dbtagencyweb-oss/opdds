@@ -1,5 +1,6 @@
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { getMetaAdAccountId, getMetaAdsAccessToken } from '../config/env';
+import { PrismaService } from '../prisma/prisma.service';
 
 const GRAPH_VERSION = process.env.META_GRAPH_VERSION || 'v21.0';
 const GRAPH_URL = `https://graph.facebook.com/${GRAPH_VERSION}`;
@@ -32,6 +33,65 @@ function maskToken(token: string) {
   return `${token.slice(0, 6)}...${token.slice(-4)}`;
 }
 
+function startOfDay(date: Date) {
+  const clone = new Date(date);
+  clone.setHours(0, 0, 0, 0);
+  return clone;
+}
+
+function endOfDay(date: Date) {
+  const clone = new Date(date);
+  clone.setHours(23, 59, 59, 999);
+  return clone;
+}
+
+function daysAgo(date: Date, days: number) {
+  const clone = new Date(date);
+  clone.setDate(clone.getDate() - days);
+  return clone;
+}
+
+/**
+ * Aproxima o intervalo de datas de um date_preset da Meta, usado só quando a
+ * resposta do Graph não trouxe insights (então não há date_start/date_stop reais
+ * pra copiar) — ex.: conta sem campanhas no filtro de nome.
+ */
+function resolvePeriodRange(period: string, now: Date = new Date()): { since: Date; until: Date } {
+  const until = endOfDay(now);
+  switch (period) {
+    case 'today':
+      return { since: startOfDay(now), until };
+    case 'yesterday': {
+      const y = daysAgo(now, 1);
+      return { since: startOfDay(y), until: endOfDay(y) };
+    }
+    case 'last_3d':
+      return { since: startOfDay(daysAgo(now, 2)), until };
+    case 'last_14d':
+      return { since: startOfDay(daysAgo(now, 13)), until };
+    case 'last_28d':
+      return { since: startOfDay(daysAgo(now, 27)), until };
+    case 'last_30d':
+      return { since: startOfDay(daysAgo(now, 29)), until };
+    case 'this_month':
+      return { since: startOfDay(new Date(now.getFullYear(), now.getMonth(), 1)), until };
+    case 'last_month': {
+      const start = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+      const end = new Date(now.getFullYear(), now.getMonth(), 0);
+      return { since: startOfDay(start), until: endOfDay(end) };
+    }
+    case 'maximum':
+      return { since: startOfDay(daysAgo(now, 365 * 3)), until };
+    case 'last_7d':
+    default:
+      return { since: startOfDay(daysAgo(now, 6)), until };
+  }
+}
+
+function toDateOnly(date: Date) {
+  return date.toISOString().slice(0, 10);
+}
+
 async function fetchWithTimeout(url: string, options: RequestInit, timeoutMs = REQUEST_TIMEOUT_MS): Promise<Response> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
@@ -52,6 +112,8 @@ type CampaignMetric = {
 @Injectable()
 export class MetaAdsService {
   private readonly logger = new Logger(MetaAdsService.name);
+
+  constructor(private readonly prisma: PrismaService) {}
 
   private assertConfigured(accountIdOverride?: string) {
     const token = getMetaAdsAccessToken();
@@ -154,7 +216,7 @@ export class MetaAdsService {
     const nameFilter = String(query?.q || '').trim().toLowerCase();
     const effectiveStatus = status === 'ALL' ? ['ACTIVE', 'PAUSED', 'ARCHIVED', 'WITH_ISSUES'] : [status];
 
-    const insightFields = ['spend', 'impressions', 'clicks', 'cpc', 'cpm', 'ctr', 'reach', 'purchase_roas', 'actions', 'action_values', 'frequency'].join(',');
+    const insightFields = ['spend', 'impressions', 'clicks', 'cpc', 'cpm', 'ctr', 'reach', 'purchase_roas', 'actions', 'action_values', 'frequency', 'date_start', 'date_stop'].join(',');
     const fields = [
       'id', 'name', 'status', 'effective_status', 'objective', 'daily_budget', 'lifetime_budget', 'start_time', 'stop_time',
       `insights.date_preset(${period}){${insightFields}}`,
@@ -567,5 +629,87 @@ ${JSON.stringify(payload)}`;
     const campaigns = await this.getCampaigns(query);
     const base = this.buildRulesAdvisor(campaigns.data || [], campaigns.meta);
     return this.buildAiAdvisor(base);
+  }
+
+  /**
+   * Compara o que a Meta reporta como "Purchase" (atribuição própria dela, sujeita a
+   * janela de atribuição/perda de sinal) com as vendas que a Kiwify de fato confirmou
+   * via webhook no mesmo período — isso dá o ROAS real de investimento, não o auto-relatado.
+   */
+  async getReconciliation(query: any) {
+    const period = safePeriod(query?.period);
+    const campaignsResponse = await this.getCampaigns({ ...query, status: 'ALL', limit: 200 });
+    const campaigns = campaignsResponse.data || [];
+
+    const firstDatedInsight = campaigns
+      .map((campaign: any) => campaign?.insights?.data?.[0])
+      .find((insight: any) => insight?.date_start && insight?.date_stop);
+
+    const fallbackRange = resolvePeriodRange(period);
+    const dateStart = firstDatedInsight?.date_start || toDateOnly(fallbackRange.since);
+    const dateStop = firstDatedInsight?.date_stop || toDateOnly(fallbackRange.until);
+
+    const since = new Date(`${dateStart}T00:00:00`);
+    const until = new Date(`${dateStop}T23:59:59.999`);
+
+    const metaTotals = campaigns.reduce(
+      (acc: { purchases: number; revenue: number; spend: number }, campaign: any) => {
+        const insight = campaign?.insights?.data?.[0] || {};
+        acc.purchases += this.getActionValue(insight, 'purchase');
+        acc.revenue += this.getRevenue(insight);
+        acc.spend += Number(insight.spend || 0);
+        return acc;
+      },
+      { purchases: 0, revenue: 0, spend: 0 },
+    );
+
+    const events = await this.prisma.purchaseEvent.findMany({
+      where: {
+        provider: 'KIWIFY',
+        eventType: { in: ['ACCESS_GRANTED', 'RENEWAL_GRANTED', 'INVITE_CREATED'] },
+        createdAt: { gte: since, lte: until },
+      },
+      select: { payload: true },
+    });
+
+    let kiwifyPurchases = 0;
+    let kiwifyRevenue = 0;
+    let missingValueCount = 0;
+    for (const event of events) {
+      kiwifyPurchases += 1;
+      const value = Number((event.payload as any)?.value);
+      if (Number.isFinite(value) && value > 0) {
+        kiwifyRevenue += value;
+      } else {
+        missingValueCount += 1;
+      }
+    }
+
+    const spend = Number(metaTotals.spend.toFixed(2));
+    const metaRevenue = Number(metaTotals.revenue.toFixed(2));
+    const metaPurchases = Number(metaTotals.purchases.toFixed(2));
+    kiwifyRevenue = Number(kiwifyRevenue.toFixed(2));
+
+    return {
+      period,
+      since: dateStart,
+      until: dateStop,
+      spend,
+      meta: {
+        purchases: metaPurchases,
+        revenue: metaRevenue,
+        roas: spend > 0 && metaRevenue > 0 ? Number((metaRevenue / spend).toFixed(2)) : 0,
+      },
+      kiwify: {
+        purchases: kiwifyPurchases,
+        revenue: kiwifyRevenue,
+        roas: spend > 0 && kiwifyRevenue > 0 ? Number((kiwifyRevenue / spend).toFixed(2)) : 0,
+        missingValueCount,
+      },
+      delta: {
+        purchases: Number((kiwifyPurchases - metaPurchases).toFixed(2)),
+        revenue: Number((kiwifyRevenue - metaRevenue).toFixed(2)),
+      },
+    };
   }
 }

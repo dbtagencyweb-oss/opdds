@@ -43,7 +43,7 @@ export class AuthService {
     return (Object.keys(PRODUCTS_BY_PLAN).includes(normalized) ? normalized : 'basic') as AccessPlan;
   }
 
-  async createInvite(data: CreateInviteDto & { source?: string; externalId?: string | null }) {
+  async createInvite(data: CreateInviteDto & { source?: string; externalId?: string | null; value?: number; currency?: string }) {
     const plan = this.normalizePlan(data.plan);
     const code = this.createCode();
     const expiresAt = data.expiresInDays ? new Date(Date.now() + data.expiresInDays * 24 * 60 * 60 * 1000) : null;
@@ -68,6 +68,8 @@ export class AuthService {
           plan,
           code,
           expiresInDays: data.expiresInDays ?? null,
+          value: data.value ?? null,
+          currency: data.currency || null,
         },
       },
     });

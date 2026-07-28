@@ -7,8 +7,8 @@ import {
   RefreshCw, Radio, TrendingUp, Percent, Users2, MonitorSmartphone, ChevronRight,
 } from 'lucide-react';
 import {
-  fetchMetaAdsConfig, fetchMetaAdsCampaigns, fetchMetaAdsAdvisor, fetchMetaAdsAdSets,
-  type MetaAdsConfig, type MetaAdsCampaign, type MetaAdsAdvisorResponse, type MetaAdsAdSet,
+  fetchMetaAdsConfig, fetchMetaAdsCampaigns, fetchMetaAdsAdvisor, fetchMetaAdsAdSets, fetchMetaAdsReconciliation,
+  type MetaAdsConfig, type MetaAdsCampaign, type MetaAdsAdvisorResponse, type MetaAdsAdSet, type MetaAdsReconciliation,
 } from '../services/auth';
 import {
   buildMarketingDrafts, marketingProductLabels, marketingGoalLabels, marketingProductAngles,
@@ -1115,8 +1115,10 @@ function MetaAdsMonitor() {
   const [campaigns, setCampaigns] = useState<MetaAdsCampaign[]>([]);
   const [totalBeforeFilter, setTotalBeforeFilter] = useState<number | null>(null);
   const [advisor, setAdvisor] = useState<MetaAdsAdvisorResponse | null>(null);
+  const [reconciliation, setReconciliation] = useState<MetaAdsReconciliation | null>(null);
   const [loading, setLoading] = useState(false);
   const [advisorLoading, setAdvisorLoading] = useState(false);
+  const [reconciliationLoading, setReconciliationLoading] = useState(false);
   const [error, setError] = useState('');
   const [expandedCampaignId, setExpandedCampaignId] = useState<string | null>(null);
   const [adSetsByCampaign, setAdSetsByCampaign] = useState<Record<string, MetaAdsAdSet[]>>({});
@@ -1160,11 +1162,24 @@ function MetaAdsMonitor() {
     }
   };
 
+  const loadReconciliation = async () => {
+    setReconciliationLoading(true);
+    try {
+      const response = await fetchMetaAdsReconciliation({ period, accountId: accountId || undefined, q: nameFilter || undefined });
+      setReconciliation(response);
+    } catch {
+      setReconciliation(null);
+    } finally {
+      setReconciliationLoading(false);
+    }
+  };
+
   const handleSearch = () => {
     setExpandedCampaignId(null);
     setAdSetsByCampaign({});
     loadCampaigns();
     loadAdvisor();
+    loadReconciliation();
   };
 
   const handleSelectSavedAccount = (value: string) => {
@@ -1363,6 +1378,47 @@ function MetaAdsMonitor() {
               </div>
             );
           })}
+        </div>
+      )}
+
+      {(reconciliation || reconciliationLoading) && (
+        <div className="studio-card studio-reconciliation-card">
+          <div className="studio-monitor-head">
+            <p className="studio-card-title"><CheckCircle2 size={15} /> Controle: Meta reportado vs. Kiwify confirmado</p>
+            {reconciliation && <small>{reconciliation.since} a {reconciliation.until}</small>}
+          </div>
+          {reconciliationLoading && !reconciliation && <p className="studio-empty-hint">Calculando...</p>}
+          {reconciliation && (
+            <>
+              <p className="studio-empty-hint">
+                A Meta atribui vendas por conta própria (janela de atribuição, cliques que não viraram venda). A Kiwify é quem confirma o pagamento de verdade — por isso o ROAS real usa a receita da Kiwify sobre o gasto da Meta.
+              </p>
+              <div className="studio-reconciliation-grid">
+                <div className="studio-reconciliation-col">
+                  <small>Meta reportou</small>
+                  <p>{formatNumber(reconciliation.meta.purchases)} compra(s)</p>
+                  <p>{formatCurrency(reconciliation.meta.revenue)}</p>
+                  <p>ROAS reportado: {reconciliation.meta.roas.toFixed(2)}x</p>
+                </div>
+                <div className="studio-reconciliation-col studio-reconciliation-real">
+                  <small>Kiwify confirmou</small>
+                  <p>{formatNumber(reconciliation.kiwify.purchases)} compra(s)</p>
+                  <p>{formatCurrency(reconciliation.kiwify.revenue)}</p>
+                  <p>ROAS real: {reconciliation.kiwify.roas.toFixed(2)}x</p>
+                </div>
+                <div className={`studio-reconciliation-col studio-reconciliation-delta ${reconciliation.delta.revenue < 0 ? 'is-negative' : 'is-positive'}`}>
+                  <small>Diferença</small>
+                  <p>{reconciliation.delta.purchases >= 0 ? '+' : ''}{formatNumber(reconciliation.delta.purchases)} compra(s)</p>
+                  <p>{reconciliation.delta.revenue >= 0 ? '+' : ''}{formatCurrency(reconciliation.delta.revenue)}</p>
+                </div>
+              </div>
+              {reconciliation.kiwify.missingValueCount > 0 && (
+                <p className="studio-empty-hint">
+                  {reconciliation.kiwify.missingValueCount} venda(s) confirmada(s) no período sem valor registrado (webhooks antigos, antes desse controle) — a receita real da Kiwify pode estar subestimada.
+                </p>
+              )}
+            </>
+          )}
         </div>
       )}
 

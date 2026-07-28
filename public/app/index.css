@@ -6934,6 +6934,54 @@ html.light .admin-canonical-block-card textarea {
   font-size: 0.72rem;
 }
 
+.studio-reconciliation-card {
+  border-color: rgba(177, 138, 102, 0.35);
+}
+
+.studio-reconciliation-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.studio-reconciliation-col {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.02);
+  padding: 12px;
+  display: grid;
+  gap: 3px;
+}
+
+.studio-reconciliation-col small {
+  color: var(--muted);
+  font-size: 0.66rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  margin-bottom: 3px;
+}
+
+.studio-reconciliation-col p {
+  margin: 0;
+  color: var(--text);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.studio-reconciliation-real {
+  border-color: rgba(117, 183, 152, 0.4);
+  background: rgba(117, 183, 152, 0.06);
+}
+
+.studio-reconciliation-delta.is-positive p {
+  color: #75b798;
+}
+
+.studio-reconciliation-delta.is-negative p {
+  color: #ef4444;
+}
+
 .studio-monitor-diagnosis {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -18899,7 +18947,8 @@ html.light .studio-priority-item,
 html.light .studio-campaign-row,
 html.light .studio-adset-card,
 html.light .studio-creative-card,
-html.light .studio-campaign-summary-grid {
+html.light .studio-campaign-summary-grid,
+html.light .studio-reconciliation-col {
   background: var(--surface-2) !important;
 }
 

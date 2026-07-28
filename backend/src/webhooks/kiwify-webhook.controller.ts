@@ -265,6 +265,8 @@ export class KiwifyWebhookController {
         plan: purchase.plan,
         source: 'KIWIFY',
         externalId: purchase.orderId,
+        value: purchase.value,
+        currency: purchase.currency,
       });
 
       this.metaCapi
@@ -296,6 +298,8 @@ export class KiwifyWebhookController {
           name: purchase.name,
           plan: purchase.plan,
           productKeys: purchase.productKeys,
+          value: purchase.value,
+          currency: purchase.currency,
           body,
         },
         processedAt: new Date(),
