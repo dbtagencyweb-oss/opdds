@@ -262,6 +262,7 @@ export type BookChapter = {
   id: string;
   chapter: string | number;
   title: string;
+  shortTitle: string;
   summary: string;
   content: string[];
   audioUrl: string | null;
@@ -371,6 +372,7 @@ export const bookChapters: BookChapter[] = bookStructure.map((item, index) => {
     id: item.id,
     chapter: 'pillar' in item ? item.pillar : index + 1,
     title: item.title,
+    shortTitle: item.shortTitle,
     summary: item.summary,
     content,
     audioUrl: audioMap[item.id] ?? audioMap[audioAliases[item.id]] ?? null,

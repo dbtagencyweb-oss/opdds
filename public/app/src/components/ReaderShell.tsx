@@ -38,6 +38,7 @@ type AudioTrack = {
 type ChapterNavItem = {
   id: string;
   title: string;
+  shortTitle?: string;
   summary: string;
   pdfPage: number;
   groupId: string;
@@ -751,13 +752,19 @@ export default function ReaderShell({
   const canonicalTextBlocks = useMemo<TextBlock[]>(
     () => (activeCanonicalChapter?.blocks ?? [])
       .filter((block) => block.kind !== 'image' && block.kind !== 'image-full')
-      .map((block) => ({
-        kind: block.kind === 'pause' ? 'paragraph' : block.kind,
-        text: block.text,
-        alt: block.alt,
-        size: block.size,
-        className: [block.className, block.kind === 'pause' ? 'reader-canonical-pause' : ''].filter(Boolean).join(' ') || undefined,
-      })),
+      .map((block) => {
+        const cleanText = (block.text ?? '').replace(/\[br\]/gi, ' ').replace(/\s+/g, ' ').trim();
+        const wordCount = cleanText ? cleanText.split(' ').length : 0;
+        const sentenceCount = (cleanText.match(/[.!?…]+/g) ?? []).length;
+        const isSafePause = block.kind === 'pause' && wordCount <= 18 && cleanText.length <= 140 && sentenceCount <= 2;
+        return {
+          kind: block.kind === 'pause' ? 'paragraph' : block.kind,
+          text: block.text,
+          alt: block.alt,
+          size: block.size,
+          className: [block.className, isSafePause ? 'reader-canonical-pause' : ''].filter(Boolean).join(' ') || undefined,
+        };
+      }),
     [activeCanonicalChapter],
   );
   const reflowBlocks = useMemo(
@@ -897,7 +904,7 @@ export default function ReaderShell({
       const parsedContentGuard = Number.parseFloat(viewportStyle.getPropertyValue('--reader-reflow-right-guard'));
       const contentGuard = Number.isFinite(parsedContentGuard) ? parsedContentGuard : 0;
       const measuredWidth = viewport.clientWidth - horizontalPadding - contentGuard;
-      const width = Math.max(320, Math.floor(measuredWidth));
+      const width = Math.max(220, Math.floor(measuredWidth));
       const gap = Math.max(40, Math.min(72, Math.round(width * 0.08)));
       columns.style.setProperty('--reader-reflow-colw', `${width}px`);
       columns.style.setProperty('--reader-reflow-gap', `${gap}px`);
@@ -1353,7 +1360,7 @@ export default function ReaderShell({
                     >
                       <span>
                         {chapter.roman && <small>Pilar {chapter.roman}</small>}
-                        <strong>{repairReaderText(chapter.title)}</strong>
+                        <strong>{repairReaderText((chapter.roman && chapter.shortTitle) || chapter.title)}</strong>
                       </span>
                       <ChevronRight size={12} />
                     </button>

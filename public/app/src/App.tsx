@@ -260,6 +260,7 @@ import {
   trimExcerpt,
   mindGuides,
 } from './app/appConstants';
+import { MarketingStudioTabs } from './app/marketingStudio';
 
 export function App() {
   const { darkMode, toggleTheme } = useTheme();
@@ -337,6 +338,7 @@ export function App() {
   const [adminMessage, setAdminMessage] = useState('');
   const [adminSection, setAdminSection] = useState<AdminSection>('overview');
   const [adminBookTab, setAdminBookTab] = useState<'canonical' | 'audio'>('canonical');
+  const [adminCopyTab, setAdminCopyTab] = useState<'quick' | 'studio'>('quick');
   const [adminCanonicalChapterId, setAdminCanonicalChapterId] = useState(bookChapters[0]?.id || '');
   const [adminCanonicalDrafts, setAdminCanonicalDrafts] = useState<Record<string, CanonicalBookBlock[]>>(() => {
     try {
@@ -649,9 +651,10 @@ export function App() {
       if (index < 0 || index >= blocks.length - 1) return blocks;
       const current = blocks[index];
       const nextBlock = blocks[index + 1];
+      const mergedKind = current.kind === nextBlock.kind ? current.kind : 'paragraph';
       return [
         ...blocks.slice(0, index),
-        { ...current, text: [current.text, nextBlock.text].filter(Boolean).join('\n\n') },
+        { ...current, kind: mergedKind, text: [current.text, nextBlock.text].filter(Boolean).join('\n\n') },
         ...blocks.slice(index + 2),
       ];
     });
@@ -4372,7 +4375,7 @@ export function App() {
             <p>Esse diário não é um questionário. Não tem resposta certa. Não tem nota. Ele existe porque algumas perguntas precisam ser feitas em voz alta, mesmo que só para você mesmo.</p>
             <p>Comece pelo pilar que mais incomoda. Ou pelo que menos assusta. O iGentMIND vai ler o que você escrever e devolver uma pergunta que eu faria se estivesse do outro lado. Não para resolver. Para continuar.</p>
             <div className="workbook-welcome-actions">
-              <Button onClick={openWorkbookIntro} variant="secondary"><Volume2 size={17} /> Ouvir Diego</Button>
+              <Button onClick={openWorkbookIntro} variant="secondary"><Volume2 size={17} /> Ouvir Autor</Button>
               <Button onClick={enterWorkbook}><BookOpen size={17} /> Comecar diario</Button>
             </div>
             <small>Áudio esperado: {WORKBOOK_WELCOME_AUDIO}</small>
@@ -5461,6 +5464,18 @@ export function App() {
       )}
 
       {adminSection === 'copy' && (
+        <>
+        <div className="admin-book-subnav" role="tablist" aria-label="Central de marketing">
+          <button className={adminCopyTab === 'quick' ? 'active' : ''} onClick={() => setAdminCopyTab('quick')}>
+            <NotebookPen size={16} />
+            Gerador rápido
+          </button>
+          <button className={adminCopyTab === 'studio' ? 'active' : ''} onClick={() => setAdminCopyTab('studio')}>
+            <Sparkles size={16} />
+            Estúdio de campanhas
+          </button>
+        </div>
+        {adminCopyTab === 'quick' && (
         <section className="admin-copy-grid">
           <article className="account-card admin-panel">
             <div className="admin-section-head compact">
@@ -5547,6 +5562,9 @@ export function App() {
             </div>
           </article>
         </section>
+        )}
+        {adminCopyTab === 'studio' && <MarketingStudioTabs />}
+        </>
       )}
     </div>
   );

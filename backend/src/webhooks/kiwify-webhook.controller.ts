@@ -5,6 +5,7 @@ import * as crypto from 'crypto';
 import { AuthService } from '../auth/auth.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { IS_PRODUCTION } from '../config/env';
+import { MetaCapiService } from './meta-capi.service';
 
 type AccessPlan = 'pdf' | 'basic' | 'workbook' | 'igent30' | 'igent90' | 'group' | 'vip';
 type RevokeStatus = 'CANCELED' | 'REFUNDED';
@@ -128,6 +129,20 @@ function verifySignature(rawBody: Buffer, signature = '', secret = '') {
   return timingSafeEqualHex(expected, signature.trim().toLowerCase());
 }
 
+function extractOrderValue(order: any, data: any): number {
+  const raw = valueOf(
+    order.amount,
+    order.total_price,
+    order.charge_amount,
+    order.product_price,
+    order.price,
+    data.amount,
+    data.Commissions?.charge_amount,
+  );
+  const value = Number(raw);
+  return Number.isFinite(value) ? value : 0;
+}
+
 function extractData(body: any) {
   const data = body.data ?? body.payload ?? body;
   const customer = data.Customer ?? data.customer ?? data.buyer ?? {};
@@ -138,8 +153,10 @@ function extractData(body: any) {
   const name = String(valueOf(customer.full_name, customer.name, order.customer_name, data.customer_name, data.name, 'Leitor OPDDS')).trim();
   const orderId = String(valueOf(order.id, order.order_id, order.orderId, data.order_id, data.id, subscription.id)).trim() || null;
   const plan = resolvePlan(body);
+  const value = extractOrderValue(order, data);
+  const currency = String(valueOf(order.currency, data.currency, 'BRL')).trim().toUpperCase();
 
-  return { data, customer, order, subscription, email, name, orderId, plan, productKeys: PRODUCTS_BY_PLAN[plan] };
+  return { data, customer, order, subscription, email, name, orderId, plan, value, currency, productKeys: PRODUCTS_BY_PLAN[plan] };
 }
 
 @Controller('kiwify')
@@ -147,6 +164,7 @@ export class KiwifyWebhookController {
   constructor(
     private readonly authService: AuthService,
     private readonly prisma: PrismaService,
+    private readonly metaCapi: MetaCapiService,
   ) {}
 
   @Throttle({ default: { limit: 60, ttl: 60_000 } })
@@ -249,6 +267,10 @@ export class KiwifyWebhookController {
         externalId: purchase.orderId,
       });
 
+      this.metaCapi
+        .sendPurchaseEvent({ email: purchase.email, orderId: purchase.orderId, value: purchase.value, currency: purchase.currency })
+        .catch(() => {});
+
       return {
         ok: true,
         action: 'invite_created',
@@ -279,6 +301,10 @@ export class KiwifyWebhookController {
         processedAt: new Date(),
       },
     });
+
+    this.metaCapi
+      .sendPurchaseEvent({ email: purchase.email, orderId: purchase.orderId, value: purchase.value, currency: purchase.currency })
+      .catch(() => {});
 
     return {
       ok: true,

@@ -345,6 +345,75 @@ export async function fetchAdminBookAudio() {
   return apiRequest<AdminBookAudioSummary[]>('/api/admin/book/audio', { token });
 }
 
+export type MetaAdsConfig = {
+  configured: boolean;
+  hasToken: boolean;
+  tokenPreview: string | null;
+  accountId: string | null;
+  graphVersion: string;
+};
+
+export type MetaAdsCampaign = {
+  id: string;
+  name: string;
+  status?: string;
+  effective_status?: string;
+  objective?: string;
+  daily_budget?: string;
+  lifetime_budget?: string;
+  insights?: { data?: Array<Record<string, any>> };
+  adPreview?: { id: string; name: string; status: string };
+  creative?: { image_url?: string; title?: string; body?: string };
+};
+
+export type MetaAdsCampaignsResponse = {
+  data: MetaAdsCampaign[];
+  meta: { accountId: string; period: string; status: string; graphVersion: string; fetchedAt: string };
+};
+
+export type MetaAdsAdvisorPriority = { title: string; reason: string; action: string; impact: string; urgency: 'alta' | 'media' | 'baixa' };
+export type MetaAdsAdvisorCampaignAction = { campaignId?: string; campaignName: string; recommendation?: string; budgetAction?: string; why?: string; status?: string; spend?: number; ctr?: number; cpc?: number; roas?: number };
+export type MetaAdsAdvisorExperiment = { title: string; hypothesis: string; setup: string; successMetric: string };
+
+export type MetaAdsAdvisorResponse = {
+  provider: 'rules' | 'openai' | 'gemini';
+  aiModel?: string;
+  generatedAt: string;
+  summary: {
+    period: string; totalCampaigns: number; activeCampaigns: number; spend: number;
+    clicks: number; impressions: number; conversions: number; revenue: number; ctr: number; cpc: number; roas: number;
+    diagnosis?: string; mainRisk?: string; bestOpportunity?: string;
+  };
+  priorities: MetaAdsAdvisorPriority[];
+  campaignActions: MetaAdsAdvisorCampaignAction[];
+  experiments: MetaAdsAdvisorExperiment[];
+  nextQuestions: string[];
+  ai?: {
+    summary?: { diagnosis?: string; mainRisk?: string; bestOpportunity?: string };
+    priorities?: MetaAdsAdvisorPriority[];
+    campaignActions?: MetaAdsAdvisorCampaignAction[];
+    experiments?: MetaAdsAdvisorExperiment[];
+    nextQuestions?: string[];
+  };
+};
+
+export async function fetchMetaAdsConfig() {
+  const token = getStoredAuthToken();
+  return apiRequest<MetaAdsConfig>('/api/admin/meta-ads/config', { token });
+}
+
+export async function fetchMetaAdsCampaigns(params: { period?: string; status?: string; accountId?: string } = {}) {
+  const token = getStoredAuthToken();
+  const query = new URLSearchParams(Object.entries(params).filter(([, value]) => Boolean(value)) as [string, string][]).toString();
+  return apiRequest<MetaAdsCampaignsResponse>(`/api/admin/meta-ads/campaigns${query ? `?${query}` : ''}`, { token });
+}
+
+export async function fetchMetaAdsAdvisor(params: { period?: string; status?: string; accountId?: string } = {}) {
+  const token = getStoredAuthToken();
+  const query = new URLSearchParams(Object.entries(params).filter(([, value]) => Boolean(value)) as [string, string][]).toString();
+  return apiRequest<MetaAdsAdvisorResponse>(`/api/admin/meta-ads/advisor${query ? `?${query}` : ''}`, { token });
+}
+
 export async function publishAdminBookAudio(input: { chapterId: string; sectionKey: string; label: string; url: string; coverUrl?: string }) {
   const token = getStoredAuthToken();
   return apiRequest<BookAudioRevision>('/api/admin/book/audio/publish', {

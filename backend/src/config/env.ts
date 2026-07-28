@@ -35,6 +35,36 @@ export function getJwtSecret(): string {
   return secret || DEV_JWT_SECRET;
 }
 
+const DEFAULT_META_PIXEL_ID = '1452183630052536';
+
+/**
+ * Token da Conversions API (CAPI) do Meta. Recurso opcional: se ausente, o
+ * envio de eventos de compra pro Meta simplesmente não acontece (sem quebrar
+ * o fluxo de concessão de acesso da Kiwify).
+ */
+export function getMetaCapiAccessToken(): string {
+  return (process.env.META_CAPI_ACCESS_TOKEN || '').trim();
+}
+
+export function getMetaPixelId(): string {
+  return (process.env.META_PIXEL_ID || DEFAULT_META_PIXEL_ID).trim();
+}
+
+/**
+ * Token da Marketing API do Meta (permissão `ads_read`), usado só pelo
+ * monitor de campanhas do admin para LER métricas — diferente do token de
+ * CAPI acima, que só ENVIA eventos de compra. Recurso opcional.
+ */
+export function getMetaAdsAccessToken(): string {
+  return (process.env.META_ADS_ACCESS_TOKEN || '').trim();
+}
+
+export function getMetaAdAccountId(): string {
+  const raw = (process.env.META_AD_ACCOUNT_ID || '').trim();
+  if (!raw) return '';
+  return raw.startsWith('act_') ? raw : `act_${raw.replace(/[^\d]/g, '')}`;
+}
+
 /**
  * Valida a presença das variáveis obrigatórias na inicialização (produção).
  * Chamado a partir do bootstrap para dar um erro claro e único no boot.

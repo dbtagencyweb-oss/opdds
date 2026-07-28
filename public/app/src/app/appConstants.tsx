@@ -265,11 +265,11 @@ export const formatTime = (seconds: number) => {
 
 export const navGroups = [
   {
-    title: 'Jornada',
+    title: 'Travessia',
     items: [
       { id: ROUTES.HOME, label: 'Início', icon: Home },
       { id: ROUTES.BOOK, label: 'Livro', icon: BookOpen },
-      { id: ROUTES.LIBRARY, label: 'Jornada', icon: Library },
+      { id: ROUTES.LIBRARY, label: 'Travessia', icon: Library },
     ],
   },
   {

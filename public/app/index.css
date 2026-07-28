@@ -1,6 +1,6 @@
 :root {
   --font-book: "Inria Sans", "Inria Serif", Georgia, "Times New Roman", serif;
-  --font-ui: "Arsenal", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-ui: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --bg: #101114;
   --surface: #18191d;
   --surface-2: #222329;
@@ -554,7 +554,7 @@ body::selection {
 .home-hero h1 {
   margin: 10px 0 16px;
   font-family: var(--font-ui);
-  font-size: clamp(1.9rem, 4vw, 3.2rem);
+  font-size: clamp(1.6rem, 3.4vw, 2.6rem);
   line-height: 1.04;
 }
 
@@ -562,7 +562,7 @@ body::selection {
 .settings-panel h1 {
   margin: 8px 0 12px;
   font-family: var(--font-ui);
-  font-size: clamp(1.75rem, 3vw, 2.55rem);
+  font-size: clamp(1.5rem, 2.6vw, 2.1rem);
   line-height: 1.08;
 }
 
@@ -1978,7 +1978,7 @@ html.dark .reader-clean-mode .reader-text-surface:not(.reader-image-page) .reade
   .home-hero h1,
   .page-heading h1,
   .settings-panel h1 {
-    font-size: 1.9rem;
+    font-size: 1.6rem;
   }
 
   .reader-topbar,
@@ -2543,12 +2543,12 @@ button:active {
   margin: 10px 0 16px;
   max-width: 760px;
   font-family: var(--font-ui);
-  font-size: clamp(2rem, 5vw, 4.2rem);
+  font-size: clamp(1.7rem, 4vw, 3.2rem);
   line-height: 1;
 }
 
 .manifesto-panel h1 {
-  font-size: clamp(1.8rem, 4vw, 3.35rem);
+  font-size: clamp(1.6rem, 3.2vw, 2.6rem);
   line-height: 1.05;
 }
 
@@ -3468,7 +3468,7 @@ button:active {
 .community-panel h1 {
   max-width: 720px;
   margin: 8px 0 12px;
-  font-size: clamp(1.8rem, 4vw, 3.35rem);
+  font-size: clamp(1.6rem, 3.2vw, 2.6rem);
   line-height: 1.03;
 }
 
@@ -3502,7 +3502,7 @@ button:active {
 .home-greeting h1 {
   margin: 0 0 6px;
   font-family: var(--font-ui);
-  font-size: clamp(2rem, 5vw, 3.2rem);
+  font-size: clamp(1.7rem, 4vw, 2.6rem);
   line-height: 1.02;
   letter-spacing: 0;
 }
@@ -3963,7 +3963,7 @@ button:active {
 .workbook-welcome h1 {
   margin: 0;
   font-family: var(--font-ui);
-  font-size: clamp(2rem, 5vw, 3rem);
+  font-size: clamp(1.7rem, 4vw, 2.4rem);
   line-height: 1.04;
 }
 
@@ -5445,6 +5445,1641 @@ html.light .admin-canonical-block-card textarea {
 .admin-copy-list button span {
   min-width: 0;
   line-height: 1.35;
+}
+
+/* ─── Estúdio de campanhas (Central de marketing) ────────────────────────── */
+
+.studio-shell {
+  display: grid;
+  gap: 18px;
+}
+
+.studio-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 6px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.studio-tabs button {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.studio-tabs button:hover {
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.studio-tabs button.active {
+  color: #17130b;
+  background: var(--opdds-premium-gold-gradient, var(--accent));
+  border-color: transparent;
+}
+
+.studio-panel-body {
+  display: grid;
+  gap: 16px;
+}
+
+.studio-card {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: #17181c;
+  padding: 18px;
+  display: grid;
+  gap: 10px;
+}
+
+.studio-card-dark {
+  background: #0d0e11;
+}
+
+.studio-card-title {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--text);
+  font-size: 0.86rem;
+  font-weight: 800;
+  margin: 0;
+}
+
+.studio-card-subtitle {
+  margin: -4px 0 0;
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.studio-primary-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: none;
+  border-radius: 10px;
+  background: var(--opdds-premium-gold-gradient, var(--accent));
+  color: #17130b;
+  font-size: 0.78rem;
+  font-weight: 800;
+  padding: 10px 16px;
+  cursor: pointer;
+}
+
+.studio-inline-button {
+  width: fit-content;
+}
+
+.studio-ghost-button {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 8px 14px;
+  cursor: pointer;
+}
+
+/* Naming */
+
+.studio-field-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px;
+}
+
+.studio-field-grid label,
+.studio-editor-field {
+  display: grid;
+  gap: 6px;
+}
+
+.studio-field-grid span,
+.studio-editor-field > span {
+  display: flex;
+  justify-content: space-between;
+  color: var(--muted);
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.studio-field-grid select,
+.studio-field-grid input,
+.studio-editor-field textarea,
+.studio-add-card textarea,
+.studio-add-card select,
+.studio-idea-form textarea,
+.studio-idea-form select,
+.studio-link-form input,
+.studio-link-form select,
+.studio-calendar-form input,
+.studio-calendar-form select,
+.studio-calendar-form textarea,
+.studio-calendar-head select,
+.studio-calendar-card-inputs input,
+.studio-calendar-card-foot select,
+.studio-funnel-step input,
+.studio-editor-new input {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.18);
+  color: var(--text);
+  font-size: 0.78rem;
+  padding: 9px 10px;
+}
+
+.studio-naming-rows {
+  display: grid;
+  gap: 8px;
+}
+
+.studio-naming-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.025);
+  padding: 10px 12px;
+}
+
+.studio-naming-row small {
+  display: block;
+  color: var(--muted);
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.studio-naming-row p {
+  margin: 2px 0 0;
+  color: var(--text);
+  font-family: monospace;
+  font-size: 0.78rem;
+  font-weight: 700;
+  word-break: break-all;
+}
+
+.studio-naming-row button {
+  flex-shrink: 0;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--gold-soft, var(--accent));
+  padding: 7px;
+  cursor: pointer;
+}
+
+/* Kanban */
+
+.studio-add-card {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.025);
+  padding: 14px;
+  display: grid;
+  gap: 10px;
+}
+
+.studio-add-card textarea {
+  min-height: 60px;
+  resize: vertical;
+}
+
+.studio-add-card-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.studio-add-card-row select {
+  width: auto;
+}
+
+.studio-kanban-board {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.studio-kanban-col {
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.02);
+  padding: 12px;
+  min-height: 160px;
+  transition: background 0.15s ease;
+}
+
+.studio-kanban-col.is-over {
+  background: rgba(177, 138, 102, 0.1);
+}
+
+.studio-kanban-col-head {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 10px;
+}
+
+.studio-kanban-col-head p {
+  flex: 1;
+  margin: 0;
+  color: var(--text);
+  font-size: 0.76rem;
+  font-weight: 800;
+}
+
+.studio-kanban-col-head small {
+  color: var(--muted);
+  font-size: 0.68rem;
+  font-weight: 700;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 1px 7px;
+}
+
+.studio-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.studio-kanban-col-body {
+  display: grid;
+  gap: 8px;
+}
+
+.studio-kanban-card {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #17181c;
+  padding: 11px;
+  cursor: grab;
+}
+
+.studio-kanban-card p {
+  margin: 0 0 8px;
+  color: var(--text);
+  font-size: 0.76rem;
+  line-height: 1.45;
+}
+
+.studio-kanban-card-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.studio-kanban-tags {
+  display: flex;
+  gap: 6px;
+}
+
+.studio-kanban-tags span {
+  color: #fff;
+  font-size: 0.62rem;
+  font-weight: 800;
+  border-radius: 6px;
+  padding: 2px 6px;
+}
+
+.studio-priority {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--muted);
+}
+
+.studio-priority-alta {
+  background: rgba(239, 68, 68, 0.12);
+  color: #f87171;
+}
+
+.studio-priority-média {
+  background: rgba(245, 158, 11, 0.12);
+  color: #fbbf24;
+}
+
+.studio-kanban-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.studio-kanban-actions button {
+  width: 19px;
+  height: 19px;
+  border: none;
+  border-radius: 6px;
+  color: #fff;
+  font-size: 0.6rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.studio-kanban-delete {
+  background: rgba(239, 68, 68, 0.14) !important;
+  color: #f87171 !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Editor de copy */
+
+.studio-editor-layout {
+  display: grid;
+  grid-template-columns: 190px minmax(0, 1fr);
+  gap: 16px;
+}
+
+.studio-editor-sidebar {
+  display: grid;
+  align-content: start;
+  gap: 6px;
+}
+
+.studio-editor-new {
+  display: grid;
+  gap: 6px;
+}
+
+.studio-editor-new-row {
+  display: flex;
+  gap: 6px;
+}
+
+.studio-editor-new-row button {
+  flex: 1;
+}
+
+.studio-editor-doc {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  border-radius: 10px;
+  padding: 9px 10px;
+  color: var(--muted);
+  font-size: 0.76rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.studio-editor-doc:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.studio-editor-doc.active {
+  background: var(--opdds-premium-gold-gradient, var(--accent));
+  color: #17130b;
+}
+
+.studio-editor-doc span {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.studio-editor-doc button {
+  border: none;
+  background: transparent;
+  color: inherit;
+  opacity: 0.6;
+  cursor: pointer;
+}
+
+.studio-empty-hint {
+  color: var(--muted);
+  font-size: 0.74rem;
+  text-align: center;
+  padding: 14px 0;
+}
+
+.studio-empty-state {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  padding: 40px 10px;
+  color: var(--muted);
+  text-align: center;
+}
+
+.studio-empty-state p {
+  margin: 0;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.studio-empty-state small {
+  font-size: 0.74rem;
+}
+
+.studio-editor-doc-body {
+  display: grid;
+  gap: 14px;
+}
+
+.studio-editor-doc-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.studio-editor-doc-head p {
+  margin: 0;
+  color: var(--text);
+  font-weight: 800;
+}
+
+.studio-saved-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--accent-2);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.studio-drive-field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid rgba(59, 130, 246, 0.28);
+  border-radius: 12px;
+  background: rgba(59, 130, 246, 0.08);
+  padding: 9px 12px;
+  color: #93c5fd;
+}
+
+.studio-drive-field input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font-size: 0.78rem;
+}
+
+.studio-drive-field input:focus {
+  outline: none;
+}
+
+.studio-drive-field a {
+  color: inherit;
+  flex-shrink: 0;
+}
+
+.studio-editor-field textarea {
+  resize: vertical;
+  line-height: 1.5;
+}
+
+/* Sub-tabs (brainstorm) */
+
+.studio-subtabs {
+  display: flex;
+  gap: 6px;
+  width: fit-content;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 4px;
+}
+
+.studio-subtabs button {
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.76rem;
+  font-weight: 700;
+  padding: 7px 14px;
+  cursor: pointer;
+}
+
+.studio-subtabs button.active {
+  background: var(--opdds-premium-gold-gradient, var(--accent));
+  color: #17130b;
+}
+
+.studio-idea-form,
+.studio-link-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.studio-idea-form textarea {
+  flex: 1;
+  min-width: 200px;
+  resize: none;
+}
+
+.studio-idea-form > div {
+  display: grid;
+  gap: 6px;
+}
+
+.studio-link-form input:first-child {
+  flex: 1;
+  min-width: 200px;
+}
+
+.studio-idea-grid {
+  display: grid;
+  gap: 10px;
+}
+
+.studio-idea-card {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.025);
+  padding: 14px;
+}
+
+.studio-idea-card > div:first-child {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.studio-idea-card p {
+  margin: 0;
+  color: var(--text);
+  font-size: 0.82rem;
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
+.studio-idea-actions {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.studio-idea-actions button {
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.studio-idea-actions button.is-starred {
+  color: #fbbf24;
+}
+
+.studio-idea-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.studio-idea-meta span {
+  color: #fff;
+  font-size: 0.62rem;
+  font-weight: 800;
+  border-radius: 999px;
+  padding: 2px 8px;
+}
+
+.studio-idea-meta small {
+  color: var(--muted);
+  font-size: 0.68rem;
+}
+
+.studio-link-list {
+  display: grid;
+  gap: 8px;
+}
+
+.studio-link-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.02);
+  padding: 10px 12px;
+  color: var(--muted);
+}
+
+.studio-link-row > div {
+  flex: 1;
+  min-width: 0;
+}
+
+.studio-link-row p {
+  margin: 0;
+  color: var(--text);
+  font-size: 0.78rem;
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.studio-link-row small {
+  display: block;
+  font-size: 0.68rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.studio-link-row > span {
+  flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--muted);
+  font-size: 0.66rem;
+  font-weight: 700;
+  border-radius: 999px;
+  padding: 3px 9px;
+}
+
+.studio-link-row button,
+.studio-link-row a {
+  flex-shrink: 0;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.studio-link-row button.is-starred {
+  color: #fbbf24;
+}
+
+/* Diagnóstico de vendas */
+
+.studio-funnel-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 12px;
+}
+
+.studio-funnel-step {
+  display: grid;
+  justify-items: center;
+  text-align: center;
+  gap: 4px;
+}
+
+.studio-funnel-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  margin-bottom: 4px;
+}
+
+.studio-funnel-step p {
+  margin: 0;
+  color: var(--text);
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.studio-funnel-step small {
+  color: var(--muted);
+  font-size: 0.66rem;
+}
+
+.studio-funnel-step input {
+  text-align: center;
+  margin-top: 4px;
+}
+
+.studio-funnel-step span {
+  font-size: 0.66rem;
+  font-weight: 800;
+}
+
+.studio-funnel-benchmark {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.6rem;
+  line-height: 1.3;
+}
+
+.studio-alert-card {
+  border-left: 3px solid #ef4444;
+  border-radius: 12px;
+  background: rgba(239, 68, 68, 0.08);
+  padding: 14px;
+  display: grid;
+  gap: 8px;
+}
+
+.studio-alert-card > p:first-child {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 0;
+  color: #f87171;
+  font-size: 0.76rem;
+  font-weight: 800;
+}
+
+.studio-alert-card > div p {
+  margin: 0 0 5px;
+  color: #fca5a5;
+  font-size: 0.76rem;
+}
+
+.studio-score-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.studio-score-head p {
+  margin: 0;
+  color: var(--text);
+  font-weight: 800;
+  font-size: 0.84rem;
+}
+
+.studio-score-head strong {
+  font-size: 1.4rem;
+}
+
+.studio-score-track {
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  overflow: hidden;
+}
+
+.studio-score-track span {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.4s ease;
+}
+
+.studio-checklist {
+  display: grid;
+  gap: 8px;
+}
+
+.studio-checklist label {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.studio-checkbox {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  margin-top: 1px;
+  border: 2px solid var(--line);
+  border-radius: 6px;
+  display: grid;
+  place-items: center;
+  color: #17130b;
+}
+
+.studio-checklist label.is-checked .studio-checkbox {
+  border-color: transparent;
+  background: var(--opdds-premium-gold-gradient, var(--accent));
+}
+
+.studio-checklist label span:last-child {
+  color: var(--text);
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+
+.studio-checklist label.is-checked span:last-child {
+  color: var(--muted);
+  text-decoration: line-through;
+}
+
+.studio-checklist label small {
+  color: #f87171;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+/* Ad Spy */
+
+.studio-tip-card {
+  border-left: 3px solid var(--accent);
+  border-radius: 12px;
+  background: rgba(177, 138, 102, 0.08);
+  padding: 14px;
+  display: grid;
+  gap: 6px;
+}
+
+.studio-tip-card > p:first-child {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 0;
+  color: var(--accent);
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.studio-tip-card > p:last-child {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.78rem;
+  line-height: 1.55;
+}
+
+.studio-spy-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 10px;
+}
+
+.studio-spy-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.02);
+  padding: 14px;
+  color: inherit;
+  text-decoration: none;
+}
+
+.studio-spy-card:hover {
+  border-color: var(--accent);
+}
+
+.studio-spy-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.studio-spy-card > div:nth-child(2) {
+  flex: 1;
+  min-width: 0;
+}
+
+.studio-spy-card > div:nth-child(2) > div {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex-wrap: wrap;
+  margin-bottom: 4px;
+}
+
+.studio-spy-card p {
+  margin: 0;
+  color: var(--text);
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
+.studio-spy-card small {
+  color: var(--muted);
+  font-size: 0.72rem;
+  line-height: 1.45;
+}
+
+.studio-spy-card span {
+  color: #fff;
+  font-size: 0.6rem;
+  font-weight: 800;
+  border-radius: 999px;
+  padding: 2px 8px;
+}
+
+.studio-spy-card svg:last-child {
+  flex-shrink: 0;
+  color: var(--muted);
+  margin-top: 3px;
+}
+
+.studio-framework-list {
+  display: grid;
+  gap: 10px;
+}
+
+.studio-framework-card {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.02);
+  padding: 12px;
+}
+
+.studio-framework-card > div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 6px;
+}
+
+.studio-framework-card > div > span {
+  width: 20px;
+  height: 20px;
+  border-radius: 7px;
+  background: var(--opdds-premium-gold-gradient, var(--accent));
+  color: #17130b;
+  font-size: 0.66rem;
+  font-weight: 800;
+  display: grid;
+  place-items: center;
+}
+
+.studio-framework-card p {
+  margin: 0;
+  color: var(--text);
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.studio-framework-card small {
+  color: var(--accent);
+  font-size: 0.68rem;
+  font-weight: 700;
+  background: rgba(177, 138, 102, 0.12);
+  border-radius: 999px;
+  padding: 2px 8px;
+}
+
+.studio-framework-example {
+  margin: 0 0 0 28px;
+  color: var(--muted);
+  font-size: 0.76rem;
+  font-style: italic;
+  line-height: 1.5;
+}
+
+/* Calendário */
+
+.studio-calendar-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 18px;
+  align-items: start;
+}
+
+.studio-calendar-main {
+  display: grid;
+  gap: 14px;
+}
+
+.studio-calendar-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: rgba(177, 138, 102, 0.06);
+  padding: 14px 16px;
+}
+
+.studio-calendar-head small {
+  color: var(--muted);
+  font-size: 0.76rem;
+}
+
+.studio-calendar-head select {
+  width: auto;
+}
+
+.studio-calendar-day {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.02);
+  padding: 12px;
+}
+
+.studio-calendar-day-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  color: var(--text);
+}
+
+.studio-calendar-day-head p {
+  margin: 0;
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: capitalize;
+}
+
+.studio-calendar-day-head small {
+  color: var(--muted);
+}
+
+.studio-calendar-day-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 10px;
+}
+
+.studio-calendar-card {
+  display: flex;
+  gap: 10px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: #17181c;
+  padding: 12px;
+}
+
+.studio-calendar-card-thumb {
+  width: 64px;
+  height: 64px;
+  flex-shrink: 0;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  color: var(--muted);
+}
+
+.studio-calendar-card-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.studio-calendar-card-body {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.studio-calendar-card-tags {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.studio-calendar-card-tags span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #fff;
+  font-size: 0.6rem;
+  font-weight: 800;
+  border-radius: 999px;
+  padding: 2px 7px;
+}
+
+.studio-calendar-status {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--muted) !important;
+}
+
+.studio-calendar-card-tags small {
+  color: var(--muted);
+  font-size: 0.66rem;
+  font-weight: 700;
+}
+
+.studio-calendar-card-body > p {
+  margin: 0;
+  color: var(--text);
+  font-size: 0.8rem;
+  font-weight: 800;
+  line-height: 1.3;
+}
+
+.studio-calendar-card-body > small {
+  color: var(--muted);
+  font-size: 0.7rem;
+  line-height: 1.4;
+}
+
+.studio-calendar-card-links {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.studio-calendar-card-links a {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--gold-soft, var(--accent));
+  font-size: 0.64rem;
+  font-weight: 800;
+  border-radius: 8px;
+  background: rgba(177, 138, 102, 0.1);
+  padding: 3px 8px;
+  text-decoration: none;
+}
+
+.studio-calendar-card-inputs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+.studio-calendar-card-inputs input {
+  font-size: 0.7rem;
+  padding: 6px 8px;
+}
+
+.studio-calendar-card-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.studio-calendar-card-foot select {
+  width: auto;
+  font-size: 0.7rem;
+  padding: 5px 8px;
+}
+
+.studio-calendar-card-foot button {
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.studio-calendar-side {
+  display: grid;
+  gap: 14px;
+}
+
+.studio-calendar-form {
+  display: grid;
+  gap: 8px;
+}
+
+.studio-calendar-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.studio-calendar-form textarea {
+  resize: vertical;
+  min-height: 50px;
+}
+
+.studio-channel-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.studio-channel-grid a,
+.studio-channel-grid > div {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 10px;
+  color: inherit;
+  text-decoration: none;
+}
+
+.studio-channel-grid a:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.studio-channel-grid p {
+  margin: 8px 0 0;
+  color: #fff;
+  font-size: 0.68rem;
+  font-weight: 800;
+}
+
+.studio-channel-grid small {
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 0.62rem;
+}
+
+/* Inteligência */
+
+.studio-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 10px;
+}
+
+.studio-stat-card {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: #17181c;
+  padding: 14px;
+}
+
+.studio-stat-card small {
+  display: block;
+  margin-top: 10px;
+  color: var(--muted);
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.studio-stat-card strong {
+  display: block;
+  color: var(--text);
+  font-size: 1.5rem;
+}
+
+.studio-intel-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 16px;
+  align-items: start;
+}
+
+.studio-angle-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 10px;
+}
+
+.studio-angle-card {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.02);
+  padding: 14px;
+}
+
+.studio-angle-module {
+  margin: 0;
+  color: var(--accent);
+  font-size: 0.64rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.studio-angle-title {
+  margin: 3px 0 6px;
+  color: var(--text);
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.studio-angle-card p:not(.studio-angle-module):not(.studio-angle-title) {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.76rem;
+  line-height: 1.45;
+}
+
+.studio-angle-card small {
+  display: block;
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 0.66rem;
+  font-weight: 700;
+}
+
+.studio-recommendation-list {
+  display: grid;
+  gap: 8px;
+}
+
+.studio-recommendation-list p {
+  margin: 0;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  padding: 10px 12px;
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 0.76rem;
+  line-height: 1.5;
+}
+
+@media (max-width: 900px) {
+  .studio-editor-layout,
+  .studio-calendar-layout,
+  .studio-intel-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .studio-editor-sidebar {
+    grid-auto-flow: column;
+    overflow-x: auto;
+  }
+}
+
+/* Monitor de campanhas */
+
+.studio-monitor-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.studio-monitor-toolbar > div:first-child {
+  display: grid;
+  gap: 4px;
+}
+
+.studio-monitor-toolbar > div:first-child small {
+  color: var(--muted);
+  font-size: 0.66rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.studio-monitor-toolbar > div:first-child p {
+  margin: 0;
+  color: var(--text);
+  font-size: 0.82rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.studio-monitor-toolbar > div:first-child p small {
+  color: var(--muted);
+  font-weight: 600;
+  text-transform: none;
+}
+
+.studio-status-ok {
+  color: var(--accent-2);
+}
+
+.studio-monitor-toolbar label {
+  display: grid;
+  gap: 6px;
+  min-width: 140px;
+}
+
+.studio-monitor-toolbar label span {
+  color: var(--muted);
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.studio-monitor-toolbar label input,
+.studio-monitor-toolbar label select {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.18);
+  color: var(--text);
+  font-size: 0.78rem;
+  padding: 9px 10px;
+}
+
+.is-spinning {
+  animation: studioSpin 0.9s linear infinite;
+}
+
+@keyframes studioSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.studio-monitor-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.studio-monitor-head small {
+  color: var(--muted);
+  font-size: 0.72rem;
+}
+
+.studio-monitor-diagnosis {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.studio-diagnosis-card {
+  border-radius: 12px;
+  padding: 12px;
+}
+
+.studio-diagnosis-card small {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 0.66rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.studio-diagnosis-card p {
+  margin: 0;
+  font-size: 0.78rem;
+  line-height: 1.45;
+}
+
+.studio-diagnosis-diag {
+  background: rgba(99, 102, 241, 0.1);
+}
+
+.studio-diagnosis-diag small { color: #a5a6f6; }
+.studio-diagnosis-diag p { color: var(--text); }
+
+.studio-diagnosis-risk {
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.studio-diagnosis-risk small { color: #f87171; }
+.studio-diagnosis-risk p { color: var(--text); }
+
+.studio-diagnosis-opp {
+  background: rgba(117, 183, 152, 0.12);
+}
+
+.studio-diagnosis-opp small { color: var(--accent-2); }
+.studio-diagnosis-opp p { color: var(--text); }
+
+.studio-monitor-columns {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.studio-priority-list {
+  display: grid;
+  gap: 8px;
+}
+
+.studio-priority-item {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.02);
+  padding: 11px 13px;
+}
+
+.studio-priority-item > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.studio-priority-item p {
+  margin: 0;
+  color: var(--text);
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.studio-priority-item small {
+  display: block;
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 0.72rem;
+  line-height: 1.4;
+}
+
+.studio-priority-action {
+  margin: 6px 0 0 !important;
+  color: var(--accent) !important;
+  font-size: 0.7rem !important;
+  font-weight: 700 !important;
+}
+
+.studio-urgency {
+  flex-shrink: 0;
+  font-size: 0.6rem;
+  font-weight: 800;
+  border-radius: 999px;
+  padding: 2px 8px;
+}
+
+.studio-urgency-alta { background: rgba(239, 68, 68, 0.14); color: #f87171; }
+.studio-urgency-media { background: rgba(245, 158, 11, 0.14); color: #fbbf24; }
+.studio-urgency-baixa { background: rgba(255, 255, 255, 0.08); color: var(--muted); }
+
+.studio-monitor-questions {
+  margin: 16px 0 0;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 0.74rem;
+  line-height: 1.5;
+}
+
+.studio-monitor-questions strong {
+  color: var(--text);
+}
+
+.studio-campaign-list {
+  display: grid;
+  gap: 8px;
+}
+
+.studio-campaign-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.02);
+  padding: 10px 12px;
+}
+
+.studio-campaign-row img,
+.studio-campaign-thumb {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.studio-campaign-thumb {
+  display: grid;
+  place-items: center;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--muted);
+}
+
+.studio-campaign-row > div:nth-child(2) {
+  flex: 1;
+  min-width: 0;
+}
+
+.studio-campaign-row > div:nth-child(2) p {
+  margin: 0;
+  color: var(--text);
+  font-size: 0.8rem;
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.studio-campaign-row > div:nth-child(2) small {
+  color: var(--muted);
+  font-size: 0.7rem;
+}
+
+.studio-campaign-metrics {
+  display: flex;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.studio-campaign-metrics span {
+  color: var(--text);
+  font-size: 0.76rem;
+  font-weight: 700;
+  min-width: 60px;
+  text-align: right;
+}
+
+@media (max-width: 700px) {
+  .studio-monitor-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .studio-campaign-metrics {
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .studio-campaign-metrics span {
+    text-align: left;
+  }
 }
 
 .admin-events-panel {
@@ -8127,7 +9762,7 @@ html.light .audio-now-marker {
 
 .book-hub-copy h1 {
   margin: 0 0 14px;
-  font-size: clamp(2.25rem, 5vw, 4.6rem);
+  font-size: clamp(1.9rem, 4vw, 3.4rem);
   line-height: 0.98;
   letter-spacing: 0;
 }
@@ -12557,6 +14192,9 @@ html.dark .reader-contents-drawer nav section > .reader-toc-chapter > .reader-to
 
 .reader-toc-chapter-row > span {
   min-width: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 2px !important;
 }
 
 .reader-toc-chapter-row svg {
@@ -12583,7 +14221,7 @@ html.dark .reader-toc-audio-row {
   width: 100% !important;
   min-height: 0 !important;
   display: flex !important;
-  align-items: center !important;
+  align-items: flex-start !important;
   justify-content: space-between !important;
   gap: 8px !important;
   padding: 7px 0 7px 4px !important;
@@ -12598,13 +14236,14 @@ html.dark .reader-toc-audio-row {
 
 .reader-toc-audio-row span {
   min-width: 0 !important;
-  overflow: hidden !important;
+  overflow: visible !important;
   font-family: var(--font-ui) !important;
   font-size: 0.76rem !important;
   font-weight: 500 !important;
-  line-height: 1.25 !important;
-  text-overflow: ellipsis !important;
-  white-space: nowrap !important;
+  line-height: 1.3 !important;
+  text-overflow: clip !important;
+  white-space: normal !important;
+  padding-top: 2px !important;
 }
 
 .reader-toc-audio-row strong {
@@ -14761,8 +16400,7 @@ html.dark .reader-clean-mode .reader-text-surface.reader-chapter-epigrafe .chapt
 .reader-clean-mode .reader-text-surface.reader-chapter-epigrafe .reader-reflow-viewport,
 html.light .reader-clean-mode .reader-text-surface.reader-chapter-epigrafe .reader-reflow-viewport,
 html.dark .reader-clean-mode .reader-text-surface.reader-chapter-epigrafe .reader-reflow-viewport {
-  height: calc(100% - 82px) !important;
-  padding-top: clamp(32px, 5.4vh, 48px) !important;
+  height: calc(100% - 130px) !important;
 }
 
 .reader-clean-mode .reader-text-surface.reader-chapter-epigrafe .reader-reflow-columns h3.reader-canonical-section-title,
@@ -15026,6 +16664,22 @@ html.dark .reader-clean-mode .reader-text-surface:not(.reader-image-page) .reade
   margin: 0.95em auto 1.25em !important;
   font-size: 1.02em !important;
   line-height: 1.4 !important;
+}
+
+/* Manual round: a pause/section-title that reads as an internal transition
+   shouldn't be stranded alone at the bottom of a fôlego with no body text
+   below it — push the whole title+paragraph unit to the next column instead. */
+.reader-clean-mode .reader-text-surface:not(.reader-image-page) .reader-reflow-columns p.reader-canonical-pause,
+html.light .reader-clean-mode .reader-text-surface:not(.reader-image-page) .reader-reflow-columns p.reader-canonical-pause,
+html.dark .reader-clean-mode .reader-text-surface:not(.reader-image-page) .reader-reflow-columns p.reader-canonical-pause,
+.reader-clean-mode .reader-text-surface:not(.reader-image-page) .reader-reflow-columns h3.reader-canonical-section-title,
+html.light .reader-clean-mode .reader-text-surface:not(.reader-image-page) .reader-reflow-columns h3.reader-canonical-section-title,
+html.dark .reader-clean-mode .reader-text-surface:not(.reader-image-page) .reader-reflow-columns h3.reader-canonical-section-title,
+.reader-clean-mode .reader-text-surface:not(.reader-image-page) .reader-reflow-columns h2.reader-canonical-section-title,
+html.light .reader-clean-mode .reader-text-surface:not(.reader-image-page) .reader-reflow-columns h2.reader-canonical-section-title,
+html.dark .reader-clean-mode .reader-text-surface:not(.reader-image-page) .reader-reflow-columns h2.reader-canonical-section-title {
+  break-after: avoid-column !important;
+  break-inside: avoid-column !important;
 }
 
 /* PDF mode: one Chrome-like toolbar, no duplicated reader controls. */
@@ -15612,6 +17266,14 @@ html.dark .reader-clean-mode:has(.reader-bottom-audio-slot) .reader-text-surface
 html.light .reader-clean-mode .reader-text-surface:not(.reader-image-page) .reader-reflow-viewport,
 html.dark .reader-clean-mode .reader-text-surface:not(.reader-image-page) .reader-reflow-viewport {
   padding-bottom: 28px !important;
+}
+
+/* TRUE LAST override: the epigrafe opening screen has no visible chapter-coverlet,
+   so it needs extra top clearance below the reader's top bar. */
+.reader-clean-mode .reader-text-surface.reader-chapter-epigrafe .reader-reflow-viewport,
+html.light .reader-clean-mode .reader-text-surface.reader-chapter-epigrafe .reader-reflow-viewport,
+html.dark .reader-clean-mode .reader-text-surface.reader-chapter-epigrafe .reader-reflow-viewport {
+  padding-top: clamp(72px, 10vh, 96px) !important;
 }
 
 .reader-clean-mode .reader-text-surface.reader-has-bottom-audio:not(.reader-image-page) .reader-reflow-viewport,
@@ -16728,4 +18390,209 @@ html.dark .reader-clean-mode .reader-compact-audio-player .reader-mini-audio-pro
   html.dark .reader-clean-mode .reader-compact-audio-player .reader-mini-audio-time {
     display: none !important;
   }
+}
+
+/* ABSOLUTE FINAL overrides. This stylesheet has accumulated many rounds of
+   equal-specificity `!important` rules where the winner is whichever comes
+   LAST in the file — a source of repeated regressions. Everything below
+   uses a doubled class (`.reader-clean-mode.reader-clean-mode`) to bump
+   specificity above every rule earlier in this file, so these rules win
+   unconditionally regardless of where anything else is declared. Add new
+   fixes here, at the true end of the file, not earlier. */
+
+.reader-clean-mode.reader-clean-mode .reader-text-surface:not(.reader-image-page) .reader-reflow-columns p,
+html.light .reader-clean-mode.reader-clean-mode .reader-text-surface:not(.reader-image-page) .reader-reflow-columns p,
+html.dark .reader-clean-mode.reader-clean-mode .reader-text-surface:not(.reader-image-page) .reader-reflow-columns p {
+  font-weight: 400 !important;
+}
+
+.reader-clean-mode.reader-clean-mode .reader-text-surface:not(.reader-image-page) .reader-reflow-columns p.reader-canonical-pause,
+html.light .reader-clean-mode.reader-clean-mode .reader-text-surface:not(.reader-image-page) .reader-reflow-columns p.reader-canonical-pause,
+html.dark .reader-clean-mode.reader-clean-mode .reader-text-surface:not(.reader-image-page) .reader-reflow-columns p.reader-canonical-pause {
+  display: block !important;
+  max-width: 38ch !important;
+  margin: 0.4em auto 1.6em !important;
+  text-align: center !important;
+  text-align-last: center !important;
+  font-size: 1.28em !important;
+  font-style: italic !important;
+  font-weight: 640 !important;
+  line-height: 1.36 !important;
+}
+
+.reader-clean-mode.reader-clean-mode .reader-text-surface:not(.reader-image-page) .reader-reflow-columns h3,
+html.light .reader-clean-mode.reader-clean-mode .reader-text-surface:not(.reader-image-page) .reader-reflow-columns h3,
+html.dark .reader-clean-mode.reader-clean-mode .reader-text-surface:not(.reader-image-page) .reader-reflow-columns h3 {
+  font-size: 1.12em !important;
+  font-weight: 700 !important;
+  line-height: 1.28 !important;
+}
+
+/* A rule elsewhere forces line-height: inherit on h2/h3 so headings pick up
+   the paragraph's own (much looser) reading line-height — a 2-line wrapped
+   title ends up with huge gaps between its own lines. */
+.reader-clean-mode.reader-clean-mode .reader-text-surface:not(.reader-image-page) .reader-reflow-columns h2,
+html.light .reader-clean-mode.reader-clean-mode .reader-text-surface:not(.reader-image-page) .reader-reflow-columns h2,
+html.dark .reader-clean-mode.reader-clean-mode .reader-text-surface:not(.reader-image-page) .reader-reflow-columns h2 {
+  line-height: 1.16 !important;
+}
+
+/* Every chapter page with a visible header (title + eyebrow) was sitting
+   with only 12px above it — cramped against the top bar on every fôlego,
+   not just the first one, since the coverlet renders on each page of the
+   chapter. */
+.reader-clean-mode.reader-clean-mode .reader-text-surface:not(.reader-image-page) .chapter-coverlet,
+html.light .reader-clean-mode.reader-clean-mode .reader-text-surface:not(.reader-image-page) .chapter-coverlet,
+html.dark .reader-clean-mode.reader-clean-mode .reader-text-surface:not(.reader-image-page) .chapter-coverlet {
+  padding-top: clamp(24px, 3.5vh, 36px) !important;
+  padding-bottom: 20px !important;
+}
+
+/* The gap ABOVE the header was the only thing fixed so far — the gap
+   BELOW it (coverlet to first paragraph) was still governed by the
+   viewport's own tiny padding-top (12-22px), so body text sat almost
+   flush against the title divider. */
+.reader-clean-mode.reader-clean-mode .reader-text-surface:not(.reader-image-page) .reader-reflow-viewport,
+html.light .reader-clean-mode.reader-clean-mode .reader-text-surface:not(.reader-image-page) .reader-reflow-viewport,
+html.dark .reader-clean-mode.reader-clean-mode .reader-text-surface:not(.reader-image-page) .reader-reflow-viewport {
+  padding-top: clamp(28px, 4vh, 44px) !important;
+}
+
+/* Placed AFTER the generic rule above on purpose: the epigrafe chapter has
+   no visible coverlet at all, so it needs its own, larger top clearance —
+   this must win the tie against the generic .reflow-viewport rule, and in
+   this file equal-specificity ties go to whichever is declared last. */
+.reader-clean-mode.reader-clean-mode .reader-text-surface.reader-chapter-epigrafe .reader-reflow-viewport,
+html.light .reader-clean-mode.reader-clean-mode .reader-text-surface.reader-chapter-epigrafe .reader-reflow-viewport,
+html.dark .reader-clean-mode.reader-clean-mode .reader-text-surface.reader-chapter-epigrafe .reader-reflow-viewport {
+  height: calc(100% - 130px) !important;
+  padding-top: clamp(72px, 10vh, 96px) !important;
+}
+
+/* Dozens of earlier rules reserve generous, inconsistent bottom padding
+   (72-155px) on top of the space already reserved for the audio player —
+   dense pages end with a lot of unused white space before the footer.
+   Pin it to a small, consistent 25px everywhere. */
+.reader-clean-mode.reader-clean-mode .reader-text-surface:not(.reader-image-page) .reader-reflow-viewport,
+html.light .reader-clean-mode.reader-clean-mode .reader-text-surface:not(.reader-image-page) .reader-reflow-viewport,
+html.dark .reader-clean-mode.reader-clean-mode .reader-text-surface:not(.reader-image-page) .reader-reflow-viewport,
+.reader-clean-mode.reader-clean-mode .reader-text-surface.reader-has-bottom-audio:not(.reader-image-page) .reader-reflow-viewport,
+html.light .reader-clean-mode.reader-clean-mode .reader-text-surface.reader-has-bottom-audio:not(.reader-image-page) .reader-reflow-viewport,
+html.dark .reader-clean-mode.reader-clean-mode .reader-text-surface.reader-has-bottom-audio:not(.reader-image-page) .reader-reflow-viewport,
+.reader-clean-mode.reader-clean-mode:has(.reader-bottom-audio-slot) .reader-text-surface:not(.reader-image-page) .reader-reflow-viewport,
+html.light .reader-clean-mode.reader-clean-mode:has(.reader-bottom-audio-slot) .reader-text-surface:not(.reader-image-page) .reader-reflow-viewport,
+html.dark .reader-clean-mode.reader-clean-mode:has(.reader-bottom-audio-slot) .reader-text-surface:not(.reader-image-page) .reader-reflow-viewport {
+  padding-bottom: 25px !important;
+}
+
+/* Compact mobile audio bar was overflowing the screen edge (volume slider
+   + "1x" speed button pushed the row past the viewport width). Drop the
+   speed button on narrow screens — it stays available in the fullscreen
+   player — and narrow the volume slider to free up the space it needs. */
+@media (max-width: 760px) {
+  .reader-clean-mode.reader-clean-mode .reader-compact-audio-player,
+  html.light .reader-clean-mode.reader-clean-mode .reader-compact-audio-player,
+  html.dark .reader-clean-mode.reader-clean-mode .reader-compact-audio-player {
+    grid-template-columns: 42px minmax(110px, 1fr) minmax(38px, 44px) 40px !important;
+  }
+
+  .reader-clean-mode.reader-clean-mode .reader-compact-audio-player .reader-mini-speed,
+  html.light .reader-clean-mode.reader-clean-mode .reader-compact-audio-player .reader-mini-speed,
+  html.dark .reader-clean-mode.reader-clean-mode .reader-compact-audio-player .reader-mini-speed {
+    display: none !important;
+  }
+
+  .reader-clean-mode.reader-clean-mode .reader-compact-audio-player .reader-mini-volume,
+  html.light .reader-clean-mode.reader-clean-mode .reader-compact-audio-player .reader-mini-volume,
+  html.dark .reader-clean-mode.reader-clean-mode .reader-compact-audio-player .reader-mini-volume {
+    width: 38px !important;
+    min-width: 32px !important;
+    max-width: 44px !important;
+  }
+
+  .reader-clean-mode.reader-clean-mode .reader-compact-audio-player .reader-mini-volume input,
+  html.light .reader-clean-mode.reader-clean-mode .reader-compact-audio-player .reader-mini-volume input,
+  html.dark .reader-clean-mode.reader-clean-mode .reader-compact-audio-player .reader-mini-volume input {
+    width: 38px !important;
+  }
+}
+
+/* The shared <Button variant="primary"> component (used by "Começar diário",
+   "Próxima carta", "Ouvir manifesto", "Salvar dados", "Entrar na
+   comunidade", etc.) only ever had a flat Tailwind color and no dark-theme
+   CSS override, while every other primary CTA across the app already uses
+   the premium gold gradient. Bring it in line. */
+.opdds-button-primary,
+.opdds-button-primary.opdds-button-primary,
+html.light .opdds-button-primary,
+html.dark .opdds-button-primary {
+  background: var(--opdds-premium-gold-gradient) !important;
+  color: #17130b !important;
+}
+
+/* The compact reader audio player was hardcoded to a dark capsule even in
+   light theme (several "manual round" rules re-affirmed this), which then
+   left its light-colored title/time/track-bar text unreadable once the
+   surrounding page is actually light. Restore the same cream tone already
+   used for .reader-top-audio-chip elsewhere, with matching dark ink text. */
+html.light .reader-clean-mode.reader-clean-mode .reader-compact-audio-player {
+  background: linear-gradient(180deg, rgba(255, 250, 240, 0.98), rgba(246, 236, 220, 0.98)) !important;
+  border-color: rgba(177, 117, 69, 0.22) !important;
+  color: #3d3026 !important;
+  box-shadow: 0 14px 30px rgba(86, 62, 38, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.64) !important;
+}
+
+html.light .reader-clean-mode.reader-clean-mode .reader-compact-audio-player .reader-top-audio-current strong {
+  color: #3d3026 !important;
+}
+
+html.light .reader-clean-mode.reader-clean-mode .reader-compact-audio-player .reader-mini-audio-time {
+  color: rgba(61, 48, 38, 0.7) !important;
+}
+
+html.light .reader-clean-mode.reader-clean-mode .reader-compact-audio-player .reader-mini-audio-progress {
+  background: rgba(61, 48, 38, 0.16) !important;
+}
+
+html.light .reader-clean-mode.reader-clean-mode .reader-compact-audio-player .reader-mini-audio-meter {
+  color: #b18a66 !important;
+}
+
+html.light .reader-clean-mode.reader-clean-mode .reader-compact-audio-player .reader-top-audio-minimize {
+  background: rgba(177, 117, 69, 0.14) !important;
+  border-color: rgba(177, 117, 69, 0.26) !important;
+  color: #6b432a !important;
+}
+
+/* Estúdio de campanhas: cards were hardcoded dark, ignoring the theme
+   variables — fine in dark mode (matches --surface anyway) but stuck dark
+   on the light theme. Swap to the theme-aware surface variables. */
+html.light .studio-card,
+html.light .studio-card-dark,
+html.light .studio-kanban-card,
+html.light .studio-calendar-card,
+html.light .studio-stat-card {
+  background: var(--surface) !important;
+}
+
+html.light .studio-tabs,
+html.light .studio-add-card,
+html.light .studio-naming-row,
+html.light .studio-kanban-col,
+html.light .studio-idea-card,
+html.light .studio-link-row,
+html.light .studio-spy-card,
+html.light .studio-framework-card,
+html.light .studio-angle-card,
+html.light .studio-calendar-day,
+html.light .studio-calendar-head,
+html.light .studio-recommendation-list p,
+html.light .studio-priority-item,
+html.light .studio-campaign-row {
+  background: var(--surface-2) !important;
+}
+
+html.light .studio-editor-doc:hover,
+html.light .studio-tabs button:hover {
+  background: rgba(0, 0, 0, 0.05) !important;
 }
