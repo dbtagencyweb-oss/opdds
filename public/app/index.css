@@ -6859,6 +6859,30 @@ html.light .admin-canonical-block-card textarea {
   padding: 9px 10px;
 }
 
+.studio-account-id-field {
+  display: flex;
+  gap: 6px;
+}
+
+.studio-account-id-field input {
+  flex: 1;
+  min-width: 140px;
+}
+
+.studio-account-id-field button {
+  flex-shrink: 0;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--muted);
+  padding: 0 9px;
+  cursor: pointer;
+}
+
+.studio-account-id-field button:hover {
+  color: var(--accent);
+}
+
 .is-spinning {
   animation: studioSpin 0.9s linear infinite;
 }

@@ -1002,9 +1002,17 @@ function campaignInsight(campaign: MetaAdsCampaign) {
   return campaign.insights?.data?.[0] || {};
 }
 
+type SavedAdAccount = { id: string; label: string };
+
+const DEFAULT_SAVED_ACCOUNTS: SavedAdAccount[] = [
+  { id: 'act_537227715782892', label: 'DBT anúncios' },
+  { id: 'act_532215532848894', label: '532215532848894' },
+];
+
 function MetaAdsMonitor() {
   const [config, setConfig] = useState<MetaAdsConfig | null>(null);
   const [accountId, setAccountId] = useState('');
+  const [savedAccounts, setSavedAccounts] = useLocalStorageState<SavedAdAccount[]>('opdds_studio_ad_accounts', DEFAULT_SAVED_ACCOUNTS);
   const [period, setPeriod] = useState('last_7d');
   const [status, setStatus] = useState('ACTIVE');
   const [campaigns, setCampaigns] = useState<MetaAdsCampaign[]>([]);
@@ -1054,6 +1062,23 @@ function MetaAdsMonitor() {
     loadAdvisor();
   };
 
+  const handleSelectSavedAccount = (value: string) => {
+    if (value) setAccountId(value);
+  };
+
+  const handleSaveCurrentAccount = () => {
+    const trimmed = accountId.trim();
+    if (!trimmed) return;
+    if (savedAccounts.some((account) => account.id === trimmed)) return;
+    const label = window.prompt('Nome pra essa conta (ex.: "DBT anúncios"):', trimmed);
+    if (!label) return;
+    setSavedAccounts((prev) => [...prev, { id: trimmed, label: label.trim() || trimmed }]);
+  };
+
+  const handleRemoveSavedAccount = (id: string) => {
+    setSavedAccounts((prev) => prev.filter((account) => account.id !== id));
+  };
+
   const aiSummary = advisor?.ai?.summary || advisor?.summary;
   const priorities = advisor?.ai?.priorities?.length ? advisor.ai.priorities : advisor?.priorities || [];
   const experiments = advisor?.ai?.experiments?.length ? advisor.ai.experiments : advisor?.experiments || [];
@@ -1097,8 +1122,21 @@ function MetaAdsMonitor() {
           <p>{config?.hasToken ? <span className="studio-status-ok">Meta configurado</span> : 'Carregando...'} <small>{config?.graphVersion}</small></p>
         </div>
         <label>
+          <span>Conta salva</span>
+          <select value={savedAccounts.find((account) => account.id === accountId)?.id || ''} onChange={(event) => handleSelectSavedAccount(event.target.value)}>
+            <option value="">Personalizado...</option>
+            {savedAccounts.map((account) => <option key={account.id} value={account.id}>{account.label}</option>)}
+          </select>
+        </label>
+        <label>
           <span>Ad account ID</span>
-          <input value={accountId} onChange={(event) => setAccountId(event.target.value)} placeholder="act_xxxxxxxxxxxx" />
+          <div className="studio-account-id-field">
+            <input value={accountId} onChange={(event) => setAccountId(event.target.value)} placeholder="act_xxxxxxxxxxxx" />
+            <button type="button" title="Salvar essa conta na lista" onClick={handleSaveCurrentAccount}><Plus size={13} /></button>
+            {savedAccounts.some((account) => account.id === accountId.trim()) && (
+              <button type="button" title="Remover essa conta da lista" onClick={() => handleRemoveSavedAccount(accountId.trim())}><Trash2 size={13} /></button>
+            )}
+          </div>
         </label>
         <label>
           <span>Período</span>
