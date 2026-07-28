@@ -1068,6 +1068,36 @@ function campaignInsight(campaign: MetaAdsCampaign) {
   return campaign.insights?.data?.[0] || {};
 }
 
+function actionValue(insight: any, actionType: string) {
+  return Number(insight?.actions?.find((item: any) => item.action_type === actionType)?.value || 0);
+}
+
+function insightRevenue(insight: any) {
+  return Number(insight?.action_values?.find((item: any) => item.action_type === 'purchase')?.value || 0);
+}
+
+function insightRoas(insight: any) {
+  const direct = Number(insight?.purchase_roas?.[0]?.value || 0);
+  if (direct > 0) return direct;
+  const spend = Number(insight?.spend || 0);
+  const revenue = insightRevenue(insight);
+  return spend > 0 && revenue > 0 ? revenue / spend : 0;
+}
+
+function campaignSummaryMetrics(insight: any) {
+  return {
+    spend: Number(insight.spend || 0),
+    ctr: Number(insight.ctr || 0),
+    cpc: Number(insight.cpc || 0),
+    cpm: Number(insight.cpm || 0),
+    clicks: Number(insight.clicks || 0),
+    impressions: Number(insight.impressions || 0),
+    conversions: actionValue(insight, 'purchase'),
+    revenue: insightRevenue(insight),
+    roas: insightRoas(insight),
+  };
+}
+
 type SavedAdAccount = { id: string; label: string };
 
 const DEFAULT_SAVED_ACCOUNTS: SavedAdAccount[] = [
@@ -1091,6 +1121,7 @@ function MetaAdsMonitor() {
   const [expandedCampaignId, setExpandedCampaignId] = useState<string | null>(null);
   const [adSetsByCampaign, setAdSetsByCampaign] = useState<Record<string, MetaAdsAdSet[]>>({});
   const [adSetsLoading, setAdSetsLoading] = useState<string | null>(null);
+  const [lightboxImage, setLightboxImage] = useState<string | null>(null);
 
   useEffect(() => {
     fetchMetaAdsConfig()
@@ -1343,6 +1374,7 @@ function MetaAdsMonitor() {
               const insight = campaignInsight(campaign);
               const isExpanded = expandedCampaignId === campaign.id;
               const adSets = adSetsByCampaign[campaign.id];
+              const campaignSummary = campaignSummaryMetrics(insight);
               return (
                 <div key={campaign.id} className={`studio-campaign-block ${isExpanded ? 'expanded' : ''}`}>
                   <button type="button" className="studio-campaign-row" onClick={() => toggleCampaignExpand(campaign.id)}>
@@ -1365,6 +1397,21 @@ function MetaAdsMonitor() {
 
                   {isExpanded && (
                     <div className="studio-adset-panel">
+                      <div className="studio-adset-panel-head">
+                        <p className="studio-targeting-title">Resumo da campanha</p>
+                        <button type="button" className="studio-close-button" title="Fechar" onClick={() => setExpandedCampaignId(null)}><X size={14} /></button>
+                      </div>
+                      <div className="studio-campaign-summary-grid">
+                        <div><small>Investimento</small><strong>{formatCurrency(campaignSummary.spend)}</strong></div>
+                        <div><small>ROAS</small><strong>{campaignSummary.roas.toFixed(2)}x</strong></div>
+                        <div><small>CPC</small><strong>{formatCurrency(campaignSummary.cpc)}</strong></div>
+                        <div><small>CTR</small><strong>{formatPercent(campaignSummary.ctr)}</strong></div>
+                        <div><small>CPM</small><strong>{formatCurrency(campaignSummary.cpm)}</strong></div>
+                        <div><small>Conversões</small><strong>{formatNumber(campaignSummary.conversions)}</strong></div>
+                        <div><small>Cliques</small><strong>{formatNumber(campaignSummary.clicks)}</strong></div>
+                        <div><small>Impressões</small><strong>{formatNumber(campaignSummary.impressions)}</strong></div>
+                      </div>
+
                       {adSetsLoading === campaign.id && <p className="studio-empty-hint">Carregando conjuntos de anúncios...</p>}
                       {adSets && adSets.length === 0 && <p className="studio-empty-hint">Nenhum conjunto de anúncios encontrado.</p>}
                       {adSets?.map((adset) => (
@@ -1401,7 +1448,13 @@ function MetaAdsMonitor() {
                               <div className="studio-creative-grid">
                                 {adset.creatives.map((creative) => (
                                   <div key={creative.adId} className="studio-creative-card">
-                                    {creative.imageUrl ? <img src={creative.imageUrl} alt="" /> : <div className="studio-campaign-thumb"><ImageIcon size={14} /></div>}
+                                    {creative.imageUrl ? (
+                                      <button type="button" className="studio-creative-thumb-button" onClick={() => setLightboxImage(creative.imageUrl)}>
+                                        <img src={creative.imageUrl} alt="" />
+                                      </button>
+                                    ) : (
+                                      <div className="studio-campaign-thumb"><ImageIcon size={14} /></div>
+                                    )}
                                     <div>
                                       <p>{creative.title || creative.adName}</p>
                                       {creative.body && <small>{creative.body}</small>}
@@ -1419,6 +1472,13 @@ function MetaAdsMonitor() {
               );
             })}
           </div>
+        </div>
+      )}
+
+      {lightboxImage && (
+        <div className="studio-lightbox-backdrop" onClick={() => setLightboxImage(null)}>
+          <button type="button" className="studio-lightbox-close" onClick={() => setLightboxImage(null)}><X size={20} /></button>
+          <img src={lightboxImage} alt="" onClick={(event) => event.stopPropagation()} />
         </div>
       )}
 

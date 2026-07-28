@@ -7103,6 +7103,113 @@ html.light .admin-canonical-block-card textarea {
   padding: 10px 4px 4px 24px;
 }
 
+.studio-adset-panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 0 0 -2px;
+}
+
+.studio-adset-panel-head .studio-targeting-title {
+  margin: 0;
+}
+
+.studio-close-button {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  flex-shrink: 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--muted);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.studio-close-button:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text);
+}
+
+.studio-campaign-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 8px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.02);
+  padding: 12px;
+}
+
+.studio-campaign-summary-grid > div {
+  display: grid;
+  gap: 2px;
+}
+
+.studio-campaign-summary-grid small {
+  color: var(--muted);
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.studio-campaign-summary-grid strong {
+  color: var(--text);
+  font-size: 0.86rem;
+  font-weight: 800;
+}
+
+.studio-creative-thumb-button {
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: zoom-in;
+  flex-shrink: 0;
+  line-height: 0;
+}
+
+.studio-lightbox-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  background: rgba(0, 0, 0, 0.82);
+  padding: 32px;
+  cursor: zoom-out;
+}
+
+.studio-lightbox-backdrop img {
+  max-width: min(92vw, 900px);
+  max-height: 88vh;
+  border-radius: 12px;
+  object-fit: contain;
+  cursor: default;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+.studio-lightbox-close {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  cursor: pointer;
+}
+
+.studio-lightbox-close:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+
 .studio-adset-card {
   border: 1px solid var(--line);
   border-radius: 12px;
@@ -18791,8 +18898,13 @@ html.light .studio-recommendation-list p,
 html.light .studio-priority-item,
 html.light .studio-campaign-row,
 html.light .studio-adset-card,
-html.light .studio-creative-card {
+html.light .studio-creative-card,
+html.light .studio-campaign-summary-grid {
   background: var(--surface-2) !important;
+}
+
+html.light .studio-close-button {
+  background: rgba(0, 0, 0, 0.04) !important;
 }
 
 html.light .studio-editor-doc:hover,
