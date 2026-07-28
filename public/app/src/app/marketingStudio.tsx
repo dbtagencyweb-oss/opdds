@@ -4,12 +4,16 @@ import {
   ExternalLink, Target, AlertTriangle, Zap, BarChart2, Hash, Sparkles,
   FolderOpen, Calendar, Instagram, MessageCircle, Mail, Video, Cloud, Wand2,
   Layers, Eye, MousePointer, ShoppingCart, DollarSign, BookOpen, Image as ImageIcon,
-  RefreshCw, Radio, TrendingUp, Percent, Users2, MonitorSmartphone,
+  RefreshCw, Radio, TrendingUp, Percent, Users2, MonitorSmartphone, ChevronRight,
 } from 'lucide-react';
 import {
-  fetchMetaAdsConfig, fetchMetaAdsCampaigns, fetchMetaAdsAdvisor,
-  type MetaAdsConfig, type MetaAdsCampaign, type MetaAdsAdvisorResponse,
+  fetchMetaAdsConfig, fetchMetaAdsCampaigns, fetchMetaAdsAdvisor, fetchMetaAdsAdSets,
+  type MetaAdsConfig, type MetaAdsCampaign, type MetaAdsAdvisorResponse, type MetaAdsAdSet,
 } from '../services/auth';
+import {
+  buildMarketingDrafts, marketingProductLabels, marketingGoalLabels, marketingProductAngles,
+  type MarketingProduct, type MarketingGoal,
+} from './appConstants';
 
 const TAG_COLORS: Record<string, string> = {
   Criativo: '#b18a66',
@@ -255,6 +259,11 @@ function CopyDocsEditor() {
   const [newName, setNewName] = useState('');
   const [creating, setCreating] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [genProduct, setGenProduct] = useState<MarketingProduct>('book');
+  const [genGoal, setGenGoal] = useState<MarketingGoal>('conversion');
+  const [genAudience, setGenAudience] = useState('pessoas cansadas de tentar vencer performando força');
+  const [genOffer, setGenOffer] = useState('acesso ao app de leitura, Áudios e jornada guiada');
+  const [genObjection, setGenObjection] = useState('não tenho energia para mais um método de autoajuda');
 
   const docIds = Object.keys(docs);
   const currentDoc = active ? docs[active] : null;
@@ -281,6 +290,29 @@ function CopyDocsEditor() {
   const deleteDoc = (id: string) => {
     setDocs((prev) => { const next = { ...prev }; delete next[id]; return next; });
     if (active === id) setActive(null);
+  };
+
+  const generateDraft = () => {
+    if (!active) return;
+    const drafts = buildMarketingDrafts({ product: genProduct, goal: genGoal, audience: genAudience, offer: genOffer, objection: genObjection });
+    const cta = marketingProductAngles[genProduct].cta;
+    setDocs((prev) => ({
+      ...prev,
+      [active]: {
+        ...prev[active],
+        fields: {
+          ...prev[active].fields,
+          hook: drafts.headlines[0],
+          headline: drafts.headlines[2],
+          body: drafts.ads[0],
+          cta: `${cta}.`,
+          email: drafts.email[0],
+        },
+        updatedAt: new Date().toISOString(),
+      },
+    }));
+    setSaved(true);
+    window.setTimeout(() => setSaved(false), 1200);
   };
 
   return (
@@ -327,6 +359,40 @@ function CopyDocsEditor() {
             <div className="studio-editor-doc-head">
               <p>{currentDoc.name}</p>
               {saved && <span className="studio-saved-badge"><CheckCircle2 size={11} /> Salvo</span>}
+            </div>
+            <div className="studio-generator-panel">
+              <p className="studio-generator-title"><Wand2 size={13} /> Gerar rascunho</p>
+              <div className="studio-field-grid">
+                <label>
+                  <span>Produto</span>
+                  <select value={genProduct} onChange={(event) => setGenProduct(event.target.value as MarketingProduct)}>
+                    {Object.entries(marketingProductLabels).map(([key, label]) => <option key={key} value={key}>{label}</option>)}
+                  </select>
+                </label>
+                <label>
+                  <span>Objetivo</span>
+                  <select value={genGoal} onChange={(event) => setGenGoal(event.target.value as MarketingGoal)}>
+                    {Object.entries(marketingGoalLabels).map(([key, label]) => <option key={key} value={key}>{label}</option>)}
+                  </select>
+                </label>
+              </div>
+              <div className="studio-field-grid">
+                <label>
+                  <span>Público</span>
+                  <input value={genAudience} onChange={(event) => setGenAudience(event.target.value)} />
+                </label>
+                <label>
+                  <span>Oferta</span>
+                  <input value={genOffer} onChange={(event) => setGenOffer(event.target.value)} />
+                </label>
+                <label>
+                  <span>Objeção</span>
+                  <input value={genObjection} onChange={(event) => setGenObjection(event.target.value)} />
+                </label>
+              </div>
+              <button type="button" className="studio-primary-button studio-inline-button" onClick={generateDraft}>
+                <Wand2 size={13} /> Gerar e preencher (Hook, Headline, Corpo, CTA, E-mail)
+              </button>
             </div>
             <div className="studio-drive-field">
               <FolderOpen size={14} />
@@ -1015,11 +1081,16 @@ function MetaAdsMonitor() {
   const [savedAccounts, setSavedAccounts] = useLocalStorageState<SavedAdAccount[]>('opdds_studio_ad_accounts', DEFAULT_SAVED_ACCOUNTS);
   const [period, setPeriod] = useState('last_7d');
   const [status, setStatus] = useState('ACTIVE');
+  const [nameFilter, setNameFilter] = useLocalStorageState('opdds_studio_ad_name_filter', '');
   const [campaigns, setCampaigns] = useState<MetaAdsCampaign[]>([]);
+  const [totalBeforeFilter, setTotalBeforeFilter] = useState<number | null>(null);
   const [advisor, setAdvisor] = useState<MetaAdsAdvisorResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [advisorLoading, setAdvisorLoading] = useState(false);
   const [error, setError] = useState('');
+  const [expandedCampaignId, setExpandedCampaignId] = useState<string | null>(null);
+  const [adSetsByCampaign, setAdSetsByCampaign] = useState<Record<string, MetaAdsAdSet[]>>({});
+  const [adSetsLoading, setAdSetsLoading] = useState<string | null>(null);
 
   useEffect(() => {
     fetchMetaAdsConfig()
@@ -1034,8 +1105,9 @@ function MetaAdsMonitor() {
     setLoading(true);
     setError('');
     try {
-      const response = await fetchMetaAdsCampaigns({ period, status, accountId: accountId || undefined });
+      const response = await fetchMetaAdsCampaigns({ period, status, accountId: accountId || undefined, q: nameFilter || undefined });
       setCampaigns(response.data || []);
+      setTotalBeforeFilter(response.meta?.totalBeforeFilter ?? null);
     } catch (err: any) {
       setError(err?.message || 'Não foi possível buscar as campanhas.');
       setCampaigns([]);
@@ -1048,7 +1120,7 @@ function MetaAdsMonitor() {
     setAdvisorLoading(true);
     setError('');
     try {
-      const response = await fetchMetaAdsAdvisor({ period, status, accountId: accountId || undefined });
+      const response = await fetchMetaAdsAdvisor({ period, status, accountId: accountId || undefined, q: nameFilter || undefined });
       setAdvisor(response);
     } catch (err: any) {
       setError(err?.message || 'Não foi possível gerar a análise.');
@@ -1058,6 +1130,8 @@ function MetaAdsMonitor() {
   };
 
   const handleSearch = () => {
+    setExpandedCampaignId(null);
+    setAdSetsByCampaign({});
     loadCampaigns();
     loadAdvisor();
   };
@@ -1077,6 +1151,24 @@ function MetaAdsMonitor() {
 
   const handleRemoveSavedAccount = (id: string) => {
     setSavedAccounts((prev) => prev.filter((account) => account.id !== id));
+  };
+
+  const toggleCampaignExpand = async (campaignId: string) => {
+    if (expandedCampaignId === campaignId) {
+      setExpandedCampaignId(null);
+      return;
+    }
+    setExpandedCampaignId(campaignId);
+    if (adSetsByCampaign[campaignId]) return;
+    setAdSetsLoading(campaignId);
+    try {
+      const response = await fetchMetaAdsAdSets(campaignId, { period, accountId: accountId || undefined });
+      setAdSetsByCampaign((prev) => ({ ...prev, [campaignId]: response.data || [] }));
+    } catch (err: any) {
+      setError(err?.message || 'Não foi possível buscar os conjuntos de anúncios.');
+    } finally {
+      setAdSetsLoading(null);
+    }
   };
 
   const aiSummary = advisor?.ai?.summary || advisor?.summary;
@@ -1150,10 +1242,20 @@ function MetaAdsMonitor() {
             {STATUS_OPTIONS.map((option) => <option key={option.id} value={option.id}>{option.label}</option>)}
           </select>
         </label>
+        <label>
+          <span>Filtrar por texto no nome</span>
+          <input value={nameFilter} onChange={(event) => setNameFilter(event.target.value)} placeholder="ex.: Desacreditados, OPDDS..." />
+        </label>
         <button type="button" className="studio-primary-button" onClick={handleSearch} disabled={loading || advisorLoading}>
           <RefreshCw size={13} className={loading || advisorLoading ? 'is-spinning' : ''} /> Buscar
         </button>
       </div>
+
+      {!!nameFilter && totalBeforeFilter !== null && (
+        <p className="studio-empty-hint">
+          Mostrando {campaigns.length} de {totalBeforeFilter} campanha(s) da conta — filtradas por "{nameFilter}". Ajuste o texto se o nome das campanhas desse produto for diferente.
+        </p>
+      )}
 
       {error && <div className="studio-alert-card"><p><AlertTriangle size={14} /> {error}</p></div>}
 
@@ -1235,26 +1337,84 @@ function MetaAdsMonitor() {
 
       {campaigns.length > 0 && (
         <div className="studio-card">
-          <p className="studio-card-title">Campanhas</p>
+          <p className="studio-card-title">Campanhas <small className="studio-campaign-hint">clique pra ver conjuntos, públicos e criativos</small></p>
           <div className="studio-campaign-list">
             {campaigns.map((campaign) => {
               const insight = campaignInsight(campaign);
+              const isExpanded = expandedCampaignId === campaign.id;
+              const adSets = adSetsByCampaign[campaign.id];
               return (
-                <div key={campaign.id} className="studio-campaign-row">
-                  {campaign.creative?.image_url ? (
-                    <img src={campaign.creative.image_url} alt="" />
-                  ) : (
-                    <div className="studio-campaign-thumb"><ImageIcon size={16} /></div>
+                <div key={campaign.id} className={`studio-campaign-block ${isExpanded ? 'expanded' : ''}`}>
+                  <button type="button" className="studio-campaign-row" onClick={() => toggleCampaignExpand(campaign.id)}>
+                    {campaign.creative?.image_url ? (
+                      <img src={campaign.creative.image_url} alt="" />
+                    ) : (
+                      <div className="studio-campaign-thumb"><ImageIcon size={16} /></div>
+                    )}
+                    <div>
+                      <p>{campaign.name}</p>
+                      <small>{campaign.objective} · {campaign.effective_status || campaign.status}</small>
+                    </div>
+                    <div className="studio-campaign-metrics">
+                      <span>{formatCurrency(Number(insight.spend))}</span>
+                      <span>{formatPercent(Number(insight.ctr))}</span>
+                      <span>{formatCurrency(Number(insight.cpc))}</span>
+                    </div>
+                    <ChevronRight size={15} className="studio-campaign-chevron" />
+                  </button>
+
+                  {isExpanded && (
+                    <div className="studio-adset-panel">
+                      {adSetsLoading === campaign.id && <p className="studio-empty-hint">Carregando conjuntos de anúncios...</p>}
+                      {adSets && adSets.length === 0 && <p className="studio-empty-hint">Nenhum conjunto de anúncios encontrado.</p>}
+                      {adSets?.map((adset) => (
+                        <div key={adset.id} className="studio-adset-card">
+                          <div className="studio-adset-head">
+                            <p>{adset.name}</p>
+                            <small>{adset.optimizationGoal} · {adset.status}</small>
+                          </div>
+                          <div className="studio-adset-metrics">
+                            <span>{formatCurrency(adset.spend)}</span>
+                            <span>{formatPercent(adset.ctr)}</span>
+                            <span>{formatCurrency(adset.cpc)}</span>
+                          </div>
+
+                          {adset.targeting && (
+                            <div className="studio-targeting">
+                              <p className="studio-targeting-title"><Users2 size={12} /> Público</p>
+                              <div className="studio-targeting-rows">
+                                {(adset.targeting.ageMin || adset.targeting.ageMax) && (
+                                  <span>Idade: {adset.targeting.ageMin || 13}–{adset.targeting.ageMax || '65+'}</span>
+                                )}
+                                <span>Gênero: {adset.targeting.genders}</span>
+                                {adset.targeting.locations.length > 0 && <span>Local: {adset.targeting.locations.join(', ')}</span>}
+                                {adset.targeting.customAudiences.length > 0 && <span>Públicos personalizados: {adset.targeting.customAudiences.join(', ')}</span>}
+                                {adset.targeting.excludedAudiences.length > 0 && <span>Excluídos: {adset.targeting.excludedAudiences.join(', ')}</span>}
+                                {adset.targeting.interests.length > 0 && <span>Interesses: {adset.targeting.interests.join(', ')}</span>}
+                              </div>
+                            </div>
+                          )}
+
+                          {adset.creatives.length > 0 && (
+                            <div className="studio-adset-creatives">
+                              <p className="studio-targeting-title"><ImageIcon size={12} /> Criativos</p>
+                              <div className="studio-creative-grid">
+                                {adset.creatives.map((creative) => (
+                                  <div key={creative.adId} className="studio-creative-card">
+                                    {creative.imageUrl ? <img src={creative.imageUrl} alt="" /> : <div className="studio-campaign-thumb"><ImageIcon size={14} /></div>}
+                                    <div>
+                                      <p>{creative.title || creative.adName}</p>
+                                      {creative.body && <small>{creative.body}</small>}
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
                   )}
-                  <div>
-                    <p>{campaign.name}</p>
-                    <small>{campaign.objective} · {campaign.effective_status || campaign.status}</small>
-                  </div>
-                  <div className="studio-campaign-metrics">
-                    <span>{formatCurrency(Number(insight.spend))}</span>
-                    <span>{formatPercent(Number(insight.ctr))}</span>
-                    <span>{formatCurrency(Number(insight.cpc))}</span>
-                  </div>
                 </div>
               );
             })}

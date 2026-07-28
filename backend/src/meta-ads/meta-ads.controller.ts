@@ -1,4 +1,4 @@
-import { Controller, Get, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common';
 import { AdminGuard } from '../auth/admin.guard';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { MetaAdsService } from './meta-ads.service';
@@ -21,6 +21,11 @@ export class MetaAdsController {
   @Get('campaigns')
   getCampaigns(@Query() query: any) {
     return this.metaAds.getCampaigns(query);
+  }
+
+  @Get('campaigns/:campaignId/adsets')
+  getAdSets(@Param('campaignId') campaignId: string, @Query() query: any) {
+    return this.metaAds.getAdSets(campaignId, query);
   }
 
   @Get('audiences')

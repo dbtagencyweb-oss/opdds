@@ -151,6 +151,7 @@ export class MetaAdsService {
     const period = safePeriod(query?.period);
     const status = safeStatus(query?.status);
     const limit = numberParam(query?.limit, 50, 200);
+    const nameFilter = String(query?.q || '').trim().toLowerCase();
     const effectiveStatus = status === 'ALL' ? ['ACTIVE', 'PAUSED', 'ARCHIVED', 'WITH_ISSUES'] : [status];
 
     const insightFields = ['spend', 'impressions', 'clicks', 'cpc', 'cpm', 'ctr', 'reach', 'purchase_roas', 'actions', 'action_values', 'frequency'].join(',');
@@ -165,13 +166,20 @@ export class MetaAdsService {
       limit,
     });
 
-    const campaigns = Array.isArray(data?.data) ? data.data : [];
+    const allCampaigns = Array.isArray(data?.data) ? data.data : [];
+    const campaigns = nameFilter
+      ? allCampaigns.filter((campaign: any) => String(campaign.name || '').toLowerCase().includes(nameFilter))
+      : allCampaigns;
     const creativeMap = await this.getCampaignCreativeMap(accountId, token, campaigns.map((campaign: any) => campaign.id));
 
     return {
       data: campaigns.map((campaign: any) => ({ ...campaign, ...(creativeMap[campaign.id] || {}) })),
       paging: data?.paging || null,
-      meta: { accountId, period, status, graphVersion: GRAPH_VERSION, fetchedAt: new Date().toISOString() },
+      meta: {
+        accountId, period, status, graphVersion: GRAPH_VERSION, fetchedAt: new Date().toISOString(),
+        totalBeforeFilter: allCampaigns.length,
+        q: nameFilter || null,
+      },
     };
   }
 
@@ -194,6 +202,108 @@ export class MetaAdsService {
       })),
       paging: data?.paging || null,
       meta: { accountId, graphVersion: GRAPH_VERSION, fetchedAt: new Date().toISOString() },
+    };
+  }
+
+  private summarizeTargeting(targeting: any) {
+    if (!targeting) return null;
+
+    const genderMap: Record<number, string> = { 1: 'Homens', 2: 'Mulheres' };
+    const genders = Array.isArray(targeting.genders) && targeting.genders.length
+      ? targeting.genders.map((code: number) => genderMap[code] || String(code)).join(', ')
+      : 'Todos';
+
+    const locations = [
+      ...(targeting.geo_locations?.countries || []),
+      ...(targeting.geo_locations?.regions || []).map((item: any) => item.name),
+      ...(targeting.geo_locations?.cities || []).map((item: any) => item.name),
+    ].filter(Boolean);
+
+    const customAudiences = (targeting.custom_audiences || []).map((item: any) => item.name || item.id);
+    const excludedAudiences = (targeting.excluded_custom_audiences || []).map((item: any) => item.name || item.id);
+    const interests = (targeting.flexible_spec || [])
+      .flatMap((spec: any) => [...(spec.interests || []), ...(spec.behaviors || [])])
+      .map((item: any) => item.name || item.id);
+
+    return {
+      ageMin: targeting.age_min ?? null,
+      ageMax: targeting.age_max ?? null,
+      genders,
+      locations,
+      customAudiences,
+      excludedAudiences,
+      interests,
+    };
+  }
+
+  private async getAdSetCreatives(accountId: string, token: string, adsetIds: string[]) {
+    const ids = adsetIds.filter(Boolean).slice(0, 100);
+    if (!ids.length) return {} as Record<string, any[]>;
+
+    try {
+      const data = await this.graphGet(`${accountId}/ads`, token, {
+        fields: 'id,name,effective_status,adset{id},creative{id,name,title,body,image_url,thumbnail_url,object_story_spec,asset_feed_spec}',
+        filtering: JSON.stringify([{ field: 'adset.id', operator: 'IN', value: ids }]),
+        limit: 200,
+      });
+
+      return (Array.isArray(data?.data) ? data.data : []).reduce((acc: Record<string, any[]>, ad: any) => {
+        const adsetId = ad?.adset?.id;
+        if (!adsetId) return acc;
+        const creative = ad?.creative || {};
+        acc[adsetId] = acc[adsetId] || [];
+        acc[adsetId].push({
+          adId: ad.id,
+          adName: ad.name,
+          status: ad.effective_status,
+          title: creative.title || creative.name || '',
+          body: creative.body || '',
+          imageUrl: this.pickCreativeImage(creative),
+        });
+        return acc;
+      }, {});
+    } catch (error) {
+      this.logger.warn(`Não foi possível buscar criativos por conjunto de anúncios: ${error instanceof Error ? error.message : error}`);
+      return {};
+    }
+  }
+
+  async getAdSets(campaignId: string, query: any) {
+    if (!campaignId) {
+      throw new HttpException({ error: 'campaignId é obrigatório', code: 'CAMPAIGN_ID_MISSING' }, HttpStatus.BAD_REQUEST);
+    }
+    const { token, accountId } = this.assertConfigured(query?.accountId);
+    const period = safePeriod(query?.period);
+
+    const insightFields = ['spend', 'impressions', 'clicks', 'cpc', 'ctr'].join(',');
+    const fields = [
+      'id', 'name', 'status', 'effective_status', 'optimization_goal', 'daily_budget', 'lifetime_budget',
+      'targeting',
+      `insights.date_preset(${period}){${insightFields}}`,
+    ].join(',');
+
+    const data = await this.graphGet(`${campaignId}/adsets`, token, { fields, limit: 100 });
+    const adsets = Array.isArray(data?.data) ? data.data : [];
+    const creativesByAdset = await this.getAdSetCreatives(accountId, token, adsets.map((adset: any) => adset.id));
+
+    return {
+      data: adsets.map((adset: any) => {
+        const insight = adset?.insights?.data?.[0] || {};
+        return {
+          id: adset.id,
+          name: adset.name,
+          status: adset.effective_status || adset.status,
+          optimizationGoal: adset.optimization_goal,
+          spend: Number(insight.spend || 0),
+          impressions: Number(insight.impressions || 0),
+          clicks: Number(insight.clicks || 0),
+          ctr: Number(insight.ctr || 0),
+          cpc: Number(insight.cpc || 0),
+          targeting: this.summarizeTargeting(adset.targeting),
+          creatives: creativesByAdset[adset.id] || [],
+        };
+      }),
+      meta: { campaignId, accountId, period, graphVersion: GRAPH_VERSION, fetchedAt: new Date().toISOString() },
     };
   }
 

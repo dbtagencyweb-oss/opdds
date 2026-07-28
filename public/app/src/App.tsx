@@ -184,9 +184,6 @@ import {
   SensoryTrack,
   SaveFeedback,
   AdminAudioProductionStatus,
-  MarketingGoal,
-  MarketingChannel,
-  MarketingProduct,
   ADMIN_AUDIO_PRODUCTION_KEY,
   ADMIN_AUDIO_ORDER_KEY,
   ADMIN_SUPPORT_AUDIO_KEY,
@@ -200,11 +197,6 @@ import {
   defaultSupportAudios,
   defaultReadingTracks,
   defaultSensoryPlaylist,
-  marketingGoalLabels,
-  marketingChannelLabels,
-  marketingProductLabels,
-  marketingProductAngles,
-  marketingGoalAngles,
   audioProductionLabels,
   workbookTransitionPhrases,
   BeforeInstallPromptEvent,
@@ -338,7 +330,6 @@ export function App() {
   const [adminMessage, setAdminMessage] = useState('');
   const [adminSection, setAdminSection] = useState<AdminSection>('overview');
   const [adminBookTab, setAdminBookTab] = useState<'canonical' | 'audio'>('canonical');
-  const [adminCopyTab, setAdminCopyTab] = useState<'quick' | 'studio'>('quick');
   const [adminCanonicalChapterId, setAdminCanonicalChapterId] = useState(bookChapters[0]?.id || '');
   const [adminCanonicalDrafts, setAdminCanonicalDrafts] = useState<Record<string, CanonicalBookBlock[]>>(() => {
     try {
@@ -348,13 +339,6 @@ export function App() {
       return {};
     }
   });
-  const [marketingGoal, setMarketingGoal] = useState<MarketingGoal>('conversion');
-  const [marketingProduct, setMarketingProduct] = useState<MarketingProduct>('book');
-  const [marketingChannel, setMarketingChannel] = useState<MarketingChannel>('ads');
-  const [marketingAudience, setMarketingAudience] = useState('pessoas cansadas de tentar vencer performando força');
-  const [marketingOffer, setMarketingOffer] = useState('acesso ao app de leitura, Áudios e jornada guiada');
-  const [marketingObjection, setMarketingObjection] = useState('não tenho energia para mais um método de autoajuda');
-  const [marketingCopied, setMarketingCopied] = useState('');
   const [bookAudioOverrides, setBookAudioOverrides] = useState<Record<string, { chapterId: string; sectionKey: string; label: string; url: string; coverUrl?: string | null }>>({});
   const [upgradeModal, setUpgradeModal] = useState<UpgradeKey | null>(null);
   const [token, setToken] = useState('');
@@ -743,42 +727,6 @@ export function App() {
     [bookAudioOverrides, selectedChapter],
   );
 
-  const marketingDrafts = useMemo(() => {
-    const product = marketingProductAngles[marketingProduct];
-    const productName = marketingProductLabels[marketingProduct];
-    const goalAngle = marketingGoalAngles[marketingGoal];
-    const audience = marketingAudience.trim() || 'pessoas desacreditadas que continuam tentando';
-    const offer = marketingOffer.trim() || product.mechanism;
-    const objection = marketingObjection.trim() || 'não quero mais uma promessa vazia';
-    const baseHook = `Não é sobre vencer mais rápido. É sobre ${product.promise}.`;
-    const bridge = `Para ${audience}, ${productName} organiza uma travessia ${goalAngle}: ${product.mechanism}.`;
-    const objectionTurn = `Se a objeção é "${objection}", a resposta não é pressão. É presença, ritmo e um próximo passo pequeno.`;
-
-    return {
-      headlines: [
-        baseHook,
-        `Um app para quem continuou mesmo quando ninguém mais acreditava.`,
-        `${productName}: ${product.promise}.`,
-      ],
-      ads: [
-        `${baseHook}\n\n${bridge}\n\n${objectionTurn}\n\n${product.cta}.`,
-        `Você não precisa transformar cansaço em espetáculo para continuar.\n\n${productName} foi criado para ${product.promise}, usando ${offer}.\n\n${product.cta}.`,
-      ],
-      whatsapp: [
-        `Oi. Pensei em você por causa disso: ${baseHook}\n\nO ${productName} junta ${offer} para quem precisa de presença, não de cobrança.\n\nQuer que eu te mande o acesso?`,
-        `Passando aqui com uma proposta simples: se você está em fase de reconstrução, talvez o primeiro passo não seja acelerar.\n\nÉ ${product.promise}.\n\n${product.cta}.`,
-      ],
-      email: [
-        `Assunto: não é mais um método para vencer\n\n${baseHook}\n\n${bridge}\n\n${objectionTurn}\n\nO convite é simples: entrar, ler no seu ritmo e continuar sem se abandonar.\n\n${product.cta}.`,
-      ],
-      salesPage: [
-        `Promessa: ${baseHook}\n\nPara quem é: ${audience}.\n\nO que recebe: ${offer}.\n\nPor que funciona: ${product.mechanism} criam uma jornada de leitura, escuta e escrita sem exigir performance.\n\nObjeção principal: ${objection}.\n\nResposta: aqui não existe pressa nem nota. Existe continuidade.\n\nCTA: ${product.cta}.`,
-      ],
-      onboarding: [
-        `Bem-vindo ao ${productName}.\n\nAqui você não precisa provar nada. Use ${offer} para encontrar um ponto de presença hoje.\n\nComece pequeno: leia uma página, ouça uma parte ou escreva uma resposta honesta.`,
-      ],
-    };
-  }, [marketingAudience, marketingChannel, marketingGoal, marketingObjection, marketingOffer, marketingProduct]);
 
   const audiobookQueue = useMemo<AudioQueueItem[]>(
     () => bookChapters.flatMap((chapter, chapterIndex) =>
@@ -1867,12 +1815,6 @@ export function App() {
   const parseOptionalDays = (value: string) => {
     const days = Number(value);
     return Number.isFinite(days) && days > 0 ? Math.floor(days) : undefined;
-  };
-
-  const copyMarketingText = async (key: string, text: string) => {
-    await navigator.clipboard?.writeText(text);
-    setMarketingCopied(key);
-    window.setTimeout(() => setMarketingCopied((current) => current === key ? '' : current), 1600);
   };
 
   const handleCreateAdminInvite = async () => {
@@ -5463,109 +5405,7 @@ export function App() {
       </section>
       )}
 
-      {adminSection === 'copy' && (
-        <>
-        <div className="admin-book-subnav" role="tablist" aria-label="Central de marketing">
-          <button className={adminCopyTab === 'quick' ? 'active' : ''} onClick={() => setAdminCopyTab('quick')}>
-            <NotebookPen size={16} />
-            Gerador rápido
-          </button>
-          <button className={adminCopyTab === 'studio' ? 'active' : ''} onClick={() => setAdminCopyTab('studio')}>
-            <Sparkles size={16} />
-            Estúdio de campanhas
-          </button>
-        </div>
-        {adminCopyTab === 'quick' && (
-        <section className="admin-copy-grid">
-          <article className="account-card admin-panel">
-            <div className="admin-section-head compact">
-              <div>
-                <p className="kicker">Copys</p>
-                <h2>Central de marketing</h2>
-              </div>
-              <span>{marketingProductLabels[marketingProduct]}</span>
-            </div>
-            <p>Monte rapidamente textos para anúncios, WhatsApp, e-mail, página de vendas e onboarding com o tom do projeto.</p>
-            <div className="admin-copy-builder">
-              <label>
-                <span>Produto</span>
-                <select value={marketingProduct} onChange={(event) => setMarketingProduct(event.target.value as MarketingProduct)}>
-                  {Object.entries(marketingProductLabels).map(([key, label]) => <option key={key} value={key}>{label}</option>)}
-                </select>
-              </label>
-              <label>
-                <span>Objetivo</span>
-                <select value={marketingGoal} onChange={(event) => setMarketingGoal(event.target.value as MarketingGoal)}>
-                  {Object.entries(marketingGoalLabels).map(([key, label]) => <option key={key} value={key}>{label}</option>)}
-                </select>
-              </label>
-              <label>
-                <span>Canal</span>
-                <select value={marketingChannel} onChange={(event) => setMarketingChannel(event.target.value as MarketingChannel)}>
-                  {Object.entries(marketingChannelLabels).map(([key, label]) => <option key={key} value={key}>{label}</option>)}
-                </select>
-              </label>
-              <label>
-                <span>Público</span>
-                <textarea value={marketingAudience} onChange={(event) => setMarketingAudience(event.target.value)} />
-              </label>
-              <label>
-                <span>Oferta / entrega</span>
-                <textarea value={marketingOffer} onChange={(event) => setMarketingOffer(event.target.value)} />
-              </label>
-              <label>
-                <span>Objeção principal</span>
-                <textarea value={marketingObjection} onChange={(event) => setMarketingObjection(event.target.value)} />
-              </label>
-            </div>
-          </article>
-
-          <article className="account-card admin-panel">
-            <div className="admin-section-head compact">
-              <div>
-                <p className="kicker">{marketingChannelLabels[marketingChannel]}</p>
-                <h2>Peças prontas</h2>
-              </div>
-              <Button variant="ghost" onClick={() => copyMarketingText('all', marketingDrafts[marketingChannel].join('\n\n---\n\n'))}>
-                <Copy size={15} /> {marketingCopied === 'all' ? 'Copiado' : 'Copiar tudo'}
-              </Button>
-            </div>
-            <div className="admin-copy-output">
-              {marketingDrafts[marketingChannel].map((text, index) => {
-                const key = `${marketingChannel}-${index}`;
-                return (
-                  <article key={key}>
-                    <div>
-                      <strong>Variação {index + 1}</strong>
-                      <button type="button" onClick={() => copyMarketingText(key, text)}>
-                        <Copy size={14} /> {marketingCopied === key ? 'Copiado' : 'Copiar'}
-                      </button>
-                    </div>
-                    <pre>{text}</pre>
-                  </article>
-                );
-              })}
-            </div>
-          </article>
-
-          <article className="account-card admin-panel admin-copy-library">
-            <p className="kicker">Headlines e ângulos</p>
-            <h2>Banco rápido</h2>
-            <div className="admin-copy-list">
-              {marketingDrafts.headlines.map((item, index) => (
-                <button key={item} type="button" onClick={() => copyMarketingText(`headline-${index}`, item)}>
-                  <NotebookPen size={16} />
-                  <span>{item}</span>
-                  <small>{marketingCopied === `headline-${index}` ? 'copiado' : 'copiar'}</small>
-                </button>
-              ))}
-            </div>
-          </article>
-        </section>
-        )}
-        {adminCopyTab === 'studio' && <MarketingStudioTabs />}
-        </>
-      )}
+      {adminSection === 'copy' && <MarketingStudioTabs />}
     </div>
   );
 

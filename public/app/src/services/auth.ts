@@ -402,16 +402,55 @@ export async function fetchMetaAdsConfig() {
   return apiRequest<MetaAdsConfig>('/api/admin/meta-ads/config', { token });
 }
 
-export async function fetchMetaAdsCampaigns(params: { period?: string; status?: string; accountId?: string } = {}) {
+export async function fetchMetaAdsCampaigns(params: { period?: string; status?: string; accountId?: string; q?: string } = {}) {
   const token = getStoredAuthToken();
   const query = new URLSearchParams(Object.entries(params).filter(([, value]) => Boolean(value)) as [string, string][]).toString();
-  return apiRequest<MetaAdsCampaignsResponse>(`/api/admin/meta-ads/campaigns${query ? `?${query}` : ''}`, { token });
+  return apiRequest<MetaAdsCampaignsResponse & { meta: MetaAdsCampaignsResponse['meta'] & { totalBeforeFilter?: number } }>(`/api/admin/meta-ads/campaigns${query ? `?${query}` : ''}`, { token });
 }
 
-export async function fetchMetaAdsAdvisor(params: { period?: string; status?: string; accountId?: string } = {}) {
+export async function fetchMetaAdsAdvisor(params: { period?: string; status?: string; accountId?: string; q?: string } = {}) {
   const token = getStoredAuthToken();
   const query = new URLSearchParams(Object.entries(params).filter(([, value]) => Boolean(value)) as [string, string][]).toString();
   return apiRequest<MetaAdsAdvisorResponse>(`/api/admin/meta-ads/advisor${query ? `?${query}` : ''}`, { token });
+}
+
+export type MetaAdsAdSetTargeting = {
+  ageMin: number | null;
+  ageMax: number | null;
+  genders: string;
+  locations: string[];
+  customAudiences: string[];
+  excludedAudiences: string[];
+  interests: string[];
+};
+
+export type MetaAdsAdSetCreative = {
+  adId: string;
+  adName: string;
+  status?: string;
+  title: string;
+  body: string;
+  imageUrl: string;
+};
+
+export type MetaAdsAdSet = {
+  id: string;
+  name: string;
+  status?: string;
+  optimizationGoal?: string;
+  spend: number;
+  impressions: number;
+  clicks: number;
+  ctr: number;
+  cpc: number;
+  targeting: MetaAdsAdSetTargeting | null;
+  creatives: MetaAdsAdSetCreative[];
+};
+
+export async function fetchMetaAdsAdSets(campaignId: string, params: { period?: string; accountId?: string } = {}) {
+  const token = getStoredAuthToken();
+  const query = new URLSearchParams(Object.entries(params).filter(([, value]) => Boolean(value)) as [string, string][]).toString();
+  return apiRequest<{ data: MetaAdsAdSet[]; meta: Record<string, any> }>(`/api/admin/meta-ads/campaigns/${encodeURIComponent(campaignId)}/adsets${query ? `?${query}` : ''}`, { token });
 }
 
 export async function publishAdminBookAudio(input: { chapterId: string; sectionKey: string; label: string; url: string; coverUrl?: string }) {

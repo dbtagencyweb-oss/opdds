@@ -5952,6 +5952,35 @@ html.light .admin-canonical-block-card textarea {
   line-height: 1.5;
 }
 
+.studio-generator-panel {
+  display: grid;
+  gap: 10px;
+  border: 1px solid rgba(177, 138, 102, 0.22);
+  border-radius: 14px;
+  background: rgba(177, 138, 102, 0.06);
+  padding: 14px;
+}
+
+.studio-generator-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  color: var(--accent);
+  font-size: 0.76rem;
+  font-weight: 800;
+}
+
+.studio-generator-panel .studio-field-grid input {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.18);
+  color: var(--text);
+  font-size: 0.78rem;
+  padding: 9px 10px;
+}
+
 /* Sub-tabs (brainstorm) */
 
 .studio-subtabs {
@@ -7031,6 +7060,7 @@ html.light .admin-canonical-block-card textarea {
 }
 
 .studio-campaign-row {
+  width: 100%;
   display: flex;
   align-items: center;
   gap: 12px;
@@ -7038,6 +7068,153 @@ html.light .admin-canonical-block-card textarea {
   border-radius: 12px;
   background: rgba(255, 255, 255, 0.02);
   padding: 10px 12px;
+  color: inherit;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.studio-campaign-hint {
+  margin-left: 8px;
+  color: var(--muted);
+  font-size: 0.68rem;
+  font-weight: 600;
+  text-transform: none;
+}
+
+.studio-campaign-block.expanded .studio-campaign-row {
+  border-color: var(--accent);
+}
+
+.studio-campaign-chevron {
+  flex-shrink: 0;
+  color: var(--muted);
+  transition: transform 0.15s ease;
+}
+
+.studio-campaign-block.expanded .studio-campaign-chevron {
+  transform: rotate(90deg);
+  color: var(--accent);
+}
+
+.studio-adset-panel {
+  display: grid;
+  gap: 10px;
+  padding: 10px 4px 4px 24px;
+}
+
+.studio-adset-card {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.015);
+  padding: 12px;
+  display: grid;
+  gap: 8px;
+}
+
+.studio-adset-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.studio-adset-head p {
+  margin: 0;
+  color: var(--text);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.studio-adset-head small {
+  color: var(--muted);
+  font-size: 0.68rem;
+  flex-shrink: 0;
+}
+
+.studio-adset-metrics {
+  display: flex;
+  gap: 14px;
+}
+
+.studio-adset-metrics span {
+  color: var(--text);
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+
+.studio-targeting-title {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin: 0 0 4px;
+  color: var(--accent);
+  font-size: 0.66rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.studio-targeting-rows {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.studio-targeting-rows span {
+  color: var(--muted);
+  font-size: 0.7rem;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 8px;
+  padding: 3px 8px;
+}
+
+.studio-creative-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 8px;
+}
+
+.studio-creative-card {
+  display: flex;
+  gap: 8px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.02);
+  padding: 8px;
+}
+
+.studio-creative-card img,
+.studio-creative-card .studio-campaign-thumb {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  border-radius: 7px;
+  object-fit: cover;
+}
+
+.studio-creative-card > div {
+  min-width: 0;
+}
+
+.studio-creative-card p {
+  margin: 0;
+  color: var(--text);
+  font-size: 0.72rem;
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.studio-creative-card small {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 0.68rem;
+  line-height: 1.3;
 }
 
 .studio-campaign-row img,
@@ -18612,7 +18789,9 @@ html.light .studio-calendar-day,
 html.light .studio-calendar-head,
 html.light .studio-recommendation-list p,
 html.light .studio-priority-item,
-html.light .studio-campaign-row {
+html.light .studio-campaign-row,
+html.light .studio-adset-card,
+html.light .studio-creative-card {
   background: var(--surface-2) !important;
 }
 

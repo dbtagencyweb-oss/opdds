@@ -183,6 +183,60 @@ export const marketingGoalAngles: Record<MarketingGoal, string> = {
   community: 'para quem não quer atravessar a obra sozinho depois do primeiro impacto',
 };
 
+export type MarketingDraftInput = {
+  product: MarketingProduct;
+  goal: MarketingGoal;
+  audience?: string;
+  offer?: string;
+  objection?: string;
+};
+
+export type MarketingDrafts = {
+  headlines: string[];
+  ads: string[];
+  whatsapp: string[];
+  email: string[];
+  salesPage: string[];
+  onboarding: string[];
+};
+
+export function buildMarketingDrafts({ product: productKey, goal, audience: audienceInput, offer: offerInput, objection: objectionInput }: MarketingDraftInput): MarketingDrafts {
+  const product = marketingProductAngles[productKey];
+  const productName = marketingProductLabels[productKey];
+  const goalAngle = marketingGoalAngles[goal];
+  const audience = (audienceInput || '').trim() || 'pessoas desacreditadas que continuam tentando';
+  const offer = (offerInput || '').trim() || product.mechanism;
+  const objection = (objectionInput || '').trim() || 'não quero mais uma promessa vazia';
+  const baseHook = `Não é sobre vencer mais rápido. É sobre ${product.promise}.`;
+  const bridge = `Para ${audience}, ${productName} organiza uma travessia ${goalAngle}: ${product.mechanism}.`;
+  const objectionTurn = `Se a objeção é "${objection}", a resposta não é pressão. É presença, ritmo e um próximo passo pequeno.`;
+
+  return {
+    headlines: [
+      baseHook,
+      `Um app para quem continuou mesmo quando ninguém mais acreditava.`,
+      `${productName}: ${product.promise}.`,
+    ],
+    ads: [
+      `${baseHook}\n\n${bridge}\n\n${objectionTurn}\n\n${product.cta}.`,
+      `Você não precisa transformar cansaço em espetáculo para continuar.\n\n${productName} foi criado para ${product.promise}, usando ${offer}.\n\n${product.cta}.`,
+    ],
+    whatsapp: [
+      `Oi. Pensei em você por causa disso: ${baseHook}\n\nO ${productName} junta ${offer} para quem precisa de presença, não de cobrança.\n\nQuer que eu te mande o acesso?`,
+      `Passando aqui com uma proposta simples: se você está em fase de reconstrução, talvez o primeiro passo não seja acelerar.\n\nÉ ${product.promise}.\n\n${product.cta}.`,
+    ],
+    email: [
+      `Assunto: não é mais um método para vencer\n\n${baseHook}\n\n${bridge}\n\n${objectionTurn}\n\nO convite é simples: entrar, ler no seu ritmo e continuar sem se abandonar.\n\n${product.cta}.`,
+    ],
+    salesPage: [
+      `Promessa: ${baseHook}\n\nPara quem é: ${audience}.\n\nO que recebe: ${offer}.\n\nPor que funciona: ${product.mechanism} criam uma jornada de leitura, escuta e escrita sem exigir performance.\n\nObjeção principal: ${objection}.\n\nResposta: aqui não existe pressa nem nota. Existe continuidade.\n\nCTA: ${product.cta}.`,
+    ],
+    onboarding: [
+      `Bem-vindo ao ${productName}.\n\nAqui você não precisa provar nada. Use ${offer} para encontrar um ponto de presença hoje.\n\nComece pequeno: leia uma página, ouça uma parte ou escreva uma resposta honesta.`,
+    ],
+  };
+}
+
 export const audioProductionLabels: Record<AdminAudioProductionStatus, string> = {
   ok: 'OK',
   review: 'Revisar',
