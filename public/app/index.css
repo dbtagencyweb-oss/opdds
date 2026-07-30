@@ -3488,11 +3488,6 @@ button:active {
   color: var(--gold);
 }
 
-.community-cta {
-  align-items: center;
-  margin-top: 18px;
-}
-
 .home-dashboard {
   width: min(var(--page-standard), 100%);
   display: grid;
@@ -3786,8 +3781,6 @@ button:active {
   color: #050505;
 }
 
-.manifesto-card,
-.unlock-strip,
 .locked-panel,
 .workbook-hero,
 .workbook-prompts,
@@ -3797,44 +3790,73 @@ button:active {
   background: #17181c;
 }
 
-.manifesto-card {
-  border-left: 4px solid var(--gold);
-  padding: 24px;
-}
-
-.manifesto-card blockquote {
-  margin: 12px 0 18px;
-  font-family: var(--font-ui);
-  font-size: clamp(1.12rem, 3vw, 1.5rem);
-  font-style: italic;
-  line-height: 1.45;
-}
-
-.manifesto-card button {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  border: 0;
-  background: transparent;
-  color: var(--muted);
-  padding: 0;
-}
-
-.unlock-strip {
-  display: flex;
-  justify-content: space-between;
-  gap: 18px;
-  align-items: center;
-  border-color: rgba(169, 113, 63, 0.22);
+.upgrade-hint-card {
+  position: relative;
+  display: grid;
+  gap: 10px;
+  border: 1px solid rgba(169, 113, 63, 0.22);
+  border-radius: 14px;
+  background: #17181c;
   padding: 20px;
 }
 
-.unlock-strip h2 {
-  margin: 4px 0 6px;
-  font-size: 1.12rem;
+.upgrade-hint-card p {
+  color: var(--muted);
+  margin: 0;
 }
 
-.unlock-strip span,
+.upgrade-hint-dismiss {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+}
+
+.upgrade-hint-inline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px dashed rgba(169, 113, 63, 0.28);
+  font-size: 0.86rem;
+}
+
+.upgrade-hint-inline span {
+  color: var(--muted);
+}
+
+.upgrade-hint-inline > div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+}
+
+.upgrade-hint-inline button:first-child {
+  border: 1px solid rgba(169, 113, 63, 0.3);
+  border-radius: 999px;
+  background: rgba(169, 113, 63, 0.1);
+  color: var(--gold-soft);
+  padding: 6px 12px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.upgrade-hint-inline button:last-child {
+  display: grid;
+  place-items: center;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+}
+
 .locked-panel p,
 .workbook-hero p {
   color: var(--muted);
@@ -4372,118 +4394,6 @@ button:active {
 .upgrade-section-head span {
   color: var(--muted);
   font-size: 0.82rem;
-}
-
-.upgrade-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 12px;
-}
-
-.upgrade-card {
-  position: relative;
-  display: grid;
-  gap: 10px;
-  min-height: 188px;
-  border: 1px solid rgba(255, 255, 255, 0.09);
-  border-radius: 12px;
-  background: rgba(10, 11, 14, 0.62);
-  padding: 16px;
-}
-
-.upgrade-card.active {
-  border-color: rgba(52, 211, 153, 0.46);
-  background:
-    radial-gradient(circle at 92% 12%, rgba(52, 211, 153, 0.12), transparent 32%),
-    rgba(10, 16, 14, 0.72);
-  box-shadow: 0 0 22px rgba(52, 211, 153, 0.08), inset 0 0 0 1px rgba(52, 211, 153, 0.08);
-}
-
-.upgrade-card.locked {
-  border-color: rgba(255, 70, 86, 0.28);
-  background:
-    radial-gradient(circle at 92% 12%, rgba(255, 70, 86, 0.09), transparent 32%),
-    rgba(13, 10, 12, 0.72);
-}
-
-.upgrade-card-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.upgrade-card-top .kicker {
-  margin: 0;
-}
-
-.upgrade-lock {
-  display: grid;
-  place-items: center;
-  width: 34px;
-  height: 34px;
-  flex: 0 0 auto;
-  border-radius: 50%;
-}
-
-.upgrade-lock.active {
-  border: 1px solid rgba(52, 211, 153, 0.66);
-  background: rgba(52, 211, 153, 0.12);
-  color: #50f0ad;
-  box-shadow: 0 0 12px rgba(52, 211, 153, 0.52), 0 0 28px rgba(52, 211, 153, 0.18);
-}
-
-.upgrade-lock.locked {
-  border: 1px solid rgba(255, 70, 86, 0.7);
-  background: rgba(255, 70, 86, 0.1);
-  color: #ff5368;
-  box-shadow: 0 0 12px rgba(255, 70, 86, 0.56), 0 0 30px rgba(255, 70, 86, 0.18);
-}
-
-.upgrade-card h3 {
-  margin: 0;
-  color: #f4efe7;
-  font-size: 1rem;
-  line-height: 1.22;
-}
-
-.upgrade-card span {
-  color: var(--muted);
-  font-size: 0.84rem;
-  line-height: 1.45;
-}
-
-.upgrade-card-foot {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  margin-top: auto;
-}
-
-.upgrade-card-foot strong {
-  color: var(--gold-soft);
-}
-
-.upgrade-card-foot button {
-  border: 1px solid rgba(169, 113, 63, 0.22);
-  border-radius: 999px;
-  background: rgba(169, 113, 63, 0.08);
-  color: var(--gold-soft);
-  padding: 8px 10px;
-  font-size: 0.76rem;
-  font-weight: 850;
-}
-
-.upgrade-card.active .upgrade-card-foot button {
-  border-color: rgba(52, 211, 153, 0.36);
-  background: rgba(52, 211, 153, 0.09);
-  color: #8af0c7;
-}
-
-.upgrade-card.locked .upgrade-card-foot button {
-  border-color: rgba(255, 70, 86, 0.28);
-  background: rgba(255, 70, 86, 0.06);
 }
 
 .account-edit label {
@@ -8518,8 +8428,7 @@ html.light .admin-canonical-block-card textarea {
 
   .diary-shell,
   .workbook-grid,
-  .account-grid,
-  .upgrade-grid {
+  .account-grid {
     grid-template-columns: 1fr;
   }
 
@@ -8659,7 +8568,6 @@ html.light .admin-canonical-block-card textarea {
     grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
   }
 
-  .unlock-strip,
   .workbook-hero,
   .workbook-editor-head {
     align-items: stretch;
@@ -8689,6 +8597,56 @@ html.light .admin-canonical-block-card textarea {
 .contents-group { width: 100%; overflow: hidden; border: 1px solid var(--line); border-radius: 24px; background: var(--surface); }
 .contents-group > header { padding: 26px 28px 22px; border-bottom: 1px solid var(--line); background: linear-gradient(135deg, rgba(255,255,255,.04), transparent); }
 .contents-group > header h2 { margin: 4px 0 8px; font-size: clamp(1.5rem, 3vw, 2.25rem); }
+.triad-intro-audio {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 28px;
+  border-bottom: 1px solid var(--line);
+  background: rgba(169, 113, 63, 0.05);
+}
+
+.triad-intro-audio-info p {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 0.86rem;
+}
+
+.triad-intro-audio-player {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 160px;
+}
+
+.triad-intro-audio-player button {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  flex: 0 0 auto;
+  border: 1px solid rgba(169, 113, 63, 0.3);
+  border-radius: 50%;
+  background: rgba(169, 113, 63, 0.1);
+  color: var(--gold-soft);
+}
+
+.triad-intro-audio-progress {
+  flex: 1;
+  height: 4px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+}
+
+.triad-intro-audio-progress span {
+  display: block;
+  height: 100%;
+  background: var(--gold);
+  transition: width .2s linear;
+}
+
 .contents-chapters { display: grid; }
 .contents-chapter + .contents-chapter { border-top: 1px solid var(--line); }
 .contents-chapter { transition: border-color .18s ease, background .18s ease; }
@@ -9976,9 +9934,6 @@ html.light .mind-compose button,
 html.light .audio-row button:last-child,
 html.light .continue-card button,
 html.light .home-state-list article.active .state-play,
-html.light .manifesto-card button,
-html.light .upgrade-card-foot button.primary,
-html.light .community-cta,
 html.light .token-submit,
 html.light .admin-panel .publish-button,
 html.light .admin-panel button[type="submit"] {
@@ -10664,7 +10619,6 @@ html.light .account-card,
 html.light .account-hero,
 html.light .admin-table,
 html.light .upgrade-section,
-html.light .upgrade-card,
 html.light .recommendation-mini,
 html.light .mentor-panel,
 html.light .mentor-card,
@@ -10675,8 +10629,7 @@ html.light .mind-chat-context-card,
 html.light .contents-group,
 html.light .letters-index,
 html.light .letter-editor,
-html.light .journey-overview article,
-html.light .unlock-strip {
+html.light .journey-overview article {
   background: #fffaf0 !important;
   color: #211f1b !important;
   border-color: rgba(35, 31, 25, 0.14) !important;
@@ -10706,8 +10659,7 @@ html.light .workbook-prompts button,
 html.light .pilar-nav button,
 html.light .account-popover button,
 html.light .contents-quick-actions button,
-html.light .reader-quick-tools button,
-html.light .upgrade-card-foot button {
+html.light .reader-quick-tools button {
   background: #f5eee2 !important;
   color: #4b453b !important;
   /* border-color: rgba(35, 31, 25, 0.15) !important; */
@@ -10739,7 +10691,6 @@ html.light .workbook-hero h1,
 html.light .workbook-editor-head h2,
 html.light .account-card h2,
 html.light .account-hero h1,
-html.light .upgrade-card h3,
 html.light .recommendation-mini strong,
 html.light .mind-recommendations strong,
 html.light .contents-main strong,
@@ -10752,7 +10703,6 @@ html.light .diary-question span,
 html.light .mind-tags span,
 html.light .product-list span,
 html.light .upgrade-includes span,
-html.light .upgrade-card-foot strong,
 html.light .plan-badge {
   color: #7b5f2f !important;
 }
@@ -10763,7 +10713,6 @@ html.light .workbook-hero p,
 html.light .workbook-editor-head span,
 html.light .account-card p,
 html.light .account-hero span,
-html.light .upgrade-card span,
 html.light .recommendation-mini p,
 html.light .contents-main small,
 html.light .letters-index > button small,
@@ -10811,8 +10760,8 @@ html.light .saved-items-list button p {
 }
 
 html.light .home-state-list article,
-html.light .manifesto-card,
-html.light .locked-panel {
+html.light .locked-panel,
+html.light .upgrade-hint-card {
   background: #fffaf0 !important;
   color: #211f1b !important;
   border-color: rgba(35, 31, 25, 0.14) !important;
@@ -10825,16 +10774,11 @@ html.light .home-state-list article.active {
   border-color: rgba(141, 112, 64, 0.48) !important;
 }
 
-html.light .home-state-list h3,
-html.light .manifesto-card blockquote,
-html.light .manifesto-card .kicker,
-html.light .unlock-strip h2 {
+html.light .home-state-list h3 {
   color: #211f1b !important;
 }
 
-html.light .home-state-list p,
-html.light .manifesto-card button,
-html.light .unlock-strip span {
+html.light .home-state-list p {
   color: #706a5f !important;
 }
 
@@ -10847,17 +10791,6 @@ html.light .home-state-list button {
 html.light .home-state-list article.active button {
   background: #b18a66 !important;
   color: #17130b !important;
-}
-
-html.light .manifesto-card {
-  border-left-color: rgba(141, 112, 64, 0.5) !important;
-}
-
-html.light .manifesto-card button {
-  background: rgba(200, 164, 93, 0.1) !important;
-  border: 1px solid rgba(141, 112, 64, 0.18);
-  border-radius: 999px;
-  padding: 8px 11px;
 }
 
 html.light .pro-player {
@@ -11993,6 +11926,12 @@ html.light .reader-actions .reader-page-bookmark-button.active {
 html.dark .reader-clean-mode .reader-actions .reader-favorite-button.active,
 html.light .reader-actions .reader-favorite-button.active {
   color: #ef7d8e !important;
+}
+
+.reader-actions .reader-ambient-button.active,
+html.dark .reader-clean-mode .reader-actions .reader-ambient-button.active,
+html.light .reader-actions .reader-ambient-button.active {
+  color: var(--gold) !important;
 }
 
 .reader-clean-mode .reader-quick-tools {

@@ -50,6 +50,7 @@ export const ROUTES = {
   WORKBOOK: 'workbook',
   LETTERS: 'letters',
   MANIFESTO: 'manifesto',
+  UPGRADE: 'upgrade',
   SETTINGS: 'settings',
   ADMIN: 'admin',
   READER: 'reader',
@@ -329,7 +330,6 @@ export const navGroups = [
   {
     title: 'Ferramentas',
     items: [
-      { id: ROUTES.SESSIONS, label: 'Áudios de apoio', icon: AudioLines },
       { id: ROUTES.IGENT, label: 'iGentMIND', icon: Zap },
       { id: ROUTES.COMMUNITY, label: 'Comunidade', icon: Users },
     ],
@@ -494,6 +494,11 @@ export const planLabels: Record<Plan, string> = {
 
 export type UpgradeKey = 'basic' | 'workbook' | 'igent30' | 'igent90' | 'group' | 'vip';
 
+export const UPGRADE_TRIGGERS = {
+  AFTER_PILAR_1: 'upgrade_hint_after_pilar_1',
+  AFTER_FIRST_CARTA: 'upgrade_hint_after_first_carta',
+} as const;
+
 export const upgradeOffers: Record<UpgradeKey, {
   title: string;
   eyebrow: string;
@@ -502,6 +507,7 @@ export const upgradeOffers: Record<UpgradeKey, {
   checkoutUrl: string;
   plan: Plan;
   productKeys: ProductKey[];
+  inApp: boolean;
 }> = {
   basic: {
     title: 'Livro interativo + Áudios',
@@ -511,33 +517,37 @@ export const upgradeOffers: Record<UpgradeKey, {
     checkoutUrl: 'https://pay.kiwify.com.br/cJ4T7JR',
     plan: 'basic',
     productKeys: [PRODUCT_KEYS.base],
+    inApp: true,
   },
   workbook: {
     title: 'Diário dos Desacreditados',
-    eyebrow: 'Workbook',
-    description: 'Área para escrever, salvar reflexões e atravessar os pilares com perguntas guiadas.',
+    eyebrow: 'Downsell',
+    description: 'Diário expandido: 27 perguntas reflexivas, uma por pilar, sem o mentor iGentMIND.',
     price: 'R$ 17',
     checkoutUrl: 'https://pay.kiwify.com.br/sT7TVjJ',
     plan: 'workbook',
     productKeys: [PRODUCT_KEYS.workbook],
+    inApp: true,
   },
   igent30: {
-    title: 'iGentMIND - 30 dias',
-    eyebrow: 'Mentor de leitura',
-    description: 'Conselheiro motivador que cruza sentimentos, pilares e trechos do livro para orientar sua próxima leitura.',
-    price: 'R$ 27',
+    title: 'Diário + iGentMIND 30 dias',
+    eyebrow: 'Jornada expandida',
+    description: 'Diário expandido com perfil preditivo e o mentor iGentMIND lendo suas respostas por 30 dias.',
+    price: 'R$ 37',
     checkoutUrl: 'https://pay.kiwify.com.br/3rj0NbN',
     plan: 'igent30',
-    productKeys: [PRODUCT_KEYS.igentMind30],
+    productKeys: [PRODUCT_KEYS.workbook, PRODUCT_KEYS.igentMind30],
+    inApp: true,
   },
   igent90: {
-    title: 'iGentMIND - Mentor Psicanalítico',
-    eyebrow: 'Mentoria estendida',
-    description: 'Acesso ampliado ao iGentMIND, com recomendações por tema, pilar e estado emocional.',
+    title: 'iGentMIND 90 dias — Ilimitado',
+    eyebrow: 'Upsell',
+    description: 'Estende o mentor iGentMIND de 30 para 90 dias, com recomendações por tema, pilar e estado emocional.',
     price: 'R$ 67',
-    checkoutUrl: 'https://pay.kiwify.com.br/yYaKNrk',
+    checkoutUrl: 'https://pay.kiwify.com.br/vYaKNrk',
     plan: 'igent90',
     productKeys: [PRODUCT_KEYS.igentMind90],
+    inApp: true,
   },
   group: {
     title: 'Comunidade Viva dos Desacreditados',
@@ -547,6 +557,7 @@ export const upgradeOffers: Record<UpgradeKey, {
     checkoutUrl: 'https://pay.kiwify.com.br/SHxtsOn',
     plan: 'group',
     productKeys: [PRODUCT_KEYS.group],
+    inApp: false,
   },
   vip: {
     title: 'Pacote completo OPDDS',
@@ -556,6 +567,7 @@ export const upgradeOffers: Record<UpgradeKey, {
     checkoutUrl: 'https://pay.kiwify.com.br/yYaKNrk',
     plan: 'vip',
     productKeys: [PRODUCT_KEYS.base, PRODUCT_KEYS.workbook, PRODUCT_KEYS.igentMind90, PRODUCT_KEYS.group, PRODUCT_KEYS.vip],
+    inApp: false,
   },
 };
 

@@ -36,4 +36,8 @@ export class ReaderJourneyDto {
   @IsOptional()
   @IsObject()
   audioProgress?: Record<string, unknown>;
+
+  @IsOptional()
+  @IsObject()
+  upgradeHintsShown?: Record<string, boolean>;
 }

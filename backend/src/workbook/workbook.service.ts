@@ -16,6 +16,7 @@ type ReaderJourneySnapshot = {
   readerNotes: unknown[];
   anchors: unknown[];
   audioProgress: Record<string, unknown>;
+  upgradeHintsShown: Record<string, boolean>;
   updatedAt?: string;
 };
 
@@ -29,6 +30,7 @@ const EMPTY_SNAPSHOT: ReaderJourneySnapshot = {
   readerNotes: [],
   anchors: [],
   audioProgress: {},
+  upgradeHintsShown: {},
 };
 
 @Injectable()
@@ -52,7 +54,8 @@ export class WorkbookService {
       && !Object.values(snapshot.letters).some((value) => value.trim())
       && snapshot.readerNotes.length === 0
       && snapshot.anchors.length === 0
-      && Object.keys(snapshot.audioProgress).length === 0;
+      && Object.keys(snapshot.audioProgress).length === 0
+      && Object.keys(snapshot.upgradeHintsShown).length === 0;
     if (isEmpty) {
       await this.prisma.workbookEntry.deleteMany({ where: { userId, promptId: JOURNEY_PROMPT_ID } });
       return snapshot;
@@ -159,8 +162,19 @@ export class WorkbookService {
       readerNotes: this.cleanArray(data.readerNotes, 220),
       anchors: this.cleanArray(data.anchors, 80),
       audioProgress: this.cleanRecord(data.audioProgress, 500),
+      upgradeHintsShown: this.cleanBooleanRecord(data.upgradeHintsShown, 40),
       updatedAt: typeof data.updatedAt === 'string' ? data.updatedAt : undefined,
     };
+  }
+
+  private cleanBooleanRecord(value: unknown, maxKeys: number) {
+    const record = this.readObject(value);
+    return Object.fromEntries(
+      Object.entries(record)
+        .slice(0, maxKeys)
+        .map(([key, item]) => [this.cleanString(key, 120), Boolean(item)])
+        .filter(([key]) => key),
+    );
   }
 
   private cleanStringRecord(value: unknown, maxKeys: number, maxValueLength: number) {

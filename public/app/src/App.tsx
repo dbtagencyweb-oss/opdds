@@ -126,6 +126,7 @@ import {
   loadLocalLetters,
   loadLocalReaderAnchors,
   loadLocalReaderNotes,
+  loadLocalUpgradeHintsShown,
   loadLocalWorkbookAnswers,
   loadLocalWorkbookEntry,
   loadLocalWorkbookPrompt,
@@ -135,6 +136,7 @@ import {
   saveLocalLetters,
   saveLocalReaderAnchors,
   saveLocalReaderNotes,
+  saveLocalUpgradeHintsShown,
   saveLocalWorkbookAnswers,
   saveLocalWorkbookEntry,
   saveLocalWorkbookPrompt,
@@ -215,6 +217,7 @@ import {
   UpgradeKey,
   upgradeOffers,
   upgradeActiveProductKeys,
+  UPGRADE_TRIGGERS,
   eventLabels,
   eventTone,
   formatDateTime,
@@ -341,6 +344,7 @@ export function App() {
   });
   const [bookAudioOverrides, setBookAudioOverrides] = useState<Record<string, { chapterId: string; sectionKey: string; label: string; url: string; coverUrl?: string | null }>>({});
   const [upgradeModal, setUpgradeModal] = useState<UpgradeKey | null>(null);
+  const [upgradeRouteOffer, setUpgradeRouteOffer] = useState<UpgradeKey>('workbook');
   const [token, setToken] = useState('');
   const [tokenError, setTokenError] = useState('');
   const [deferredInstallPrompt, setDeferredInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
@@ -446,6 +450,8 @@ export function App() {
   const [letterSaveStatus, setLetterSaveStatus] = useState<SaveFeedback>('idle');
   const [noteSaveStatus, setNoteSaveStatus] = useState<SaveFeedback>('idle');
   const [audioProgressMap, setAudioProgressMap] = useState<Record<string, AudioProgressEntry>>({});
+  const [upgradeHintsShown, setUpgradeHintsShown] = useState<Record<string, boolean>>({});
+  const [activeUpgradeHint, setActiveUpgradeHint] = useState<string | null>(null);
   const [audioFrequencies, setAudioFrequencies] = useState<number[]>(idleAudioBars);
   const readerName = authUser?.name?.trim() || authName || 'Sobrevivente';
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -521,11 +527,8 @@ export function App() {
   const hasWorkbookAccess = hasProductAccess(PRODUCT_KEYS.workbook);
   const hasMindAccess = hasProductAccess(PRODUCT_KEYS.igentMind30) || hasProductAccess(PRODUCT_KEYS.igentMind90) || hasProductAccess(PRODUCT_KEYS.vip);
   const hasGroupAccess = hasProductAccess(PRODUCT_KEYS.group);
-  const hasOrderBump = hasWorkbookAccess || hasMindAccess || hasGroupAccess;
   const isAdmin = authUser?.role === 'ADMIN';
   const currentProducts = onlineProducts || Object.values(PRODUCT_KEYS).filter((productKey) => hasLocalEntitlement(plan, productKey as ProductKey));
-  const upgradeEntries = Object.entries(upgradeOffers) as Array<[UpgradeKey, typeof upgradeOffers[UpgradeKey]]>;
-  const lockedUpgradeCount = upgradeEntries.filter(([key]) => !currentProducts.includes(upgradeActiveProductKeys[key])).length;
   const currentGroup = bookGroups.find((group) => group.id === selectedChapter.groupId) ?? bookGroups[0];
   const writtenLettersCount = pillarLetters.filter((letter) => readerLetters[letter.id]?.trim()).length;
   const totalAudioTracks = bookChapters.reduce((total, chapter) => total + chapter.audioTracks.length, 0);
@@ -1029,6 +1032,7 @@ export function App() {
     const savedReaderNotes = loadLocalReaderNotes();
     const savedReaderAnchors = loadLocalReaderAnchors();
     const savedAudioProgress = loadLocalAudioProgress();
+    const savedUpgradeHintsShown = loadLocalUpgradeHintsShown();
 
     if (savedAuthUser) {
       setAuthUser(savedAuthUser);
@@ -1053,6 +1057,7 @@ export function App() {
     setReaderNotes(savedReaderNotes);
     setReaderAnchors(savedReaderAnchors);
     setAudioProgressMap(savedAudioProgress);
+    setUpgradeHintsShown(savedUpgradeHintsShown);
 
     const params = new URLSearchParams(window.location.search);
     const checkoutToken = params.get('token');
@@ -1108,6 +1113,11 @@ export function App() {
     const duckFactor = audioState.isPlaying ? 0.28 : 1;
     audio.volume = Math.max(0, Math.min(1, ambientAudioState.volume * duckFactor));
   }, [ambientAudioState.volume, audioState.isPlaying]);
+
+  useEffect(() => {
+    const isAmbientPlaying = Boolean(selectedReadingTrack && ambientAudioState.currentUrl === selectedReadingTrack.audioUrl && ambientAudioState.isPlaying);
+    localStorage.setItem('reading_ambient_enabled', String(isAmbientPlaying));
+  }, [ambientAudioState.isPlaying, ambientAudioState.currentUrl, selectedReadingTrack]);
 
   useEffect(() => {
     if (!authUser) return;
@@ -1285,6 +1295,7 @@ export function App() {
     readerNotes: ReaderNote[];
     readerAnchors: ReaderAnchor[];
     audioProgress: Record<string, AudioProgressEntry>;
+    upgradeHintsShown: Record<string, boolean>;
   }) => {
     saveLocalWorkbookEntry(snapshot.workbookEntry);
     saveLocalWorkbookPrompt(snapshot.workbookPrompt);
@@ -1295,6 +1306,7 @@ export function App() {
     saveLocalReaderNotes(snapshot.readerNotes);
     saveLocalReaderAnchors(snapshot.readerAnchors);
     saveLocalAudioProgress(snapshot.audioProgress);
+    saveLocalUpgradeHintsShown(snapshot.upgradeHintsShown);
   };
 
   const mergeById = <T extends { id?: string }>(localItems: T[], remoteItems: unknown[]): T[] => {
@@ -1327,6 +1339,7 @@ export function App() {
         const mergedReaderNotes = mergeById(readerNotes, snapshot.readerNotes || []);
         const mergedReaderAnchors = mergeById(readerAnchors, snapshot.anchors || []);
         const mergedAudioProgress = { ...audioProgressMap, ...((snapshot.audioProgress || {}) as Record<string, AudioProgressEntry>) };
+        const mergedUpgradeHintsShown = { ...upgradeHintsShown, ...(snapshot.upgradeHintsShown || {}) };
 
         setWorkbookEntry(mergedWorkbookEntry);
         setWorkbookPrompt(mergedWorkbookPrompt);
@@ -1337,6 +1350,7 @@ export function App() {
         setReaderNotes(mergedReaderNotes);
         setReaderAnchors(mergedReaderAnchors);
         setAudioProgressMap(mergedAudioProgress);
+        setUpgradeHintsShown(mergedUpgradeHintsShown);
         persistJourneyLocally({
           workbookEntry: mergedWorkbookEntry,
           workbookPrompt: mergedWorkbookPrompt,
@@ -1347,6 +1361,7 @@ export function App() {
           readerNotes: mergedReaderNotes,
           readerAnchors: mergedReaderAnchors,
           audioProgress: mergedAudioProgress,
+          upgradeHintsShown: mergedUpgradeHintsShown,
         });
         journeyHydratedRef.current = true;
       })
@@ -1371,6 +1386,7 @@ export function App() {
       readerNotes,
       readerAnchors,
       audioProgress: audioProgressMap,
+      upgradeHintsShown,
     });
     if (journeySyncTimerRef.current) window.clearTimeout(journeySyncTimerRef.current);
     journeySyncTimerRef.current = window.setTimeout(() => {
@@ -1384,13 +1400,31 @@ export function App() {
         readerNotes,
         anchors: readerAnchors,
         audioProgress: audioProgressMap,
+        upgradeHintsShown,
       }).catch(() => {});
     }, 900);
 
     return () => {
       if (journeySyncTimerRef.current) window.clearTimeout(journeySyncTimerRef.current);
     };
-  }, [workbookEntry, workbookAnswers, canonicalJournalAnswers, workbookPrompt, readerLetters, letterMeta, readerNotes, readerAnchors, audioProgressMap, authUser?.id]);
+  }, [workbookEntry, workbookAnswers, canonicalJournalAnswers, workbookPrompt, readerLetters, letterMeta, readerNotes, readerAnchors, audioProgressMap, upgradeHintsShown, authUser?.id]);
+
+  const markUpgradeHintShown = (triggerId: string) => {
+    setUpgradeHintsShown((current) => (current[triggerId] ? current : { ...current, [triggerId]: true }));
+  };
+
+  const dismissUpgradeHint = (triggerId: string) => {
+    markUpgradeHintShown(triggerId);
+    setActiveUpgradeHint(null);
+  };
+
+  useEffect(() => {
+    if (hasWorkbookAccess || hasMindAccess) return;
+    if (upgradeHintsShown[UPGRADE_TRIGGERS.AFTER_PILAR_1]) return;
+    if (selectedChapter.pillar && selectedChapter.pillar >= 2) {
+      setActiveUpgradeHint(UPGRADE_TRIGGERS.AFTER_PILAR_1);
+    }
+  }, [selectedChapter.pillar, hasWorkbookAccess, hasMindAccess, upgradeHintsShown]);
 
   const navigate = (target: Route) => {
     playClick('soft');
@@ -1780,10 +1814,19 @@ export function App() {
     setUpgradeModal(key);
   };
 
+  const goToUpgrade = (key: UpgradeKey) => {
+    setUpgradeRouteOffer(key);
+    navigate(ROUTES.UPGRADE);
+  };
+
   const openUpgradeCheckout = (key: UpgradeKey) => {
     const offer = upgradeOffers[key];
     playClick('primary');
-    window.open(offer.checkoutUrl, '_blank', 'noopener,noreferrer');
+    const checkoutUrl = new URL(offer.checkoutUrl);
+    checkoutUrl.searchParams.set('utm_source', 'opdds_app');
+    checkoutUrl.searchParams.set('utm_medium', 'upgrade_contextual');
+    checkoutUrl.searchParams.set('utm_campaign', key);
+    window.open(checkoutUrl.toString(), '_blank', 'noopener,noreferrer');
   };
 
   const saveAccountProfile = () => {
@@ -3199,15 +3242,6 @@ export function App() {
     return false;
   };
 
-  const upgradeForRoute = (routeId: Route): UpgradeKey => {
-    if ([ROUTES.BOOK, ROUTES.LIBRARY, ROUTES.SESSIONS, ROUTES.READER].includes(routeId as any)) return 'basic';
-    if (routeId === ROUTES.COMMUNITY) return 'group';
-    if (routeId === ROUTES.WORKBOOK) return 'workbook';
-    if (routeId === ROUTES.LETTERS) return 'basic';
-    if (routeId === ROUTES.IGENT) return 'igent30';
-    return 'vip';
-  };
-
   const AccessView = () => {
     if (authMode === 'forgot' || authMode === 'reset') {
       const isReset = authMode === 'reset';
@@ -3367,23 +3401,15 @@ export function App() {
         <img src={brandLogo} alt="" />
       </div>
       <nav>
-        {navGroups.map((group) => (
+        {navGroups.filter((group) => group.items.some((item) => !isRouteLocked(item.id))).map((group) => (
           <div className="nav-group" key={group.title}>
             <p>{group.title}</p>
-            {group.items.filter((item) => item.id !== ROUTES.ADMIN || isAdmin).map((item) => {
+            {group.items.filter((item) => !isRouteLocked(item.id)).map((item) => {
               const Icon = item.icon;
-              const locked = isRouteLocked(item.id);
               return (
-                <button key={item.id} className={route === item.id ? 'active' : ''} onClick={() => {
-                  if (locked) {
-                    openUpgrade(upgradeForRoute(item.id));
-                    return;
-                  }
-                  navigate(item.id);
-                }}>
+                <button key={item.id} className={route === item.id ? 'active' : ''} onClick={() => navigate(item.id)}>
                   <Icon size={18} />
                   <span>{item.label}</span>
-                  {locked && <Lock size={13} />}
                 </button>
               );
             })}
@@ -3397,8 +3423,12 @@ export function App() {
     const items = [
       { id: ROUTES.HOME, label: 'Início', icon: Home },
       { id: ROUTES.READER, label: 'Livro', icon: BookOpen },
-      { id: ROUTES.IGENT, label: 'iGent', icon: Zap },
-      { id: ROUTES.WORKBOOK, label: 'Diário', icon: FileText },
+      hasMindAccess
+        ? { id: ROUTES.IGENT, label: 'iGent', icon: Zap }
+        : { id: ROUTES.LIBRARY, label: 'Travessia', icon: Library },
+      hasWorkbookAccess
+        ? { id: ROUTES.WORKBOOK, label: 'Diário', icon: FileText }
+        : { id: ROUTES.LETTERS, label: 'Cartas', icon: Mail },
       { id: ROUTES.SETTINGS, label: 'Conta', icon: User },
     ];
 
@@ -3406,22 +3436,15 @@ export function App() {
       <nav className="bottom-nav" aria-label="Navegação principal">
         {items.map((item) => {
           const Icon = item.icon;
-          const locked = isRouteLocked(item.id);
           const active = route === item.id || (item.id === ROUTES.READER && route === ROUTES.BOOK);
           return (
             <button
               key={item.id}
               className={active ? 'active' : ''}
-              onClick={() => {
-                if (locked) {
-                  openUpgrade(upgradeForRoute(item.id));
-                  return;
-                }
-                navigate(item.id);
-              }}
-              title={locked ? `${item.label} bloqueado` : item.label}
+              onClick={() => navigate(item.id)}
+              title={item.label}
             >
-              {locked ? <Lock size={19} /> : <Icon size={19} />}
+              <Icon size={19} />
               <span>{item.label}</span>
             </button>
           );
@@ -3576,27 +3599,16 @@ export function App() {
         </div>
       </section>
 
-      <section className="manifesto-card">
-        <p className="kicker">Manifesto do dia</p>
-        <blockquote>"Não somos o que nos aconteceu. Somos o que escolhemos fazer com o que sobrou."</blockquote>
-        <button onClick={() => handlePlayAudio('/media/audios/home/manifesto-da-semana.wav', 'Manifesto do dia')}>
-          <Play size={14} />
-          Ouvir reflex?o
-        </button>
-      </section>
-
-      <section className="unlock-strip">
-        <div>
-          <p className="kicker">Seu nível: {planLabels[plan]}</p>
-          <h2>{hasMindAccess ? 'iGentMIND liberado' : hasWorkbookAccess ? 'Diário liberado' : 'Desbloqueie Diário + iGentMIND'}</h2>
-          <span>{hasMindAccess ? 'Seu token libera mentor, perguntas guiadas e workbook editável.' : hasWorkbookAccess ? 'Seu Diário está ativo. O próximo nível libera o mentor iGentMIND.' : 'Simulação local do upsell: Diário, mentor treinado nos pilares e acesso ao grupo quando contratado.'}</span>
-        </div>
-        {hasOrderBump ? (
-          <Button onClick={() => navigate(ROUTES.WORKBOOK)} variant="secondary"><FileText size={17} /> Abrir Diário</Button>
-        ) : (
-          <Button onClick={() => openUpgrade('workbook')}><Zap size={17} /> Desbloquear Diário</Button>
-        )}
-      </section>
+      {activeUpgradeHint === UPGRADE_TRIGGERS.AFTER_PILAR_1 && (
+        <section className="upgrade-hint-card">
+          <button className="upgrade-hint-dismiss" onClick={() => dismissUpgradeHint(UPGRADE_TRIGGERS.AFTER_PILAR_1)} title="Dispensar">
+            <X size={15} />
+          </button>
+          <p className="kicker">Quer aprofundar o que atravessou aqui?</p>
+          <p>O Diário guiado desbloqueia 27 questões reflexivas — uma por pilar — e o iGentMIND lê suas respostas antes de conversar com você.</p>
+          <Button onClick={() => { markUpgradeHintShown(UPGRADE_TRIGGERS.AFTER_PILAR_1); setActiveUpgradeHint(null); goToUpgrade('igent30'); }} variant="secondary">Ver Jornada Expandida</Button>
+        </section>
+      )}
     </div>
   );
   };
@@ -3718,6 +3730,29 @@ export function App() {
                 <h2>{group.title}</h2>
                 <span>{group.description}</span>
               </header>
+              {['sobrevivencia', 'reconstrucao', 'continuidade'].includes(group.id) && (() => {
+                const triadAudio = supportAudios.find((item) => item.id === group.id);
+                if (!triadAudio) return null;
+                const isActiveTrack = audioState.currentUrl === triadAudio.audioUrl;
+                const isPlayingTrack = isActiveTrack && audioState.isPlaying;
+                return (
+                  <div className="triad-intro-audio">
+                    <div className="triad-intro-audio-info">
+                      <span className="kicker">Introdução à Tríade</span>
+                      <p>Ouça antes de começar os pilares desta tríade.</p>
+                    </div>
+                    <div className="triad-intro-audio-player">
+                      <button
+                        onClick={() => handlePlayAudio(triadAudio.audioUrl, repairMojibake(triadAudio.title), triadAudio.coverUrl)}
+                        title={isPlayingTrack ? 'Pausar introdução' : 'Ouvir introdução'}
+                      >
+                        {isPlayingTrack ? <Pause size={16} /> : <Play size={15} fill="currentColor" />}
+                      </button>
+                      <div className="triad-intro-audio-progress"><span style={{ width: `${isActiveTrack ? audioProgress : 0}%` }} /></div>
+                    </div>
+                  </div>
+                );
+              })()}
               <div className="contents-chapters">
                 {chapters.map(({ chapter, index }) => (
                   <article className="contents-chapter" key={chapter.id}>
@@ -4212,6 +4247,33 @@ export function App() {
     </div>
   );
 
+  const UpgradeRouteView = ({ offerKey, expiredMessage }: { offerKey?: UpgradeKey; expiredMessage?: string } = {}) => {
+    const key = offerKey ?? upgradeRouteOffer;
+    const offer = upgradeOffers[key];
+    const alreadyActive = hasUpgradeOffer(key);
+    return (
+      <div className="app-page page-enter">
+        <section className="locked-panel">
+          <div className="mentor-mark"><Zap size={20} /></div>
+          <p className="kicker">{alreadyActive ? 'Módulo ativo' : offer.eyebrow}</p>
+          <h1>{offer.title}</h1>
+          <p>{alreadyActive ? 'Este produto já aparece como liberado para sua conta.' : expiredMessage || offer.description}</p>
+          <div className="upgrade-includes">
+            {offer.productKeys.map((productKey) => (
+              <span key={productKey}>{PRODUCT_LABELS[productKey] ?? productKey}</span>
+            ))}
+          </div>
+          <div className="locked-actions">
+            <Button onClick={() => openUpgradeCheckout(key)} disabled={alreadyActive}>
+              <DownloadCloud size={17} /> {offer.price} · Ir para checkout
+            </Button>
+            <Button onClick={() => navigate(ROUTES.HOME)} variant="ghost">Continuar sem agora</Button>
+          </div>
+        </section>
+      </div>
+    );
+  };
+
   const WorkbookView = () => {
     if (!hasWorkbookAccess) return <LockedView title="Diário bloqueado" offerKey="workbook" />;
     const savedAt = getLocalWorkbookSavedAt();
@@ -4514,10 +4576,14 @@ export function App() {
     const writtenCount = pillarLetters.filter((letter) => readerLetters[letter.id]?.trim()).length;
     const currentMeta = letterMeta[currentLetter.id] ?? {};
     const updateLetter = (value: string) => {
+      const wasUnwritten = writtenCount === 0;
       const next = { ...readerLetters, [currentLetter.id]: value };
       setReaderLetters(next);
       saveLocalLetters(next);
       flashSaveFeedback('letters', setLetterSaveStatus);
+      if (wasUnwritten && value.trim() && !hasWorkbookAccess && !upgradeHintsShown[UPGRADE_TRIGGERS.AFTER_FIRST_CARTA]) {
+        setActiveUpgradeHint(UPGRADE_TRIGGERS.AFTER_FIRST_CARTA);
+      }
     };
     const updateLetterMeta = (field: keyof LetterMeta, value: string) => {
       const next = {
@@ -4613,6 +4679,15 @@ export function App() {
                 </span>
                 <strong>— {readerName}</strong>
               </footer>
+              {activeUpgradeHint === UPGRADE_TRIGGERS.AFTER_FIRST_CARTA && (
+                <div className="upgrade-hint-inline">
+                  <span>O iGentMIND lê o que você escreve e devolve a pergunta que você precisava.</span>
+                  <div>
+                    <button onClick={() => { markUpgradeHintShown(UPGRADE_TRIGGERS.AFTER_FIRST_CARTA); setActiveUpgradeHint(null); goToUpgrade('igent30'); }}>Experimentar 30 dias</button>
+                    <button onClick={() => dismissUpgradeHint(UPGRADE_TRIGGERS.AFTER_FIRST_CARTA)} title="Dispensar"><X size={14} /></button>
+                  </div>
+                </div>
+              )}
             </div>
             <div className="letter-actions">
               {letterIndex < 9 && <Button onClick={() => goToChapter(8 + letterIndex)} variant="ghost"><BookOpen size={17} /> Voltar ao pilar</Button>}
@@ -4685,15 +4760,6 @@ export function App() {
           <h2>Continuidade emocional</h2>
           <p>Áudios, temas e encontros de apoio para quando a pessoa precisa de presença, não de mais conte?do solto.</p>
         </article>
-      </section>
-
-      <section className="community-panel community-cta">
-        <div>
-          <p className="kicker">Order bump</p>
-          <h2>Ofereça a comunidade como próximo passo natural.</h2>
-          <p>Depois que o leitor desbloqueia o livro, o grupo entra como sustentação: menos vitrine, mais permanência.</p>
-        </div>
-        <Button onClick={() => openUpgradeCheckout('group')}><Users size={17} /> Entrar na comunidade</Button>
       </section>
     </div>
   );
@@ -4798,29 +4864,8 @@ export function App() {
             <p className="kicker">Upgrades</p>
             <h2>Continue expandindo sua jornada</h2>
           </div>
-          <span>{lockedUpgradeCount} bloqueado(s)</span>
         </div>
-        <div className="upgrade-grid">
-          {upgradeEntries.map(([key, offer]) => {
-            const isActiveOffer = hasUpgradeOffer(key);
-            return (
-            <article className={`upgrade-card ${isActiveOffer ? 'active' : 'locked'}`} key={key}>
-              <div className="upgrade-card-top">
-                <p className="kicker">{offer.eyebrow}</p>
-                <span className={`upgrade-lock ${isActiveOffer ? 'active' : 'locked'}`}>
-                  <Lock size={15} />
-                </span>
-              </div>
-              <h3>{offer.title}</h3>
-              <span>{offer.description}</span>
-              <div className="upgrade-card-foot">
-                <strong>{offer.price}</strong>
-                <button onClick={() => openUpgrade(key)}>{isActiveOffer ? 'Liberado' : 'Ver detalhes'}</button>
-              </div>
-            </article>
-            );
-          })}
-        </div>
+        <Button onClick={() => goToUpgrade('workbook')} variant="secondary"><Zap size={17} /> Ver opções de upgrade</Button>
       </section>
 
       <footer className="account-footer">
@@ -5450,14 +5495,19 @@ export function App() {
       case ROUTES.LIBRARY: return hasReaderAccess ? LibraryView() : <LockedView title="Jornada bloqueada" offerKey="basic" />;
       case ROUTES.SESSIONS: return hasReaderAccess ? SessionsView() : <LockedView title="Áudios bloqueados" offerKey="basic" />;
       case ROUTES.COMMUNITY: return hasGroupAccess ? CommunityView() : <LockedView title="Comunidade bloqueada" offerKey="group" />;
-      case ROUTES.IGENT: return hasMindAccess ? IGentMindView() : <LockedView title="iGentMIND bloqueado" offerKey="igent30" />;
+      case ROUTES.IGENT: {
+        if (hasMindAccess) return IGentMindView();
+        if (authUser?.mindAccess?.expired) return <UpgradeRouteView offerKey="igent90" expiredMessage="Seu acesso ao iGentMIND expirou. Renove para continuar a conversa." />;
+        return <UpgradeRouteView offerKey="igent30" />;
+      }
       case ROUTES.FAVORITES: return FavoritesView();
-      case ROUTES.WORKBOOK: return WorkbookView();
+      case ROUTES.WORKBOOK: return hasWorkbookAccess ? WorkbookView() : <UpgradeRouteView offerKey="workbook" />;
       case ROUTES.LETTERS: return hasReaderAccess ? LettersView() : <LockedView title="Cartas bloqueadas" offerKey="basic" />;
       case ROUTES.MANIFESTO: return ManifestoView();
       case ROUTES.SETTINGS: return SettingsView();
       case ROUTES.ADMIN: return isAdmin ? AdminView() : <LockedView title="Painel administrativo bloqueado" />;
       case ROUTES.READER: return hasReaderAccess ? ReaderView() : <LockedView title="Leitor bloqueado" offerKey="basic" />;
+      case ROUTES.UPGRADE: return UpgradeRouteView();
       default: return HomeView();
     }
   };

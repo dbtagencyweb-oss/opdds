@@ -15,6 +15,7 @@ import {
   Minus,
   Moon,
   MoreVertical,
+  Music2,
   Pause,
   Plus,
   Play,
@@ -1243,6 +1244,16 @@ export default function ReaderShell({
           >
             <Heart size={18} fill={isFavorite ? 'currentColor' : 'none'} />
           </button>
+          {onToggleSensoryTrack && (
+            <button
+              className={`icon-button reader-ambient-button ${isSensoryTrackPlaying ? 'active' : ''}`}
+              onClick={onToggleSensoryTrack}
+              title={isSensoryTrackPlaying ? 'Pausar trilha de fundo' : `Tocar trilha de fundo${sensoryTrackTitle ? `: ${sensoryTrackTitle}` : ''}`}
+              aria-label={isSensoryTrackPlaying ? 'Pausar trilha de fundo' : `Tocar trilha de fundo${sensoryTrackTitle ? `: ${sensoryTrackTitle}` : ''}`}
+            >
+              <Music2 size={18} fill={isSensoryTrackPlaying ? 'currentColor' : 'none'} />
+            </button>
+          )}
           <button
             className={`icon-button reader-notes-button ${pageNote.trim() ? 'has-note' : ''}`}
             onClick={() => {

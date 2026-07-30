@@ -106,6 +106,17 @@ function resolvePlan(payload: any): AccessPlan {
   return 'basic';
 }
 
+const PRODUCT_DURATION_DAYS: Partial<Record<string, number>> = {
+  opdds_igentmind_30d: 30,
+  opdds_igentmind_90d: 90,
+};
+
+function expiresAtFor(productKey: string): Date | null {
+  const days = PRODUCT_DURATION_DAYS[productKey];
+  if (!days) return null;
+  return new Date(Date.now() + days * 24 * 60 * 60 * 1000);
+}
+
 function timingSafeEqualHex(a: string, b: string) {
   const bufA = Buffer.from(a, 'hex');
   const bufB = Buffer.from(b, 'hex');
@@ -361,6 +372,7 @@ export class KiwifyWebhookController {
   private async upsertEntitlements(userId: string, productKeys: string[]) {
     for (const productKey of productKeys) {
       const product = await this.prisma.product.findUnique({ where: { key: productKey } });
+      const expiresAt = expiresAtFor(productKey);
       const existing = await this.prisma.entitlement.findFirst({
         where: { userId, productKey, status: 'ACTIVE' },
       });
@@ -368,7 +380,7 @@ export class KiwifyWebhookController {
       if (existing) {
         await this.prisma.entitlement.update({
           where: { id: existing.id },
-          data: { productId: product?.id, source: 'KIWIFY', expiresAt: null },
+          data: { productId: product?.id, source: 'KIWIFY', expiresAt },
         });
       } else {
         await this.prisma.entitlement.create({
@@ -378,6 +390,7 @@ export class KiwifyWebhookController {
             productKey,
             source: 'KIWIFY',
             status: 'ACTIVE',
+            expiresAt,
           },
         });
       }

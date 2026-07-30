@@ -5,6 +5,12 @@ import { localEntitlements, LocalPlan } from './entitlements';
 
 export type UserRole = 'MEMBER' | 'ADMIN';
 
+export type MindAccessStatus = {
+  active: boolean;
+  expired: boolean;
+  expiresAt: string | null;
+};
+
 export type AuthUser = {
   id: string;
   name: string;
@@ -12,6 +18,7 @@ export type AuthUser = {
   plan: LocalPlan;
   role?: UserRole;
   products?: string[];
+  mindAccess?: MindAccessStatus;
   createdAt?: string;
 };
 
@@ -123,6 +130,7 @@ export type ReaderJourneySnapshot = {
   readerNotes: unknown[];
   anchors: unknown[];
   audioProgress: Record<string, unknown>;
+  upgradeHintsShown?: Record<string, boolean>;
   updatedAt?: string;
 };
 

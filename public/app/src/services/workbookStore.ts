@@ -8,6 +8,7 @@ const READER_NOTES_KEY = 'opd_reader_notes';
 const AUDIO_PROGRESS_KEY = 'opd_audio_progress';
 const READER_ANCHORS_KEY = 'opd_reader_anchors';
 const CANONICAL_JOURNAL_KEY = 'opd_reader_canonical_journal_answers';
+const UPGRADE_HINTS_KEY = 'opd_upgrade_hints_shown';
 
 export type LetterMeta = {
   before?: string;
@@ -169,8 +170,21 @@ export function saveLocalReaderAnchors(anchors: ReaderAnchor[]) {
   localStorage.setItem(SAVED_AT_KEY, new Date().toISOString());
 }
 
+export function loadLocalUpgradeHintsShown(): Record<string, boolean> {
+  try {
+    return JSON.parse(localStorage.getItem(UPGRADE_HINTS_KEY) ?? '{}');
+  } catch {
+    return {};
+  }
+}
+
+export function saveLocalUpgradeHintsShown(hints: Record<string, boolean>) {
+  localStorage.setItem(UPGRADE_HINTS_KEY, JSON.stringify(hints));
+  localStorage.setItem(SAVED_AT_KEY, new Date().toISOString());
+}
+
 export function clearLocalJourney() {
-  [ENTRY_KEY, SAVED_AT_KEY, ANSWERS_KEY, WORKBOOK_PROMPT_KEY, LETTERS_KEY, LETTER_META_KEY, READER_NOTES_KEY, AUDIO_PROGRESS_KEY, READER_ANCHORS_KEY, CANONICAL_JOURNAL_KEY]
+  [ENTRY_KEY, SAVED_AT_KEY, ANSWERS_KEY, WORKBOOK_PROMPT_KEY, LETTERS_KEY, LETTER_META_KEY, READER_NOTES_KEY, AUDIO_PROGRESS_KEY, READER_ANCHORS_KEY, CANONICAL_JOURNAL_KEY, UPGRADE_HINTS_KEY]
     .forEach((key) => localStorage.removeItem(key));
   const legacyKeys: string[] = [];
   for (let index = 0; index < localStorage.length; index += 1) {

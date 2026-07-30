@@ -18,6 +18,16 @@ const PRODUCTS_BY_PLAN: Record<AccessPlan, string[]> = {
   vip: ['opdds_pdf', 'opdds_base', 'opdds_diario', 'opdds_igentmind_30d', 'opdds_igentmind_90d', 'opdds_grupo', 'opdds_vip'],
 };
 
+const PLAN_LABELS: Record<AccessPlan, string> = {
+  pdf: 'PDF',
+  basic: 'Livro + App',
+  workbook: 'Diário dos Desacreditados',
+  igent30: 'Diário + iGentMIND 30 dias',
+  igent90: 'iGentMIND 90 dias',
+  group: 'Comunidade Viva dos Desacreditados',
+  vip: 'Pacote completo OPDDS',
+};
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -74,10 +84,23 @@ export class AuthService {
       },
     });
 
+    const registerUrl = `/register?token=${encodeURIComponent(token.code)}`;
+
+    if (data.source === 'KIWIFY' && data.email) {
+      setImmediate(() => {
+        void this.mailService.sendPurchaseInviteEmail({
+          to: data.email,
+          name: data.name,
+          registerUrl: `${this.getAppUrl()}${registerUrl}`,
+          planLabel: PLAN_LABELS[plan],
+        });
+      });
+    }
+
     return {
       token: token.code,
       plan,
-      registerUrl: `/register?token=${encodeURIComponent(token.code)}`,
+      registerUrl,
     };
   }
 
@@ -249,6 +272,23 @@ export class AuthService {
       select: { productKey: true, expiresAt: true },
     });
 
+    const mindEntitlements = await this.prisma.entitlement.findMany({
+      where: {
+        userId: user.id,
+        productKey: { in: ['opdds_igentmind_30d', 'opdds_igentmind_90d'] },
+        status: 'ACTIVE',
+      },
+      select: { expiresAt: true },
+      orderBy: { expiresAt: 'desc' },
+    });
+    const mindEverPurchased = mindEntitlements.length > 0;
+    const mindActiveExpiry = mindEntitlements.find((item) => !item.expiresAt || item.expiresAt > new Date());
+    const mindAccess = {
+      active: Boolean(mindActiveExpiry),
+      expired: mindEverPurchased && !mindActiveExpiry,
+      expiresAt: mindActiveExpiry?.expiresAt ?? null,
+    };
+
     const products = entitlements.map((item) => item.productKey);
     const plan: AccessPlan = products.includes('opdds_vip')
       ? 'vip'
@@ -274,6 +314,7 @@ export class AuthService {
         role: user.role,
         plan,
         products,
+        mindAccess,
       },
     };
   }
