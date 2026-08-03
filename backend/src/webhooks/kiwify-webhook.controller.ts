@@ -270,7 +270,7 @@ export class KiwifyWebhookController {
     const user = await this.prisma.user.findUnique({ where: { email: purchase.email } });
 
     if (!user) {
-      const invite = await this.authService.createInvite({
+      const invite = await this.authService.createInviteOrUpgrade({
         email: purchase.email,
         name: purchase.name,
         plan: purchase.plan,
@@ -286,11 +286,11 @@ export class KiwifyWebhookController {
 
       return {
         ok: true,
-        action: 'invite_created',
+        action: (invite as any).upgraded ? 'invite_upgraded' : 'invite_created',
         event: eventType || null,
         email: purchase.email,
         name: purchase.name,
-        products: purchase.productKeys,
+        products: PRODUCTS_BY_PLAN[invite.plan as AccessPlan],
         ...invite,
       };
     }

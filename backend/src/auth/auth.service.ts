@@ -53,6 +53,97 @@ export class AuthService {
     return (Object.keys(PRODUCTS_BY_PLAN).includes(normalized) ? normalized : 'basic') as AccessPlan;
   }
 
+  private readonly planOrder: AccessPlan[] = ['pdf', 'basic', 'workbook', 'igent30', 'igent90', 'group', 'vip'];
+
+  /** Menor plano cujo conjunto de productKeys cobre a união dos dois planos dados. */
+  private combinePlans(a: AccessPlan, b: AccessPlan): AccessPlan {
+    const union = new Set<string>([...PRODUCTS_BY_PLAN[a], ...PRODUCTS_BY_PLAN[b]]);
+    for (const plan of this.planOrder) {
+      const keys = PRODUCTS_BY_PLAN[plan];
+      if ([...union].every((key) => keys.includes(key))) return plan;
+    }
+    return 'vip';
+  }
+
+  /**
+   * Convite ACTIVE (não resgatado, não expirado) mais recente para este e-mail,
+   * se existir. Usado para não criar um segundo token/e-mail quando um upsell ou
+   * downsell da Kiwify chega como webhook separado antes do comprador se cadastrar.
+   */
+  private async findPendingInvite(email: string) {
+    const event = await this.prisma.purchaseEvent.findFirst({
+      where: {
+        eventType: { in: ['INVITE_CREATED', 'INVITE_UPGRADED'] },
+        payload: { path: ['email'], equals: email },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+    const code = (event?.payload as any)?.code as string | undefined;
+    if (!code) return null;
+    const token = await this.prisma.accessToken.findUnique({ where: { code } });
+    if (!token || token.status !== 'ACTIVE') return null;
+    if (token.expiresAt && token.expiresAt.getTime() < Date.now()) return null;
+    return token;
+  }
+
+  /**
+   * Igual a createInvite, mas primeiro checa se já existe um convite pendente
+   * pro e-mail (mesmo token ainda não resgatado). Se existir, faz upgrade do
+   * plano nesse token em vez de criar um segundo — evita o cenário em que um
+   * upsell/downsell webhook chega antes do comprador se cadastrar, gera um
+   * segundo token, e o comprador só consegue resgatar um dos dois (o outro
+   * fica órfão, porque o cadastro rejeita e-mail duplicado).
+   */
+  async createInviteOrUpgrade(data: CreateInviteDto & { source?: string; externalId?: string | null; value?: number; currency?: string }) {
+    const plan = this.normalizePlan(data.plan);
+
+    if (data.email) {
+      const pending = await this.findPendingInvite(data.email);
+      if (pending) {
+        const previousPlan = this.normalizePlan(pending.plan);
+        const combined = this.combinePlans(previousPlan, plan);
+
+        if (combined !== previousPlan) {
+          await this.prisma.accessToken.update({ where: { id: pending.id }, data: { plan: combined } });
+        }
+
+        await this.prisma.purchaseEvent.create({
+          data: {
+            provider: data.source || 'MANUAL',
+            eventType: 'INVITE_UPGRADED',
+            externalId: data.externalId || null,
+            payload: {
+              email: data.email,
+              name: data.name || null,
+              previousPlan,
+              plan: combined,
+              code: pending.code,
+              value: data.value ?? null,
+              currency: data.currency || null,
+            },
+          },
+        });
+
+        const registerUrl = `/?token=${encodeURIComponent(pending.code)}`;
+
+        if (data.source === 'KIWIFY') {
+          setImmediate(() => {
+            void this.mailService.sendPurchaseInviteEmail({
+              to: data.email,
+              name: data.name,
+              registerUrl: `${this.getAppUrl()}${registerUrl}`,
+              planLabel: PLAN_LABELS[combined],
+            });
+          });
+        }
+
+        return { token: pending.code, plan: combined, registerUrl, upgraded: true };
+      }
+    }
+
+    return this.createInvite(data);
+  }
+
   async createInvite(data: CreateInviteDto & { source?: string; externalId?: string | null; value?: number; currency?: string }) {
     const plan = this.normalizePlan(data.plan);
     const code = this.createCode();
@@ -84,7 +175,9 @@ export class AuthService {
       },
     });
 
-    const registerUrl = `/register?token=${encodeURIComponent(token.code)}`;
+    // Raiz, não /register: é uma SPA de página única sem rota de servidor para
+    // subcaminhos (o mesmo motivo pelo qual o reset de senha usa "/?resetToken=").
+    const registerUrl = `/?token=${encodeURIComponent(token.code)}`;
 
     if (data.source === 'KIWIFY' && data.email) {
       setImmediate(() => {
