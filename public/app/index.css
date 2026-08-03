@@ -1238,6 +1238,23 @@ html.light .reader-content-image figcaption {
   transition: width 0.5s ease-out;
 }
 
+.onboarding-progress-segments {
+  display: flex;
+  gap: 6px;
+}
+
+.onboarding-progress-segment {
+  flex: 1;
+  height: 0.4rem;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+}
+
+.onboarding-progress-segment.filled {
+  background: var(--accent);
+}
+
 @media (max-width: 1024px) {
   .app-sidebar {
     position: fixed;
@@ -8707,7 +8724,7 @@ html.light .admin-canonical-block-card textarea {
 
 .note-row { border-color: rgba(229,184,94,.35) !important; }
 .letter-editor { padding: 0; }
-.letter-paper { min-height: 560px; padding: clamp(24px,5vw,54px); border-radius: 16px; background: #f3eee3; color: #27231e; box-shadow: inset 0 0 70px rgba(93,72,43,.08); }
+.letter-paper { min-height: 560px; padding: clamp(24px,5vw,54px); border-radius: 16px; background:#fffaf6; color: #27231e; box-shadow: inset 0 0 70px rgba(93,72,43,.08); }
 .letter-paper header { max-width: 720px; }
 .letter-paper header h2 { margin: 5px 0 10px; font-family: Georgia, serif; font-size: clamp(1.65rem,3.5vw,2.65rem); }
 .letter-paper header p { color: #665f55; }
@@ -9709,6 +9726,15 @@ html.dark .reader-clean-mode .reader-text-surface:not(.reader-image-page) .chapt
   text-transform: none !important;
 }
 
+/* Titulo do capitulo (H1 dentro do texto) em versalete, cor inalterada por tema. */
+.reader-clean-mode .reader-text-surface:not(.reader-image-page) .chapter-cover-copy h1,
+html.light .reader-clean-mode .reader-text-surface .chapter-cover-copy h1,
+html.dark .reader-clean-mode .reader-text-surface .chapter-cover-copy h1 {
+  font-variant-caps: small-caps !important;
+  letter-spacing: 0.01em !important;
+  font-size: clamp(1.7rem, 4.2vw, 2.1rem) !important;
+}
+
 .reader-clean-mode .reader-text-surface:not(.reader-image-page) .chapter-cover-copy span {
   display: none !important;
 }
@@ -9912,7 +9938,7 @@ html.dark .reader-clean-mode .reader-text-surface:not(.reader-image-page) .reade
 
 /* Absolute final premium gold gradient token. */
 :root {
-  --opdds-premium-gold-gradient: radial-gradient(circle at 38% 28%, #ffd39d, #cb8f64 58%, #593d2f) !important;
+  --opdds-premium-gold-gradient: radial-gradient(circle at 38% 28%, #ffd39d, #cb8f64 58%, #ab7b53) !important;
 }
 
 .reader-clean-mode .reader-text-surface:not(.reader-image-page) .reader-bottom-sensory-button.active,
@@ -9990,11 +10016,11 @@ html.light .audio-now-marker {
 
 .book-3d-object {
     position: relative;
-    width: min(330px, 72vw);
-    aspect-ratio: 2 / 3;
+    width: min(300px, 72vw);
+    aspect-ratio: 2.1 / 3;
     transform: rotateY(34deg) rotateX(4deg);
     transform-style: preserve-3d;
-    transition: transform 520ms ease;
+    transition: transform 820ms ease;
     outline: 0;
 }
 
@@ -10024,6 +10050,7 @@ html.light .audio-now-marker {
   height: 100%;
   display: block;
   object-fit: cover;
+  margin-left: 3px;
 }
 
 .book-3d-back {
@@ -10634,6 +10661,10 @@ html.light .journey-overview article {
   color: #211f1b !important;
   border-color: rgba(35, 31, 25, 0.14) !important;
   box-shadow: 0 18px 45px rgba(78, 62, 36, 0.08);
+}
+
+html.light .letters-index > button.active {
+  background: rgba(200, 164, 93, 0.28) !important;
 }
 
 html.light .workbook-hero {
@@ -13483,6 +13514,21 @@ html.light .reader-notes-popover h2 {
   height: 18px !important;
 }
 
+/* Modo claro: barra de progresso fina (igual ao escuro) e ícone de volume quase transparente, estilo outline. */
+html.light .compact-audio-player .player-wave-progress {
+  background:
+    linear-gradient(90deg, rgba(169, 113, 63, 0.34) 0 var(--audio-progress), rgba(35, 31, 25, 0.1) var(--audio-progress) 100%) left bottom / 100% 2px no-repeat !important;
+  box-shadow: none !important;
+  border: 0 !important;
+}
+
+html.light .compact-audio-player .volume-control {
+  background: rgba(35, 31, 25, 0.04) !important;
+  box-shadow: none !important;
+  border-color: transparent !important;
+  color: #6d665d !important;
+}
+
 .audio-full-visualizer {
   border: 0 !important;
   border-radius: 0 !important;
@@ -15329,7 +15375,7 @@ html.dark .reader-clean-mode .reader-bookbar-current strong {
   overflow: hidden !important;
   color: var(--opdds-reflow-ink) !important;
   font-family: var(--font-book) !important;
-  font-size: 0.86rem !important;
+  font-size: 0.78rem !important;
   font-weight: 650 !important;
   line-height: 1.08 !important;
   text-overflow: ellipsis !important;
@@ -15841,22 +15887,10 @@ button.cover-primary:hover,
 
 /* Canonical reader journal notebooks. */
 .reader-journal-form {
-  break-inside: avoid;
   display: grid;
   gap: 18px;
   max-width: 680px;
   padding: 4px 0 40px;
-}
-
-.reader-journal-form h2 {
-  margin: 0 !important;
-  color: var(--opdds-reflow-title, #b18a66) !important;
-  font-family: var(--font-book) !important;
-  font-size: clamp(1.8rem, 4vw, 3rem) !important;
-  font-weight: 520 !important;
-  letter-spacing: 0 !important;
-  line-height: 1.05 !important;
-  text-transform: none !important;
 }
 
 .reader-journal-form > span {
@@ -15882,6 +15916,8 @@ button.cover-primary:hover,
   border: 1px solid rgba(177, 138, 102, 0.24);
   border-radius: 12px;
   background: rgba(255, 255, 255, 0.025);
+  break-inside: avoid;
+  -webkit-column-break-inside: avoid;
 }
 
 .reader-journal-field strong {
@@ -18713,6 +18749,8 @@ html.dark .reader-clean-mode.reader-clean-mode .reader-text-surface:not(.reader-
   font-style: italic !important;
   font-weight: 640 !important;
   line-height: 1.36 !important;
+  break-before: avoid-column !important;
+  -webkit-column-break-before: avoid !important;
 }
 
 .reader-clean-mode.reader-clean-mode .reader-text-surface:not(.reader-image-page) .reader-reflow-columns h3,
@@ -18730,6 +18768,35 @@ html.dark .reader-clean-mode.reader-clean-mode .reader-text-surface:not(.reader-
 html.light .reader-clean-mode.reader-clean-mode .reader-text-surface:not(.reader-image-page) .reader-reflow-columns h2,
 html.dark .reader-clean-mode.reader-clean-mode .reader-text-surface:not(.reader-image-page) .reader-reflow-columns h2 {
   line-height: 1.16 !important;
+}
+
+/* Titulos internos do capitulo (secoes dentro da leitura) em versalete. */
+.reader-clean-mode.reader-clean-mode .reader-text-surface:not(.reader-image-page) .reader-reflow-columns h2,
+html.light .reader-clean-mode.reader-clean-mode .reader-text-surface:not(.reader-image-page) .reader-reflow-columns h2,
+html.dark .reader-clean-mode.reader-clean-mode .reader-text-surface:not(.reader-image-page) .reader-reflow-columns h2,
+.reader-clean-mode.reader-clean-mode .reader-text-surface:not(.reader-image-page) .reader-reflow-columns h3,
+html.light .reader-clean-mode.reader-clean-mode .reader-text-surface:not(.reader-image-page) .reader-reflow-columns h3,
+html.dark .reader-clean-mode.reader-clean-mode .reader-text-surface:not(.reader-image-page) .reader-reflow-columns h3 {
+  font-variant-caps: small-caps !important;
+  letter-spacing: 0.02em !important;
+}
+
+/* Titulos internos de secao: mesma cor e tamanho do H1 do capitulo (versalete tambem). */
+.reader-clean-mode.reader-clean-mode .reader-text-surface:not(.reader-image-page) .reader-reflow-columns h2.reader-canonical-section-title,
+.reader-clean-mode.reader-clean-mode .reader-text-surface:not(.reader-image-page) .reader-reflow-columns h3.reader-canonical-section-title {
+  font-size: clamp(1.7rem, 4.2vw, 2.1rem) !important;
+}
+
+html.light .reader-clean-mode.reader-clean-mode .reader-text-surface:not(.reader-image-page) .reader-reflow-columns h2.reader-canonical-section-title,
+html.light .reader-clean-mode.reader-clean-mode .reader-text-surface:not(.reader-image-page) .reader-reflow-columns h3.reader-canonical-section-title {
+  color: #8d7040 !important;
+  font-size: clamp(1.7rem, 4.2vw, 2.1rem) !important;
+}
+
+html.dark .reader-clean-mode.reader-clean-mode .reader-text-surface:not(.reader-image-page) .reader-reflow-columns h2.reader-canonical-section-title,
+html.dark .reader-clean-mode.reader-clean-mode .reader-text-surface:not(.reader-image-page) .reader-reflow-columns h3.reader-canonical-section-title {
+  color: #b18a66 !important;
+  font-size: clamp(1.7rem, 4.2vw, 2.1rem) !important;
 }
 
 /* Every chapter page with a visible header (title + eyebrow) was sitting
@@ -18898,4 +18965,156 @@ html.light .studio-close-button {
 html.light .studio-editor-doc:hover,
 html.light .studio-tabs button:hover {
   background: rgba(0, 0, 0, 0.05) !important;
+}
+
+/* Títulos internos do capítulo (h2/h3 dentro do texto corrido, ex.: "Abertura",
+   "O que é Consciência") centralizados — antes só os blocos "pause" eram. */
+.reader-clean-mode.reader-clean-mode .reader-text-surface:not(.reader-image-page) .reader-reflow-columns h2,
+html.light .reader-clean-mode.reader-clean-mode .reader-text-surface:not(.reader-image-page) .reader-reflow-columns h2,
+html.dark .reader-clean-mode.reader-clean-mode .reader-text-surface:not(.reader-image-page) .reader-reflow-columns h2,
+.reader-clean-mode.reader-clean-mode .reader-text-surface:not(.reader-image-page) .reader-reflow-columns h3,
+html.light .reader-clean-mode.reader-clean-mode .reader-text-surface:not(.reader-image-page) .reader-reflow-columns h3,
+html.dark .reader-clean-mode.reader-clean-mode .reader-text-surface:not(.reader-image-page) .reader-reflow-columns h3 {
+  text-align: center !important;
+}
+
+/* O índice lateral (drawer) ficava atrás do rodapé de áudio: .reader-bottom-stack
+   tem z-index: 60, maior que o z-index: 50 do drawer/backdrop. */
+.reader-contents-backdrop.reader-contents-backdrop {
+  z-index: 70 !important;
+}
+
+.reader-contents-drawer.reader-contents-drawer {
+  z-index: 71 !important;
+}
+
+/* Uma regra antiga (linha ~14320) força display:none permanente no backdrop
+   do índice, sem exceção pra classe .show — ele nunca renderizava, então o
+   onClick de fechar-ao-clicar-fora nunca disparava (elemento com display:none
+   não recebe eventos de ponteiro). */
+.reader-contents-backdrop.show,
+html.light .reader-contents-backdrop.show,
+html.dark .reader-contents-backdrop.show {
+  display: block !important;
+}
+
+/* Citação de transição antes da capa de um pilar, e o parágrafo de fechamento
+   de uma capa (.reader-cover-transition / .reader-cover-page-break), precisam
+   ficar isolados no próprio fôlego. break-after:column sozinho se mostrou
+   inconsistente entre navegadores (funcionou no Chromium do Playwright, falhou
+   no Firefox E no Edge real do Diego). Um min-height fixo em vh também não
+   funciona bem aqui: vh é relativo à janela, não à altura real da coluna
+   (que muda com o tamanho da fonte e o chrome do app), e um valor fixo tanto
+   pode sobrar (deixando a próxima seção colar na mesma página) quanto faltar
+   (fazendo o próprio bloco se partir em duas colunas, criando uma coluna
+   fantasma quase vazia no meio). Por isso a altura é calculada e aplicada via
+   JS (ReaderShell, efeito de medição) com a altura real da coluna — aqui só
+   garantimos que display:block permite o min-height inline funcionar. */
+.reader-clean-mode.reader-clean-mode .reader-text-surface:not(.reader-image-page) .reader-reflow-columns p.reader-cover-transition.reader-cover-transition,
+html.light .reader-clean-mode.reader-clean-mode .reader-text-surface:not(.reader-image-page) .reader-reflow-columns p.reader-cover-transition.reader-cover-transition,
+html.dark .reader-clean-mode.reader-clean-mode .reader-text-surface:not(.reader-image-page) .reader-reflow-columns p.reader-cover-transition.reader-cover-transition,
+.reader-clean-mode.reader-clean-mode .reader-text-surface:not(.reader-image-page) .reader-reflow-columns p.reader-cover-page-break.reader-cover-page-break,
+html.light .reader-clean-mode.reader-clean-mode .reader-text-surface:not(.reader-image-page) .reader-reflow-columns p.reader-cover-page-break.reader-cover-page-break,
+html.dark .reader-clean-mode.reader-clean-mode .reader-text-surface:not(.reader-image-page) .reader-reflow-columns p.reader-cover-page-break.reader-cover-page-break {
+  display: block !important;
+  break-inside: avoid !important;
+  -webkit-column-break-inside: avoid !important;
+}
+
+/* A citação de transição fica sozinha na coluna (min-height + padding-top
+   aplicados via JS) — sem isso ela fica colada no topo com um vazio grande
+   embaixo. display:flex pra centralizar quebrava o wrap do texto (o item de
+   texto anônimo encolhia pro conteúdo em vez de ocupar a largura toda), então
+   a centralização vertical é feita com padding-top calculado no JS, não flex. */
+.reader-clean-mode.reader-clean-mode .reader-text-surface:not(.reader-image-page) .reader-reflow-columns p.reader-cover-transition.reader-cover-transition,
+html.light .reader-clean-mode.reader-clean-mode .reader-text-surface:not(.reader-image-page) .reader-reflow-columns p.reader-cover-transition.reader-cover-transition,
+html.dark .reader-clean-mode.reader-clean-mode .reader-text-surface:not(.reader-image-page) .reader-reflow-columns p.reader-cover-transition.reader-cover-transition {
+  display: block !important;
+  box-sizing: border-box !important;
+}
+
+/* Título grande da capa (ex.: "Tríade da Sobrevivência", "Reconhecimento")
+   estava sendo pego por uma regra genérica de h3 dentro de .reader-reflow-columns
+   (font-size: 1.12em / cor de corpo de texto), que tem mais especificidade que
+   .reader-digital-cover-title sozinha (elemento h3 + classes empatadas). Resultado:
+   o título saía pequeno e na cor do corpo do texto, não no dourado grande igual
+   aos títulos de seção (ex.: "Abertura"). Repetindo aqui o mesmo tamanho/peso/cor
+   de h2.reader-canonical-section-title, com especificidade maior pra garantir. */
+.reader-clean-mode.reader-clean-mode .reader-text-surface:not(.reader-image-page) .reader-reflow-columns h3.reader-digital-cover-title.reader-digital-cover-title,
+html.light .reader-clean-mode.reader-clean-mode .reader-text-surface:not(.reader-image-page) .reader-reflow-columns h3.reader-digital-cover-title.reader-digital-cover-title,
+html.dark .reader-clean-mode.reader-clean-mode .reader-text-surface:not(.reader-image-page) .reader-reflow-columns h3.reader-digital-cover-title.reader-digital-cover-title {
+  font-size: clamp(1.7rem, 4.2vw, 2.1rem) !important;
+  font-weight: 700 !important;
+}
+
+html.light .reader-clean-mode.reader-clean-mode .reader-text-surface:not(.reader-image-page) .reader-reflow-columns h3.reader-digital-cover-title.reader-digital-cover-title {
+  color: #8d7040 !important;
+}
+
+html.dark .reader-clean-mode.reader-clean-mode .reader-text-surface:not(.reader-image-page) .reader-reflow-columns h3.reader-digital-cover-title.reader-digital-cover-title {
+  color: #b18a66 !important;
+}
+
+/* Mesmo bug de especificidade pegava o "imprint" (ex.: "Ato I", "Pilar I"),
+   deixando-o na cor de corpo de texto em vez do dourado de destaque. */
+html.light .reader-clean-mode.reader-clean-mode .reader-text-surface:not(.reader-image-page) .reader-reflow-columns h3.reader-digital-cover-imprint.reader-digital-cover-imprint {
+  color: #8d7040 !important;
+}
+
+html.dark .reader-clean-mode.reader-clean-mode .reader-text-surface:not(.reader-image-page) .reader-reflow-columns h3.reader-digital-cover-imprint.reader-digital-cover-imprint {
+  color: #b18a66 !important;
+}
+
+/* Respiro fixo no topo da capa (imprint), pra ela não ficar colada no topo da
+   coluna. Antes isso era calculado dinamicamente em JS dividindo o espaço
+   sobrando com o bloco de fechamento — mas em capas com tagline (4 blocos) o
+   valor calculado podia ficar grande demais e estourar a coluna no meio do
+   grupo, partindo-o em duas páginas. Um valor fixo e modesto é mais seguro;
+   box-sizing:border-box deixa o cálculo de altura da coluna previsível. */
+.reader-clean-mode.reader-clean-mode .reader-text-surface:not(.reader-image-page) .reader-reflow-columns h3.reader-digital-cover-imprint.reader-digital-cover-imprint {
+  box-sizing: border-box !important;
+  padding-top: clamp(36px, 7vh, 76px) !important;
+}
+
+/* Capa principal do livro (capa-digital): pedido específico do Diego —
+   o imprint (antes "DBT Agency", agora lista dos 3 Atos) não deve ter cor de
+   destaque, e o título precisa ficar dourado (h2 aqui, não h3 como nas capas
+   de pilar — por isso o fix de cor anterior, que só mirava h3, não pegava). */
+.reader-clean-mode.reader-clean-mode .reader-text-surface.reader-chapter-capa-digital.reader-chapter-capa-digital h3.reader-digital-cover-imprint.reader-digital-cover-imprint,
+html.light .reader-clean-mode.reader-clean-mode .reader-text-surface.reader-chapter-capa-digital.reader-chapter-capa-digital h3.reader-digital-cover-imprint.reader-digital-cover-imprint,
+html.dark .reader-clean-mode.reader-clean-mode .reader-text-surface.reader-chapter-capa-digital.reader-chapter-capa-digital h3.reader-digital-cover-imprint.reader-digital-cover-imprint {
+  color: var(--opdds-reflow-ink, #ded2bd) !important;
+}
+
+.reader-clean-mode.reader-clean-mode .reader-text-surface.reader-chapter-capa-digital.reader-chapter-capa-digital h2.reader-digital-cover-title.reader-digital-cover-title,
+html.light .reader-clean-mode.reader-clean-mode .reader-text-surface.reader-chapter-capa-digital.reader-chapter-capa-digital h2.reader-digital-cover-title.reader-digital-cover-title {
+  color: #8d7040 !important;
+}
+
+html.dark .reader-clean-mode.reader-clean-mode .reader-text-surface.reader-chapter-capa-digital.reader-chapter-capa-digital h2.reader-digital-cover-title.reader-digital-cover-title {
+  color: #b18a66 !important;
+}
+
+/* Elemento que recebeu min-height dinâmico via JS pra empurrar um título de
+   seção órfão pra próxima página (ver ReaderShell, orphanThreshold). Precisa
+   de box-sizing previsível — mesmo motivo dos outros ajustes de min-height
+   desta seção. */
+.reader-clean-mode.reader-clean-mode .reader-text-surface:not(.reader-image-page) .reader-reflow-columns [data-orphan-fix],
+html.light .reader-clean-mode.reader-clean-mode .reader-text-surface:not(.reader-image-page) .reader-reflow-columns [data-orphan-fix],
+html.dark .reader-clean-mode.reader-clean-mode .reader-text-surface:not(.reader-image-page) .reader-reflow-columns [data-orphan-fix] {
+  box-sizing: border-box !important;
+}
+
+/* Quando o elemento inflado é uma citação (.reader-canonical-pause), ela tem
+   break-before:avoid-column pra não ficar "flutuando" longe do que vem antes
+   (ver regra correspondente). Isso conflita com o uso aqui — ao inflar essa
+   citação até o fim da coluna, o "avoid" faz o Chromium mover a citação
+   INTEIRA (não só o que vem depois) pra uma coluna nova, esvaziando a coluna
+   atual em vez de empurrar só o título. Neutraliza o break-before só nesses
+   elementos específicos, com especificidade maior que a regra da citação. */
+.reader-clean-mode.reader-clean-mode .reader-text-surface:not(.reader-image-page) .reader-reflow-columns p[data-orphan-fix][data-orphan-fix],
+html.light .reader-clean-mode.reader-clean-mode .reader-text-surface:not(.reader-image-page) .reader-reflow-columns p[data-orphan-fix][data-orphan-fix],
+html.dark .reader-clean-mode.reader-clean-mode .reader-text-surface:not(.reader-image-page) .reader-reflow-columns p[data-orphan-fix][data-orphan-fix] {
+  break-before: auto !important;
+  -webkit-column-break-before: auto !important;
 }

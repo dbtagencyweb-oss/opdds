@@ -1,4 +1,5 @@
 ﻿import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import {
   Bookmark,
   BookOpen,
@@ -634,6 +635,16 @@ export default function ReaderShell({
 }: Props) {
   const [mode, setMode] = useState<'edition' | 'text'>(initialMode);
   const [contentsOpen, setContentsOpen] = useState(false);
+  const contentsDrawerRef = useRef<HTMLElement | null>(null);
+
+  useEffect(() => {
+    if (!contentsOpen) return;
+    const handleOutsideClick = (event: MouseEvent) => {
+      if (!contentsDrawerRef.current?.contains(event.target as Node)) setContentsOpen(false);
+    };
+    document.addEventListener('mousedown', handleOutsideClick);
+    return () => document.removeEventListener('mousedown', handleOutsideClick);
+  }, [contentsOpen]);
   const [notesOpen, setNotesOpen] = useState(false);
   const [notesTab, setNotesTab] = useState<'current' | 'all'>('current');
   const [letterSpacing, setLetterSpacing] = useState(0);
@@ -651,6 +662,7 @@ export default function ReaderShell({
   const [reflowPageIndex, setReflowPageIndex] = useState(0);
   const [reflowTotalPages, setReflowTotalPages] = useState(1);
   const [reflowPageStep, setReflowPageStep] = useState(1);
+  const [reflowIsCoverPage, setReflowIsCoverPage] = useState(false);
   const readerShellRef = useRef<HTMLElement | null>(null);
   const textSurfaceRef = useRef<HTMLElement | null>(null);
   const reflowViewportRef = useRef<HTMLDivElement | null>(null);
@@ -823,6 +835,7 @@ export default function ReaderShell({
   };
 
   const audioTrackForBlock = (block: TextBlock) => {
+    if (block.className?.includes('reader-no-audio-cue')) return null;
     const cleanText = repairReaderText(block.text).replace(/\[br\]/gi, ' ').replace(/\s+/g, ' ').trim();
     const wordCount = cleanText ? cleanText.split(/\s+/).length : 0;
     if (!cleanText || cleanText.length > 56 || wordCount > 5) return null;
@@ -910,6 +923,102 @@ export default function ReaderShell({
       columns.style.setProperty('--reader-reflow-colw', `${width}px`);
       columns.style.setProperty('--reader-reflow-gap', `${gap}px`);
       setReflowPageStep(width + gap);
+
+      // Capas/citações de transição (.reader-cover-transition / .reader-cover-page-break)
+      // precisam ocupar o resto da coluna onde caem, pra isolar a seção seguinte no
+      // próximo fôlego. A altura de coluna varia com fonte/viewport, então calculamos
+      // em px (não vh) a partir da coluna real, processando em ordem de documento —
+      // cada min-height aplicado pode empurrar o próximo bloco marcado pra outra
+      // coluna, e a leitura de offsetTop seguinte já reflete isso.
+      const transitionNodes = Array.from(columns.querySelectorAll<HTMLElement>('.reader-cover-transition'));
+      const pageBreakNodes = Array.from(columns.querySelectorAll<HTMLElement>('.reader-cover-page-break'));
+      const sectionHeadingNodes = Array.from(
+        columns.querySelectorAll<HTMLElement>('h2.reader-canonical-section-title, h3.reader-canonical-section-title'),
+      );
+      transitionNodes.forEach((node) => {
+        node.style.removeProperty('min-height');
+        node.style.removeProperty('padding-top');
+      });
+      pageBreakNodes.forEach((node) => { node.style.removeProperty('min-height'); });
+      columns.querySelectorAll<HTMLElement>('[data-orphan-fix]').forEach((node) => {
+        node.style.removeProperty('min-height');
+        node.removeAttribute('data-orphan-fix');
+      });
+      const columnHeight = columns.clientHeight;
+      if (columnHeight > 0) {
+        // Citação de transição: sozinha na coluna. Reserva o resto dela (min-height)
+        // e divide a sobra entre padding-top e o restante embaixo, pra centralizar o
+        // texto verticalmente em vez de deixá-lo colado no topo. Usa setProperty com
+        // 'important' porque o CSS já tem regras !important concorrentes (ex.: o
+        // margin-top do imprint) que, sem isso, vencem silenciosamente o inline style.
+        transitionNodes.forEach((node) => {
+          const naturalHeight = node.offsetHeight;
+          const fullReserved = columnHeight - node.offsetTop - 4;
+          if (fullReserved > naturalHeight) {
+            const extra = fullReserved - naturalHeight;
+            node.style.setProperty('padding-top', `${Math.floor(extra / 2)}px`, 'important');
+            node.style.setProperty('min-height', `${fullReserved}px`, 'important');
+            // Verificação: margens/colapsos que o cálculo acima não modela podem
+            // fazer o bloco terminar além da coluna mesmo assim. Mede de novo e,
+            // se ainda estourar, encolhe o min-height pelo excesso exato.
+            const overflow = (node.offsetTop + node.offsetHeight) - columnHeight;
+            if (overflow > 0) {
+              const currentMinHeight = Number.parseFloat(node.style.minHeight) || fullReserved;
+              node.style.setProperty('min-height', `${Math.max(naturalHeight, currentMinHeight - overflow - 4)}px`, 'important');
+            }
+          }
+        });
+        // Grupo da capa (imprint + título + [tagline] + parágrafo de fechamento):
+        // o topo já ganha um respiro fixo via CSS (padding-top em .reader-digital-cover-imprint).
+        // Aqui só preenchemos o resto da coluna no último bloco, pra empurrar a
+        // próxima seção pra fora da página — mesma técnica comprovada da citação
+        // de transição, sem tentar dividir a sobra em duas partes (essa divisão se
+        // mostrou frágil: em capas com tagline, o padding-top calculado podia ficar
+        // grande demais e estourar a coluna no meio do grupo, partindo-o ao meio).
+        pageBreakNodes.forEach((node) => {
+          const naturalHeight = node.offsetHeight;
+          const fullReserved = columnHeight - node.offsetTop - 8;
+          if (fullReserved > naturalHeight) {
+            node.style.setProperty('min-height', `${fullReserved}px`, 'important');
+            const overflow = (node.offsetTop + node.offsetHeight) - columnHeight;
+            if (overflow > 0) {
+              node.style.setProperty('min-height', `${Math.max(naturalHeight, fullReserved - overflow - 4)}px`, 'important');
+            }
+          }
+        });
+        // Título de seção "órfão": break-after/break-inside:avoid-column no CSS
+        // (ver .reader-canonical-section-title) é só uma dica — testado e confirmado
+        // que o Chromium a ignora em quebras de coluna por overflow natural (mesma
+        // categoria de problema já visto com break-after:column pras capas). Em vez
+        // de tentar inflar o próprio título pra empurrá-lo (não funciona: sem o
+        // break forçado respeitado, ele só estoura e ainda assim fica com o corpo
+        // de texto na página seguinte), infla o elemento ANTERIOR ao título até
+        // preencher o resto da coluna — a mesma técnica já comprovada pras capas —
+        // o que empurra o título inteiro (e o que vem depois) pra começar fresco
+        // na próxima página.
+        // "Manifesto de Abertura" sempre começa fôlego novo, mesmo quando caberia
+        // na mesma página da seção anterior (pedido específico: essa seção é longa
+        // e densa o bastante pra não ficar espremida junto com outra no mesmo fôlego).
+        const orphanThreshold = 110;
+        sectionHeadingNodes.forEach((node) => {
+          if (node.offsetTop <= 4) return; // já no topo da própria coluna, nada a fazer
+          const forceFreshPage = node.textContent?.includes('Manifesto de Abertura') ?? false;
+          const remaining = columnHeight - (node.offsetTop + node.offsetHeight);
+          if (!forceFreshPage && remaining >= orphanThreshold) return;
+          const previous = node.previousElementSibling as HTMLElement | null;
+          if (!previous) return;
+          const naturalHeight = previous.offsetHeight;
+          const fullReserved = columnHeight - previous.offsetTop - 8;
+          if (fullReserved <= naturalHeight) return;
+          previous.setAttribute('data-orphan-fix', '1');
+          previous.style.setProperty('min-height', `${fullReserved}px`, 'important');
+          const overflow = (previous.offsetTop + previous.offsetHeight) - columnHeight;
+          if (overflow > 0) {
+            previous.style.setProperty('min-height', `${Math.max(naturalHeight, fullReserved - overflow - 4)}px`, 'important');
+          }
+        });
+      }
+
       const scrollWidth = Math.max(width, columns.scrollWidth);
       const total = scrollWidth <= width + Math.ceil(gap * 0.35)
         ? 1
@@ -926,6 +1035,25 @@ export default function ReaderShell({
       window.removeEventListener('resize', measure);
     };
   }, [fontSize, letterSpacing, lineHeight, mode, reflowBlocks.length, reflowTextSource]);
+
+  useEffect(() => {
+    if (mode !== 'text') { setReflowIsCoverPage(false); return; }
+    const detect = () => {
+      const columns = reflowColumnsRef.current;
+      if (!columns || reflowPageStep <= 1) { setReflowIsCoverPage(false); return; }
+      const nodes = columns.querySelectorAll<HTMLElement>(
+        '.reader-digital-cover-imprint, .reader-digital-cover-title, .reader-digital-cover-tagline, .reader-digital-cover-author, .reader-cover-transition',
+      );
+      if (!nodes.length) { setReflowIsCoverPage(false); return; }
+      let onCoverPage = false;
+      nodes.forEach((node) => {
+        if (Math.round(node.offsetLeft / reflowPageStep) === reflowPageIndex) onCoverPage = true;
+      });
+      setReflowIsCoverPage(onCoverPage);
+    };
+    const frame = window.requestAnimationFrame(detect);
+    return () => window.cancelAnimationFrame(frame);
+  }, [mode, reflowPageIndex, reflowPageStep, reflowTextSource]);
 
   const touchDistance = (touches: React.TouchList) => {
     if (touches.length < 2) return 0;
@@ -1213,8 +1341,12 @@ export default function ReaderShell({
           <Menu size={21} />
         </button>
         <div className="reader-bookbar-current" aria-label="Seção aberta">
-          <span>{reflowDisplayEyebrow}</span>
-          <strong>{reflowDisplayTitle}</strong>
+          {!reflowIsCoverPage && (
+            <>
+              <span>{reflowDisplayEyebrow}</span>
+              <strong>{reflowDisplayTitle}</strong>
+            </>
+          )}
         </div>
 
         <div className="reader-actions" aria-label="Controles do leitor">
@@ -1279,7 +1411,7 @@ export default function ReaderShell({
       </div>
       )}
 
-      {notesOpen && (
+      {notesOpen && createPortal(
         <div className="reader-notes-backdrop" onClick={() => setNotesOpen(false)}>
           <aside className="reader-notes-popover" onClick={(event) => event.stopPropagation()} role="dialog" aria-modal="true" aria-label="Minhas anotações">
             <header>
@@ -1328,7 +1460,8 @@ export default function ReaderShell({
               </section>
             )}
           </aside>
-        </div>
+        </div>,
+        document.body,
       )}
 
       {displayCurrentLetterTitle && (
@@ -1341,7 +1474,7 @@ export default function ReaderShell({
       )}
 
       <div className={`reader-contents-backdrop ${contentsOpen ? 'show' : ''}`} onClick={() => setContentsOpen(false)} />
-      <aside className={`reader-contents-drawer ${contentsOpen ? 'open' : ''}`} aria-label="Índice do livro">
+      <aside ref={contentsDrawerRef} className={`reader-contents-drawer ${contentsOpen ? 'open' : ''}`} aria-label="Índice do livro">
         <header>
           <div>
             <p className="kicker">O Poder dos Desacreditados</p>
@@ -1520,7 +1653,7 @@ export default function ReaderShell({
             <span>{reflowDisplayEyebrow}</span>
             <span>{reflowProgress}% do livro</span>
           </div>
-          {!reflowHeaderDirectives.hideHeader && (
+          {!reflowHeaderDirectives.hideHeader && !reflowIsCoverPage && (
           <div className="chapter-coverlet">
             <div className="chapter-cover-art" style={coverImageUrl ? { backgroundImage: `linear-gradient(180deg, rgba(6,7,8,.08), rgba(6,7,8,.76)), url(${coverImageUrl})` } : undefined} />
             <div className="chapter-cover-copy">
@@ -1545,8 +1678,6 @@ export default function ReaderShell({
             >
             {isJournalChapter ? (
               <section className="reader-journal-form" aria-label="Caderno de presença">
-                <p className="kicker">Caderno de presença</p>
-                <h2>{reflowDisplayTitle}</h2>
                 <span>Escreva sem obrigação de concluir. As respostas ficam na sua jornada privada e sincronizam quando sua conta está conectada.</span>
                 <div className="reader-journal-fields">
                   {journalPrompts.map((prompt, promptIndex) => (

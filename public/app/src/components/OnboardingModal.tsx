@@ -22,7 +22,7 @@ export default function OnboardingModal({
   onSkip,
   isPlaying = false,
 }: Props) {
-  const progressPercent = (step / totalSteps) * 100;
+  const segments = Array.from({ length: totalSteps }, (_, index) => index < step);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-6 backdrop-blur-xl animate-fade-in">
@@ -43,8 +43,10 @@ export default function OnboardingModal({
         </div>
 
         <div className="mt-6 space-y-2">
-          <div className="progress-bar">
-            <div className="progress-fill" style={{ width: `${progressPercent}%` }} />
+          <div className="onboarding-progress-segments">
+            {segments.map((filled, index) => (
+              <div key={index} className={`onboarding-progress-segment ${filled ? 'filled' : ''}`} />
+            ))}
           </div>
           <p className="text-xs text-zinc-500">{step} de {totalSteps}</p>
         </div>

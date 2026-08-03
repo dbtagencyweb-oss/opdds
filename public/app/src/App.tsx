@@ -400,6 +400,16 @@ export function App() {
   const [onboardingStep, setOnboardingStep] = useState(0);
   const [menuOpen, setMenuOpen] = useState(false);
   const [accountMenuOpen, setAccountMenuOpen] = useState(false);
+  const accountMenuRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (!accountMenuOpen) return;
+    const handleOutsideClick = (event: MouseEvent) => {
+      if (!accountMenuRef.current?.contains(event.target as Node)) setAccountMenuOpen(false);
+    };
+    document.addEventListener('mousedown', handleOutsideClick);
+    return () => document.removeEventListener('mousedown', handleOutsideClick);
+  }, [accountMenuOpen]);
   const [activeMentorTopic, setActiveMentorTopic] = useState(mentorTopics[7]);
   const [mindStep, setMindStep] = useState<'select' | 'chat'>('select');
   const [selectedMindTriadId, setSelectedMindTriadId] = useState(mindTriads[0].id);
@@ -3374,7 +3384,7 @@ export function App() {
           <DownloadCloud size={16} />
           <span>Baixar Livro</span>
         </button>
-        <div className="account-menu-wrap">
+        <div className="account-menu-wrap" ref={accountMenuRef}>
           <button className="account-pill" onClick={() => setAccountMenuOpen((value) => !value)}>
             <span>{readerName.slice(0, 1).toUpperCase()}</span>
             <strong>{readerName}</strong>

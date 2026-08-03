@@ -10,7 +10,7 @@ export const artifactBookData = {
       "title": "O Poder dos Desacreditados",
       "tagline": "Há um poder que só aparece na ausência de expectativa.",
       "author": "Diego Bock Tavares",
-      "imprint": "DBT Agency"
+      "imprint": "Sobrevivência · Reconstrução · Continuidade"
     }
   },
   "chapters": [
@@ -126,7 +126,7 @@ export const artifactBookData = {
           "blocks": [
             {
               "type": "pause",
-              "text": "E por que isso importa?"
+              "text": "Por que este livro não é autoajuda.\nE por que isso importa?"
             },
             {
               "type": "p",
@@ -147,19 +147,11 @@ export const artifactBookData = {
             },
             {
               "type": "pause",
-              "text": "Autoajuda costuma acelerar."
-            },
-            {
-              "type": "pause",
-              "text": "Este livro desacelera."
+              "text": "Autoajuda costuma acelerar.[br]\nEste livro desacelera."
             },
             {
               "type": "p",
-              "text": "Grande parte da literatura de autoajuda trabalha com aceleração: metas, hábitos, mudanças rápidas, reprogramação mental, visão de futuro. Mesmo quando bem-intencionada, essa abordagem costuma pressionar alguém que já está em estado de sobrecarga."
-            },
-            {
-              "type": "p",
-              "text": "Quando você está ansioso, deprimido, esgotado ou em reconstrução, acelerar não ajuda. Pelo contrário: aumenta a sensação de inadequação. A mensagem implícita se torna cruel: \"se você não conseguiu aplicar isso, o problema é você\"."
+              "text": "Grande parte da literatura de autoajuda trabalha com aceleração: metas, hábitos, mudanças rápidas, reprogramação mental, visão de futuro. Mesmo quando bem-intencionada, essa abordagem costuma pressionar alguém que já está em estado de sobrecarga.\n\nQuando você está ansioso, deprimido, esgotado ou em reconstrução, acelerar não ajuda. Pelo contrário: aumenta a sensação de inadequação. A mensagem implícita se torna cruel: \"se você não conseguiu aplicar isso, o problema é você\"."
             },
             {
               "type": "pause",
@@ -173,37 +165,37 @@ export const artifactBookData = {
         },
         {
           "id": "quebra1--uma-obra-pensada-para-mentes-criativas-e-cansadas",
-          "title": "Uma Obra Pensada Para Mentes Criativas e Cansadas",
+          "title": "Uma obra pensada para mentes criativas e cansadas",
           "audioId": "quebra1--uma-obra-pensada-para-mentes-criativas-e-cansadas",
           "listened": false,
           "blocks": [
             {
               "type": "p",
-              "text": "Este livro também não foi escrito a partir de uma mente linear, organizada e previsível. Ele nasce de uma mente criativa, sensorial, inquieta, marcada por períodos de hiperfoco e longos momentos de dispersão."
-            },
-            {
-              "type": "p",
-              "text": "Quem vive assim costuma se sentir inadequado diante de livros longos, densos, cheios de explicações circulares e abstrações prolongadas. A leitura vira peso. O conteúdo vira cobrança. O livro vira mais uma coisa que não se consegue terminar. Por isso, a escrita aqui é direta. Os textos são densos, mas objetivos. As ideias não se repetem para convencer — se repetem para sustentar. A estrutura é fragmentada porque respeita quem tem dificuldade de foco quando está em dor. Não é superficialidade. É cuidado cognitivo. Este livro entende que, em certos estados emocionais, menos estímulo é mais profundidade."
+              "text": "Este livro também não foi escrito a partir de uma mente linear, organizada e previsível. Ele nasce de uma mente criativa, sensorial, inquieta, marcada por períodos de hiperfoco e longos momentos de dispersão.\n\nQuem vive assim costuma se sentir inadequado diante de livros longos, densos, cheios de explicações circulares e abstrações prolongadas. A leitura vira peso. O conteúdo vira cobrança. O livro vira mais uma coisa que não se consegue terminar. Por isso, a escrita aqui é direta. Os textos são densos, mas objetivos. As ideias não se repetem para convencer — se repetem para sustentar. A estrutura é fragmentada porque respeita quem tem dificuldade de foco quando está em dor. Não é superficialidade. É cuidado cognitivo. Este livro entende que, em certos estados emocionais, menos estímulo é mais profundidade."
             }
           ]
         },
         {
           "id": "quebra1--experiencia-vivida-nao-teoria-emprestada",
-          "title": "Experiência Vivida, Não Teoria Emprestada",
+          "title": "Experiência vivida, não teoria emprestada",
           "audioId": "quebra1--experiencia-vivida-nao-teoria-emprestada",
           "listened": false,
           "blocks": [
             {
               "type": "p",
-              "text": "Nada do que está aqui foi escrito a partir de observação distante. Este livro nasce de vivências reais: ansiedade crônica, perdas que não se resolvem, episódios depressivos, uso de drogas e sexo como anestesia, dificuldade de foco, sensação de inadequação constante, tentativas repetidas de reconstrução e a experiência íntima de se sentir desacreditado — pelos outros e por si mesmo. Isso não transforma o livro em confissão nem em vitimismo. Transforma em responsabilidade. Responsabilidade de não romantizar a dor. Responsabilidade de não prometer o que não se pode sustentar. Responsabilidade de escrever algo que realmente acompanhe quem está no chão — não quem já está em pé."
-            },
-            {
-              "type": "pause",
-              "text": "UMA OBRA QUE RESPEITA QUEM PRECISA DE ALÍVIO IMEDIATO"
-            },
+              "text": "Nada do que está aqui foi escrito a partir de observação distante. [br]\n\nEste livro nasce de vivências reais: ansiedade crônica, perdas que não se resolvem, episódios depressivos, uso de drogas e sexo como anestesia, dificuldade de foco, sensação de inadequação constante, tentativas repetidas de reconstrução e a experiência íntima de se sentir desacreditado — pelos outros e por si mesmo. Isso não transforma o livro em confissão nem em vitimismo. [br]\n\nTransforma em responsabilidade. \nResponsabilidade de não romantizar a dor. Responsabilidade de não prometer o que não se pode sustentar. Responsabilidade de escrever algo que realmente acompanhe quem está no chão — não quem já está em pé."
+            }
+          ]
+        },
+        {
+          "id": "quebra1--uma-obra-que-respeita-quem-precisa-de-alivio-imediato",
+          "title": "Uma obra que respeita quem precisa de alivio imediato",
+          "audioId": "quebra1--uma-obra-que-respeita-quem-precisa-de-alivio-imediato",
+          "listened": false,
+          "blocks": [
             {
               "type": "p",
-              "text": "Outro ponto central: este livro não foi pensado para ser lido como obrigação intelectual. Ele pode ser aberto em qualquer página. Pode ser interrompido. Pode ser retomado semanas depois. Ele foi escrito considerando pessoas que, em determinados momentos, só conseguem sustentar pequenos blocos de atenção. Pessoas que precisam de alívio emocional imediato, não de longas argumentações. Cada texto existe porque precisa existir. Cada conceito é apresentado porque sustenta algo real. Cada silêncio é intencional. Este livro não quer impressionar. Quer servir."
+              "text": "Outro ponto central: este livro não foi pensado para ser lido como obrigação intelectual. Ele pode ser aberto em qualquer página. Pode ser interrompido. Pode ser retomado semanas depois. [br]\nEle foi escrito considerando pessoas que, em determinados momentos, só conseguem sustentar pequenos blocos de atenção. Pessoas que precisam de alívio emocional imediato, não de longas argumentações. [br]\nCada texto existe porque precisa existir. Cada conceito é apresentado porque sustenta algo real. Cada silêncio é intencional. Este livro não quer impressionar. Quer servir."
             },
             {
               "type": "pause",
@@ -211,7 +203,7 @@ export const artifactBookData = {
             },
             {
               "type": "p",
-              "text": "Este livro é um espaço. Um espaço estruturado para quem vive em estados internos difíceis. Um espaço que organiza a experiência humana em três movimentos fundamentais: Consciência, Julgamento e Presença. Um espaço que reconhece que o ser humano não é feito apenas de dualidades — força e fraqueza, razão e impulso, controle e caos — mas também de um terceiro elemento: aquele que observa tudo isso sem desaparecer. Você não encontrará aqui promessas de sucesso. Encontrará algo mais raro: Um lugar onde você pode existir sem precisar se consertar imediatamente. E, para quem já esteve perto de desistir, isso não é pouco. É o começo possível."
+              "text": "Este livro é um espaço. Um espaço estruturado para quem vive em estados internos difíceis. Um espaço que organiza a experiência humana em três movimentos fundamentais: Consciência, Julgamento e Presença. Um espaço que reconhece que o ser humano não é feito apenas de dualidades — força e fraqueza, razão e impulso, controle e caos — mas também de um terceiro elemento: aquele que observa tudo isso sem desaparecer. Você não encontrará aqui promessas de sucesso. [br]\nEncontrará algo mais raro: Um lugar onde você pode existir sem precisar se consertar imediatamente. E, para quem já esteve perto de desistir, isso não é pouco.[br] É o começo possível."
             }
           ]
         }
@@ -231,11 +223,11 @@ export const artifactBookData = {
           "blocks": [
             {
               "type": "pause",
-              "text": "SOBRE O DESACREDITADO. Quem é a pessoa para quem este livro foi escrito"
+              "text": "Quem é a pessoa para quem este livro foi escrito"
             },
             {
               "type": "p",
-              "text": "Este livro não foi escrito para um público genérico. Ele não foi pensado para qualquer pessoa que queira melhorar de vida, organizar metas ou alcançar desempenho máximo. Ele foi escrito para um tipo específico de pessoa — alguém que, mesmo tentando, sente que nunca ocupou completamente o lugar que parecia destinado aos outros. O desacreditado não é alguém que desistiu. É alguém que continuou. Continuou mesmo sem aplauso. Continuou mesmo sem validação. Continuou mesmo quando a energia interna já não sustentava a narrativa da força constante. O desacreditado não se reconhece nos discursos tradicionais de sucesso porque, na maior parte do tempo, sua luta não foi para vencer — foi para não se perder.",
+              "text": "Este livro não foi escrito para um público genérico. [br]\nEle não foi pensado para qualquer pessoa que queira melhorar de vida, organizar metas ou alcançar desempenho máximo. Ele foi escrito para um tipo específico de pessoa — alguém que, mesmo tentando, sente que nunca ocupou completamente o lugar que parecia destinado aos outros. [br]O desacreditado não é alguém que desistiu. É alguém que continuou. [br]\nContinuou mesmo sem aplauso. Continuou mesmo sem validação. Continuou mesmo quando a energia interna já não sustentava a narrativa da força constante. O desacreditado não se reconhece nos discursos tradicionais de sucesso porque, na maior parte do tempo, sua luta não foi para vencer — foi para não se perder.",
               "lead": true
             }
           ]
@@ -288,11 +280,7 @@ export const artifactBookData = {
             },
             {
               "type": "p",
-              "text": "Ansiedade prolongada, episódios depressivos, compulsões, uso de drogas, sexo como anestesia emocional, trabalho excessivo, fuga constante para estímulos — tudo isso costuma aparecer como tentativa de regular um sistema interno sobrecarregado. Essas estratégias não nascem de fraqueza moral. Nascem de uma necessidade legítima de aliviar a dor quando não há outras ferramentas disponíveis."
-            },
-            {
-              "type": "p",
-              "text": "O problema não é ter recorrido a essas saídas. O problema é ter aprendido a se odiar por isso."
+              "text": "Ansiedade prolongada, episódios depressivos, compulsões, uso de drogas, sexo como anestesia emocional, trabalho excessivo, fuga constante para estímulos — tudo isso costuma aparecer como tentativa de regular um sistema interno sobrecarregado. [br]\nEssas estratégias não nascem de fraqueza moral. [br]\nNascem de uma necessidade legítima de aliviar a dor quando não há outras ferramentas disponíveis.[br]\nO problema não é ter recorrido a essas saídas. O problema é ter aprendido a se odiar por isso."
             }
           ]
         },
@@ -304,17 +292,17 @@ export const artifactBookData = {
           "blocks": [
             {
               "type": "p",
-              "text": "Outro traço comum do desacreditado é a relação ambígua com conteúdo de desenvolvimento pessoal. Ele até deseja entender, melhorar, se reorganizar. Mas frequentemente se sente exausto diante de livros longos, cheios de promessas, metáforas repetitivas e conceitos que exigem esforço cognitivo contínuo. Quando está em dor, sua capacidade de foco diminui. O excesso de informação não ajuda — sobrecarrega. O discurso muito abstrato afasta. A leitura vira mais uma tarefa não concluída, mais um sinal interno de falha. Este livro reconhece isso."
+              "text": "Outro traço comum do desacreditado é a relação ambígua com conteúdo de desenvolvimento pessoal. Ele até deseja entender, melhorar, se reorganizar. Mas frequentemente se sente exausto diante de livros longos, cheios de promessas, metáforas repetitivas e conceitos que exigem esforço cognitivo contínuo. Quando está em dor, sua capacidade de foco diminui. O excesso de informação não ajuda — sobrecarrega. O discurso muito abstrato afasta. A leitura vira mais uma tarefa não concluída, mais um sinal interno de falha. [br]Este livro reconhece isso."
             },
             {
               "type": "p",
-              "text": "Por isso, não exige linearidade. Não exige leitura contínua. Não exige concentração prolongada. Ele foi escrito para ser acessado em estados reais de cansaço, confusão e reconstrução."
+              "text": "Por isso, não exige linearidade. Não exige leitura contínua. Não exige concentração prolongada. [br]\nEle foi escrito para ser acessado em estados reais de cansaço, confusão e reconstrução."
             }
           ]
         },
         {
           "id": "quebra2--o-desacreditado-ea-culpa-silenciosa",
-          "title": "O Desacreditado Ea Culpa Silenciosa",
+          "title": "O Desacreditado e a Culpa Silenciosa",
           "audioId": "quebra2--o-desacreditado-ea-culpa-silenciosa",
           "listened": false,
           "blocks": [
@@ -332,15 +320,11 @@ export const artifactBookData = {
             },
             {
               "type": "p",
-              "text": "Este livro existe para interromper esse ciclo. Se você se reconhece aqui, se, ao ler estas páginas, você sente que algo foi descrito com precisão desconfortável, saiba: isso não é coincidência. Este livro não foi escrito para te diagnosticar nem para te rotular. Foi escrito para te reconhecer."
+              "text": "Este livro existe para interromper esse ciclo. Se você se reconhece aqui, se, ao ler estas páginas, você sente que algo foi descrito com precisão desconfortável, saiba: isso não é coincidência. [br]\nEste livro não foi escrito para te diagnosticar nem para te rotular. Foi escrito para te reconhecer."
             },
             {
               "type": "p",
-              "text": "Reconhecer não resolve tudo. Mas muda o ponto de partida. E, para quem passou tempo demais tentando se corrigir, mudar o ponto de partida é um gesto profundamente transformador."
-            },
-            {
-              "type": "p",
-              "text": "Você não está atrasado. Você não está quebrado. Você apenas atravessou caminhos que não são celebrados. Este livro começa exatamente aí."
+              "text": "Reconhecer não resolve tudo. [br]\nMas muda o ponto de partida. [br]\nE, para quem passou tempo demais tentando se corrigir, mudar o ponto de partida é um gesto profundamente transformador.\n\nVocê não está atrasado. [br]\nVocê não está quebrado. [br]\nVocê apenas atravessou caminhos que não são celebrados. [br]\nEste livro começa exatamente aí."
             }
           ]
         }
@@ -379,7 +363,7 @@ export const artifactBookData = {
         },
         {
           "id": "quebra3--quando-a-promessa-vira-peso",
-          "title": "Quando a Promessa Vira Peso",
+          "title": "Quando a promessa vira peso",
           "audioId": "quebra3--quando-a-promessa-vira-peso",
           "listened": false,
           "blocks": [
@@ -393,13 +377,13 @@ export const artifactBookData = {
             },
             {
               "type": "p",
-              "text": "“Se isso funciona para todos, por que não funciona comigo?” Este livro evita prometer porque prometer, nesse contexto, seria desonesto. Não há garantia de melhora constante. Não há método infalível. Não há final redentor. Há apenas a possibilidade de permanecer com menos violência interna."
+              "text": "“Se isso funciona para todos, por que não funciona comigo?” [br]\nEste livro evita prometer porque prometer, nesse contexto, seria desonesto. [br]\nNão há garantia de melhora constante. Não há método infalível. Não há final redentor. [br]\nHá apenas a possibilidade de permanecer com menos violência interna."
             }
           ]
         },
         {
           "id": "quebra3--escrita-objetiva-como-respeito-cognitivo",
-          "title": "Escrita Objetiva Como Respeito Cognitivo",
+          "title": "Escrita objetiva como respeito cognitivo",
           "audioId": "quebra3--escrita-objetiva-como-respeito-cognitivo",
           "listened": false,
           "blocks": [
@@ -419,27 +403,27 @@ export const artifactBookData = {
         },
         {
           "id": "quebra3--um-livro-para-ser-usado-nao-seguido",
-          "title": "Um Livro Para Ser Usado, Não Seguido",
+          "title": "Um livro para ser usado, não seguido",
           "audioId": "quebra3--um-livro-para-ser-usado-nao-seguido",
           "listened": false,
           "blocks": [
             {
               "type": "p",
-              "text": "Outra diferença fundamental: este livro não pede adesão. Ele não exige que você acredite, concorde ou siga um caminho específico. Ele não foi escrito para ser seguido como manual nem para ser aplicado como método."
+              "text": "Outra diferença fundamental: este livro não pede adesão. [br]\nEle não exige que você acredite, concorde ou siga um caminho específico. Ele não foi escrito para ser seguido como manual nem para ser aplicado como método."
             },
             {
               "type": "p",
-              "text": "Ele foi escrito para ser usado. Usado nos dias em que você está mal. Usado nos dias em que está confuso. Usado nos dias em que tudo parece suspenso. Você pode abrir em qualquer parte. Pode pular capítulos. Pode repetir um trecho e ignorar outro."
+              "text": "Ele foi escrito para ser usado. Usado nos dias em que você está mal. Usado nos dias em que está confuso. Usado nos dias em que tudo parece suspenso. [br]\nVocê pode abrir em qualquer parte. Pode pular capítulos. Pode repetir um trecho e ignorar outro."
             },
             {
               "type": "pause",
-              "text": "Aqui, não há fidelidade exigida. Há apenas presença oferecida."
+              "text": "Aqui, não há fidelidade exigida.[br]\nHá apenas presença oferecida."
             }
           ]
         },
         {
           "id": "quebra3--o-perigo-da-positividade-forcada",
-          "title": "O Perigo da Positividade Forçada",
+          "title": "O Perigo da positividade forçada",
           "audioId": "quebra3--o-perigo-da-positividade-forcada",
           "listened": false,
           "blocks": [
@@ -449,17 +433,17 @@ export const artifactBookData = {
             },
             {
               "type": "p",
-              "text": "Quando isso funciona, pode ajudar. Quando não funciona, costuma gerar culpa. Para quem vive luto, ansiedade, depressão ou reconstrução lenta, a positividade forçada soa como negação da realidade. Este livro não tenta substituir dor por pensamento bonito. Ele permite que a dor exista sem virar identidade."
+              "text": "Quando isso funciona, pode ajudar. [br]\nQuando não funciona, costuma gerar culpa. Para quem vive luto, ansiedade, depressão ou reconstrução lenta, a positividade forçada soa como negação da realidade. Este livro não tenta substituir dor por pensamento bonito. Ele permite que a dor exista sem virar identidade."
             },
             {
               "type": "pause",
-              "text": "Permite que a dúvida exista sem virar fracasso. Permite que o vazio exista sem virar sentença."
+              "text": "Permite que a dúvida exista sem virar fracasso.[br]\nPermite que o vazio exista sem virar sentença."
             }
           ]
         },
         {
           "id": "quebra3--presenca-em-vez-de-motivacao",
-          "title": "Presença em Vez de Motivação",
+          "title": "Presença em vez de motivação",
           "audioId": "quebra3--presenca-em-vez-de-motivacao",
           "listened": false,
           "blocks": [
@@ -473,11 +457,11 @@ export const artifactBookData = {
             },
             {
               "type": "p",
-              "text": "Este livro aposta em algo mais simples e mais difícil: presença. Presença não empolga. Não anima plateias. Não promete finais felizes. Mas sustenta."
+              "text": "Este livro aposta em algo mais simples e mais difícil: presença. [br]\nPresença não empolga. Não anima plateias. Não promete finais felizes. [br]\nMas sustenta."
             },
             {
               "type": "p",
-              "text": "Sustenta o dia ruim. Sustenta a recaída. Sustenta o intervalo entre uma tentativa e outra. É isso que este livro oferece."
+              "text": "Sustenta o dia ruim. Sustenta a recaída. Sustenta o intervalo entre uma tentativa e outra.[br]\nÉ isso que este livro oferece."
             },
             {
               "type": "pause",
@@ -485,7 +469,7 @@ export const artifactBookData = {
             },
             {
               "type": "pause",
-              "text": "Talvez este livro frustre quem procura soluções rápidas. E tudo bem."
+              "text": "Talvez este livro frustre quem procura soluções rápidas. [br]\nE tudo bem."
             },
             {
               "type": "p",
@@ -493,11 +477,11 @@ export const artifactBookData = {
             },
             {
               "type": "p",
-              "text": "Se algo aqui te acompanha, use. Se algo aqui não fizer sentido agora, deixe. Não há promessa de chegada."
+              "text": "Se algo aqui te acompanha, use. Se algo aqui não fizer sentido agora, deixe. [br]\nNão há promessa de chegada."
             },
             {
               "type": "p",
-              "text": "Há apenas a possibilidade de continuar com mais lucidez e menos ataque interno. Para quem já esteve perto de desistir de si, isso não é pouco. É exatamente o necessário."
+              "text": "Há apenas a possibilidade de continuar com mais lucidez e menos ataque interno. [br]\nPara quem já esteve perto de desistir de si, isso não é pouco.[br]\nÉ exatamente o necessário."
             }
           ]
         }
@@ -516,13 +500,18 @@ export const artifactBookData = {
           "listened": false,
           "blocks": [
             {
+              "type": "pause",
+              "text": "CONSCIÊNCIA [br]\nJULGAMENTO [br]\nPRESENÇA [br]",
+              "className": "reader-no-audio-cue"
+            },
+            {
               "type": "p",
               "text": "Este livro não foi organizado em capítulos aleatórios nem em temas soltos. Ele segue uma estrutura simples, mas profunda, que atravessa toda a experiência humana — especialmente quando alguém está em dor, confusão ou reconstrução.",
               "lead": true
             },
             {
               "type": "p",
-              "text": "Essa estrutura é a Tríade Humana Fundamental: Consciência. Julgamento. Presença. Ela não é um método. Não é uma técnica terapêutica. Não é um sistema fechado. É um mapa mínimo para atravessar estados internos difíceis sem se destruir no processo."
+              "text": "Essa estrutura é a Tríade Humana Fundamental: Consciência. Julgamento. Presença. [br]\nEla não é um método. Não é uma técnica terapêutica. Não é um sistema fechado. É um mapa mínimo para atravessar estados internos difíceis sem se destruir no processo."
             },
             {
               "type": "p",
@@ -537,8 +526,13 @@ export const artifactBookData = {
           "listened": false,
           "blocks": [
             {
+              "type": "step-header",
+              "text": "O que é CONSCIÊNCIA",
+              "className": "reader-canonical-section-title reader-no-audio-cue"
+            },
+            {
               "type": "p",
-              "text": "Consciência é o primeiro gesto possível. Não é análise profunda. Não é interpretação. Não é busca por sentido. É apenas perceber o que está acontecendo, sem tentar corrigir imediatamente. Consciência é notar o estado interno: — Estou tenso — estou confuso — estou vazio — estou em pânico — estou cansado. Ela não pergunta por quê. Pergunta apenas o que está aqui agora."
+              "text": "Consciência é o primeiro gesto possível. Não é análise profunda. Não é interpretação. Não é busca por sentido. É apenas perceber o que está acontecendo, sem tentar corrigir imediatamente.[br]\nConsciência é notar o estado interno:[br]\n— Estou tenso — estou confuso — estou vazio — estou em pânico — estou cansado. Ela não pergunta por quê.[br]\nPergunta apenas o que está aqui agora."
             },
             {
               "type": "p",
@@ -546,7 +540,7 @@ export const artifactBookData = {
             },
             {
               "type": "p",
-              "text": "Consciência interrompe a fuga automática. Ela não resolve o problema. Mas impede que você desapareça dentro dele."
+              "text": "Consciência interrompe a fuga automática. [br]\nEla não resolve o problema. Mas impede que você desapareça dentro dele."
             }
           ]
         },
@@ -557,8 +551,13 @@ export const artifactBookData = {
           "listened": false,
           "blocks": [
             {
+              "type": "step-header",
+              "text": "O que é JULGAMENTO",
+              "className": "reader-canonical-section-title"
+            },
+            {
               "type": "p",
-              "text": "Depois da consciência, quase sempre surge uma segunda camada: a interpretação. A mente começa a contar histórias: — Isso não deveria estar acontecendo — eu sou assim mesmo — sempre acaba desse jeito — tem algo errado comigo. Isso é o julgamento."
+              "text": "Depois da consciência, quase sempre surge uma segunda camada: a interpretação. [br]\nA mente começa a contar histórias: [br]\n— Isso não deveria estar acontecendo — eu sou assim mesmo — sempre acaba desse jeito — tem algo errado comigo. [br]\nIsso é o julgamento."
             },
             {
               "type": "p",
@@ -570,7 +569,7 @@ export const artifactBookData = {
             },
             {
               "type": "pause",
-              "text": "Reconhecer o julgamento não é combatê-lo. É percebê-lo como narrativa — não como identidade."
+              "text": "Reconhecer o julgamento não é combatê-lo. [br]\nÉ percebê-lo como narrativa — não como identidade."
             }
           ]
         },
@@ -581,22 +580,27 @@ export const artifactBookData = {
           "listened": false,
           "blocks": [
             {
-              "type": "p",
-              "text": "Presença é o terceiro movimento. Não é positividade. Não é força. Não é solução. Presença é a capacidade de permanecer consigo mesmo depois que a consciência percebeu o estado e o julgamento contou sua história."
+              "type": "step-header",
+              "text": "O que é PRESENÇA",
+              "className": "reader-canonical-section-title"
             },
             {
               "type": "p",
-              "text": "É dizer, mesmo sem clareza: — Eu estou aqui — eu não vou me abandonar agora — eu posso atravessar este momento sem me atacar"
+              "text": "Presença é o terceiro movimento. [br]\n Não é positividade. Não é força. Não é solução. Presença é a capacidade de permanecer consigo mesmo depois que a consciência percebeu o estado e o julgamento contou sua história."
             },
             {
               "type": "p",
-              "text": "Presença não muda imediatamente o que você sente. Mas muda como você sente. E isso altera toda a experiência."
+              "text": "É dizer, mesmo sem clareza:  [br]\n— Eu estou aqui — eu não vou me abandonar agora — eu posso atravessar este momento sem me atacar."
+            },
+            {
+              "type": "p",
+              "text": "Presença não muda imediatamente o que você sente.  [br]\nMas muda como você sente. [br]\nE isso altera toda a experiência."
             }
           ]
         },
         {
           "id": "fund1--a-triade-em-funcionamento-real",
-          "title": "A Tríade em Funcionamento Real",
+          "title": "A Tríade em funcionamento real",
           "audioId": "fund1--a-triade-em-funcionamento-real",
           "listened": false,
           "blocks": [
@@ -606,11 +610,11 @@ export const artifactBookData = {
             },
             {
               "type": "p",
-              "text": "Exemplo simples: Você acorda com uma sensação de aperto no peito. Consciência: algo está pesado em mim agora. Julgamento: isso significa que eu estou falhando de novo. Presença: posso respirar e não me atacar enquanto isso passa."
+              "text": "Exemplo simples:  [br]\nVocê acorda com uma sensação de aperto no peito.  [br]\nConsciência: algo está pesado em mim agora.  [br]\nJulgamento: isso significa que eu estou falhando de novo. [br]\n Presença: posso respirar e não me atacar enquanto isso passa."
             },
             {
               "type": "pause",
-              "text": "Nada foi resolvido. Mas algo foi sustentado. É assim que a Tríade funciona na vida real."
+              "text": "Nada foi resolvido. [br]\n Mas algo foi sustentado.  [br]\nÉ assim que a Tríade funciona na vida real."
             },
             {
               "type": "pause",
@@ -618,11 +622,11 @@ export const artifactBookData = {
             },
             {
               "type": "p",
-              "text": "A maioria das leituras humanas trabalha com dualidades: — razão e emoção — força e fraqueza — controle e impulso — médico e monstro. O problema das dualidades é que elas criam conflito permanente. Você precisa escolher lados. Controlar um polo. Eliminar o outro."
+              "text": "A maioria das leituras humanas trabalha com dualidades:  [br]\n— razão e emoção — força e fraqueza — controle e impulso — médico e monstro  [br]\nO problema das dualidades é que elas criam conflito permanente. Você precisa escolher lados. Controlar um polo. Eliminar o outro."
             },
             {
               "type": "pause",
-              "text": "A Tríade introduz um terceiro elemento essencial: aquele que observa. Não o médico. Não o monstro."
+              "text": "A Tríade introduz um terceiro elemento essencial: aquele que observa. [br]\nNão o médico. Não o monstro."
             },
             {
               "type": "p",
@@ -632,29 +636,29 @@ export const artifactBookData = {
         },
         {
           "id": "fund1--a-triade-ao-longo-deste-livro",
-          "title": "A Tríade Ao Longo Deste Livro",
+          "title": "A Tríade ao longo deste livro",
           "audioId": "fund1--a-triade-ao-longo-deste-livro",
           "listened": false,
           "blocks": [
             {
               "type": "p",
-              "text": "Cada pilar que você vai atravessar daqui para frente será lido sob essa lente: — O que este tema desperta em mim? (Consciência) — Que histórias eu conto a partir disso? (Julgamento) — Como posso permanecer sem me destruir? (Presença)"
+              "text": "Cada pilar que você vai atravessar daqui para frente será lido sob essa lente: [br] — O que este tema desperta em mim? (Consciência) — Que histórias eu conto a partir disso? (Julgamento) — Como posso permanecer sem me destruir? (Presença)"
             },
             {
               "type": "pause",
-              "text": "Não para responder perfeitamente. Mas para sustentar a travessia."
+              "text": "Não para responder perfeitamente.  [br]\nMas para sustentar a travessia."
             }
           ]
         },
         {
           "id": "fund1--um-mapa-para-estados-dificeis",
-          "title": "Um Mapa Para Estados Difíceis",
+          "title": "Um mapa para estados difíceis",
           "audioId": "fund1--um-mapa-para-estados-dificeis",
           "listened": false,
           "blocks": [
             {
               "type": "p",
-              "text": "Este livro não oferece caminhos retos. Ele oferece orientação mínima para momentos em que tudo parece confuso demais para grandes decisões."
+              "text": "Este livro não oferece caminhos retos. [br]\n Ele oferece orientação mínima para momentos em que tudo parece confuso demais para grandes decisões."
             },
             {
               "type": "p",
@@ -662,19 +666,19 @@ export const artifactBookData = {
             },
             {
               "type": "pause",
-              "text": "A Tríade ainda funciona. Consciência. Julgamento. Presença. Perceber. Diferenciar. Permanecer. Isso já é movimento."
+              "text": "A Tríade ainda funciona. [br]\nConsciência. Julgamento. Presença.  [br]\nPerceber. Diferenciar. Permanecer.  [br]\nIsso já é movimento."
             },
             {
               "type": "pause",
-              "text": "Antes de seguir"
+              "text": "Antes de seguir..."
             },
             {
               "type": "p",
-              "text": "Você não precisa decorar esses conceitos. Eles não são teoria para ser aplicada. Eles são movimentos que você já faz — este livro apenas os torna conscientes."
+              "text": "Você não precisa decorar esses conceitos. Eles não são teoria para ser aplicada. [br] Eles são movimentos que você já faz — este livro apenas os torna conscientes."
             },
             {
               "type": "pause",
-              "text": "A partir daqui os pilares não são temas isolados"
+              "text": "A partir daqui os pilares não são temas isolados."
             },
             {
               "type": "pause",
@@ -682,7 +686,7 @@ export const artifactBookData = {
             },
             {
               "type": "pause",
-              "text": "Siga sem pressa. A Tríade não exige domínio. Exige apenas honestidade."
+              "text": "Siga sem pressa.  [br]\nA Tríade não exige domínio. [br] Exige apenas honestidade."
             }
           ]
         }
@@ -706,7 +710,7 @@ export const artifactBookData = {
             },
             {
               "type": "p",
-              "text": "Escrever este livro também foi um exercício da Tríade. Consciência do que eu vivi. Julgamento sobre como isso seria lido. Presença para sustentar a decisão de escrever mesmo assim.",
+              "text": "Escrever este livro também foi um exercício da Tríade.  [br]\nConsciência do que eu vivi. Julgamento sobre como isso seria lido. Presença para sustentar a decisão de escrever mesmo assim.",
               "lead": true
             },
             {
@@ -717,7 +721,7 @@ export const artifactBookData = {
         },
         {
           "id": "fund2--a-consciencia-do-autor",
-          "title": "A Consciência do Autor",
+          "title": "A consciência do autor",
           "audioId": "fund2--a-consciencia-do-autor",
           "listened": false,
           "blocks": [
@@ -741,17 +745,17 @@ export const artifactBookData = {
         },
         {
           "id": "fund2--o-julgamento-que-antecede-a-obra",
-          "title": "O Julgamento que Antecede a Obra",
+          "title": "O julgamento que antecede a obra",
           "audioId": "fund2--o-julgamento-que-antecede-a-obra",
           "listened": false,
           "blocks": [
             {
               "type": "p",
-              "text": "Quando alguém escreve algo que toca camadas profundas da experiência humana, o julgamento costuma vir rápido. Questiona-se a autoridade. Questiona-se a legitimidade. Questiona-se a origem. No meu caso, esse julgamento assume uma forma específica: a ideia de que o uso de ferramentas de inteligência artificial invalidaria a autoria, diluiria a experiência ou tornaria a obra menos verdadeira"
+              "text": "Quando alguém escreve algo que toca camadas profundas da experiência humana, o julgamento costuma vir rápido. [br]\nQuestiona-se a autoridade. Questiona-se a legitimidade. Questiona-se a origem. [br]\nNo meu caso, esse julgamento assume uma forma específica: a ideia de que o uso de ferramentas de inteligência artificial invalidaria a autoria, diluiria a experiência ou tornaria a obra menos verdadeira."
             },
             {
               "type": "pause",
-              "text": "Esse julgamento não é novo. Ele ecoa descrenças antigas. Descrenças familiares. Descrenças sociais. Descrenças internas."
+              "text": "Esse julgamento não é novo. [br]\nEle ecoa descrenças antigas. [br]\nDescrenças familiares.  [br]\nDescrenças sociais.  [br]\nDescrenças internas."
             },
             {
               "type": "p",
@@ -759,29 +763,29 @@ export const artifactBookData = {
             },
             {
               "type": "pause",
-              "text": "Este livro não tenta disputar esse julgamento. Ele o atravessa."
+              "text": "Este livro não tenta disputar esse julgamento. [br]\n Ele o atravessa."
             }
           ]
         },
         {
           "id": "fund2--ferramenta-nao-e-identidade",
-          "title": "Ferramenta Não é Identidade",
+          "title": "Ferramenta não é identidade",
           "audioId": "fund2--ferramenta-nao-e-identidade",
           "listened": false,
           "blocks": [
             {
               "type": "p",
-              "text": "Ferramentas ampliam capacidades. Nunca substituíram intenção. Um lápis não escreve sozinho. Um instrumento não cria música sem alguém que o conduza. Da mesma forma, ferramentas de inteligência artificial não geram consciência, experiência ou sentido por conta própria. Elas organizam, expandem, estruturam — quando bem instruídas."
+              "text": "Ferramentas ampliam capacidades. Nunca substituíram intenção.  [br]\nUm lápis não escreve sozinho. Um instrumento não cria música sem alguém que o conduza. Da mesma forma, ferramentas de inteligência artificial não geram consciência, experiência ou sentido por conta própria. Elas organizam, expandem, estruturam — quando bem instruídas."
             },
             {
               "type": "p",
-              "text": "Tudo o que existe aqui foi pensado, vivido, revisitado e escolhido. A ferramenta não criou o conteúdo. Ela foi utilizada como meio. Negar isso seria ignorar algo essencial: escrever também é saber usar os recursos disponíveis para sustentar a própria voz."
+              "text": "Tudo o que existe aqui foi pensado, vivido, revisitado e escolhido.  [br]\nA ferramenta não criou o conteúdo.  [br]\nEla foi utilizada como meio. [br]\n Negar isso seria ignorar algo essencial: escrever também é saber usar os recursos disponíveis para sustentar a própria voz."
             }
           ]
         },
         {
           "id": "fund2--presenca-como-autoria",
-          "title": "Presença Como Autoria",
+          "title": "Presença como autoria",
           "audioId": "fund2--presenca-como-autoria",
           "listened": false,
           "blocks": [
@@ -791,13 +795,13 @@ export const artifactBookData = {
             },
             {
               "type": "p",
-              "text": "É assumir o que foi dito. É sustentar o que foi escrito. É reconhecer as próprias referências, limites e escolhas. Eu escrevi este livro. Escrevi com consciência do que carrego. Com julgamento sobre como isso poderia ser recebido. E com presença suficiente para não recuar. Se alguém “desacreditar”, isso diz mais sobre o olhar do outro do que sobre a verdade da obra."
+              "text": "É assumir o que foi dito. É sustentar o que foi escrito. É reconhecer as próprias referências, limites e escolhas.  [br]\nEu escrevi este livro.  [br]\nEscrevi com consciência do que carrego. Com julgamento sobre como isso poderia ser recebido. E com presença suficiente para não recuar.  [br]\nSe alguém “desacreditar”, isso diz mais sobre o olhar do outro do que sobre a verdade da obra."
             }
           ]
         },
         {
           "id": "fund2--um-movimento-que-se-estende",
-          "title": "Um Movimento que Se Estende",
+          "title": "Um movimento que se estende",
           "audioId": "fund2--um-movimento-que-se-estende",
           "listened": false,
           "blocks": [
@@ -807,7 +811,7 @@ export const artifactBookData = {
             },
             {
               "type": "p",
-              "text": "Ele se estende em formatos digitais, experiências sonoras e espaços de continuidade. Isso não dilui a obra — amplia o acesso. Criar um agente, uma presença digital ou um ambiente de apoio não substitui o livro. Dá corpo a ele. O que está aqui não depende do formato para existir. Depende apenas de alguém que reconheça, julgue e permaneça."
+              "text": "Ele se estende em formatos digitais, experiências sonoras e espaços de continuidade. Isso não dilui a obra — amplia o acesso.  [br]\nCriar um agente, uma presença digital ou um ambiente de apoio não substitui o livro. Dá corpo a ele. [br]\nO que está aqui não depende do formato para existir. [br]\nDepende apenas de alguém que reconheça, julgue e permaneça."
             },
             {
               "type": "pause",
@@ -815,15 +819,15 @@ export const artifactBookData = {
             },
             {
               "type": "p",
-              "text": "Se este conteúdo causou desconforto, observe. Se despertou julgamento, observe. Se trouxe alívio, observe. Este livro não pede concordância."
+              "text": "Se este conteúdo causou desconforto, observe. [br]\n Se despertou julgamento, observe. [br]\n Se trouxe alívio, observe.  [br]\nEste livro não pede concordância."
             },
             {
               "type": "p",
-              "text": "Pede apenas que você perceba como reage quando alguém assume a própria voz. A partir daqui a obra aprofunda."
+              "text": "Pede apenas que você perceba como reage quando alguém assume a própria voz.  [br]\nA partir daqui a obra aprofunda."
             },
             {
               "type": "pause",
-              "text": "Não mais sobre escrever. Mas sobre existir. E existir, mesmo desacreditado, exige presença."
+              "text": "Não mais sobre escrever.  [br]\nMas sobre existir. [br]\n E existir, mesmo desacreditado, exige presença."
             }
           ]
         }
@@ -847,7 +851,7 @@ export const artifactBookData = {
             },
             {
               "type": "p",
-              "text": "Grande parte das narrativas que usamos para explicar o ser humano opera em dualidades. Certo ou errado. Força ou fraqueza. Controle ou impulso. Razão ou emoção.",
+              "text": "Grande parte das narrativas que usamos para explicar o ser humano opera em dualidades.  [br]\nCerto ou errado. Força ou fraqueza. Controle ou impulso. Razão ou emoção.",
               "lead": true
             },
             {
@@ -856,13 +860,13 @@ export const artifactBookData = {
             },
             {
               "type": "p",
-              "text": "Para quem está em sofrimento emocional, a dualidade costuma virar armadilha. Se você está mal, então está errado. Se falhou, então é fraco. Se sente demais, então perdeu o controle. Este livro propõe uma saída diferente."
+              "text": "Para quem está em sofrimento emocional, a dualidade costuma virar armadilha. Se você está mal, então está errado. Se falhou, então é fraco. Se sente demais, então perdeu o controle. [br]\nEste livro propõe uma saída diferente."
             }
           ]
         },
         {
           "id": "fund3--o-medico-eo-monstro",
-          "title": "O Médico Eo Monstro",
+          "title": "O Médico e o Monstro",
           "audioId": "fund3--o-medico-eo-monstro",
           "listened": false,
           "blocks": [
@@ -872,7 +876,7 @@ export const artifactBookData = {
             },
             {
               "type": "p",
-              "text": "A obra O Médico e o Monstro tornou-se uma metáfora poderosa da experiência humana. De um lado, o sujeito socialmente aceitável, racional, contido. Do outro, o impulso, o excesso, a sombra, aquilo que precisa ser escondido. Essa leitura ajudou gerações a compreender conflitos internos. Mas ela carrega um limite silencioso: apresenta apenas dois polos."
+              "text": "A obra O Médico e o Monstro tornou-se uma metáfora poderosa da experiência humana. De um lado, o sujeito socialmente aceitável, racional, contido. Do outro, o impulso, o excesso, a sombra, aquilo que precisa ser escondido. [br]\nEssa leitura ajudou gerações a compreender conflitos internos. Mas ela carrega um limite silencioso: apresenta apenas dois polos."
             },
             {
               "type": "pause",
@@ -886,7 +890,7 @@ export const artifactBookData = {
         },
         {
           "id": "fund3--o-terceiro-elemento",
-          "title": "O Terceiro Elemento:",
+          "title": "O terceiro elemento:",
           "audioId": "fund3--o-terceiro-elemento",
           "listened": false,
           "blocks": [
@@ -896,33 +900,33 @@ export const artifactBookData = {
             },
             {
               "type": "p",
-              "text": "Entre o médico e o monstro existe alguém. Não o lado racional. Não o lado impulsivo. Mas quem percebe ambos. Esse terceiro ponto não julga imediatamente. Não tenta corrigir. Não precisa escolher lados. Ele observa o conflito sem ser engolido por ele."
+              "text": "Entre o médico e o monstro existe alguém. Não o lado racional. Não o lado impulsivo. Mas quem percebe ambos.  [br]\nEsse terceiro ponto não julga imediatamente. Não tenta corrigir. Não precisa escolher lados. Ele observa o conflito sem ser engolido por ele."
             },
             {
               "type": "p",
-              "text": "Esse é o espaço da trialidade. Não se trata de eliminar a sombra nem glorificar o controle. Trata-se de reconhecer que ambos existem — e que você não é nenhum deles isoladamente."
+              "text": "Esse é o espaço da trialidade. [br]\nNão se trata de eliminar a sombra nem glorificar o controle. Trata-se de reconhecer que ambos existem — e que você não é nenhum deles isoladamente."
             }
           ]
         },
         {
           "id": "fund3--trialidade-como-maturidade-emocional",
-          "title": "Trialidade Como Maturidade Emocional",
+          "title": "Trialidade como maturidade emocional",
           "audioId": "fund3--trialidade-como-maturidade-emocional",
           "listened": false,
           "blocks": [
             {
               "type": "p",
-              "text": "A passagem da dualidade para a trialidade marca um amadurecimento profundo. Na dualidade, a pessoa pergunta: — qual lado eu preciso vencer? Na trialidade, a pergunta muda: — como eu permaneço presente enquanto isso acontece em mim? Esse deslocamento muda tudo."
+              "text": "A passagem da dualidade para a trialidade marca um amadurecimento profundo.  [br]\nNa dualidade, a pessoa pergunta: — qual lado eu preciso vencer? [br]\nNa trialidade, a pergunta muda: — como eu permaneço presente enquanto isso acontece em mim?  [br]\nEsse deslocamento muda tudo."
             },
             {
               "type": "p",
-              "text": "O conflito deixa de ser guerra. A recaída deixa de ser sentença. O excesso deixa de definir identidade. Surge espaço."
+              "text": "O conflito deixa de ser guerra. A recaída deixa de ser sentença. O excesso deixa de definir identidade.  [br]\nSurge espaço."
             }
           ]
         },
         {
           "id": "fund3--quando-o-desacreditado-vive-na-dualidade",
-          "title": "Quando o Desacreditado Vive Na Dualidade",
+          "title": "Quando o desacreditado vive na dualidade",
           "audioId": "fund3--quando-o-desacreditado-vive-na-dualidade",
           "listened": false,
           "blocks": [
@@ -932,35 +936,48 @@ export const artifactBookData = {
             },
             {
               "type": "p",
-              "text": "A trialidade oferece um terceiro caminho: — Reconhecer o impulso — reconhecer o controle — permanecer sem se destruir. Isso não resolve o conflito. Mas impede que ele vire identidade."
+              "text": "A trialidade oferece um terceiro caminho: — Reconhecer o impulso — reconhecer o controle — permanecer sem se destruir.  [br]\nIsso não resolve o conflito. Mas impede que ele vire identidade."
             }
           ]
         },
         {
           "id": "fund3--a-trialidade-aplicada-aosp-il-ar-es",
-          "title": "A Trialidade Aplicada Aosp Il Ar Es",
+          "title": "A trialidade aplicada aos PILARES",
           "audioId": "fund3--a-trialidade-aplicada-aosp-il-ar-es",
           "listened": false,
           "blocks": [
             {
               "type": "p",
-              "text": "A partir daqui, cada pilar deste livro será atravessado por essa lente. Família não será apenas vínculo ou rejeição. Luto não será apenas dor ou superação. Trabalho não será apenas sucesso ou fracasso. Desejo não será apenas virtude ou vício. Cada tema será lido como campo de tensão — e não como escolha moral. A trialidade permite complexidade sem colapso."
+              "text": "A partir daqui, cada pilar deste livro será atravessado por essa lente. [br]\nFamília não será apenas vínculo ou rejeição. Luto não será apenas dor ou superação. Trabalho não será apenas sucesso ou fracasso. Desejo não será apenas virtude ou vício.  [br]\nCada tema será lido como campo de tensão — e não como escolha moral. [br]\nA trialidade permite complexidade sem colapso."
             }
           ]
         },
         {
           "id": "fund3--o-fim-da-guerra-interna",
-          "title": "O Fim da Guerra Interna",
+          "title": "O fim da guerra interna",
           "audioId": "fund3--o-fim-da-guerra-interna",
           "listened": false,
           "blocks": [
             {
               "type": "p",
-              "text": "Quando você deixa de operar apenas em dualidades, algo essencial se reorganiza. Você não precisa mais vencer partes de si. Não precisa mais esconder o que sente. Não precisa mais provar equilíbrio constante."
+              "text": "Quando você deixa de operar apenas em dualidades, algo essencial se reorganiza. [br]\nVocê não precisa mais vencer partes de si. Não precisa mais esconder o que sente. Não precisa mais provar equilíbrio constante."
             },
             {
               "type": "pause",
-              "text": "Você pode perceber. Pode nomear. Pode permanecer. Isso não é iluminação. É sobrevivência madura."
+              "text": "Você pode perceber. Pode nomear. Pode permanecer. [br]\nIsso não é iluminação. [br]\nÉ sobrevivência madura."
+            }
+          ]
+        },
+        {
+          "id": "fund3--antes-de-atravessar-os-pilares",
+          "title": "Antes de atravessar os PILARES",
+          "audioId": "fund3--antes-de-atravessar-os-pilares",
+          "listened": false,
+          "blocks": [
+            {
+              "type": "p",
+              "text": "Os capítulos que vêm a seguir não são lições.[br]\nSão territórios.[br]\nEles não te pedem escolha rápida nem postura correta. Eles te convidam a observar como cada dilema opera dentro de você — sem se di-vidir, sem se atacar, sem se perder.[br][br]\nA trialidade não promete paz constante.[br][br]\nPromete algo mais honesto:[br]\nQue você não precise mais se fragmentar para continuar.\nAgora, os pilares começam.[br]\nSiga no seu ritmo.[br]\nA travessia já foi preparada.",
+              "className": "reader-opening-single-block"
             }
           ]
         }
@@ -974,31 +991,10 @@ export const artifactBookData = {
       "sections": [
         {
           "id": "acol1--antes-de-atravessar-osp-il-ar-es",
-          "title": "Antes de Atravessar Osp Il Ar Es",
+          "title": "Para quem continua",
           "audioId": "acol1--antes-de-atravessar-osp-il-ar-es",
           "listened": false,
           "blocks": [
-            {
-              "type": "p",
-              "text": "Os capítulos que vêm a seguir não são lições. São territórios. Eles não te pedem escolha rápida nem postura correta. Eles te convidam a observar como cada dilema opera dentro de você — sem se dividir, sem se atacar, sem se perder.",
-              "lead": true
-            },
-            {
-              "type": "pause",
-              "text": "A trialidade não promete paz constante."
-            },
-            {
-              "type": "pause",
-              "text": "Promete algo mais honesto: Que você não precise mais se fragmentar para continuar."
-            },
-            {
-              "type": "pause",
-              "text": "Agora, os pilares começam. Siga no seu ritmo. A travessia já foi preparada."
-            },
-            {
-              "type": "pause",
-              "text": "Atravesse."
-            },
             {
               "type": "pause",
               "text": "Este não é um livro para quem está bem."
@@ -1017,11 +1013,7 @@ export const artifactBookData = {
             },
             {
               "type": "p",
-              "text": "Este livro não exige leitura linear nem pressa. Ele pode ser lido aos poucos, em momentos de pausa, ou retomado quando algo apertar por dentro. Não há certo ou errado na forma de atravessá-lo. O único convite real é este: leia sem se cobrar. Se alguma parte tocar fundo, pare. Se outra não fizer sentido agora, deixe. Nem tudo precisa ressoar ao mesmo tempo."
-            },
-            {
-              "type": "pause",
-              "text": "Este não é um livro sobre vencer. É um livro sobre não se abandonar."
+              "text": "Este livro não exige leitura linear nem pressa. Ele pode ser lido aos poucos, em momentos de pausa, ou retomado quando algo apertar por dentro. Não há certo ou errado na forma de atravessá-lo. O único convite real é este: leia sem se cobrar. Se alguma parte tocar fundo, pare. Se outra não fizer sentido agora, deixe. Nem tudo precisa ressoar ao mesmo tempo.[br][br]\nEste não é um livro sobre vencer. [br]\nÉ um livro sobre não se abandonar."
             }
           ]
         }
@@ -1046,19 +1038,15 @@ export const artifactBookData = {
             },
             {
               "type": "p",
-              "text": "O Poder dos Desacreditados nasce como contraponto a essa lógica. Ele parte de uma constatação simples e pouco explorada: existem pessoas que não desistiram, mas também não se encaixaram no discurso da superação tradicional. Pessoas que seguiram em frente, mas carregando dúvidas, cansaço e a sensação de não pertencimento. Pessoas que sobreviveram, se reconstruíram parcialmente e agora tentam continuar com mais consciência."
+              "text": "O Poder dos Desacreditados nasce como contraponto a essa lógica. [br]\nEle parte de uma constatação simples e pouco explorada: existem pessoas que não desistiram, mas também não se encaixaram no discurso da superação tradicional. Pessoas que seguiram em frente, mas carregando dúvidas, cansaço e a sensação de não pertencimento. Pessoas que sobreviveram, se reconstruíram parcialmente e agora tentam continuar com mais consciência."
             },
             {
               "type": "p",
-              "text": "Este livro não foi estruturado como uma sequência de capítulos motivacionais. Ele foi organizado em blocos conceituais e pilares emocionais que representam estágios humanos possíveis — não como regra, mas como espelho."
+              "text": "Este livro não foi estruturado como uma sequência de capítulos motivacionais. Ele foi organizado em blocos conceituais e pilares emocionais que representam estágios humanos possíveis — não como regra, mas como espelho. [br]\nOs seis capítulos iniciais preparam o terreno. Eles não pedem mudança imediata. Eles reorganizam o olhar. [br]"
             },
             {
               "type": "p",
-              "text": "Os seis capítulos iniciais preparam o terreno. Eles não pedem mudança imediata. Eles reorganizam o olhar. A partir deles, o livro se estrutura em três grandes Tríades: A Tríade da Sobrevivência, que fala de parar de sangrar: reconhecer, silenciar e compreender as fugas."
-            },
-            {
-              "type": "p",
-              "text": "A Tríade da Reconstrução, que fala de criar base interna: atravessar quedas, sustentar a solidão e desenvolver autocompaixão. A Tríade da Continuidade, que fala de permanecer consciente: sustentar pequenas ações, aceitar a ausência de sentido imediato e continuar sem se destruir."
+              "text": "A partir deles, o livro se estrutura em três grandes Tríades:[br]\nA Tríade da Sobrevivência, que fala de parar de sangrar: reconhecer, silenciar e compreender as fugas.[br]\nA Tríade da Reconstrução, que fala de criar base interna: atravessar quedas, sustentar a solidão e desenvolver autocompaixão. [br]\nA Tríade da Continuidade, que fala de permanecer consciente: sustentar pequenas ações, aceitar a ausência de sentido imediato e continuar sem se destruir."
             },
             {
               "type": "p",
@@ -1066,7 +1054,7 @@ export const artifactBookData = {
             },
             {
               "type": "p",
-              "text": "Este livro não pede que você deixe de ser quem é enquanto tenta mudar a própria vida. Se você se sente desacreditado — pelo mundo, pelas circunstâncias ou por você mesmo — saiba: isso não te desqualifica. Muitas vezes, apenas indica que você sobreviveu por caminhos que não são celebrados."
+              "text": "Este livro não pede que você deixe de ser quem é enquanto tenta mudar a própria vida. [br]\nSe você se sente desacreditado — pelo mundo, pelas circunstâncias ou por você mesmo — saiba: isso não te desqualifica. Muitas vezes, apenas indica que você sobreviveu por caminhos que não são celebrados."
             },
             {
               "type": "p",
@@ -1083,30 +1071,58 @@ export const artifactBookData = {
       "title": "Pilar I — Reconhecimento",
       "sections": [
         {
-          "id": "pilar1--abertura",
-          "title": "Abertura",
-          "audioId": "pilar1--abertura",
+          "id": "pilar1--capa-triade",
+          "title": "Tríade da Sobrevivência",
+          "audioId": "pilar1--capa-triade",
           "listened": false,
           "blocks": [
             {
               "type": "pause",
-              "text": "Toda travessia começa antes do primeiro passo. Ela começa quando você decide não fugir de si."
+              "text": "Toda travessia começa antes do primeiro passo. Ela começa quando você decide não fugir de si.",
+              "className": "reader-cover-transition"
+            },
+            {
+              "type": "step-header",
+              "text": "Ato I",
+              "className": "reader-digital-cover-imprint"
+            },
+            {
+              "type": "step-header",
+              "text": "Tríade da Sobrevivência",
+              "className": "reader-digital-cover-title"
+            },
+            {
+              "type": "p",
+              "text": "Toda transformação começa quando deixamos de lutar para parecer fortes e passamos a reconhecer aquilo que apenas sobrevivemos.",
+              "className": "reader-digital-cover-author reader-cover-page-break"
+            }
+          ]
+        },
+        {
+          "id": "pilar1--capa",
+          "title": "Reconhecimento",
+          "audioId": "pilar1--capa",
+          "listened": false,
+          "blocks": [
+            {
+              "type": "step-header",
+              "text": "Pilar I",
+              "className": "reader-digital-cover-imprint"
+            },
+            {
+              "type": "step-header",
+              "text": "Reconhecimento",
+              "className": "reader-digital-cover-title"
             },
             {
               "type": "pause",
-              "text": "Toda travessia começa antes do primeiro passo. Ela começa quando você decide não fugir de si."
+              "text": "Eu não estou quebrada.",
+              "className": "reader-digital-cover-tagline"
             },
             {
-              "type": "pause",
-              "text": "\"Toda transformação começa quando deixamos de lutar para parecer fortes e passamos a reconhecer aquilo que apenas sobreviveu.\""
-            },
-            {
-              "type": "pause",
-              "text": "Eu não estou quebrado."
-            },
-            {
-              "type": "pause",
-              "text": "Todo reconhecimento começa quando você deixa de se tratar como inimigo."
+              "type": "p",
+              "text": "Todo reconhecimento começa quando você deixa de se tratar como inimigo.",
+              "className": "reader-digital-cover-author reader-cover-page-break"
             }
           ]
         },
@@ -1127,7 +1143,7 @@ export const artifactBookData = {
             },
             {
               "type": "pause",
-              "text": "não é autoestima. Não é motivação. Não é promessa"
+              "text": "Reconhecimento não é autoestima. Não é motivação. Não é promessa."
             }
           ]
         },
@@ -1143,7 +1159,7 @@ export const artifactBookData = {
             },
             {
               "type": "p",
-              "text": "Reconhecimento não é “se valorizar”. Reconhecimento não é “pensar positivo”. Reconhecimento não é uma técnica de autoestima com nome bonito. Reconhecimento é uma coisa mais simples e mais brutal: parar de fingir que você não está onde está. Tem um jeito de viver que parece produtivo, mas é só evasão bem vestida. Você segue andando, faz planos, responde mensagens, conversa, trabalha, compra, promete. E por fora tudo continua. Mas por dentro existe um ponto fixo — um ponto que você evita encostar. Você gira em torno dele como quem não quer olhar o centro do próprio quarto. Você evita o lugar onde a verdade mora, porque você sabe que, se encostar ali, alguma coisa vai cair. E cair dá medo. Porque a gente aprendeu cedo que cair tem plateia. Reconhecer é encostar. É ficar perto do que você desviou a vida inteira. É olhar sem buscar frase de saída. É olhar sem procurar justificativa bonita. É dizer: “é isso”. E aguentar o peso de dizer “é isso” sem emendar com “mas”. Sem virar advogado de si mesmo. Sem querer convencer ninguém. Sem querer ser entendido. Sem querer ser perdoado. Reconhecimento é um gesto interno de honestidade que não pede aplauso. Ele não precisa de legenda. Ele não precisa virar post. Ele não precisa virar discurso. Ele acontece no silêncio, e geralmente acontece tarde — depois de muita tentativa de resolver pela força. E aqui tem uma verdade que dói porque tira a fantasia: você não sofre só pelo que te aconteceu. Você sofre também pelo tanto que você passou a vida negando que aconteceu. Você sofre pelo que fizeram. E sofre pelo que você fez. E sofre pelo que você não fez. E sofre — principalmente — pelo quanto você tentou ser outra pessoa para não precisar encostar em quem você era."
+              "text": "Reconhecimento não é “se valorizar”. Reconhecimento não é “pensar positivo”. Reconhecimento não é uma técnica de autoestima com nome bonito. Reconhecimento é uma coisa mais simples e mais brutal: parar de fingir que você não está onde está. [br]\nTem um jeito de viver que parece produtivo, mas é só evasão bem vestida. Você segue andando, faz planos, responde mensagens, conversa, trabalha, compra, promete. E por fora tudo continua. Mas por dentro existe um ponto fixo — um ponto que você evita encostar. Você gira em torno dele como quem não quer olhar o centro do próprio quarto. Você evita o lugar onde a verdade mora, porque você sabe que, se encostar ali, alguma coisa vai cair. E cair dá medo. Porque a gente aprendeu cedo que cair tem plateia.  [br]\nReconhecer é encostar. É ficar perto do que você desviou a vida inteira. É olhar sem buscar frase de saída. É olhar sem procurar justificativa bonita. É dizer: “é isso”. E aguentar o peso de dizer “é isso” sem emendar com “mas”. Sem virar advogado de si mesmo. Sem querer convencer ninguém. Sem querer ser entendido. Sem querer ser perdoado. [br]\nReconhecimento é um gesto interno de honestidade que não pede aplauso. Ele não precisa de legenda. Ele não precisa virar post. Ele não precisa virar discurso. Ele acontece no silêncio, e geralmente acontece tarde — depois de muita tentativa de resolver pela força.  [br]\nE aqui tem uma verdade que dói porque tira a fantasia: você não sofre só pelo que te aconteceu. Você sofre também pelo tanto que você passou a vida negando que aconteceu. Você sofre pelo que fizeram. E sofre pelo que você fez. E sofre pelo que você não fez. E sofre — principalmente — pelo quanto você tentou ser outra pessoa para não precisar encostar em quem você era."
             },
             {
               "type": "p",
@@ -1167,7 +1183,7 @@ export const artifactBookData = {
             },
             {
               "type": "p",
-              "text": "Reconhecimento é: “eu parei de me abandonar por cinco minutos.” E depois por seis. E depois por sete. Até o seu corpo começar a acreditar que você voltou."
+              "text": "Reconhecimento é: “eu parei de me abandonar por cinco minutos.” [br]\n E depois por seis.  [br]\nE depois por sete. [br]\nAté o seu corpo começar a acreditar que você voltou."
             }
           ]
         },
@@ -1183,31 +1199,27 @@ export const artifactBookData = {
             },
             {
               "type": "p",
-              "text": "Existe um instante que não é dramático, mas é definitivo: quando você percebe que está vivendo mais para evitar dor do que para viver."
+              "text": "Existe um instante que não é dramático, mas é definitivo: quando você percebe que está vivendo mais para evitar dor do que para viver. [br]\nNão tem música. Não tem cena. Às vezes é no banho. Às vezes é indo trabalhar. Às vezes é numa conversa comum, quando alguém fala algo simples e você sente um incômodo desproporcional, como se tivesse tocado numa parte antiga. [br]\nO desacreditado costuma passar anos colecionando pequenos sinais de que precisa “dar certo” para ser aceito. E quando eu digo “dar certo”, eu não digo sucesso bonito. Eu digo a versão interna disso: ser irrepreensível o suficiente para não ser alvo. [br]\nSer útil. Ser engraçado. Ser o forte. Ser o que resolve. Ser o que não dá trabalho. Ser o que “aguenta”. Porque, em algum ponto, ele aprendeu que sentir demais é perigoso. E pedir demais é humilhante. [br]\nEntão ele aprende a pedir pouco. A desejar pouco. A se oferecer como solução para não precisar ser pessoa."
             },
             {
               "type": "p",
-              "text": "Não tem música. Não tem cena. Às vezes é no banho. Às vezes é indo trabalhar. Às vezes é numa conversa comum, quando alguém fala algo simples e você sente um incômodo desproporcional, como se tivesse tocado numa parte antiga. O desacreditado costuma passar anos colecionando pequenos sinais de que precisa “dar certo” para ser aceito. E quando eu digo “dar certo”, eu não digo sucesso bonito. Eu digo a versão interna disso: ser irrepreensível o suficiente para não ser alvo. Ser útil. Ser engraçado. Ser o forte. Ser o que resolve. Ser o que não dá trabalho. Ser o que “aguenta”. Porque, em algum ponto, ele aprendeu que sentir demais é perigoso. E pedir demais é humilhante. Então ele aprende a pedir pouco. A desejar pouco. A se oferecer como solução para não precisar ser pessoa."
+              "text": "E isso parece maturidade. Parece autonomia. Parece: “eu me viro”. Só que por baixo existe outra coisa: uma espécie de contrato silencioso que você faz com a vida: “eu não vou incomodar se vocês não me esmagarem.” Só que a vida não assina contrato. A vida passa. E, enquanto passa, você vai ficando bom em sobreviver. E ruim em existir. [br]\nA consequência não é imediata. É lenta. [br]\nVocê começa a se acostumar com a sua própria ausência. [br]\nVocê começa a achar normal não sentir. [br]\nVocê começa a achar normal estar sempre em alerta. [br]\nVocê começa a achar normal se punir antes que alguém te puna.\n[br]Você começa a achar normal se diminuir antes que alguém te diminua."
             },
             {
               "type": "p",
-              "text": "E isso parece maturidade. Parece autonomia. Parece: “eu me viro”. Só que por baixo existe outra coisa: uma espécie de contrato silencioso que você faz com a vida: “eu não vou incomodar se vocês não me esmagarem.” Só que a vida não assina contrato. A vida passa. E, enquanto passa, você vai ficando bom em sobreviver. E ruim em existir. A consequência não é imediata. É lenta. Você começa a se acostumar com a sua própria ausência. Você começa a achar normal não sentir. Você começa a achar normal estar sempre em alerta. Você começa a achar normal se punir antes que alguém te puna. Você começa a achar normal se diminuir antes que alguém te diminua."
+              "text": "E, quando a gente se acostuma com isso, a gente chama isso de “personalidade”. A gente diz: “eu sou assim.” [br]\nMas “eu sou assim” muitas vezes significa: “eu precisei ficar assim.” [br]\nReconhecimento começa quando você para de dizer “eu sou assim” e começa a dizer: “eu fiquei assim.” E esse pequeno ajuste muda tudo, porque abre uma fresta: se eu fiquei assim, talvez exista um eu que não era assim. Talvez exista um eu que ainda está aqui, só escondido atrás da função. [br]\nReconhecimento não é recuperar o passado. Não é nostalgia. É contato com o que ficou preso. [br]\nE o que fica preso não é só tristeza. É raiva também. É desejo também. É ambição também. É sensibilidade. É vontade de ser cuidado. É vontade de descansar sem culpa. É vontade de ser visto sem ter que performar."
             },
             {
               "type": "p",
-              "text": "E, quando a gente se acostuma com isso, a gente chama isso de “personalidade”. A gente diz: “eu sou assim.” Mas “eu sou assim” muitas vezes significa: “eu precisei ficar assim.” Reconhecimento começa quando você para de dizer “eu sou assim” e começa a dizer: “eu fiquei assim.” E esse pequeno ajuste muda tudo, porque abre uma fresta: se eu fiquei assim, talvez exista um eu que não era assim. Talvez exista um eu que ainda está aqui, só escondido atrás da função. Reconhecimento não é recuperar o passado. Não é nostalgia. É contato com o que ficou preso. E o que fica preso não é só tristeza. É raiva também. É desejo também. É ambição também. É sensibilidade. É vontade de ser cuidado. É vontade de descansar sem culpa. É vontade de ser visto sem ter que performar."
+              "text": "Muita gente confunde reconhecimento com “assumir fraqueza”. Não é isso. Reconhecimento é assumir realidade. E realidade é complexa: você pode ser forte e quebrado na mesma semana. Você pode amar e sentir rancor. Você pode ter gratidão e ter mágoa. Você pode ter fé e ter cansaço. Você pode ter vontade de viver e, ao mesmo tempo, estar exausto de existir. [br]\nA narrativa do desacreditado quase sempre é uma narrativa de vergonha. Não necessariamente vergonha pelo que fez. Às vezes vergonha por quem é. Por não se encaixar. Por ser intenso demais. Por ser distraído demais. Por ser sensível demais. Por ser “diferente”. A vergonha vira filtro. Você começa a editar sua presença. Você começa a reduzir sua verdade para caber."
             },
             {
               "type": "p",
-              "text": "Muita gente confunde reconhecimento com “assumir fraqueza”. Não é isso. Reconhecimento é assumir realidade. E realidade é complexa: você pode ser forte e quebrado na mesma semana. Você pode amar e sentir rancor. Você pode ter gratidão e ter mágoa. Você pode ter fé e ter cansaço. Você pode ter vontade de viver e, ao mesmo tempo, estar exausto de existir. A narrativa do desacreditado quase sempre é uma narrativa de vergonha. Não necessariamente vergonha pelo que fez. Às vezes vergonha por quem é. Por não se encaixar. Por ser intenso demais. Por ser distraído demais. Por ser sensível demais. Por ser “diferente”. A vergonha vira filtro. Você começa a editar sua presença. Você começa a reduzir sua verdade para caber."
+              "text": "E aí você conquista um tipo de aceitação que cobra caro: a aceitação de uma versão reduzida de você. [br]\n Você é aceito… mas não é você.  [br]\nE o corpo sabe. O corpo sempre sabe. Reconhecer é interromper esse processo de redução. Não para virar uma versão “melhor”. Mas para parar de ser uma versão amputada. E aqui entra a camada mais dura: reconhecimento implica admitir também onde você se traiu. Não como culpa. Como verdade. Você se traiu quando se chamou de fraco por sentir. Você se traiu quando aceitou migalha e chamou de “o que dá”. Você se traiu quando tolerou desrespeito e chamou de “paz”. Você se traiu quando se abandonou para ser aceito. Você se traiu quando se tratou como projeto e não como pessoa."
             },
             {
               "type": "p",
-              "text": "E aí você conquista um tipo de aceitação que cobra caro: a aceitação de uma versão reduzida de você. Você é aceito… mas não é você. E o corpo sabe. O corpo sempre sabe. Reconhecer é interromper esse processo de redução. Não para virar uma versão “melhor”. Mas para parar de ser uma versão amputada. E aqui entra a camada mais dura: reconhecimento implica admitir também onde você se traiu. Não como culpa. Como verdade. Você se traiu quando se chamou de fraco por sentir. Você se traiu quando aceitou migalha e chamou de “o que dá”. Você se traiu quando tolerou desrespeito e chamou de “paz”. Você se traiu quando se abandonou para ser aceito. Você se traiu quando se tratou como projeto e não como pessoa."
-            },
-            {
-              "type": "p",
-              "text": "Isso não é uma acusação. É um diagnóstico íntimo. E diagnósticos íntimos doem porque não dá pra terceirizar. Mas há um alívio estranho nisso: quando você reconhece, você para de brigar com a realidade. E a energia que estava sendo gasta em negação volta para você. Volta como cansaço primeiro. Volta como luto. Volta como raiva. Volta como tremor. Volta como silêncio. Volta como uma vontade de ficar sozinho sem fugir — só ficar. Reconhecimento não é euforia. Reconhecimento é gravidade. E gravidade é aquilo que te devolve ao chão."
+              "text": "Isso não é uma acusação. É um diagnóstico íntimo. E diagnósticos íntimos doem porque não dá pra terceirizar.  [br]\nMas há um alívio estranho nisso: quando você reconhece, você para de brigar com a realidade. E a energia que estava sendo gasta em negação volta para você. Volta como cansaço primeiro. Volta como luto. Volta como raiva. Volta como tremor. Volta como silêncio. Volta como uma vontade de ficar sozinho sem fugir — só ficar. [br]\nReconhecimento não é euforia. Reconhecimento é gravidade. [br]\nE gravidade é aquilo que te devolve ao chão."
             }
           ]
         },
@@ -1223,19 +1235,15 @@ export const artifactBookData = {
             },
             {
               "type": "p",
-              "text": "Consciência aqui não é “entender”. É perceber. Perceber sem corrigir. Perceber sem comentar. Perceber sem transformar em teoria. Você não precisa se explicar para reconhecer. Você precisa sentir o fato. Três perguntas simples — simples demais para a mente gostar — sustentam a Consciência do Reconhecimento: 1. O que em mim está pedindo para ser visto e eu estou ignorando? Não o que é bonito de responder. O que é verdadeiro. 2. Onde meu corpo está segurando o que eu não admito? Garganta? Peito? Estômago? Lombar? Mandíbula? O corpo é um arquivo. Ele guarda o que a cabeça racionaliza."
+              "text": "Consciência aqui não é “entender”. É perceber. Perceber sem corrigir. Perceber sem comentar. Perceber sem transformar em teoria. [br] Você não precisa se explicar para reconhecer. Você precisa sentir o fato. [br]\nTrês perguntas simples — simples demais para a mente gostar — sustentam a Consciência do Reconhecimento:  [br]\n1. O que em mim está pedindo para ser visto e eu estou ignorando? Não o que é bonito de responder. O que é verdadeiro.  [br]\n2. Onde meu corpo está segurando o que eu não admito? Garganta? Peito? Estômago? Lombar? Mandíbula? O corpo é um arquivo. Ele guarda o que a cabeça racionaliza. [br]\n3. Qual é a frase interna que eu repito sobre mim quando ninguém está vendo?  [br]\nA frase que você nem percebe mais. [br]\n “Eu sempre estrago.” [br]\n “Eu nunca vou dar certo.”  [br]\n“Eu sou demais.” [br]\n “Eu sou de menos.”  [br]\n“Eu não posso parar.” [br]\n “Eu tenho que provar.” [br]\n Essa frase é o seu clima interno. E você vive dentro dela."
             },
             {
               "type": "p",
-              "text": "Qual é a frase interna que eu repito sobre mim quando ninguém está vendo? A frase que você nem percebe mais. “Eu sempre estrago.” “Eu nunca vou dar certo.” “Eu sou demais.” “Eu sou de menos.” “Eu não posso parar.” “Eu tenho que provar.” Essa frase é o seu clima interno. E você vive dentro dela."
+              "text": "Consciência é notar o clima sem tentar mudar o tempo. [br]\nPorque, antes de mudar, você precisa admitir: está chovendo."
             },
             {
               "type": "p",
-              "text": "Consciência é notar o clima sem tentar mudar o tempo. Porque, antes de mudar, você precisa admitir: está chovendo."
-            },
-            {
-              "type": "p",
-              "text": "E aqui entra a repetição consciente: Eu estou aqui. Eu estou aqui mesmo desconfortável. Eu estou aqui mesmo sem solução. Eu estou aqui mesmo sem resposta."
+              "text": "E aqui entra a repetição consciente: Eu estou aqui. [br]\nEu estou aqui mesmo desconfortável.  [br]\nEu estou aqui mesmo sem solução.  [br]\nEu estou aqui mesmo sem resposta."
             },
             {
               "type": "pause",
@@ -1247,7 +1255,7 @@ export const artifactBookData = {
             },
             {
               "type": "p",
-              "text": "Reconhecimento começa quando você volta nessa estação. E você não precisa fazer discurso. Você só precisa chegar."
+              "text": "Reconhecimento começa quando você volta nessa estação. [br]\n E você não precisa fazer discurso. [br]\n Você só precisa chegar."
             }
           ]
         },
@@ -1263,39 +1271,39 @@ export const artifactBookData = {
             },
             {
               "type": "p",
-              "text": "O maior inimigo do reconhecimento não é a dor. É o julgamento. Porque a dor, se você ficar, se move. O julgamento, se você alimenta, vira prisão. O julgamento interno do desacreditado costuma ter três vozes principais: 1) A voz do desprezo: “Para com isso.” “Que drama.” “Tem gente pior.” “Tu é fraco.” Essa voz não quer te fortalecer. Ela quer te calar para você não virar problema."
+              "text": "O maior inimigo do reconhecimento não é a dor. É o julgamento.  [br]\nPorque a dor, se você ficar, se move.  [br]\nO julgamento, se você alimenta, vira prisão. O julgamento interno do desacreditado costuma ter três vozes principais: [br]\n 1) A voz do desprezo:  [br]\n“Para com isso.” [br]\n “Que drama.” [br]\n “Tem gente pior.”  [br]\n“Tu é fraco.”  [br]\nEssa voz não quer te fortalecer. Ela quer te calar para você não virar problema."
             },
             {
               "type": "pause",
-              "text": "2) A voz da cobrança moral: “Tu devia ter superado.”"
+              "text": "2) A voz da cobrança moral: [br]\n “Tu devia ter superado.”"
             },
             {
               "type": "p",
-              "text": "“Tu devia ser grato.” “Tu devia ser melhor.” Essa voz confunde dignidade com rigidez. Ela acha que humanidade é falha de caráter."
+              "text": "“Tu devia ser grato.”  [br]\n“Tu devia ser melhor.” [br]\n Essa voz confunde dignidade com rigidez.  [br]\nEla acha que humanidade é falha de caráter."
             },
             {
               "type": "p",
-              "text": "3) A voz do medo social: “Se descobrirem, acabou.” “Se perceberem, vão te abandonar.” “Se você parar, você perde tudo.” Essa voz te mantém em movimento para não ser visto parado. Julgar é a forma que a mente encontra de tentar controlar o que sente. Se eu julgo, acredito que tenho domínio sobre a situação. Se eu me protejo demais, penso que estou evitando o sofrimento. Se eu escondo minhas fragilidades, imagino que estou preservando minha força. Mas a verdade é que, aos poucos, você se afasta de si mesmo."
+              "text": "3) A voz do medo social: [br]\n“Se descobrirem, acabou.” [br]\n “Se perceberem, vão te abandonar.” [br]\n “Se você parar, você perde tudo.” [br]\n Essa voz te mantém em movimento para não ser visto parado.  [br]\nJulgar é a forma que a mente encontra de tentar controlar o que sente. [br]\n Se eu julgo, acredito que tenho domínio sobre a situação. Se eu me protejo demais, penso que estou evitando o sofrimento. Se eu escondo minhas fragilidades, imagino que estou preservando minha força. [br]\n Mas a verdade é que, aos poucos, você se afasta de si mesmo."
             },
             {
               "type": "p",
-              "text": "O preço dessa falsa proteção é alto: você se torna o seu próprio carcereiro. O seu próprio agressor \"educado\". Aquele que sorri para o mundo, mas condena a si mesmo em silêncio."
+              "text": "O preço dessa falsa proteção é alto: você se torna o seu próprio carcereiro. O seu próprio agressor \"educado\" [br]\n. Aquele que sorri para o mundo, mas condena a si mesmo em silêncio."
             },
             {
               "type": "p",
-              "text": "No Reconhecimento, o julgamento precisa ser visto como um mecanismo, não como verdade. Ele é um guarda na porta. Ele grita para te impedir de entrar. Ele diz que o que você sente é perigoso."
+              "text": "No Reconhecimento, o julgamento precisa ser visto como um mecanismo, não como verdade.  [br]\nEle é um guarda na porta.  [br]\nEle grita para te impedir de entrar. [br]\n Ele diz que o que você sente é perigoso."
             },
             {
               "type": "p",
-              "text": "E talvez tenha sido perigoso antes. Talvez, em algum tempo, sentir tenha te colocado em risco real: risco de ser ridicularizado, risco de ser rejeitado, risco de ser punido, risco de ser abandonado. O corpo aprende. A mente aprende. Só que você cresceu — e o mecanismo ficou."
+              "text": "E talvez tenha sido perigoso antes. Talvez, em algum tempo, sentir tenha te colocado em risco real: risco de ser ridicularizado, risco de ser rejeitado, risco de ser punido, risco de ser abandonado. O corpo aprende. A mente aprende.  [br]\nSó que você cresceu — e o mecanismo ficou."
             },
             {
               "type": "p",
-              "text": "Então o trabalho aqui não é “calar” o julgamento na força. É reconhecer o julgamento também: “Eu percebo que estou me atacando.” “Eu percebo que estou me diminuindo.” “Eu percebo que estou tentando me controlar com vergonha.”"
+              "text": "Então o trabalho aqui não é “calar” o julgamento na força. É reconhecer o julgamento também:  [br]\n“Eu percebo que estou me atacando.”  [br]\n“Eu percebo que estou me diminuindo.” [br]\n“Eu percebo que estou tentando me controlar com vergonha.”"
             },
             {
               "type": "p",
-              "text": "E ficar. Sem rebater com frase bonita. Sem “autoamor” de fachada. Só ficar respirando, enquanto o julgamento perde um pouco de combustível."
+              "text": "E ficar.  [br]\nSem rebater com frase bonita.  [br]\nSem “autoamor” de fachada.  [br]\nSó ficar respirando, enquanto o julgamento perde um pouco de combustível."
             }
           ]
         },
@@ -1318,24 +1326,12 @@ export const artifactBookData = {
               "text": "O desacreditado costuma ser leal aos outros e desertor de si mesmo. Presença é interromper essa deserção."
             },
             {
-              "type": "pause",
-              "text": "Três práticas internas de Presença no Reconhecimento:"
-            },
-            {
               "type": "p",
-              "text": "1) O minuto sem fuga. Um minuto em que você não abre o celular. Um minuto em que você não muda de assunto dentro da cabeça. Um minuto em que você só percebe: respiração, corpo, pensamento. E quando vier a vontade de escapar, você nota: “vontade de escapar.” E fica mais dez segundos."
-            },
-            {
-              "type": "p",
-              "text": "2) A frase de retorno (sem motivação). Não é afirmação positiva. É frase de retorno ao real: “Eu estou aqui.” “Eu não preciso me explicar agora.” “Eu posso sentir isso sem resolver hoje.” Você repete como quem finca o pé no chão. Não para melhorar. Para sustentar."
-            },
-            {
-              "type": "p",
-              "text": "3) O contato com o corpo como prova. Mão no peito. Mão no abdômen. Encostar no próprio braço. Não como carinho romântico. Como evidência física: “eu existo aqui.” O corpo aprende pelo contato. Ele não aprende por argumento."
+              "text": "Três práticas internas de Presença no Reconhecimento:\n\n1) O minuto sem fuga. [br]\nUm minuto em que você não abre o celular. [br]\nUm minuto em que você não muda de assunto dentro da cabeça. [br]\nUm minuto em que você só percebe: respiração, corpo, pensamento. E quando vier a vontade de escapar, você nota: “vontade de escapar.” E fica mais dez segundos. [br]\n[br]\n2) A frase de retorno (sem motivação). Não é afirmação positiva. É frase de retorno ao real: [br]\n“Eu estou aqui.” [br]\n“Eu não preciso me explicar agora.” [br]\n“Eu posso sentir isso sem resolver hoje.” [br]\nVocê repete como quem finca o pé no chão. Não para melhorar. Para sustentar.\n[br]\n3) O contato com o corpo como prova. [br]\nMão no peito.\n[br] Mão no abdômen. [br]\nEncostar no próprio braço. [br]\nNão como carinho romântico. Como evidência física: “eu existo aqui.” [br]\nO corpo aprende pelo contato. Ele não aprende por argumento."
             },
             {
               "type": "pause",
-              "text": "Presença é repetição consciente. É o treino de não abandonar o próprio estado."
+              "text": "Presença é repetição consciente. [br]\n É o treino de não abandonar o próprio estado."
             },
             {
               "type": "pause",
@@ -1343,7 +1339,7 @@ export const artifactBookData = {
             },
             {
               "type": "p",
-              "text": "Ele não muda para ficar “bom”. Ele muda porque emoções são ondas. O que mantém a onda infinita é a fuga e o julgamento — não o sentir."
+              "text": "Ele não muda para ficar “bom”.  [br]\nEle muda porque emoções são ondas.  [br]\nO que mantém a onda infinita é a fuga e o julgamento — não o sentir."
             }
           ]
         },
@@ -1359,7 +1355,7 @@ export const artifactBookData = {
             },
             {
               "type": "p",
-              "text": "Eu não vou te pedir coragem. Coragem é uma palavra bonita que, às vezes, só coloca mais peso em cima de quem já está pesado. Eu não vou te pedir “força”. Força também vira chicote. Eu vou te dizer o que talvez ninguém tenha dito do jeito certo: Se você está cansado, isso não prova fracasso. Se você está confuso, isso não prova incapacidade. Se você está duro por dentro, isso não prova frieza. Se você está irritado sem motivo, isso não prova que você é ruim. Se você sente vergonha de existir às vezes, isso não prova que você é menor. Isso prova, muitas vezes, que você passou tempo demais tentando sobreviver sem ser visto. E sobreviver assim deixa marca. Reconhecimento é você parar de se tratar como erro. É você parar de se tratar como algo que precisa ser consertado para merecer paz. Talvez ninguém tenha te reconhecido quando você precisava. Talvez te olharam e te reduziram. Talvez te interpretaram errado. Talvez te deram rótulos em vez de presença."
+              "text": "Eu não vou te pedir coragem. Coragem é uma palavra bonita que, às vezes, só coloca mais peso em cima de quem já está pesado. Eu não vou te pedir “força”. Força também vira chicote. [br]\n Eu vou te dizer o que talvez ninguém tenha dito do jeito certo: [br]\n Se você está cansado, isso não prova fracasso. Se você está confuso, isso não prova incapacidade.  [br]\nSe você está duro por dentro, isso não prova frieza. Se você está irritado sem motivo, isso não prova que você é ruim.  [br]\nSe você sente vergonha de existir às vezes, isso não prova que você é menor. [br]\n Isso prova, muitas vezes, que você passou tempo demais tentando sobreviver sem ser visto. E sobreviver assim deixa marca. Reconhecimento é você parar de se tratar como erro. [br]\n É você parar de se tratar como algo que precisa ser consertado para merecer paz. [br]\n Talvez ninguém tenha te reconhecido quando você precisava. [br]\n Talvez te olharam e te reduziram. [br]\n Talvez te interpretaram errado. Talvez te deram rótulos em vez de presença."
             },
             {
               "type": "p",
@@ -1371,15 +1367,11 @@ export const artifactBookData = {
             },
             {
               "type": "pause",
-              "text": "Então volta do jeito que dá. Volta sem teatro. Volta sem promessa. Volta sem meta."
-            },
-            {
-              "type": "pause",
-              "text": "Só volta."
+              "text": "Então volta do jeito que dá. Volta sem teatro. Volta sem promessa. Volta sem meta. [br]\n [br]\nSó volta."
             },
             {
               "type": "p",
-              "text": "E se hoje tudo o que você consegue é reconhecer uma coisa — uma só — então reconhece essa: eu não quero mais me abandonar para caber. E fica em silêncio um pouco depois dessa frase. Deixa-a encostar."
+              "text": "E se hoje tudo o que você consegue é reconhecer uma coisa — uma só — então reconhece essa:  [br]\neu não quero mais me abandonar para caber. E fica em silêncio um pouco depois dessa frase.  [br]\nDeixa-a encostar."
             }
           ]
         },
@@ -1395,7 +1387,7 @@ export const artifactBookData = {
             },
             {
               "type": "p",
-              "text": "Não é um desafio. Não é uma técnica de produtividade. Não é um exercício para se tornar uma pessoa melhor. É apenas um convite para permanecer. Durante anos, talvez você tenha tentado corrigir tudo o que sentia. Explicar. Justificar. Resolver. Por sete dias, você fará algo diferente. Você apenas reconhecerá."
+              "text": "Não é um desafio. [br]\n Não é uma técnica de produtividade.  [br]\nNão é um exercício para se tornar uma pessoa melhor. [br]\nÉ apenas um convite para permanecer. Durante anos, talvez você tenha tentado corrigir tudo o que sentia.  [br]\nExplicar. Justificar. Resolver. Por sete dias, você fará algo diferente. Você apenas reconhecerá."
             },
             {
               "type": "pause",
@@ -1403,7 +1395,7 @@ export const artifactBookData = {
             },
             {
               "type": "p",
-              "text": "Sente-se em silêncio. Respire normalmente. Sem controlar a respiração. Sem buscar relaxamento. Sem tentar alcançar nenhum estado especial. Apenas escolha um ponto fixo à sua frente. Observe. Chegue. Nada para conquistar. Nada para provar. Só estar aqui."
+              "text": "Sente-se em silêncio.  [br]\nRespire normalmente.  [br]\nSem controlar a respiração.  [br]\nSem buscar relaxamento.  [br]\nSem tentar alcançar nenhum estado especial.  [br]\nApenas escolha um ponto fixo à sua frente. [br]\n Observe.  [br]\nChegue.  [br]\nNada para conquistar.  [br]\nNada para provar. [br]\nSó estar aqui."
             },
             {
               "type": "pause",
@@ -1419,7 +1411,7 @@ export const artifactBookData = {
             },
             {
               "type": "pause",
-              "text": "Não explique. Não conte a história. Não procure motivos. Apenas reconheça. Depois complete:"
+              "text": "Não explique.  [br]\nNão conte a história. [br]\n Não procure motivos.  [br]\nApenas reconheça.  [br]\nDepois complete:"
             },
             {
               "type": "pause",
@@ -1430,19 +1422,9 @@ export const artifactBookData = {
               "text": "Talvez seja:"
             },
             {
-              "type": "list",
-              "items": [
-                "tensão",
-                "peso",
-                "vazio",
-                "pressa",
-                "cansaço",
-                "aperto",
-                "inquietação",
-                "medo",
-                "tristeza",
-                "raiva"
-              ]
+              "type": "p",
+              "text": "• tensão[br]\n• peso[br]\n• vazio[br]\n• pressa[br]\n• cansaço[br]\n• aperto[br]\n• inquietação[br]\n• medo[br]\n• tristeza[br]\n• raiva",
+              "className": "reader-canonical-list-item"
             },
             {
               "type": "pause",
@@ -1450,7 +1432,7 @@ export const artifactBookData = {
             },
             {
               "type": "p",
-              "text": "Não tente entender. Não tente mudar. Apenas nomeie. O que é reconhecido deixa de precisar gritar para ser ouvido."
+              "text": "Não tente entender.  [br]\nNão tente mudar.  [br]\nApenas nomeie.  [br]\nO que é reconhecido deixa de precisar gritar para ser ouvido."
             },
             {
               "type": "pause",
@@ -1458,19 +1440,15 @@ export const artifactBookData = {
             },
             {
               "type": "p",
-              "text": "Coloque uma das mãos sobre o peito ou sobre o abdômen. Respire normalmente. Repita lentamente: \"Eu estou aqui.\" Mais uma vez: \"Eu estou aqui.\""
+              "text": "Coloque uma das mãos sobre o peito ou sobre o abdômen. [br]\n Respire normalmente.  [br]\nRepita lentamente:  [br]\n\"Eu estou aqui.\"  [br]\nMais uma vez:  [br]\n\"Eu estou aqui.\""
             },
             {
               "type": "pause",
               "text": "Quando surgir um pensamento de crítica ou julgamento, não lute contra ele. Apenas reconheça:"
             },
             {
-              "type": "pause",
-              "text": "\"Julgamento.\""
-            },
-            {
-              "type": "pause",
-              "text": "E volte. \"Eu estou aqui.\""
+              "type": "p",
+              "text": "\"Julgamento.\" [br]\nE volte. [br]\n\"Eu estou aqui.\""
             },
             {
               "type": "pause",
@@ -1478,7 +1456,12 @@ export const artifactBookData = {
             },
             {
               "type": "p",
-              "text": "Agora faça a si mesmo uma única pergunta: \"O que eu tenho evitado reconhecer em mim?\" Responda sem enfeitar. Sem explicar. Sem defender. Sem tentar parecer forte. Talvez apareça: • cansaço • medo de fracassar • raiva antiga • solidão • necessidade de ser cuidado • sensação de não pertencer • vergonha • sensação de estar atrasado na vida • ressentimento • tristeza. O que surgir é o suficiente."
+              "text": "Agora faça a si mesmo uma única pergunta:  [br]\n\"O que eu tenho evitado reconhecer em mim? [br]\n\" Responda sem enfeitar.  [br]\nSem explicar.  [br]\nSem defender.  [br]\nSem tentar parecer forte. Talvez apareça:"
+            },
+            {
+              "type": "p",
+              "text": "• cansaço [br]\n• medo de fracassar [br]\n• raiva antiga [br]\n• solidão [br]\n• necessidade de ser cuidado [br]\n• sensação de não pertencer [br]\n• vergonha [br]\n• sensação de estar atrasado na vida [br]\n• ressentimento [br]\n• tristeza [br]\nO que surgir é o suficiente.",
+              "className": "reader-canonical-list-item"
             }
           ]
         },
@@ -1490,19 +1473,11 @@ export const artifactBookData = {
           "blocks": [
             {
               "type": "p",
-              "text": "Se durante o exercício sua mente tentar resolver tudo, planejar tudo ou encontrar respostas imediatas, não discuta com ela. Não brigue. Não tente vencer. Apenas responda: \"Hoje não.\""
+              "text": "Se durante o exercício sua mente tentar resolver tudo, planejar tudo ou encontrar respostas imediatas, não discuta com ela.  [br]\nNão brigue. [br]\n Não tente vencer.  [br]\nApenas responda:  [br]\n\"Hoje não.\"\n\n\"Hoje é reconhecimento.\""
             },
             {
               "type": "pause",
-              "text": "\"Hoje é reconhecimento.\""
-            },
-            {
-              "type": "pause",
-              "text": "Porque a transformação não começa quando você encontra respostas."
-            },
-            {
-              "type": "pause",
-              "text": "Ela começa quando você para de fugir daquilo que já sabe que está sentindo."
+              "text": "Porque a transformação não começa quando você encontra respostas. [br]\n [br]\nEla começa quando você para de fugir daquilo que já sabe que está sentindo."
             }
           ]
         },
@@ -1518,15 +1493,15 @@ export const artifactBookData = {
             },
             {
               "type": "p",
-              "text": "Se você leu ou escutou este pilar e sentiu algum incômodo, ótimo. Incômodo, aqui, não é um problema. É um sinal de contato. Durante muito tempo, talvez você tenha sobrevivido evitando. Evitando sentir. Evitando lembrar. Evitando olhar. Evitando reconhecer. Mas evitar não é curar. Evitar apenas adia o encontro. Contato é outra coisa. Contato é permanecer por alguns instantes diante daquilo que você sente sem fugir imediatamente."
+              "text": "Se você leu ou escutou este pilar e sentiu algum incômodo, ótimo. [br]\n Incômodo, aqui, não é um problema.  [br]\nÉ um sinal de contato. [br]\n Durante muito tempo, talvez você tenha sobrevivido evitando. [br]\n Evitando sentir.  [br]\nEvitando lembrar.  [br]\nEvitando olhar.  [br]\nEvitando reconhecer.  [br]\nMas evitar não é curar. [br]\n Evitar apenas adia o encontro.  [br]\nContato é outra coisa.  [br]\nContato é permanecer por alguns instantes diante daquilo que você sente sem fugir imediatamente."
             },
             {
               "type": "p",
-              "text": "É permitir que a verdade exista antes de tentar transformá-la. Por isso o reconhecimento é o começo. Porque ele não exige performance. Não exige respostas. Não exige força. Ele exige presença. Ele exige honestidade. Ele exige que você pare de se abandonar toda vez que a realidade toca uma ferida que ainda dói. Talvez hoje você não consiga mudar sua história. Talvez hoje você não consiga reorganizar sua vida. Talvez hoje você não consiga responder todas as perguntas que carrega. Mas existe algo que você pode fazer. Reconhecer. Mesmo que seja apenas uma coisa."
+              "text": "É permitir que a verdade exista antes de tentar transformá-la.  [br]\nPor isso o reconhecimento é o começo.  [br]\nPorque ele não exige performance.  [br]\nNão exige respostas. [br]\n Não exige força. [br]\n Ele exige presença.  [br]\nEle exige honestidade. [br]\n Ele exige que você pare de se abandonar toda vez que a realidade toca uma ferida que ainda dói.  [br]\nTalvez hoje você não consiga mudar sua história. [br]\n Talvez hoje você não consiga reorganizar sua vida. [br]\n Talvez hoje você não consiga responder todas as perguntas que carrega.  [br]\nMas existe algo que você pode fazer.  [br]\nReconhecer.  [br]\nMesmo que seja apenas uma coisa."
             },
             {
               "type": "p",
-              "text": "Mesmo que seja pequena. Mesmo que seja desconfortável. Reconheça. Porque aquilo que é reconhecido deixa de precisar gritar para ser ouvido. E porque o mínimo verdadeiro sempre constrói mais do que o máximo performado. Este não é o fim do caminho. É apenas o momento em que você para de correr na direção oposta. E, para alguém que passou a vida inteira fugindo de si mesmo, isso já é um começo extraordinário."
+              "text": "Mesmo que seja pequena. [br]\n Mesmo que seja desconfortável.  [br]\nReconheça. [br]\n Porque aquilo que é reconhecido deixa de precisar gritar para ser ouvido. [br]\n E porque o mínimo verdadeiro sempre constrói mais do que o máximo performado. [br]\n Este não é o fim do caminho.  [br]\nÉ apenas o momento em que você para de correr na direção oposta. [br]\n E, para alguém que passou a vida inteira fugindo de si mesmo, isso já é um começo extraordinário."
             },
             {
               "type": "pause",
@@ -1543,18 +1518,35 @@ export const artifactBookData = {
       "title": "Pilar II — Família & lealdades invisíveis",
       "sections": [
         {
-          "id": "pilar2--abertura",
-          "title": "Abertura",
-          "audioId": "pilar2--abertura",
+          "id": "pilar2--capa",
+          "title": "Família",
+          "audioId": "pilar2--capa",
           "listened": false,
           "blocks": [
             {
               "type": "pause",
-              "text": "O primeiro lugar onde aprendemos a nos calar"
+              "text": "Quando você para de se atacar, começa a perceber de onde aprendeu a se calar.",
+              "className": "reader-cover-transition"
+            },
+            {
+              "type": "step-header",
+              "text": "Pilar II",
+              "className": "reader-digital-cover-imprint"
+            },
+            {
+              "type": "step-header",
+              "text": "Família & Lealdades Invisíveis",
+              "className": "reader-digital-cover-title"
             },
             {
               "type": "pause",
-              "text": "\"Os primeiros vínculos moldam quem acreditamos precisar ser para continuar pertencendo.\""
+              "text": "O primeiro lugar onde aprendemos a nos calar.",
+              "className": "reader-digital-cover-tagline"
+            },
+            {
+              "type": "p",
+              "text": "Os primeiros vínculos moldam quem acreditamos precisar ser para continuar pertencendo.",
+              "className": "reader-digital-cover-author reader-cover-page-break"
             }
           ]
         },
@@ -1566,16 +1558,12 @@ export const artifactBookData = {
           "blocks": [
             {
               "type": "p",
-              "text": "Onde aprendemos, antes de qualquer escolha consciente, quem devemos ser para merecer amor. Onde pais, mães, irmãos, filhos e cônjuges se tornam espelhos — às vezes acolhedores, muitas vezes exigentes. Onde expectativas não ditas moldam comportamento. Onde afeto se mistura com cobrança. Onde pertencimento pode depender de desempenho emocional.",
+              "text": "Onde aprendemos, antes de qualquer escolha consciente, quem devemos ser para merecer amor. [br]\nOnde pais, mães, irmãos, filhos e cônjuges se tornam espelhos — às vezes acolhedores, muitas vezes exigentes.[br]\n Onde expectativas não ditas moldam comportamento. [br]\nOnde afeto se mistura com cobrança. Onde pertencimento pode depender de desempenho emocional.",
               "lead": true
             },
             {
               "type": "p",
-              "text": "Aqui nasce boa parte da insegurança que carregamos sem nome. Aqui se aprende a sentir culpa antes mesmo de errar."
-            },
-            {
-              "type": "pause",
-              "text": "Aqui começa o autoabandono silencioso do desacreditado."
+              "text": "Aqui nasce boa parte da insegurança que carregamos sem nome. [br]\nAqui se aprende a sentir culpa antes mesmo de errar.[br]\nAqui começa o autoabandono silencioso do desacreditado."
             }
           ]
         },
@@ -1591,11 +1579,11 @@ export const artifactBookData = {
             },
             {
               "type": "p",
-              "text": "Família não começa na palavra “amor”. Ela começa no clima. Antes de você ter linguagem para chamar algo de injusto, antes de você ter maturidade para diferenciar cuidado de controle, antes de você ter vocabulário para nomear o que sente, você já está respirando um ambiente que te educa por dentro. E essa educação não vem como explicação; ela vem como repetição, como padrão, como micro mensagens diárias que o corpo capta e registra sem transformar em pensamento. O tom com que seu nome é chamado quando você entra num cômodo. O silêncio que se instala quando você fala algo que não combina com o que esperavam de você. O jeito como um erro é tratado: como parte da vida, ou como falha moral. O tipo de riso permitido: o riso solto, ou o riso que precisa medir o momento. O tipo de tristeza tolerada: a tristeza acolhida, ou a tristeza que “atrapalha”. O tipo de pergunta que pode existir: a pergunta curiosa, ou a pergunta vista como afronta. Em algum ponto, sem ninguém dizer “seja assim”, você aprende a se tornar alguém que cabe. E caber, numa família, pode significar coisas muito diferentes: pode significar apenas conviver, ou pode significar se reduzir. Quando a gente fala de “lealdades invisíveis”, não estamos falando de ingratidão, nem de acusação fácil, nem de transformar pai e mãe em vilões. Isso é superficial e, além de tudo, é cômodo — porque mantém você numa história onde a causa está sempre fora. Lealdade invisível é um mecanismo mais antigo e mais íntimo: é a forma como o pertencimento se torna condicional sem precisar ser declarado. Você não precisa ouvir “seja perfeito” para viver como se errar fosse perigo; basta perceber que o erro muda o olhar, muda a paciência, muda o calor do vínculo. Você não precisa ouvir “não me decepcione” para sentir que decepcionar é ameaça; basta perceber que a alegria do outro depende do seu desempenho, que o humor da casa depende do seu comportamento, que a tranquilidade do ambiente exige que alguém se controle — e muitas vezes esse alguém vira você. Em famílias assim, o desacreditado aprende cedo que existe um preço para ser aceito: não o preço de obedecer regras claras, mas o preço de ajustar sua própria verdade ao que mantém a casa estável. E estabilidade, em certas casas, significa silenciar o que incomoda, esconder o que é intenso, maquiar o que é vulnerável, e chamar isso de “ser forte”. O problema não é ter sido educado. O problema é quando a educação vira formatação emocional. Você cresce achando que amor vem com uma lista invisível de condições: não contrarie demais; não sinta demais; não exponha demais; não precise demais; não fracasse demais. E como criança não tem poder para discutir contrato, ela faz o que sabe fazer: ela se adapta. Só que adaptação contínua não é maturidade; é sobrevivência. Com o tempo, o corpo aprende um tipo de vigilância: uma atenção exagerada ao humor do outro, uma leitura constante do ambiente, uma antecipação de conflitos para que nada piore. Você vira alguém que “sabe lidar”, alguém que “entende”, alguém que “não dá trabalho”. Isso costuma ser elogiado. Só que, por dentro, esse elogio cobra juros: ele te treina a ser amado pela utilidade e pela estabilidade que você fornece, não pela verdade que você é. E o desacreditado, que já tem uma ferida pronta de não ser visto como realmente é, confunde esse elogio com reconhecimento — quando, muitas vezes, é só recompensa por autoabandono bem executado. E aqui eu preciso ser honesto de um jeito que não alivia: grande parte do que te prende à família não é a família em si; é o clima que ficou dentro. Porque a lealdade invisível não depende mais da presença física de ninguém. Você pode ter saído de casa, você pode morar longe, você pode ter vida própria, pode até ter cortado relações. Ainda assim, o corpo continua reagindo como se a casa estivesse ali. A culpa acende no mesmo lugar. O medo de decepcionar aparece como reflexo. A necessidade de se justificar surge antes de você perceber. A sensação de estar em dívida se impõe mesmo quando não há cobrança objetiva. E isso é o que torna esse pilar tão delicado: não é sobre apontar para a família e dizer “vocês fizeram”. É sobre perceber que uma parte do seu sistema emocional ainda vive como se precisasse manter o pacto, como se o pertencimento estivesse sempre em risco, como se o amor fosse algo que você precisa merecer diariamente. E enquanto isso não é reconhecido, você continua tentando ganhar um tipo de aprovação que nunca vem completa — porque ela não é entrega, é condição. Família também é o lugar onde muita gente aprende uma confusão perigosa: confundir respeito com medo, confundir gratidão com silêncio, confundir honra com submissão, confundir paz com ausência de conflito. E quando isso entra, entra como moral — e moral pesa mais que argumento. Você se pega pensando"
+              "text": "Família não começa na palavra “amor”. Ela começa no clima. Antes de você ter linguagem para chamar algo de injusto, antes de você ter maturidade para diferenciar cuidado de controle, antes de você ter vocabulário para nomear o que sente, você já está respirando um ambiente que te educa por dentro. E essa educação não vem como explicação; ela vem como repetição, como padrão, como micro mensagens diárias que o corpo capta e registra sem transformar em pensamento. O tom com que seu nome é chamado quando você entra num cômodo. O silêncio que se instala quando você fala algo que não combina com o que esperavam de você. O jeito como um erro é tratado: como parte da vida, ou como falha moral. O tipo de riso permitido: o riso solto, ou o riso que precisa medir o momento. O tipo de tristeza tolerada: a tristeza acolhida, ou a tristeza que “atrapalha”. O tipo de pergunta que pode existir: a pergunta curiosa, ou a pergunta vista como afronta. Em algum ponto, sem ninguém dizer “seja assim”, você aprende a se tornar alguém que cabe. E caber, numa família, pode significar coisas muito diferentes: pode significar apenas conviver, ou pode significar se reduzir. [br]\nQuando a gente fala de “lealdades invisíveis”, não estamos falando de ingratidão, nem de acusação fácil, nem de transformar pai e mãe em vilões. Isso é superficial e, além de tudo, é cômodo — porque mantém você numa história onde a causa está sempre fora. Lealdade invisível é um mecanismo mais antigo e mais íntimo: é a forma como o pertencimento se torna condicional sem precisar ser declarado. Você não precisa ouvir “seja perfeito” para viver como se errar fosse perigo; basta perceber que o erro muda o olhar, muda a paciência, muda o calor do vínculo. Você não precisa ouvir “não me decepcione” para sentir que decepcionar é ameaça; basta perceber que a alegria do outro depende do seu desempenho, que o humor da casa depende do seu comportamento, que a tranquilidade do ambiente exige que alguém se controle — e muitas vezes esse alguém vira você. Em famílias assim, o desacreditado aprende cedo que existe um preço para ser aceito: não o preço de obedecer regras claras, mas o preço de ajustar sua própria verdade ao que mantém a casa estável. E estabilidade, em certas casas, significa silenciar o que incomoda, esconder o que é intenso, maquiar o que é vulnerável, e chamar isso de “ser forte”. [br]\nO problema não é ter sido educado. O problema é quando a educação vira formatação emocional. Você cresce achando que amor vem com uma lista invisível de condições: não contrarie demais; não sinta demais; não exponha demais; não precise demais; não fracasse demais. E como criança não tem poder para discutir contrato, ela faz o que sabe fazer: ela se adapta. Só que adaptação contínua não é maturidade; é sobrevivência. Com o tempo, o corpo aprende um tipo de vigilância: uma atenção exagerada ao humor do outro, uma leitura constante do ambiente, uma antecipação de conflitos para que nada piore. Você vira alguém que “sabe lidar”, alguém que “entende”, alguém que “não dá trabalho”. Isso costuma ser elogiado. Só que, por dentro, esse elogio cobra juros: ele te treina a ser amado pela utilidade e pela estabilidade que você fornece, não pela verdade que você é. E o desacreditado, que já tem uma ferida pronta de não ser visto como realmente é, confunde esse elogio com reconhecimento — quando, muitas vezes, é só recompensa por autoabandono bem executado.[br]\n E aqui eu preciso ser honesto de um jeito que não alivia: grande parte do que te prende à família não é a família em si; é o clima que ficou dentro. Porque a lealdade invisível não depende mais da presença física de ninguém. Você pode ter saído de casa, você pode morar longe, você pode ter vida própria, pode até ter cortado relações. Ainda assim, o corpo continua reagindo como se a casa estivesse ali. A culpa acende no mesmo lugar. O medo de decepcionar aparece como reflexo. A necessidade de se justificar surge antes de você perceber. A sensação de estar em dívida se impõe mesmo quando não há cobrança objetiva. E isso é o que torna esse pilar tão delicado: não é sobre apontar para a família e dizer “vocês fizeram”. É sobre perceber que uma parte do seu sistema emocional ainda vive como se precisasse manter o pacto, como se o pertencimento estivesse sempre em risco, como se o amor fosse algo que você precisa merecer diariamente. E enquanto isso não é reconhecido, você continua tentando ganhar um tipo de aprovação que nunca vem completa — porque ela não é entrega, é condição. [br]"
             },
             {
               "type": "p",
-              "text": "“mas são meus pais”, “mas é minha mãe”, “mas é meu sangue”, “mas família é família”, como se isso encerrasse a conversa interna. Só que essas frases não encerram nada; elas apenas trancam. Elas colocam um cadeado em cima da sua experiência para que você não olhe de verdade para o que viveu e para o que ainda vive. E olhar não significa condenar. Olhar significa parar de mentir para si mesmo, parar de romantizar feridas antigas, parar de chamar de “normal” o que foi, na prática, uma infância aprendendo a caber num ambiente onde você não podia existir inteiro. O desacreditado não vira desacreditado no vácuo. Em muitos casos, ele vira desacreditado no lugar onde deveria ter sido visto primeiro. Este pilar não é para você criar uma narrativa contra a sua família. Ele é para você parar de construir sua identidade em cima de um contrato que nunca foi dito e nunca foi assinado, mas foi cumprido. Ele é para você perceber como o seu corpo foi treinado a servir a uma estabilidade que não incluía você por inteiro. Ele é para você encostar, com calma e sem espetáculo, na pergunta que quase ninguém sustenta tempo suficiente para ouvir responder dentro: quem eu precisei ser para ser amado aqui? E depois encostar na pergunta seguinte, que é mais perigosa, porque não tem resposta bonita: o que eu deixei de ser para não perder esse amor? Se você não fizer essas perguntas com permanência, você segue chamando de “personalidade” aquilo que foi defesa, segue chamando de “caráter” aquilo que foi medo, segue chamando de “maturidade” aquilo que foi silêncio treinado. E isso não é acusação. Isso é retorno."
+              "text": "Família também é o lugar onde muita gente aprende uma confusão perigosa: confundir respeito com medo, confundir gratidão com silêncio, confundir honra com submissão, confundir paz com ausência de conflito. E quando isso entra, entra como moral — e moral pesa mais que argumento.\n [br]Você se pega pensando “mas são meus pais”, “mas é minha mãe”, “mas é meu sangue”, “mas família é família”, como se isso encerrasse a conversa interna. Só que essas frases não encerram nada; elas apenas trancam. Elas colocam um cadeado em cima da sua experiência para que você não olhe de verdade para o que viveu e para o que ainda vive. E olhar não significa condenar. Olhar significa parar de mentir para si mesmo, parar de romantizar feridas antigas, parar de chamar de “normal” o que foi, na prática, uma infância aprendendo a caber num ambiente onde você não podia existir inteiro. O desacreditado não vira desacreditado no vácuo. Em muitos casos, ele vira desacreditado no lugar onde deveria ter sido visto primeiro.[br]\n Este pilar não é para você criar uma narrativa contra a sua família. Ele é para você parar de construir sua identidade em cima de um contrato que nunca foi dito e nunca foi assinado, mas foi cumprido. Ele é para você perceber como o seu corpo foi treinado a servir a uma estabilidade que não incluía você por inteiro. Ele é para você encostar, com calma e sem espetáculo, na pergunta que quase ninguém sustenta tempo suficiente para ouvir responder dentro: quem eu precisei ser para ser amado aqui? E depois encostar na pergunta seguinte, que é mais perigosa, porque não tem resposta bonita: o que eu deixei de ser para não perder esse amor? Se você não fizer essas perguntas com permanência, você segue chamando de “personalidade” aquilo que foi defesa, segue chamando de “caráter” aquilo que foi medo, segue chamando de “maturidade” aquilo que foi silêncio treinado. E isso não é acusação. Isso é retorno."
             }
           ]
         },
@@ -1611,7 +1599,7 @@ export const artifactBookData = {
             },
             {
               "type": "p",
-              "text": "Esse pacto invisível não termina quando a infância acaba. Ele amadurece junto com você. Ele muda de forma, mas não perde força. O adulto que saiu de casa continua carregando a casa por dentro, não como lembrança, mas como estrutura de resposta emocional. Você entra em relações como quem entra no antigo ambiente familiar: medindo, antecipando, se preparando para não desagradar demais. Você entra no trabalho como quem entra na sala de estar da infância: tentando ser útil, tentando não errar, tentando justificar sua presença pelo que entrega. Você entra no amor com o mesmo medo antigo de perder o vínculo se for inteiro demais. E, quando algo dá errado, o corpo reage com a mesma culpa primária, como se tivesse quebrado uma regra invisível que nunca foi escrita, mas sempre foi cobrada. A dívida emocional funciona assim: você sente que deve continuar sendo quem foi necessário um dia, mesmo que esse papel já não faça sentido. Você se sente responsável pelo equilíbrio emocional de pessoas que já são adultas. Você se sente culpado por crescer, por mudar, por discordar, por escolher caminhos que não estavam previstos no roteiro familiar. E muitas vezes você não sabe explicar isso em palavras, porque não houve uma frase clara que tenha dito “faça isso”. Houve apenas uma repetição silenciosa de recompensas e retiradas de afeto. Houve apenas o aprendizado de que certas versões suas eram melhor recebidas do que outras. E isso basta para criar um sistema interno de vigilância permanente. O desacreditado costuma ser aquele que tenta manter a harmonia mesmo quando isso custa caro. Ele internaliza a função de sustentador emocional: aquele que não explode, que entende, que relativiza, que “leva numa boa”. Só que esse papel tem um preço alto: ele impede o contato honesto com a própria raiva, com a própria frustração, com a própria dor não reconhecida. A raiva, quando não encontra lugar, não desaparece; ela se volta para dentro. Ela vira rigidez, autocrítica, cansaço crônico, irritação difusa, sensação de estar sempre em falta. A frustração vira resignação. A dor vira silêncio. E o silêncio vira identidade. Você começa a se definir como alguém “mais fechado”, “mais frio”, “mais racional”, quando, na verdade, você só aprendeu cedo demais que sentir dava trabalho para o ambiente. Existe também um luto pouco falado nesse campo: o luto pela família que poderia ter sido. Não uma família perfeita, mas uma família onde houvesse espaço real para falhar, para discordar, para não corresponder. Esse luto é difícil porque ele não é autorizado socialmente. Você pode lamentar a morte de alguém, mas não pode lamentar a ausência emocional de quem está vivo sem ser visto como ingrato. Então você engole. E o que é engolido sem digestão emocional vira peso interno. Vira aquela sensação estranha de estar sempre devendo algo que nunca foi combinado. Vira aquela dificuldade de descansar sem culpa. Vira aquela necessidade constante de provar valor, de mostrar resultado, de justificar escolhas. Em muitas famílias, o amor não foi negado — ele foi condicionado. E amor condicionado ensina uma lição perigosa: que você só merece vínculo se cumprir determinados requisitos. Essa lição não fica no passado. Ela estrutura o futuro. Ela faz com que o desacreditado confunda proximidade com obrigação, cuidado com sacrifício, presença com autoabandono. Ele aprende que amar é se adaptar. Que pertencer é se moldar. Que ser aceito é não ser problema. E quando a vida adulta começa a exigir escolhas mais próprias, mais autênticas, esse sistema entra em conflito. O corpo sente, mas a mente justifica. O corpo contrai, mas a narrativa tenta manter tudo “normal”. É aí que surgem sintomas: ansiedade sem causa clara, cansaço sem excesso aparente, dificuldade de se posicionar, sensação de estar sempre aquém ou além do esperado. Não é fraqueza. É memória emocional em funcionamento."
+              "text": "Esse pacto invisível não termina quando a infância acaba. Ele amadurece junto com você. Ele muda de forma, mas não perde força. O adulto que saiu de casa continua carregando a casa por dentro, não como lembrança, mas como estrutura de resposta emocional. Você entra em relações como quem entra no antigo ambiente familiar: medindo, antecipando, se preparando para não desagradar demais. Você entra no trabalho como quem entra na sala de estar da infância: tentando ser útil, tentando não errar, tentando justificar sua presença pelo que entrega. Você entra no amor com o mesmo medo antigo de perder o vínculo se for inteiro demais. E, quando algo dá errado, o corpo reage com a mesma culpa primária, como se tivesse quebrado uma regra invisível que nunca foi escrita, mas sempre foi cobrada.[br]\n A dívida emocional funciona assim: você sente que deve continuar sendo quem foi necessário um dia, mesmo que esse papel já não faça sentido. Você se sente responsável pelo equilíbrio emocional de pessoas que já são adultas. Você se sente culpado por crescer, por mudar, por discordar, por escolher caminhos que não estavam previstos no roteiro familiar. E muitas vezes você não sabe explicar isso em palavras, porque não houve uma frase clara que tenha dito “faça isso”. Houve apenas uma repetição silenciosa de recompensas e retiradas de afeto. Houve apenas o aprendizado de que certas versões suas eram melhor recebidas do que outras. E isso basta para criar um sistema interno de vigilância permanente. [br]\nO desacreditado costuma ser aquele que tenta manter a harmonia mesmo quando isso custa caro. Ele internaliza a função de sustentador emocional: aquele que não explode, que entende, que relativiza, que “leva numa boa”. Só que esse papel tem um preço alto: ele impede o contato honesto com a própria raiva, com a própria frustração, com a própria dor não reconhecida. A raiva, quando não encontra lugar, não desaparece; ela se volta para dentro. Ela vira rigidez, autocrítica, cansaço crônico, irritação difusa, sensação de estar sempre em falta. A frustração vira resignação. A dor vira silêncio. E o silêncio vira identidade. Você começa a se definir como alguém “mais fechado”, “mais frio”, “mais racional”, quando, na verdade, você só aprendeu cedo demais que sentir dava trabalho para o ambiente.[br]\n Existe também um luto pouco falado nesse campo: o luto pela família que poderia ter sido. Não uma família perfeita, mas uma família onde houvesse espaço real para falhar, para discordar, para não corresponder. Esse luto é difícil porque ele não é autorizado socialmente. Você pode lamentar a morte de alguém, mas não pode lamentar a ausência emocional de quem está vivo sem ser visto como ingrato. Então você engole. E o que é engolido sem digestão emocional vira peso interno. Vira aquela sensação estranha de estar sempre devendo algo que nunca foi combinado. Vira aquela dificuldade de descansar sem culpa. Vira aquela necessidade constante de provar valor, de mostrar resultado, de justificar escolhas. [br]\nEm muitas famílias, o amor não foi negado — ele foi condicionado. E amor condicionado ensina uma lição perigosa: que você só merece vínculo se cumprir determinados requisitos. Essa lição não fica no passado. Ela estrutura o futuro. Ela faz com que o desacreditado confunda proximidade com obrigação, cuidado com sacrifício, presença com autoabandono. Ele aprende que amar é se adaptar. Que pertencer é se moldar. Que ser aceito é não ser problema. E quando a vida adulta começa a exigir escolhas mais próprias, mais autênticas, esse sistema entra em conflito. O corpo sente, mas a mente justifica. O corpo contrai, mas a narrativa tenta manter tudo “normal”. É aí que surgem sintomas: ansiedade sem causa clara, cansaço sem excesso aparente, dificuldade de se posicionar, sensação de estar sempre aquém ou além do esperado. Não é fraqueza. É memória emocional em funcionamento."
             }
           ]
         },
@@ -1695,7 +1683,7 @@ export const artifactBookData = {
             },
             {
               "type": "p",
-              "text": "Se você leu isso e sentiu um peso familiar, não interprete isso como acusação. Interprete como contato. Você não está errado por sentir o que sente. Você não está quebrado por carregar culpa. Você apenas aprendeu cedo demais que precisava se moldar para pertencer. E isso não é falha moral; é adaptação. Só que agora essa adaptação cobra um preço que talvez você não queira mais pagar. Você não precisa romper com sua família para romper com a lealdade que te diminui. Às vezes, o rompimento mais profundo é interno. É parar de se exigir o mesmo papel. É parar de sustentar a mesma dívida. É permitir que o amor exista sem a obrigação de ser perfeito, estável, disponível o tempo todo. Você pode honrar sua história sem continuar preso a ela. Você pode reconhecer o que foi dado sem negar o que faltou. Essas duas coisas não se anulam. Elas convivem."
+              "text": "Se você leu isso e sentiu um peso familiar, não interprete isso como acusação. Interprete como contato. [br]\nVocê não está errado por sentir o que sente. Você não está quebrado por carregar culpa. [br]\nVocê apenas aprendeu cedo demais que precisava se moldar para pertencer. E isso não é falha moral; é adaptação. [br]\nSó que agora essa adaptação cobra um preço que talvez você não queira mais pagar. [br]\nVocê não precisa romper com sua família para romper com a lealdade que te diminui. [br]\nÀs vezes, o rompimento mais profundo é interno. [br]\nÉ parar de se exigir o mesmo papel. [br]\nÉ parar de sustentar a mesma dívida. [br]\nÉ permitir que o amor exista sem a obrigação de ser perfeito, estável, disponível o tempo todo. [br]\nVocê pode honrar sua história sem continuar preso a ela. Você pode reconhecer o que foi dado sem negar o que faltou. [br]\nEssas duas coisas não se anulam. Elas convivem."
             }
           ]
         },
@@ -1711,11 +1699,11 @@ export const artifactBookData = {
             },
             {
               "type": "p",
-              "text": "Durante sete dias, sem comunicar a ninguém, sem explicar, sem anunciar: Todos os dias, em silêncio, complete a frase: “Hoje eu percebo que continuo carregando…” Não julgue. Não conclua. Apenas observe. Depois, complete: “Isso pertence a quem?” Não responda com lógica. Deixe o corpo responder."
+              "text": "Durante sete dias, sem comunicar a ninguém, sem explicar, sem anunciar: [br]\nTodos os dias, em silêncio, complete a frase: [br]\n“Hoje eu percebo que continuo carregando…” [br]\nNão julgue. Não conclua. Apenas observe. [br]\nDepois, complete: [br]\n“Isso pertence a quem?” [br]\nNão responda com lógica. Deixe o corpo responder."
             },
             {
               "type": "p",
-              "text": "Se surgir culpa, você não discute. Se surgir medo, você não corrige. Se surgir tristeza, você não resolve. Você apenas fica. Esse exercício não liberta. Ele descola. E descolar já é um começo."
+              "text": "Se surgir culpa, você não discute. Se surgir medo, você não corrige. Se surgir tristeza, você não resolve. Você apenas fica. [br]\nEsse exercício não liberta. Ele descola. [br]\nE descolar já é um começo."
             }
           ]
         },
@@ -1731,11 +1719,11 @@ export const artifactBookData = {
             },
             {
               "type": "p",
-              "text": "Família não é só lembrança. É estrutura. E enquanto a estrutura ficar invisível, ela continua mandando — como culpa, como dívida, como medo de decepcionar, como obrigação de caber."
+              "text": "Família não é só lembrança. É estrutura. [br]\nE enquanto a estrutura ficar invisível, ela continua mandando — como culpa, como dívida, como medo de decepcionar, como obrigação de caber."
             },
             {
               "type": "p",
-              "text": "Quando você reconhece o pacto que te moldou, você não destrói sua história. Você para de ser prisioneiro dela. O que te formou pode permanecer como raiz — sem continuar sendo corrente."
+              "text": "Quando você reconhece o pacto que te moldou, você não destrói sua história. [br]\nVocê para de ser prisioneiro dela. [br]\nO que te formou pode permanecer como raiz — sem continuar sendo corrente."
             }
           ]
         }
@@ -1748,14 +1736,25 @@ export const artifactBookData = {
       "title": "Interlúdio — Pertencimento & rejeição",
       "sections": [
         {
-          "id": "interludio--abertura",
-          "title": "Abertura",
-          "audioId": "interludio--abertura",
+          "id": "interludio--capa",
+          "title": "Pertencimento & Rejeição",
+          "audioId": "interludio--capa",
           "listened": false,
           "blocks": [
             {
-              "type": "pause",
-              "text": "Interlúdio \"Reconstrução não significa voltar ao que era. Significa aprender a sustentar aquilo que permaneceu.\""
+              "type": "step-header",
+              "text": "Interlúdio",
+              "className": "reader-digital-cover-imprint"
+            },
+            {
+              "type": "step-header",
+              "text": "Pertencimento & Rejeição",
+              "className": "reader-digital-cover-title"
+            },
+            {
+              "type": "p",
+              "text": "Reconstrução não significa voltar ao que era. Significa aprender a sustentar aquilo que permaneceu.",
+              "className": "reader-digital-cover-author reader-cover-page-break"
             }
           ]
         },
@@ -1945,19 +1944,35 @@ export const artifactBookData = {
       "title": "Pilar III — Luto, ausência & quebra de laços",
       "sections": [
         {
-          "id": "pilar3--abertura",
-          "title": "Abertura",
-          "audioId": "pilar3--abertura",
+          "id": "pilar3--capa",
+          "title": "Luto",
+          "audioId": "pilar3--capa",
           "listened": false,
           "blocks": [
             {
               "type": "pause",
-              "text": "Quando a ausência permanece"
+              "text": "Alguns vínculos acabam. Outros continuam doendo depois que terminam.",
+              "className": "reader-cover-transition"
+            },
+            {
+              "type": "step-header",
+              "text": "Pilar III",
+              "className": "reader-digital-cover-imprint"
+            },
+            {
+              "type": "step-header",
+              "text": "Luto, Ausência & Quebra de Laços",
+              "className": "reader-digital-cover-title"
+            },
+            {
+              "type": "pause",
+              "text": "Quando a ausência permanece.",
+              "className": "reader-digital-cover-tagline"
             },
             {
               "type": "p",
-              "text": "PILAR III — Luto, Ausência & Quebra de Laços. \"Nem toda perda termina quando alguém parte. Algumas continuam vivendo dentro de nós.\"",
-              "lead": true
+              "text": "Nem toda perda termina quando alguém parte. Algumas continuam vivendo dentro de nós.",
+              "className": "reader-digital-cover-author reader-cover-page-break"
             }
           ]
         },
@@ -1993,7 +2008,7 @@ export const artifactBookData = {
             },
             {
               "type": "p",
-              "text": "O luto não começa quando alguém morre. O luto começa quando algo deixa de existir do jeito que existia — e você continua existindo. Antes da linguagem, antes da elaboração, antes da compreensão, o corpo já percebeu a ausência. E ausência não é vazio abstrato; é mudança concreta de clima interno. Algo que ocupava espaço não ocupa mais. Algo que respondia não responde. Algo que sustentava rotina não sustenta. Algo que estava ali — mesmo falho, mesmo difícil — não está mais. O corpo sente antes de a mente aceitar. E quando a mente tenta acelerar, o corpo cobra. Há lutos reconhecidos socialmente e há lutos que não recebem nome. A morte tem ritual; a ausência emocional, não. A perda concreta tem velório; a quebra de vínculo vivo não tem. E o desacreditado costuma carregar muitos lutos sem ritual. Lutos por pessoas que continuam vivas, mas inacessíveis. Lutos por versões de relação que nunca se cumpriram. Lutos por promessas implícitas que se desfizeram sem anúncio. Lutos por laços que se romperam não por falta de amor, mas por excesso de ferida. Esses lutos não são autorizados. E o que não é autorizado não se expressa; se acumula. Quando o luto não encontra espaço, ele não desaparece. Ele se desloca. Vira cansaço antigo. Vira irritação sem alvo. Vira rigidez. Vira dificuldade de confiar. Vira medo de perder de novo. Vira apego excessivo ou afastamento precoce. O desacreditado aprende cedo que sentir luto incomoda os outros. Então ele aprende a engolir. Aprende a ser forte. Aprende a “seguir em frente”. Só que seguir em frente sem passar por dentro cria um corpo que anda e uma alma que ficou. Ausência é um professor silencioso. Ela ensina que algo pode acabar sem aviso, que vínculos podem se desfazer mesmo quando houve tentativa, que amor não garante permanência. E essa lição, quando não elaborada, vira expectativa defensiva: você começa a se preparar para perdas futuras mesmo quando nada está acontecendo. Você ama com cautela. Se entrega com reserva. Se aproxima já calculando distância. Não porque não quer amar, mas porque aprendeu que amar dói quando não há despedida possível."
+              "text": "O luto não começa quando alguém morre. O luto começa quando algo deixa de existir do jeito que existia — e você continua existindo. Antes da linguagem, antes da elaboração, antes da compreensão, o corpo já percebeu a ausência. E ausência não é vazio abstrato; é mudança concreta de clima interno. Algo que ocupava espaço não ocupa mais. Algo que respondia não responde. Algo que sustentava rotina não sustenta. Algo que estava ali — mesmo falho, mesmo difícil — não está mais. O corpo sente antes de a mente aceitar. E quando a mente tenta acelerar, o corpo cobra. [br]\nHá lutos reconhecidos socialmente e há lutos que não recebem nome. A morte tem ritual; a ausência emocional, não. A perda concreta tem velório; a quebra de vínculo vivo não tem. E o desacreditado costuma carregar muitos lutos sem ritual. Lutos por pessoas que continuam vivas, mas inacessíveis. Lutos por versões de relação que nunca se cumpriram. Lutos por promessas implícitas que se desfizeram sem anúncio. Lutos por laços que se romperam não por falta de amor, mas por excesso de ferida. Esses lutos não são autorizados. E o que não é autorizado não se expressa; se acumula. [br]\nQuando o luto não encontra espaço, ele não desaparece. Ele se desloca. Vira cansaço antigo. Vira irritação sem alvo. Vira rigidez. Vira dificuldade de confiar. Vira medo de perder de novo. Vira apego excessivo ou afastamento precoce. O desacreditado aprende cedo que sentir luto incomoda os outros. Então ele aprende a engolir. Aprende a ser forte. Aprende a “seguir em frente”. Só que seguir em frente sem passar por dentro cria um corpo que anda e uma alma que ficou. [br]\nAusência é um professor silencioso. Ela ensina que algo pode acabar sem aviso, que vínculos podem se desfazer mesmo quando houve tentativa, que amor não garante permanência. E essa lição, quando não elaborada, vira expectativa defensiva: você começa a se preparar para perdas futuras mesmo quando nada está acontecendo. Você ama com cautela. Se entrega com reserva. Se aproxima já calculando distância. Não porque não quer amar, mas porque aprendeu que amar dói quando não há despedida possível."
             }
           ]
         },
@@ -2009,7 +2024,7 @@ export const artifactBookData = {
             },
             {
               "type": "p",
-              "text": "Existem perdas que não permitem colapso. Você precisa continuar. Trabalhar. Cuidar. Resolver. Ser funcional. E, enquanto você continua, o luto fica suspenso. Ele não cai. Ele paira. O corpo entra em modo de manutenção, não de processamento. O desacreditado costuma ser aquele que “segura tudo” quando algo se rompe. Ele organiza, resolve, ampara, cuida dos outros. E ninguém pergunta onde ele colocou a própria dor. Porque ele aparenta estar bem. E aparentar estar bem, nesse campo, é uma forma sofisticada de desaparecer. A quebra de laços vivos é especialmente cruel. Não há data clara. Não há fim definitivo. Há afastamento. Silêncio. Desalinhamento. Há tentativas frustradas. Há conversas que não chegam. Há a sensação de que algo morreu, mas continua respirando em algum lugar inacessível. Esse tipo de perda confunde. Você não sabe se chora, se espera, se insiste, se aceita. E, enquanto hesita, o luto se estende. Não há fechamento. Há suspensão. O corpo fica em alerta prolongado, como se aguardasse um retorno que talvez não venha. O desacreditado aprende, então, a conviver com a ausência como estado permanente. Ele se adapta. Cria rotina. Cria sentido. Mas algo fica intocado. Algo não foi atravessado. E isso aparece mais tarde, em outros vínculos, como medo de abandono, como dificuldade de confiar, como necessidade de controle, como fuga emocional quando a proximidade aumenta. O luto não elaborado não fica no passado; ele organiza o futuro."
+              "text": "Existem perdas que não permitem colapso. Você precisa continuar. Trabalhar. Cuidar. Resolver. Ser funcional. E, enquanto você continua, o luto fica suspenso. Ele não cai. Ele paira. O corpo entra em modo de manutenção, não de processamento. O desacreditado costuma ser aquele que “segura tudo” quando algo se rompe. Ele organiza, resolve, ampara, cuida dos outros. E ninguém pergunta onde ele colocou a própria dor. Porque ele aparenta estar bem. E aparentar estar bem, nesse campo, é uma forma sofisticada de desaparecer.[br]\n A quebra de laços vivos é especialmente cruel. Não há data clara. Não há fim definitivo. Há afastamento. Silêncio. Desalinhamento. Há tentativas frustradas. Há conversas que não chegam. Há a sensação de que algo morreu, mas continua respirando em algum lugar inacessível. Esse tipo de perda confunde. Você não sabe se chora, se espera, se insiste, se aceita. E, enquanto hesita, o luto se estende. Não há fechamento. Há suspensão. O corpo fica em alerta prolongado, como se aguardasse um retorno que talvez não venha. [br]\nO desacreditado aprende, então, a conviver com a ausência como estado permanente. Ele se adapta. Cria rotina. Cria sentido. Mas algo fica intocado. Algo não foi atravessado. E isso aparece mais tarde, em outros vínculos, como medo de abandono, como dificuldade de confiar, como necessidade de controle, como fuga emocional quando a proximidade aumenta. O luto não elaborado não fica no passado; ele organiza o futuro."
             },
             {
               "type": "p",
@@ -2199,6 +2214,29 @@ export const artifactBookData = {
       "title": "Pilar IV — Trabalho, valor & identidade",
       "sections": [
         {
+          "id": "pilar4--capa-triade",
+          "title": "Tríade da Reconstrução",
+          "audioId": "pilar4--capa-triade",
+          "listened": false,
+          "blocks": [
+            {
+              "type": "step-header",
+              "text": "Ato II",
+              "className": "reader-digital-cover-imprint"
+            },
+            {
+              "type": "step-header",
+              "text": "Tríade da Reconstrução",
+              "className": "reader-digital-cover-title"
+            },
+            {
+              "type": "p",
+              "text": "Reconstruir não é apagar o que caiu. É aprender a permanecer no meio dos escombros.",
+              "className": "reader-digital-cover-author reader-cover-page-break"
+            }
+          ]
+        },
+        {
           "id": "pilar4--abertura",
           "title": "Abertura",
           "audioId": "pilar4--abertura",
@@ -2219,19 +2257,36 @@ export const artifactBookData = {
             },
             {
               "type": "pause",
-              "text": "\"Reconstruir não é apagar o que caiu. É aprender a permanecer no meio dos escombros.\""
+              "text": "Depois da perda, muitos tentam se reconstruir fazendo. Produzindo. Provando que ainda valem algo.",
+              "className": "reader-cover-transition"
+            }
+          ]
+        },
+        {
+          "id": "pilar4--capa",
+          "title": "Trabalho",
+          "audioId": "pilar4--capa",
+          "listened": false,
+          "blocks": [
+            {
+              "type": "step-header",
+              "text": "Pilar IV",
+              "className": "reader-digital-cover-imprint"
+            },
+            {
+              "type": "step-header",
+              "text": "Trabalho, Valor & Identidade",
+              "className": "reader-digital-cover-title"
             },
             {
               "type": "pause",
-              "text": "Depois da perda, muitos tentam se reconstruir fazendo. Produzindo. Provando que ainda valem algo."
+              "text": "Quando produzir deixa de significar existir.",
+              "className": "reader-digital-cover-tagline"
             },
             {
-              "type": "pause",
-              "text": "Quando produzir deixa de significar existir"
-            },
-            {
-              "type": "pause",
-              "text": "\"O trabalho pode construir patrimônio. Nunca deveria consumir a própria presença.\""
+              "type": "p",
+              "text": "O trabalho pode construir patrimônio. Nunca deveria consumir a própria presença.",
+              "className": "reader-digital-cover-author reader-cover-page-break"
             }
           ]
         },
@@ -2424,19 +2479,44 @@ export const artifactBookData = {
       "title": "Pilar V — Dor, fuga & anestesia",
       "sections": [
         {
+          "id": "pilar5--capa",
+          "title": "Dor",
+          "audioId": "pilar5--capa",
+          "listened": false,
+          "blocks": [
+            {
+              "type": "pause",
+              "text": "Quando o fazer cansa, o que foi evitado começa a ser sentido.",
+              "className": "reader-cover-transition"
+            },
+            {
+              "type": "step-header",
+              "text": "Pilar V",
+              "className": "reader-digital-cover-imprint"
+            },
+            {
+              "type": "step-header",
+              "text": "Dor, Fuga & Anestesia",
+              "className": "reader-digital-cover-title"
+            },
+            {
+              "type": "pause",
+              "text": "Aquilo que ainda permanece vivo.",
+              "className": "reader-digital-cover-tagline"
+            },
+            {
+              "type": "p",
+              "text": "A dor não revela fraqueza. Revela exatamente onde a vida ainda insiste em existir.",
+              "className": "reader-digital-cover-author reader-cover-page-break"
+            }
+          ]
+        },
+        {
           "id": "pilar5--abertura",
           "title": "Abertura",
           "audioId": "pilar5--abertura",
           "listened": false,
           "blocks": [
-            {
-              "type": "pause",
-              "text": "Aquilo que ainda permanece vivo"
-            },
-            {
-              "type": "pause",
-              "text": "\"A dor não revela fraqueza. Revela exatamente onde a vida ainda insiste em existir.\""
-            },
             {
               "type": "pause",
               "text": "Hoje eu não vou tentar explicar sua dor."
@@ -2649,18 +2729,35 @@ export const artifactBookData = {
       "title": "Pilar VI — Desejo, amor & frustração",
       "sections": [
         {
-          "id": "pilar6--abertura",
-          "title": "Abertura",
-          "audioId": "pilar6--abertura",
+          "id": "pilar6--capa",
+          "title": "Desejo",
+          "audioId": "pilar6--capa",
           "listened": false,
           "blocks": [
             {
               "type": "pause",
-              "text": "Aquilo que volta a desejar"
+              "text": "Depois que a dor é reconhecida, algo tímido reaparece: a vontade de viver algo diferente.",
+              "className": "reader-cover-transition"
+            },
+            {
+              "type": "step-header",
+              "text": "Pilar VI",
+              "className": "reader-digital-cover-imprint"
+            },
+            {
+              "type": "step-header",
+              "text": "Desejo, Amor & Frustração",
+              "className": "reader-digital-cover-title"
             },
             {
               "type": "pause",
-              "text": "“Eu posso querer sem me punir.”"
+              "text": "Aquilo que volta a desejar.",
+              "className": "reader-digital-cover-tagline"
+            },
+            {
+              "type": "p",
+              "text": "Eu posso querer sem me punir.",
+              "className": "reader-digital-cover-author reader-cover-page-break"
             }
           ]
         },
@@ -2903,6 +3000,29 @@ export const artifactBookData = {
       "title": "Pilar VII — Fé, sentido & desencanto",
       "sections": [
         {
+          "id": "pilar7--capa-triade",
+          "title": "Tríade da Continuidade",
+          "audioId": "pilar7--capa-triade",
+          "listened": false,
+          "blocks": [
+            {
+              "type": "step-header",
+              "text": "Ato III",
+              "className": "reader-digital-cover-imprint"
+            },
+            {
+              "type": "step-header",
+              "text": "Tríade da Continuidade",
+              "className": "reader-digital-cover-title"
+            },
+            {
+              "type": "p",
+              "text": "Depois da sobrevivência e da reconstrução, resta aprender a permanecer.",
+              "className": "reader-digital-cover-author reader-cover-page-break"
+            }
+          ]
+        },
+        {
           "id": "pilar7--abertura",
           "title": "Abertura",
           "audioId": "pilar7--abertura",
@@ -2919,23 +3039,40 @@ export const artifactBookData = {
             },
             {
               "type": "pause",
-              "text": "CONTINUIDADE Depois da sobrevivência e da reconstrução, resta aprender a permanecer.,"
+              "text": "Querer não garante. Sentir não explica. Em algum ponto, resta apenas continuar — mesmo sem certeza."
             },
             {
               "type": "pause",
-              "text": "Querer não garante. Sentir não explica. Em algum ponto, resta apenas continuar — mesmo sem certeza"
+              "text": "Permanecer consciente: sustentar pequenas ações, aceitar a ausência de sentido imediato e continuar sem se destruir.",
+              "className": "reader-cover-transition"
+            }
+          ]
+        },
+        {
+          "id": "pilar7--capa",
+          "title": "Fé",
+          "audioId": "pilar7--capa",
+          "listened": false,
+          "blocks": [
+            {
+              "type": "step-header",
+              "text": "Pilar VII",
+              "className": "reader-digital-cover-imprint"
+            },
+            {
+              "type": "step-header",
+              "text": "Fé, Sentido & Desencanto",
+              "className": "reader-digital-cover-title"
             },
             {
               "type": "pause",
-              "text": "Permanecer consciente: sustentar pequenas ações, aceitar a ausência de sentido imediato e continuar sem se destruir."
+              "text": "Aquilo que permanece invisível.",
+              "className": "reader-digital-cover-tagline"
             },
             {
-              "type": "pause",
-              "text": "Aquilo que permanece invisível"
-            },
-            {
-              "type": "pause",
-              "text": "\"A fé nem sempre responde. Às vezes, apenas permanece quando todo o resto parece ter partido.\""
+              "type": "p",
+              "text": "A fé nem sempre responde. Às vezes, apenas permanece quando todo o resto parece ter partido.",
+              "className": "reader-digital-cover-author reader-cover-page-break"
             }
           ]
         },
@@ -3124,18 +3261,35 @@ export const artifactBookData = {
       "title": "Pilar VIII — Escassez, medo & sustentação",
       "sections": [
         {
-          "id": "pilar8--abertura",
-          "title": "Abertura",
-          "audioId": "pilar8--abertura",
+          "id": "pilar8--capa",
+          "title": "Escassez",
+          "audioId": "pilar8--capa",
           "listened": false,
           "blocks": [
             {
               "type": "pause",
-              "text": "O medo de nunca ser suficiente"
+              "text": "Quando a fé deixa de prometer, a vida pede sustentação.",
+              "className": "reader-cover-transition"
+            },
+            {
+              "type": "step-header",
+              "text": "Pilar VIII",
+              "className": "reader-digital-cover-imprint"
+            },
+            {
+              "type": "step-header",
+              "text": "Escassez, Medo & Sustentação",
+              "className": "reader-digital-cover-title"
             },
             {
               "type": "pause",
-              "text": "\"A maior escassez começa quando acreditamos que precisamos merecer até o direito de existir.\""
+              "text": "O medo de nunca ser suficiente.",
+              "className": "reader-digital-cover-tagline"
+            },
+            {
+              "type": "p",
+              "text": "A maior escassez começa quando acreditamos que precisamos merecer até o direito de existir.",
+              "className": "reader-digital-cover-author reader-cover-page-break"
             }
           ]
         },
@@ -3309,18 +3463,35 @@ export const artifactBookData = {
       "title": "Pilar IX — Vazio, presença & continuidade",
       "sections": [
         {
-          "id": "pilar9--abertura",
-          "title": "Abertura",
-          "audioId": "pilar9--abertura",
+          "id": "pilar9--capa",
+          "title": "Vazio",
+          "audioId": "pilar9--capa",
           "listened": false,
           "blocks": [
             {
               "type": "pause",
-              "text": "Quando o silêncio deixa de ser ameaça"
+              "text": "Quando a urgência diminui, o silêncio aparece. E nem sempre há algo para preencher.",
+              "className": "reader-cover-transition"
+            },
+            {
+              "type": "step-header",
+              "text": "Pilar IX",
+              "className": "reader-digital-cover-imprint"
+            },
+            {
+              "type": "step-header",
+              "text": "Vazio, Presença & Continuidade",
+              "className": "reader-digital-cover-title"
             },
             {
               "type": "pause",
-              "text": "\"Existe um vazio que destrói. Existe outro que finalmente permite ouvir quem você sempre foi.\""
+              "text": "Quando o silêncio deixa de ser ameaça.",
+              "className": "reader-digital-cover-tagline"
+            },
+            {
+              "type": "p",
+              "text": "Existe um vazio que destrói. Existe outro que finalmente permite ouvir quem você sempre foi.",
+              "className": "reader-digital-cover-author reader-cover-page-break"
             }
           ]
         },
@@ -3681,11 +3852,7 @@ export const artifactBookData = {
             },
             {
               "type": "p",
-              "text": "Não porque eu saiba mais. Mas porque caminhamos por territórios parecidos. Se você se reconheceu nestas páginas... não aconteceu por acaso. A dor tem padrões. O silêncio também. O medo de não ser suficiente também. Mas a permanência também tem. Talvez você ainda esteja cansado. Talvez ainda não saiba exatamente para onde está indo. Talvez algumas perguntas permaneçam abertas. Tudo bem. Este livro nunca foi sobre resolver a vida. Foi sobre uma coisa muito menor. E muito mais difícil. Parar de se abandonar no meio do caminho. Quando você fechar este livro..."
-            },
-            {
-              "type": "p",
-              "text": "provavelmente o mundo continuará exatamente igual. As contas continuarão existindo. Os desafios também. Algumas pessoas continuarão sem compreender você. Mas eu espero que exista uma diferença pequena. Que, da próxima vez em que a vida apertar... você não se coloque sozinho do outro lado. Se isso acontecer... este livro já terá cumprido seu propósito. Se um dia sentir vontade de continuar esta conversa... existirão outros caminhos. Mas eles não são uma continuação obrigatória deste livro. São apenas lugares onde a caminhada pode continuar. Se você quiser."
+              "text": "Não porque eu saiba mais. Mas porque caminhamos por territórios parecidos. Se você se reconheceu nestas páginas... não aconteceu por acaso. A dor tem padrões. O silêncio também. O medo de não ser suficiente também. Mas a permanência também tem. Talvez você ainda esteja cansado. Talvez ainda não saiba exatamente para onde está indo. Talvez algumas perguntas permaneçam abertas. Tudo bem. Este livro nunca foi sobre resolver a vida. Foi sobre uma coisa muito menor. E muito mais difícil. Parar de se abandonar no meio do caminho. Quando você fechar este livro... provavelmente o mundo continuará exatamente igual. As contas continuarão existindo. Os desafios também. Algumas pessoas continuarão sem compreender você. Mas eu espero que exista uma diferença pequena. Que, da próxima vez em que a vida apertar... você não se coloque sozinho do outro lado. Se isso acontecer... este livro já terá cumprido seu propósito. Se um dia sentir vontade de continuar esta conversa... existirão outros caminhos. Mas eles não são uma continuação obrigatória deste livro. São apenas lugares onde a caminhada pode continuar. Se você quiser."
             },
             {
               "type": "p",

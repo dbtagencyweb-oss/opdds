@@ -20,33 +20,33 @@ export const workbookPdfUrl = '/media/downloads/diario-dos-desacreditados.pdf';
 
 export const onboardingSteps = [
   {
-    title: 'Limites',
-    description: 'Este app não é terapia. É um espaço de acolhimento, leitura e presença.',
+    title: 'Você chegou',
+    description: 'Esse é um espaço para quem já foi duvidado, ignorado ou reduzido — e continuou de pé. Aqui você lê, escuta e escreve no seu próprio ritmo.',
     audioUrl: '/media/audios/onboarding/01-limites.mp3',
   },
   {
     title: 'A Tríade',
-    description: 'Consciência, Julgamento e Presença como três lentes para ler sem se abandonar.',
+    description: 'Consciência, Julgamento e Presença: três lentes simples pra atravessar o livro sem se perder de você mesmo.',
     audioUrl: '/media/audios/onboarding/02-triade.mp3',
   },
   {
-    title: 'Expectativas',
-    description: 'A leitura não promete atalhos. Ela oferece contrapontos para continuar com mais lucidez.',
+    title: 'Sem atalhos, com companhia',
+    description: 'Esse livro não promete solução rápida. Ele te acompanha com contrapontos pra pensar com mais clareza — no seu tempo.',
     audioUrl: '/media/audios/onboarding/03-expectativas.mp3',
   },
   {
-    title: 'Quando não usar',
-    description: 'Em crise intensa, procure apoio humano e profissional. O app acompanha, mas não substitui cuidado.',
-    audioUrl: '/media/audios/onboarding/04-quando-nao-usar.mp3',
-  },
-  {
     title: 'Portas de entrada',
-    description: 'Você pode ler por capítulos, temas, áudio ou rotas de mentor. Escolha o ritmo possível.',
+    description: 'Leia por capítulo, por tema, ouvindo os áudios ou com o mentor iGentMIND. Escolha o caminho que fizer sentido hoje.',
     audioUrl: '/media/audios/onboarding/05-portas.mp3',
   },
   {
-    title: 'Entrada',
-    description: 'Comece sem pressa. A meta não é performar força; é reconhecer a sua continuidade.',
+    title: 'Um cuidado, com carinho',
+    description: 'Se a leitura tocar uma dor muito grande, procure também apoio humano e profissional. O app caminha com você, mas não substitui cuidado real.',
+    audioUrl: '/media/audios/onboarding/04-quando-nao-usar.mp3',
+  },
+  {
+    title: 'Comece sem pressa',
+    description: 'A meta não é performar força. É reconhecer que você já está continuando. Vamos começar?',
     audioUrl: '/media/audios/onboarding/06-entrada.mp3',
   },
 ];

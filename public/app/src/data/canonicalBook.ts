@@ -44,7 +44,7 @@ type ArtifactChapter = typeof artifactBookData.chapters[number];
 type ArtifactSection = ArtifactChapter['sections'][number];
 type ArtifactBlock = ArtifactSection['blocks'][number];
 
-const artifactChapterMap: Record<string, string[]> = {
+export const artifactChapterMap: Record<string, string[]> = {
   epigrafe: ['epigrafe'],
   'nota-do-autor': ['nota-do-autor'],
   creditos: ['creditos'],
@@ -115,7 +115,7 @@ export const repairCanonicalText = (value = '') => {
     ['\u00c3\u0081', 'Á'], ['\u00c3\u0080', 'À'], ['\u00c3\u0082', 'Â'], ['\u00c3\u0083', 'Ã'],
     ['\u00c3\u0089', 'É'], ['\u00c3\u008a', 'Ê'], ['\u00c3\u008d', 'Í'], ['\u00c3\u0093', 'Ó'],
     ['\u00c3\u0094', 'Ô'], ['\u00c3\u0095', 'Õ'], ['\u00c3\u009a', 'Ú'], ['\u00c3\u0087', 'Ç'],
-    ['\u00c2\u00b7', '·'], ['\u00c2 ', ' '], ['\u00c2', ''],
+    ['\u00c2\u00b7', '·'], ['\u00c2 ', ' '],
     ['\u00e2\u20ac\u201d', '—'], ['\u00e2\u20ac\u201c', '–'], ['\u00e2\u20ac\u0153', '"'], ['\u00e2\u20ac\u009d', '"'],
     ['\u00e2\u20ac\u02dc', "'"], ['\u00e2\u20ac\u2122', "'"], ['\u00e2\u02c6\u017e', '∞'],
   ];
@@ -127,7 +127,7 @@ export const repairCanonicalText = (value = '') => {
   return text.replace(/\uFFFD/g, '');
 };
 
-const normalizeBookText = (value = '') =>
+export const normalizeBookText = (value = '') =>
   repairCanonicalText(value)
     .replace(/\uFB01/g, 'fi')
     .replace(/\uFB02/g, 'fl')
@@ -271,7 +271,7 @@ export const buildCanonicalBookChapters = (
     };
   });
 
-const artifactBlockToCanonical = (
+export const artifactBlockToCanonical = (
   chapterId: string,
   sourcePage: number,
   index: number,
@@ -279,10 +279,11 @@ const artifactBlockToCanonical = (
 ): CanonicalBookBlock[] => {
   const kind = 'type' in block ? block.type : '';
   if (kind === 'p') {
+    const explicitClassName = 'className' in block ? (block as { className?: string }).className : undefined;
     return [createBlock(chapterId, sourcePage, index, {
       kind: 'paragraph',
       text: normalizeBookText(block.text ?? ''),
-      className: 'lead' in block && block.lead ? 'lead' : undefined,
+      className: explicitClassName ?? ('lead' in block && block.lead ? 'lead' : undefined),
     })];
   }
   if (kind === 'pause') {
@@ -290,10 +291,12 @@ const artifactBlockToCanonical = (
     const wordCount = text.split(/\s+/).filter(Boolean).length;
     const sentenceCount = (text.match(/[.!?…]+/g) ?? []).length;
     const shouldKeepAsPause = wordCount <= 18 && text.length <= 140 && sentenceCount <= 2;
+    const explicitClassName = 'className' in block ? (block as { className?: string }).className : undefined;
 
     return [createBlock(chapterId, sourcePage, index, {
       kind: shouldKeepAsPause ? 'pause' : 'paragraph',
       text,
+      className: explicitClassName,
     })];
   }
   if (kind === 'divider') {
@@ -303,9 +306,11 @@ const artifactBlockToCanonical = (
     })];
   }
   if (kind === 'step-header') {
+    const explicitClassName = 'className' in block ? (block as { className?: string }).className : undefined;
     return [createBlock(chapterId, sourcePage, index, {
       kind: 'subheading',
       text: normalizeBookText(block.text ?? ''),
+      className: explicitClassName,
     })];
   }
   if (kind === 'list' && 'items' in block && Array.isArray(block.items)) {
@@ -350,7 +355,13 @@ const artifactSectionToCanonicalBlocks = (
 ) => {
   let blockIndex = startIndex;
   const blocks: CanonicalBookBlock[] = [];
-  if (includeHeading && section.title) {
+  // A section that supplies its own step-header (custom casing/emphasis, or
+  // a full "clean cover" made of step-headers) skips the auto-generated
+  // section.title heading so it doesn't render twice. Checked across all
+  // blocks, not just the first, so a leading transition quote before the
+  // step-header doesn't defeat the suppression.
+  const hasOwnStepHeader = section.blocks.some((block) => block.type === 'step-header');
+  if (includeHeading && section.title && !hasOwnStepHeader) {
     blocks.push(createBlock(chapterId, sourcePage, blockIndex++, {
       kind: sectionIndex === 0 ? 'subheading' : 'heading',
       text: normalizeBookText(section.title),
@@ -448,24 +459,19 @@ export const buildArtifactCanonicalBookChapters = (
         sourcePageEnd: chapter.pdfPage,
         blocks: [
           createBlock(chapter.id, chapter.pdfPage, 0, {
-            kind: 'subheading',
-            text: 'Nota do autor',
-            className: 'reader-canonical-section-title',
-          }),
-          createBlock(chapter.id, chapter.pdfPage, 1, {
             kind: 'paragraph',
             text: 'Este livro nasceu de vivências reais, atravessadas com os recursos que estavam disponíveis em cada momento. Algumas palavras foram organizadas com apoio de ferramentas contemporâneas. Todas foram pensadas, revisadas, escolhidas e assumidas por mim.',
             className: 'lead',
           }),
-          createBlock(chapter.id, chapter.pdfPage, 2, {
+          createBlock(chapter.id, chapter.pdfPage, 1, {
             kind: 'paragraph',
             text: 'Nada aqui foi escrito para impressionar. Foi escrito para sustentar presença.',
           }),
-          createBlock(chapter.id, chapter.pdfPage, 3, {
+          createBlock(chapter.id, chapter.pdfPage, 2, {
             kind: 'paragraph',
             text: 'Se algo ressoar, fique. Se não, siga sem culpa.',
           }),
-          createBlock(chapter.id, chapter.pdfPage, 4, {
+          createBlock(chapter.id, chapter.pdfPage, 3, {
             kind: 'paragraph',
             text: '— Diego Bock Tavares',
           }),
