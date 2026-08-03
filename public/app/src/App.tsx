@@ -3660,12 +3660,12 @@ export function App() {
         <div className="book-3d-stage">
           <div className="book-3d-object" tabIndex={0} aria-label="Capa interativa do livro">
             <div className="book-3d-cover book-3d-front">
-              <img src="/media/imagens/capas/capa.webp" alt="Capa do livro O Poder dos Desacreditados" />
+              <img src="/media/imagens/capas/capa.avif" alt="Capa do livro O Poder dos Desacreditados" />
             </div>
             <div className="book-3d-spine" aria-hidden="true" />
             <div className="book-3d-cover book-3d-back">
               <div className="book-back-text">
-                <p>O mundo costuma valorizar quem chega. Pouco se fala sobre quem continua. Este livro ? para quem seguiu mesmo sem aplauso, mesmo sem clareza, mesmo sem reconhecimento.</p>
+                <p>O mundo costuma valorizar quem chega. Pouco se fala sobre quem continua. Este livro é para quem seguiu mesmo sem aplauso, mesmo sem clareza, mesmo sem reconhecimento.</p>
                 <p>Para quem atravessou quedas silenciosas, carregou dúvidas por dentro e, ainda assim, permaneceu. O Poder dos Desacreditados não oferece promessas rápidas nem soluções prontas. Ele oferece algo mais raro: presença.</p>
                 <p>Aqui, a dor não vira espetáculo. O cansaço não vira fracasso. E continuar não é tratado como fraqueza. Este não é um livro sobre vencer. É um livro sobre não se abandonar.</p>
               </div>
