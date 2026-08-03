@@ -89,7 +89,7 @@ export type CompanionJournalPrompt = BaseCompanionJournalPrompt & {
 };
 
 const assessSafetyFromJournal = (content: string) => ({
-  level: /suic[i?]dio|me matar|autoagress[a?]o|n?o quero viver/i.test(content) ? 2 : 0,
+  level: /suic[íi]dio|me matar|autoagress[ãa]o|n[ãa]o quero viver/i.test(content) ? 2 : 0,
 });
 
 const extractAllowedJournalEvidence = (_input: {
@@ -99,7 +99,7 @@ const extractAllowedJournalEvidence = (_input: {
   forbidden_inferences: string[];
 }): JournalExtractedEvidence[] => [];
 
-const buildNonClinicalJournalSummary = (_evidence: JournalExtractedEvidence[]) => 'Registro reflexivo sem infer?ncia cl?nica.';
+const buildNonClinicalJournalSummary = (_evidence: JournalExtractedEvidence[]) => 'Registro reflexivo sem inferência clínica.';
 const selectMeaningfulExcerpt = (_evidence: JournalExtractedEvidence[], _maximumCharacters: number) => undefined as string | undefined;
 const uniquePrimarySignals = (evidence: JournalExtractedEvidence[]) => Array.from(new Set(evidence.flatMap((item) => item.primary_signal ? [item.primary_signal] : [])));
 const uniqueSecondarySignals = (evidence: JournalExtractedEvidence[]) => Array.from(new Set(evidence.flatMap((item) => item.secondary_signals)));

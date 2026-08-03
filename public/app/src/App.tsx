@@ -3262,7 +3262,7 @@ export function App() {
             <img className="access-brand-logo" src={brandLogo} alt="O Poder dos Desacreditados" />
             <div className="token-mini">
               <div className="access-copy">
-                <p className="kicker">Seguran?a da conta</p>
+                <p className="kicker">Segurança da conta</p>
                 <h1>{isReset ? 'Crie uma nova senha.' : 'Recupere sua senha.'}</h1>
                 <span>{isReset ? 'Digite e confirme sua nova senha para voltar ao app.' : 'Informe seu e-mail e enviaremos um link seguro de redefinição.'}</span>
               </div>
@@ -4768,7 +4768,7 @@ export function App() {
         <article>
           <Headphones size={22} />
           <h2>Continuidade emocional</h2>
-          <p>Áudios, temas e encontros de apoio para quando a pessoa precisa de presença, não de mais conte?do solto.</p>
+          <p>Áudios, temas e encontros de apoio para quando a pessoa precisa de presença, não de mais conteúdo solto.</p>
         </article>
       </section>
     </div>

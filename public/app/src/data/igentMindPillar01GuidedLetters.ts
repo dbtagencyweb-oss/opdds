@@ -125,7 +125,7 @@ export type CompanionGuidedLetter = BaseCompanionGuidedLetter & {
 };
 
 const assessSafetyFromGuidedLetter = (content: string) => ({
-  level: /suic[i?]dio|me matar|autoagress[a?]o|n?o quero viver/i.test(content) ? 2 : 0,
+  level: /suic[íi]dio|me matar|autoagress[ãa]o|n[ãa]o quero viver/i.test(content) ? 2 : 0,
 });
 
 const detectExternalDeliveryIntent = (content: string) => ({
@@ -140,13 +140,13 @@ const extractAllowedGuidedLetterEvidence = (_input: {
   maximum_confidence: 'low' | 'medium';
 }): GuidedLetterExtractedEvidence[] => [];
 
-const buildNonClinicalLetterSummary = (_letter: CompanionGuidedLetter, _evidence: GuidedLetterExtractedEvidence[]) => 'Carta guiada privada sem infer?ncia cl?nica.';
+const buildNonClinicalLetterSummary = (_letter: CompanionGuidedLetter, _evidence: GuidedLetterExtractedEvidence[]) => 'Carta guiada privada sem inferência clínica.';
 const uniquePrimarySignals = (evidence: GuidedLetterExtractedEvidence[]) => Array.from(new Set(evidence.flatMap((item) => item.primary_signal ? [item.primary_signal] : [])));
 const uniqueSecondarySignals = (evidence: GuidedLetterExtractedEvidence[]) => Array.from(new Set(evidence.flatMap((item) => item.secondary_signals)));
 const uniquePillarSignals = (evidence: GuidedLetterExtractedEvidence[]) => Array.from(new Set(evidence.flatMap((item) => item.pillar_specific_signals)));
 const calculateGuidedLetterEvidenceConfidence = (evidence: GuidedLetterExtractedEvidence[]): InterpretationConfidence => evidence.some((item) => item.confidence === 'medium') ? 'medium' : 'low';
 const buildGuidedLetterThreadTitle = (type: GuidedLetterType, _evidence: GuidedLetterExtractedEvidence[]) => 'Carta de ' + type;
-const buildGuidedLetterThreadSummary = (_evidence: GuidedLetterExtractedEvidence[]) => 'Fio aberto criado a partir de carta guiada, pendente de confirma??o do leitor.';
+const buildGuidedLetterThreadSummary = (_evidence: GuidedLetterExtractedEvidence[]) => 'Fio aberto criado a partir de carta guiada, pendente de confirmação do leitor.';
 const selectGuidedLetterRevisitCondition = (type: GuidedLetterType) => type === 'presence' ? 'quando o leitor quiser revisar o gesto de retorno' : 'quando o tema reaparecer na leitura';
 
 export const DEFAULT_GUIDED_LETTER_DELIVERY_POLICY:
