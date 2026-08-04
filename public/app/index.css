@@ -8726,7 +8726,7 @@ html.light .admin-canonical-block-card textarea {
 .letter-editor { padding: 0; }
 .letter-paper { min-height: 560px; padding: clamp(24px,5vw,54px); border-radius: 16px; background:#fffaf6; color: #27231e; box-shadow: inset 0 0 70px rgba(93,72,43,.08); }
 .letter-paper header { max-width: 720px; }
-.letter-paper header h2 { margin: 5px 0 10px; font-family: Georgia, serif; font-size: clamp(1.65rem,3.5vw,2.65rem); }
+.letter-paper header h2 { margin: 5px 0 10px; font-family: Georgia, serif; font-size: clamp(1.65rem,3.5vw,2.65rem); overflow-wrap: break-word; word-break: break-word; }
 .letter-paper header p { color: #665f55; }
 .letter-paper textarea { width: 100%; min-height: 330px; margin-top: 28px; padding: 0; border: 0; outline: 0; resize: vertical; background: repeating-linear-gradient(transparent,transparent 31px,rgba(74,62,48,.12) 32px); color: #29241f; font: 1.08rem/2rem Georgia,serif; }
 .letter-paper footer, .letter-actions { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
@@ -8743,6 +8743,10 @@ html.light .admin-canonical-block-card textarea {
   .contents-main > svg { display: none; }
   .contents-sections { padding-left: 18px; }
   .contents-letter-link { margin-left: 18px; }
+  .letter-paper { min-height: 0; padding: clamp(18px,6vw,28px); }
+  .letter-paper header { max-width: 100%; }
+  .letter-paper header h2 { font-size: 1.35rem; line-height: 1.28; }
+  .letter-paper header p { font-size: .88rem; }
 }
 
 /* Leitor integral da edição de 286 páginas */
@@ -10074,6 +10078,7 @@ html.light .audio-now-marker {
 .book-hub-copy p {
   color: var(--muted);
   line-height: 1.75;
+  display: none;
 }
 
 .book-back-text p {
@@ -10081,6 +10086,7 @@ html.light .audio-now-marker {
   color: rgba(244, 242, 236, 0.88);
   font-size: clamp(0.72rem, 1.35vw, 0.66em);
   line-height: 1.62;
+  display: none;
 }
 
 .book-3d-spine {
@@ -17118,6 +17124,10 @@ html.dark .reader-clean-mode .reader-text-surface:not(.reader-image-page) .reade
 }
 
 /* PDF mode final polish: drawer above toolbar, clean controls, no page gutter. */
+.reader-pdf-mode .reader-quick-tools {
+  display: none !important;
+}
+
 .reader-pdf-mode .reader-contents-backdrop,
 html.light .reader-pdf-mode .reader-contents-backdrop,
 html.dark .reader-pdf-mode .reader-contents-backdrop {

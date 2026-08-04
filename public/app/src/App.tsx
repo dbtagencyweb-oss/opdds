@@ -251,7 +251,6 @@ import {
   audioTrackKey,
   compactLetterSpacedLine,
   cleanBookEditorText,
-  getChapterKind,
   trimExcerpt,
   mindGuides,
 } from './app/appConstants';
@@ -3505,7 +3504,7 @@ export function App() {
       <section className="home-reading-card" style={{ backgroundImage: `linear-gradient(90deg, rgba(7, 7, 8, 0.9), rgba(7, 7, 8, 0.34)), url(${homeSlides[homeSlideIndex]})` }}>
         <div>
           <p className="kicker">Leitura atual</p>
-          <h2>{getChapterKind(currentChapterIndex, selectedChapter.title)} - {selectedChapter.title}</h2>
+          <h2>{selectedChapter.title}</h2>
           <span>{trimExcerpt(selectedChapter.summary, 92)}</span>
         </div>
         <div className="home-reading-actions">
