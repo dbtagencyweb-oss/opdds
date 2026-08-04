@@ -7,13 +7,14 @@ import { PrismaService } from '../prisma/prisma.service';
 import { IS_PRODUCTION } from '../config/env';
 import { MetaCapiService } from './meta-capi.service';
 
-type AccessPlan = 'pdf' | 'basic' | 'workbook' | 'igent30' | 'igent90' | 'group' | 'vip';
+type AccessPlan = 'pdf' | 'basic' | 'workbook' | 'igent7' | 'igent30' | 'igent90' | 'group' | 'vip';
 type RevokeStatus = 'CANCELED' | 'REFUNDED';
 
 const PRODUCTS_BY_PLAN: Record<AccessPlan, string[]> = {
   pdf: ['opdds_pdf'],
   basic: ['opdds_pdf', 'opdds_base'],
   workbook: ['opdds_pdf', 'opdds_base', 'opdds_diario'],
+  igent7: ['opdds_pdf', 'opdds_base', 'opdds_diario', 'opdds_igentmind_7d'],
   igent30: ['opdds_pdf', 'opdds_base', 'opdds_diario', 'opdds_igentmind_30d'],
   igent90: ['opdds_pdf', 'opdds_base', 'opdds_diario', 'opdds_igentmind_90d'],
   group: ['opdds_pdf', 'opdds_base', 'opdds_diario', 'opdds_igentmind_90d', 'opdds_grupo'],
@@ -94,10 +95,14 @@ function resolvePlan(payload: any): AccessPlan {
     flattenText(order.items ?? order.line_items ?? order.order_items ?? data.items ?? data.products),
   ].filter(Boolean).join(' '));
 
-  if (text.includes('vip') || text.includes('completo') || text.includes('pacote') || text.includes('acesso total')) return 'vip';
+  // Checar "grupo"/"comunidade" antes de "vip": produtos reais na Kiwify hoje têm nomes como
+  // "VIP OPDDS Anual — Comunidade" (tier grupo) e "VIP Anual — Fidelidade" (tier vip) — ambos
+  // contêm "vip" no nome, então o grupo precisa ser reconhecido primeiro para não virar vip por engano.
   if (text.includes('grupo') || text.includes('comunidade') || text.includes('mentoria') || text.includes('viva dos desacreditados')) return 'group';
+  if (text.includes('vip') || text.includes('completo') || text.includes('pacote') || text.includes('acesso total')) return 'vip';
   if ((text.includes('igent') || text.includes('mind')) && text.includes('90')) return 'igent90';
   if ((text.includes('igent') || text.includes('mind')) && text.includes('30')) return 'igent30';
+  if ((text.includes('igent') || text.includes('mind')) && (text.includes('7 dias') || text.includes('7 day') || text.includes('7-day'))) return 'igent7';
   if (text.includes('mentor') || text.includes('psicana') || text.includes('conselheiro')) return 'igent30';
   if (text.includes('diario') || text.includes('workbook')) return 'workbook';
   if (text.includes('pdf') || text.includes('ebook') || text.includes('e-book')) return 'pdf';
@@ -107,6 +112,7 @@ function resolvePlan(payload: any): AccessPlan {
 }
 
 const PRODUCT_DURATION_DAYS: Partial<Record<string, number>> = {
+  opdds_igentmind_7d: 7,
   opdds_igentmind_30d: 30,
   opdds_igentmind_90d: 90,
 };

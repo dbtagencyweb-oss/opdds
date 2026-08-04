@@ -247,13 +247,14 @@ export class IGentService {
   }
 
   private async ensureMindAccess(userId: string) {
-    const [mind30, mind90, vip] = await Promise.all([
+    const [mind7, mind30, mind90, vip] = await Promise.all([
+      this.entitlements.hasProduct(userId, PRODUCT_KEYS.igentMind7),
       this.entitlements.hasProduct(userId, PRODUCT_KEYS.igentMind30),
       this.entitlements.hasProduct(userId, PRODUCT_KEYS.igentMind90),
       this.entitlements.hasProduct(userId, PRODUCT_KEYS.vip),
     ]);
 
-    if (!mind30 && !mind90 && !vip) {
+    if (!mind7 && !mind30 && !mind90 && !vip) {
       throw new ForbiddenException('iGentMIND não liberado para este usuário.');
     }
   }

@@ -5,6 +5,7 @@ export const PRODUCT_KEYS = {
   pdf: 'opdds_pdf',
   base: 'opdds_base',
   workbook: 'opdds_diario',
+  igentMind7: 'opdds_igentmind_7d',
   igentMind30: 'opdds_igentmind_30d',
   igentMind90: 'opdds_igentmind_90d',
   group: 'opdds_grupo',

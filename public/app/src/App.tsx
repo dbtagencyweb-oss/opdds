@@ -534,8 +534,17 @@ export function App() {
   const hasPdfAccess = hasProductAccess(PRODUCT_KEYS.pdf);
   const hasReaderAccess = hasProductAccess(PRODUCT_KEYS.base);
   const hasWorkbookAccess = hasProductAccess(PRODUCT_KEYS.workbook);
-  const hasMindAccess = hasProductAccess(PRODUCT_KEYS.igentMind30) || hasProductAccess(PRODUCT_KEYS.igentMind90) || hasProductAccess(PRODUCT_KEYS.vip);
+  const hasMindAccess = hasProductAccess(PRODUCT_KEYS.igentMind7) || hasProductAccess(PRODUCT_KEYS.igentMind30) || hasProductAccess(PRODUCT_KEYS.igentMind90) || hasProductAccess(PRODUCT_KEYS.vip);
   const hasGroupAccess = hasProductAccess(PRODUCT_KEYS.group);
+  const nextUpgradeOffer: UpgradeKey | null = hasProductAccess(PRODUCT_KEYS.igentMind90)
+    ? null
+    : hasProductAccess(PRODUCT_KEYS.igentMind30)
+      ? 'igent90'
+      : hasProductAccess(PRODUCT_KEYS.igentMind7)
+        ? 'igent30'
+        : authUser?.mindAccess?.expired
+          ? 'igent30'
+          : 'igent7';
   const isAdmin = authUser?.role === 'ADMIN';
   const currentProducts = onlineProducts || Object.values(PRODUCT_KEYS).filter((productKey) => hasLocalEntitlement(plan, productKey as ProductKey));
   const currentGroup = bookGroups.find((group) => group.id === selectedChapter.groupId) ?? bookGroups[0];
@@ -1837,6 +1846,31 @@ export function App() {
     checkoutUrl.searchParams.set('utm_campaign', key);
     window.open(checkoutUrl.toString(), '_blank', 'noopener,noreferrer');
   };
+
+  const renderUpgradeTeaser = () => (
+    <section className="upgrade-section">
+      <div className="upgrade-section-head">
+        <div>
+          <p className="kicker">Upgrades</p>
+          <h2>{nextUpgradeOffer ? 'Continue expandindo sua jornada' : 'Você já desbloqueou tudo por aqui'}</h2>
+        </div>
+      </div>
+      {nextUpgradeOffer ? (
+        <div className="upgrade-teaser-card">
+          <div>
+            <p className="kicker">{upgradeOffers[nextUpgradeOffer].eyebrow}</p>
+            <strong>{upgradeOffers[nextUpgradeOffer].title}</strong>
+            <span>{upgradeOffers[nextUpgradeOffer].description}</span>
+          </div>
+          <Button onClick={() => goToUpgrade(nextUpgradeOffer)} variant="secondary">
+            <Zap size={17} /> {upgradeOffers[nextUpgradeOffer].price} · Ver oferta
+          </Button>
+        </div>
+      ) : (
+        <p className="upgrade-teaser-complete">iGentMIND 90 dias ativo — os próximos módulos (Comunidade, VIP) chegam por e-mail.</p>
+      )}
+    </section>
+  );
 
   const saveAccountProfile = () => {
     const updated = updateStoredAuthUser({ name: accountName, email: accountEmail });
@@ -3618,6 +3652,8 @@ export function App() {
           <Button onClick={() => { markUpgradeHintShown(UPGRADE_TRIGGERS.AFTER_PILAR_1); setActiveUpgradeHint(null); goToUpgrade('igent30'); }} variant="secondary">Ver Jornada Expandida</Button>
         </section>
       )}
+
+      {renderUpgradeTeaser()}
     </div>
   );
   };
@@ -4867,15 +4903,7 @@ export function App() {
         </article>
       </section>
 
-      <section className="upgrade-section">
-        <div className="upgrade-section-head">
-          <div>
-            <p className="kicker">Upgrades</p>
-            <h2>Continue expandindo sua jornada</h2>
-          </div>
-        </div>
-        <Button onClick={() => goToUpgrade('workbook')} variant="secondary"><Zap size={17} /> Ver opções de upgrade</Button>
-      </section>
+      {renderUpgradeTeaser()}
 
       <footer className="account-footer">
         <span>O Poder dos Desacreditados {APP_VERSION}</span>

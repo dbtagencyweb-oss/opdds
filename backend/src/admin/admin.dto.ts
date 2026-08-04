@@ -1,7 +1,7 @@
 import { IsArray, IsEmail, IsIn, IsInt, IsOptional, IsString, MaxLength, Min } from 'class-validator';
 import { Transform } from 'class-transformer';
 
-const plans = ['pdf', 'basic', 'workbook', 'igent30', 'igent90', 'group', 'vip'] as const;
+const plans = ['pdf', 'basic', 'workbook', 'igent7', 'igent30', 'igent90', 'group', 'vip'] as const;
 
 export class AdminCreateInviteDto {
   @Transform(({ value }) => String(value || '').trim().toLowerCase())

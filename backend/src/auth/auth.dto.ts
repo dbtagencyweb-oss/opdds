@@ -36,7 +36,7 @@ export class CreateInviteDto {
 
   @IsOptional()
   @IsString()
-  plan?: 'pdf' | 'basic' | 'workbook' | 'igent30' | 'igent90' | 'group' | 'vip';
+  plan?: 'pdf' | 'basic' | 'workbook' | 'igent7' | 'igent30' | 'igent90' | 'group' | 'vip';
 
   @IsOptional()
   @Transform(({ value }) => value === '' || value == null ? undefined : Number(value))

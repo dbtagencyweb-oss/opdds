@@ -4413,6 +4413,39 @@ button:active {
   font-size: 0.82rem;
 }
 
+.upgrade-teaser-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  border: 1px solid rgba(169, 113, 63, 0.22);
+  border-radius: 12px;
+  background: #17181c;
+  padding: 16px 18px;
+}
+
+.upgrade-teaser-card strong {
+  display: block;
+  margin: 3px 0 4px;
+  font-size: 1.05rem;
+}
+
+.upgrade-teaser-card span {
+  color: var(--muted);
+  font-size: 0.86rem;
+}
+
+.upgrade-teaser-card button {
+  flex-shrink: 0;
+}
+
+.upgrade-teaser-complete {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.86rem;
+}
+
 .account-edit label {
   display: grid;
   gap: 5px;

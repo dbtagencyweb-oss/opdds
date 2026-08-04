@@ -486,13 +486,14 @@ export const planLabels: Record<Plan, string> = {
   pdf: 'PDF',
   basic: 'Livro + App',
   workbook: 'Diário',
+  igent7: 'iGentMIND 7 dias',
   igent30: 'iGentMIND 30 dias',
   igent90: 'iGentMIND 90 dias',
   group: 'Grupo',
   vip: 'VIP',
 };
 
-export type UpgradeKey = 'basic' | 'workbook' | 'igent30' | 'igent90' | 'group' | 'vip';
+export type UpgradeKey = 'basic' | 'workbook' | 'igent7' | 'igent30' | 'igent90' | 'group' | 'vip';
 
 export const UPGRADE_TRIGGERS = {
   AFTER_PILAR_1: 'upgrade_hint_after_pilar_1',
@@ -529,6 +530,16 @@ export const upgradeOffers: Record<UpgradeKey, {
     productKeys: [PRODUCT_KEYS.workbook],
     inApp: true,
   },
+  igent7: {
+    title: 'iGentMIND 7 dias',
+    eyebrow: 'Downsell',
+    description: 'Mesmo acesso ao mentor iGentMIND, por 7 dias, para você sentir antes de decidir.',
+    price: 'R$ 17',
+    checkoutUrl: 'https://pay.kiwify.com.br/yZ7FLJZ',
+    plan: 'igent7',
+    productKeys: [PRODUCT_KEYS.workbook, PRODUCT_KEYS.igentMind7],
+    inApp: true,
+  },
   igent30: {
     title: 'Diário + iGentMIND 30 dias',
     eyebrow: 'Jornada expandida',
@@ -544,7 +555,7 @@ export const upgradeOffers: Record<UpgradeKey, {
     eyebrow: 'Upsell',
     description: 'Estende o mentor iGentMIND de 30 para 90 dias, com recomendações por tema, pilar e estado emocional.',
     price: 'R$ 67',
-    checkoutUrl: 'https://pay.kiwify.com.br/vYaKNrk',
+    checkoutUrl: 'https://pay.kiwify.com.br/uxCY4lb',
     plan: 'igent90',
     productKeys: [PRODUCT_KEYS.igentMind90],
     inApp: true,
@@ -554,17 +565,17 @@ export const upgradeOffers: Record<UpgradeKey, {
     eyebrow: 'Grupo de apoio',
     description: 'Acesso ao grupo/comunidade para continuidade, apoio e acompanhamento da jornada.',
     price: 'R$ 197',
-    checkoutUrl: 'https://pay.kiwify.com.br/SHxtsOn',
+    checkoutUrl: 'https://pay.kiwify.com.br/nEoaknZ',
     plan: 'group',
     productKeys: [PRODUCT_KEYS.group],
     inApp: false,
   },
   vip: {
-    title: 'Pacote completo OPDDS',
+    title: 'VIP Anual — Fidelidade',
     eyebrow: 'Acesso total',
     description: 'Livro interativo, Áudios, Diário, iGentMIND e grupo em um único pacote.',
-    price: 'Pacote',
-    checkoutUrl: 'https://pay.kiwify.com.br/yYaKNrk',
+    price: 'R$ 147',
+    checkoutUrl: 'https://pay.kiwify.com.br/yceGqqS',
     plan: 'vip',
     productKeys: [PRODUCT_KEYS.base, PRODUCT_KEYS.workbook, PRODUCT_KEYS.igentMind90, PRODUCT_KEYS.group, PRODUCT_KEYS.vip],
     inApp: false,
@@ -574,6 +585,7 @@ export const upgradeOffers: Record<UpgradeKey, {
 export const upgradeActiveProductKeys: Record<UpgradeKey, ProductKey> = {
   basic: PRODUCT_KEYS.base,
   workbook: PRODUCT_KEYS.workbook,
+  igent7: PRODUCT_KEYS.igentMind7,
   igent30: PRODUCT_KEYS.igentMind30,
   igent90: PRODUCT_KEYS.igentMind90,
   group: PRODUCT_KEYS.group,

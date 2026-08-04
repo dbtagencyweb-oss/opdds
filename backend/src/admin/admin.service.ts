@@ -2,12 +2,13 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { PrismaService } from '../prisma/prisma.service';
 import { AdminBookAudioDto, AdminBookAudioMetaDto, AdminBookAudioOrderDto, AdminGrantPlanDto, AdminGrantProductDto } from './admin.dto';
 
-type AccessPlan = 'pdf' | 'basic' | 'workbook' | 'igent30' | 'igent90' | 'group' | 'vip';
+type AccessPlan = 'pdf' | 'basic' | 'workbook' | 'igent7' | 'igent30' | 'igent90' | 'group' | 'vip';
 
 const PRODUCTS_BY_PLAN: Record<AccessPlan, string[]> = {
   pdf: ['opdds_pdf'],
   basic: ['opdds_pdf', 'opdds_base'],
   workbook: ['opdds_pdf', 'opdds_base', 'opdds_diario'],
+  igent7: ['opdds_pdf', 'opdds_base', 'opdds_diario', 'opdds_igentmind_7d'],
   igent30: ['opdds_pdf', 'opdds_base', 'opdds_diario', 'opdds_igentmind_30d'],
   igent90: ['opdds_pdf', 'opdds_base', 'opdds_diario', 'opdds_igentmind_90d'],
   group: ['opdds_pdf', 'opdds_base', 'opdds_diario', 'opdds_igentmind_90d', 'opdds_grupo'],
@@ -30,6 +31,7 @@ export class AdminService {
     if (products.includes('opdds_grupo')) return 'group';
     if (products.includes('opdds_igentmind_90d')) return 'igent90';
     if (products.includes('opdds_igentmind_30d')) return 'igent30';
+    if (products.includes('opdds_igentmind_7d')) return 'igent7';
     if (products.includes('opdds_diario')) return 'workbook';
     if (products.includes('opdds_base')) return 'basic';
     return 'pdf';
@@ -276,7 +278,7 @@ export class AdminService {
     for (const productKey of productKeys) {
       await this.grantProduct(userId, {
         productKey,
-        expiresInDays: ['opdds_igentmind_30d', 'opdds_igentmind_90d', 'opdds_grupo'].includes(productKey) ? data.expiresInDays : undefined,
+        expiresInDays: ['opdds_igentmind_7d', 'opdds_igentmind_30d', 'opdds_igentmind_90d', 'opdds_grupo'].includes(productKey) ? data.expiresInDays : undefined,
       });
     }
 

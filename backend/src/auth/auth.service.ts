@@ -6,12 +6,13 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateInviteDto, ForgotPasswordDto, LoginDto, RegisterDto, ResetPasswordDto } from './auth.dto';
 import { MailService } from './mail.service';
 
-type AccessPlan = 'pdf' | 'basic' | 'workbook' | 'igent30' | 'igent90' | 'group' | 'vip';
+type AccessPlan = 'pdf' | 'basic' | 'workbook' | 'igent7' | 'igent30' | 'igent90' | 'group' | 'vip';
 
 const PRODUCTS_BY_PLAN: Record<AccessPlan, string[]> = {
   pdf: ['opdds_pdf'],
   basic: ['opdds_pdf', 'opdds_base'],
   workbook: ['opdds_pdf', 'opdds_base', 'opdds_diario'],
+  igent7: ['opdds_pdf', 'opdds_base', 'opdds_diario', 'opdds_igentmind_7d'],
   igent30: ['opdds_pdf', 'opdds_base', 'opdds_diario', 'opdds_igentmind_30d'],
   igent90: ['opdds_pdf', 'opdds_base', 'opdds_diario', 'opdds_igentmind_90d'],
   group: ['opdds_pdf', 'opdds_base', 'opdds_diario', 'opdds_igentmind_90d', 'opdds_grupo'],
@@ -22,6 +23,7 @@ const PLAN_LABELS: Record<AccessPlan, string> = {
   pdf: 'PDF',
   basic: 'Livro + App',
   workbook: 'Diário dos Desacreditados',
+  igent7: 'iGentMIND 7 dias',
   igent30: 'Diário + iGentMIND 30 dias',
   igent90: 'iGentMIND 90 dias',
   group: 'Comunidade Viva dos Desacreditados',
@@ -53,7 +55,7 @@ export class AuthService {
     return (Object.keys(PRODUCTS_BY_PLAN).includes(normalized) ? normalized : 'basic') as AccessPlan;
   }
 
-  private readonly planOrder: AccessPlan[] = ['pdf', 'basic', 'workbook', 'igent30', 'igent90', 'group', 'vip'];
+  private readonly planOrder: AccessPlan[] = ['pdf', 'basic', 'workbook', 'igent7', 'igent30', 'igent90', 'group', 'vip'];
 
   /** Menor plano cujo conjunto de productKeys cobre a união dos dois planos dados. */
   private combinePlans(a: AccessPlan, b: AccessPlan): AccessPlan {
@@ -368,7 +370,7 @@ export class AuthService {
     const mindEntitlements = await this.prisma.entitlement.findMany({
       where: {
         userId: user.id,
-        productKey: { in: ['opdds_igentmind_30d', 'opdds_igentmind_90d'] },
+        productKey: { in: ['opdds_igentmind_7d', 'opdds_igentmind_30d', 'opdds_igentmind_90d'] },
         status: 'ACTIVE',
       },
       select: { expiresAt: true },
@@ -391,11 +393,13 @@ export class AuthService {
           ? 'igent90'
           : products.includes('opdds_igentmind_30d')
             ? 'igent30'
-            : products.includes('opdds_diario')
-              ? 'workbook'
-              : products.includes('opdds_base')
-                ? 'basic'
-                : 'pdf';
+            : products.includes('opdds_igentmind_7d')
+              ? 'igent7'
+              : products.includes('opdds_diario')
+                ? 'workbook'
+                : products.includes('opdds_base')
+                  ? 'basic'
+                  : 'pdf';
     const payload = { sub: user.id, email: user.email, role: user.role, plan, products };
 
     return {
