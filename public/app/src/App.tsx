@@ -418,6 +418,7 @@ export function App() {
   const [activeMindPillarIndex, setActiveMindPillarIndex] = useState<number | null>(null);
   const [mindInput, setMindInput] = useState('');
   const [mindMessages, setMindMessages] = useState<MindMessage[]>([]);
+  const mindMessageCountRef = useRef(0);
   const [mindTyping, setMindTyping] = useState(false);
   const [activeMindTriageStep, setActiveMindTriageStep] = useState(0);
   const [activeMindTriageAnswers, setActiveMindTriageAnswers] = useState<MindTriageAnswer[]>([]);
@@ -513,6 +514,20 @@ export function App() {
     if (!chat) return;
     chat.scrollTo({ top: chat.scrollHeight, behavior: 'smooth' });
   }, [mindMessages, mindTyping]);
+
+  useEffect(() => {
+    if (!mindTyping) return;
+    const interval = setInterval(() => playClick('type'), 340);
+    return () => clearInterval(interval);
+  }, [mindTyping]);
+
+  useEffect(() => {
+    const previousCount = mindMessageCountRef.current;
+    mindMessageCountRef.current = mindMessages.length;
+    if (mindMessages.length > previousCount && mindMessages[mindMessages.length - 1]?.from === 'agent') {
+      playMindPing();
+    }
+  }, [mindMessages]);
 
   const selectedChapter = bookChapters[currentChapterIndex] ?? bookChapters[0];
   const pages = usePagination(selectedChapter.content);
@@ -878,6 +893,32 @@ export function App() {
       gain.connect(context.destination);
       oscillator.start();
       oscillator.stop(context.currentTime + settings.duration + 0.01);
+    } catch {
+      // Sensory clicks are decorative; silence failures.
+    }
+  };
+
+  const playMindPing = () => {
+    try {
+      const AudioContextCtor = window.AudioContext || (window as any).webkitAudioContext;
+      if (!AudioContextCtor) return;
+      const context = sfxRef.current ?? new AudioContextCtor();
+      sfxRef.current = context;
+      const now = context.currentTime;
+      [660, 990].forEach((frequency, index) => {
+        const start = now + index * 0.09;
+        const oscillator = context.createOscillator();
+        const gain = context.createGain();
+        oscillator.type = 'sine';
+        oscillator.frequency.value = frequency;
+        gain.gain.setValueAtTime(0.0001, start);
+        gain.gain.exponentialRampToValueAtTime(0.05, start + 0.012);
+        gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.22);
+        oscillator.connect(gain);
+        gain.connect(context.destination);
+        oscillator.start(start);
+        oscillator.stop(start + 0.24);
+      });
     } catch {
       // Sensory clicks are decorative; silence failures.
     }

@@ -741,6 +741,7 @@ export const mindEntryIntents: Array<{
 export const sensoryClicks = {
   primary: { frequency: 520, duration: 0.055 },
   soft: { frequency: 320, duration: 0.04 },
+  type: { frequency: 210, duration: 0.018 },
 };
 
 export type MindTriageOption = {

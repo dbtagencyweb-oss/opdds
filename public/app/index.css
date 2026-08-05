@@ -8467,13 +8467,28 @@ html.light .admin-canonical-block-card textarea {
     justify-self: start;
   }
 
+  .mind-chat-shell {
+    display: flex;
+    flex-direction: column;
+    height: calc(100dvh - 64px - max(110px, calc(84px + env(safe-area-inset-bottom))) - 56px);
+    min-height: 0;
+  }
+
+  .mind-chat-status,
+  .mind-chat-context-card {
+    flex-shrink: 0;
+  }
+
   .mind-chat-window {
-    min-height: 360px;
+    flex: 1 1 auto;
+    min-height: 220px;
     max-height: none;
   }
 
   .mind-compose {
     grid-template-columns: 1fr;
+    position: static;
+    flex-shrink: 0;
   }
 
   .diary-shell,
