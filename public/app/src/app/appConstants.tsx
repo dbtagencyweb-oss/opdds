@@ -545,7 +545,7 @@ export const upgradeOffers: Record<UpgradeKey, {
     eyebrow: 'Jornada expandida',
     description: 'Diário expandido com perfil preditivo e o mentor iGentMIND lendo suas respostas por 30 dias.',
     price: 'R$ 37',
-    checkoutUrl: 'https://pay.kiwify.com.br/3rj0NbN',
+    checkoutUrl: 'https://pay.kiwify.com.br/Uo9NHdj',
     plan: 'igent30',
     productKeys: [PRODUCT_KEYS.workbook, PRODUCT_KEYS.igentMind30],
     inApp: true,

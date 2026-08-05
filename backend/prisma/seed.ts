@@ -20,6 +20,11 @@ const products = [
     description: 'Workbook editável, prompts guiados e respostas salvas.',
   },
   {
+    key: 'opdds_igentmind_7d',
+    name: 'iGentMIND 7 dias',
+    description: 'Mentor de leitura por 7 dias (trial/downsell).',
+  },
+  {
     key: 'opdds_igentmind_30d',
     name: 'iGentMIND 30 dias',
     description: 'Mentor de leitura por 30 dias.',
