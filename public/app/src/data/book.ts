@@ -37,12 +37,12 @@ export const onboardingSteps = [
   {
     title: 'Portas de entrada',
     description: 'Leia por capítulo, por tema, ouvindo os áudios ou com o mentor iGentMIND. Escolha o caminho que fizer sentido hoje.',
-    audioUrl: '/media/audios/onboarding/05-portas.mp3',
+    audioUrl: '/media/audios/onboarding/04-como-atravessar.mp3',
   },
   {
     title: 'Um cuidado, com carinho',
     description: 'Se a leitura tocar uma dor muito grande, procure também apoio humano e profissional. O app caminha com você, mas não substitui cuidado real.',
-    audioUrl: '/media/audios/onboarding/04-quando-nao-usar.mp3',
+    audioUrl: '/media/audios/onboarding/05-cuidado-real.mp3',
   },
   {
     title: 'Comece sem pressa',

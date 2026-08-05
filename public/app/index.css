@@ -2081,7 +2081,7 @@ button:active {
   background:
     radial-gradient(circle at 76% 10%, rgba(232, 201, 122, 0.22), transparent 26%),
     linear-gradient(90deg, rgba(5, 6, 9, 0.96) 0%, rgba(5, 6, 9, 0.82) 42%, rgba(5, 6, 9, 0.5) 100%),
-    url("/media/imagens/brand/opdds_capa_horiz.webp") center/cover;
+    url("/media/imagens/brand/fundo_horiz_capa-OPDDS.avif") center/cover;
 }
 
 .cover-gate::after {
