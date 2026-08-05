@@ -90,7 +90,7 @@ export const bookAudioCatalog: Record<string, Array<{ label: string; url: string
   epigrafe: [],
   'nota-do-autor': [],
   creditos: [],
-  manifesto: tracksFromFiles('1-manifesto', [['O mundo costuma valorizar quem chega', 'o-mundo-costuma-valorizar-quem-chega.wav']]),
+  manifesto: tracksFromFiles('1-manifesto', [['O mundo costuma valorizar quem chega', 'o-mundo-costuma-valorizar-quem-chega.mp3']]),
   abertura: tracksFromFiles('2-abertura', [['Este livro nasceu de viv\u00eancias reais', 'este-livro-nasceu-de-vivencias-reais.wav']]),
   quebra1: tracksFromFiles('3-quebra-de-expectativa/1-porque-esse-livro-nao-e-autoajuda', [
     ['Abertura', '1-porque-nao-e-autoajuda.wav'],

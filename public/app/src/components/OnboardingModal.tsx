@@ -8,8 +8,10 @@ type Props = {
   description: string;
   onPlayAudio: () => void;
   onNext: () => void;
+  onPrev?: () => void;
   onSkip: () => void;
   isPlaying?: boolean;
+  progress?: number;
 };
 
 export default function OnboardingModal({
@@ -19,8 +21,10 @@ export default function OnboardingModal({
   description,
   onPlayAudio,
   onNext,
+  onPrev,
   onSkip,
   isPlaying = false,
+  progress = 0,
 }: Props) {
   const segments = Array.from({ length: totalSteps }, (_, index) => index < step);
 
@@ -39,6 +43,9 @@ export default function OnboardingModal({
             <span className="text-sm font-medium">Ouvir explicação</span>
             <Play size={16} className={isPlaying ? 'animate-pulse' : ''} />
           </button>
+          <div className="onboarding-audio-progress">
+            <span style={{ width: `${Math.min(100, Math.max(0, progress))}%` }} />
+          </div>
           <Button onClick={onNext} className="w-full">Continuar</Button>
         </div>
 
@@ -51,9 +58,16 @@ export default function OnboardingModal({
           <p className="text-xs text-zinc-500">{step} de {totalSteps}</p>
         </div>
 
-        <button onClick={onSkip} className="mt-6 text-xs text-zinc-500 underline transition hover:text-zinc-300">
-          Pular boas-vindas
-        </button>
+        <div className="mt-6 flex items-center justify-between">
+          {onPrev ? (
+            <button onClick={onPrev} className="text-xs text-zinc-500 underline transition hover:text-zinc-300">
+              Voltar
+            </button>
+          ) : <span />}
+          <button onClick={onSkip} className="text-xs text-zinc-500 underline transition hover:text-zinc-300">
+            Pular boas-vindas
+          </button>
+        </div>
       </div>
     </div>
   );

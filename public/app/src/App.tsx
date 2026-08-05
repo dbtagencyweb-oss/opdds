@@ -510,9 +510,8 @@ export function App() {
   }, [authUser?.id]);
 
   useEffect(() => {
-    const chat = mindChatWindowRef.current;
-    if (!chat) return;
-    chat.scrollTo({ top: chat.scrollHeight, behavior: 'smooth' });
+    if (!mindChatWindowRef.current) return;
+    window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' });
   }, [mindMessages, mindTyping]);
 
   useEffect(() => {
@@ -1578,7 +1577,9 @@ export function App() {
     audio.currentTime = resumeAt;
     audio.volume = audioState.volume;
     audio.playbackRate = audioState.playbackRate;
-    audio.play().then(startAudioSpectrum).catch(() => {});
+    audio.play().then(startAudioSpectrum).catch((error) => {
+      console.warn(`[audio] falha ao tocar ${url}:`, error?.message || error);
+    });
     setAudioState((state) => ({
       ...state,
       isPlaying: true,
@@ -3780,11 +3781,18 @@ export function App() {
             description={currentStep.description}
             onPlayAudio={() => handlePlayAudio(currentStep.audioUrl, currentStep.title)}
             onNext={() => {
-              if (onboardingStep === onboardingSteps.length - 1) handleCompleteOnboarding();
-              else setOnboardingStep((step) => step + 1);
+              if (onboardingStep === onboardingSteps.length - 1) {
+                handleCompleteOnboarding();
+                return;
+              }
+              const nextStep = onboardingSteps[onboardingStep + 1];
+              setOnboardingStep((step) => step + 1);
+              handlePlayAudio(nextStep.audioUrl, nextStep.title);
             }}
+            onPrev={onboardingStep > 0 ? () => setOnboardingStep((step) => Math.max(0, step - 1)) : undefined}
             onSkip={handleCompleteOnboarding}
             isPlaying={audioState.currentUrl === currentStep.audioUrl && audioState.isPlaying}
+            progress={audioState.currentUrl === currentStep.audioUrl && audioState.duration ? (audioState.currentTime / audioState.duration) * 100 : 0}
           />
         )}
         <HomeView />
@@ -5696,6 +5704,20 @@ export function App() {
         {audioFullOpen && (
           <section className="audio-fullscreen-player" role="dialog" aria-modal="true" aria-label="Player de audiobook">
             <div className="audio-fullscreen-bg" />
+            <div className="audio-full-ambient-controls">
+              <button
+                className={`audio-full-ambient-toggle ${ambientAudioState.currentUrl === selectedReadingTrack.audioUrl && ambientAudioState.isPlaying ? 'active' : ''}`}
+                onClick={toggleSelectedSensoryTrack}
+                title={ambientAudioState.currentUrl === selectedReadingTrack.audioUrl && ambientAudioState.isPlaying ? 'Desativar trilha de leitura' : 'Ativar trilha de leitura'}
+              >
+                <Music2 size={18} />
+              </button>
+              {readingTracks.length > 1 && (
+                <button className="audio-full-ambient-skip" onClick={() => playAdjacentAmbientTrack(1)} title={`Trocar trilha (atual: ${selectedReadingTrack.title})`}>
+                  <SkipForward size={16} />
+                </button>
+              )}
+            </div>
             <button className="audio-full-close" onClick={() => setAudioFullOpen(false)} title="Voltar para barra"><X size={20} /></button>
             <div className="audio-full-card">
               <div className="audio-full-cover">

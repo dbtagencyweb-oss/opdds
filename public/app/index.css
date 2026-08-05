@@ -1255,6 +1255,21 @@ html.light .reader-content-image figcaption {
   background: var(--accent);
 }
 
+.onboarding-audio-progress {
+  height: 4px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+}
+
+.onboarding-audio-progress span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--gold, #a9713f);
+  transition: width 0.2s linear;
+}
+
 @media (max-width: 1024px) {
   .app-sidebar {
     position: fixed;
@@ -2910,11 +2925,12 @@ button:active {
   min-height: 78px;
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.035);
+  background: #202124;
   color: var(--text);
   padding: 12px;
   text-align: left;
   position: relative;
+  isolation: isolate;
 }
 
 .mind-territory-card:hover {
@@ -8468,27 +8484,24 @@ html.light .admin-canonical-block-card textarea {
   }
 
   .mind-chat-shell {
-    display: flex;
-    flex-direction: column;
-    height: calc(100dvh - 64px - max(110px, calc(84px + env(safe-area-inset-bottom))) - 56px);
-    min-height: 0;
-  }
-
-  .mind-chat-status,
-  .mind-chat-context-card {
-    flex-shrink: 0;
+    display: grid;
+    gap: 16px;
   }
 
   .mind-chat-window {
-    flex: 1 1 auto;
-    min-height: 220px;
+    min-height: 300px;
     max-height: none;
+    margin-bottom: 190px;
   }
 
   .mind-compose {
     grid-template-columns: 1fr;
-    position: static;
-    flex-shrink: 0;
+    position: fixed;
+    left: max(12px, env(safe-area-inset-left));
+    right: max(12px, env(safe-area-inset-right));
+    bottom: max(120px, calc(94px + env(safe-area-inset-bottom)));
+    z-index: 45;
+    box-shadow: 0 14px 34px rgba(0, 0, 0, 0.34);
   }
 
   .diary-shell,
@@ -8728,7 +8741,7 @@ html.light .admin-canonical-block-card textarea {
 .contents-letter-link { display: inline-flex; align-items: center; gap: 7px; margin: 0 26px 20px 90px; color: var(--accent); font-size: .82rem; }
 .contents-reader-button { width: auto !important; padding: 0 11px !important; gap: 6px; }
 .contents-reader-button span { font-size: .78rem; }
-.letters-hero { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; margin-bottom: 24px; padding: 28px; border: 1px solid var(--line); border-radius: 24px; background: linear-gradient(135deg, rgba(229,184,94,.11), rgba(255,255,255,.025)); }
+.letters-hero { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; margin-bottom: 24px; padding: 28px; border: 1px solid var(--line); border-radius: 24px; background: linear-gradient(135deg, rgba(229,184,94,.11), rgba(255,255,255,.025)); overflow: hidden; isolation: isolate; }
 .letters-hero h1 { margin: 4px 0 8px; font-size: clamp(1.25rem, 2vw, 1.65rem); }
 .letters-hero p { max-width: 720px; color: var(--muted); }
 .letters-shell { display: grid; grid-template-columns: minmax(200px,252px) minmax(0,1fr); gap: 18px; }
@@ -8784,7 +8797,12 @@ html.light .admin-canonical-block-card textarea {
   .letters-shell { grid-template-columns: 1fr; }
   .letters-index { display: flex; overflow-x: auto; gap: 8px; }
   .letters-index > .kicker { display: none; }
-  .letters-index > button { min-width: 170px; }
+  .letters-index > button { min-width: 190px; overflow-wrap: break-word; }
+  .letters-index > button strong { font-size: .9rem; line-height: 1.25; }
+  .letters-index > button small { font-size: .72rem; }
+  .letters-hero { padding: 18px; }
+  .letters-hero h1 { font-size: 1.1rem; }
+  .letters-hero p { font-size: .84rem; }
   .letters-hero, .letter-paper footer, .letter-actions { align-items: stretch; flex-direction: column; }
   .letter-mood-grid, .journey-overview { grid-template-columns: 1fr; }
   .contents-main { grid-template-columns: 40px 1fr; padding: 18px; }
@@ -9065,20 +9083,17 @@ html.light .admin-canonical-block-card textarea {
   align-items: center;
   justify-content: center;
   margin-left: 9px;
-  border: 1px solid rgba(169, 113, 63, 0.22);
-  border-radius: 999px;
-  background: rgba(169, 113, 63, 0.08);
+  border: 0;
+  background: transparent;
   color: #a9713f;
   vertical-align: middle;
   opacity: 0.62;
   transform: translateY(-1px);
-  transition: opacity 0.16s ease, background 0.16s ease, border-color 0.16s ease;
+  transition: opacity 0.16s ease, color 0.16s ease;
 }
 
 .reader-inline-audio-cue:hover,
 .reader-inline-audio-cue.active {
-  border-color: rgba(169, 113, 63, 0.44);
-  background: rgba(169, 113, 63, 0.16);
   opacity: 1;
 }
 
@@ -9095,15 +9110,9 @@ html.light .admin-canonical-block-card textarea {
 }
 
 html.light .reader-inline-audio-cue {
-  border-color: rgba(141, 112, 64, 0.22);
-  background: rgba(217, 184, 93, 0.13);
+  border: 0;
+  background: transparent;
   color: #9a792f;
-}
-
-html.light .reader-inline-audio-cue:hover,
-html.light .reader-inline-audio-cue.active {
-  border-color: rgba(141, 112, 64, 0.38);
-  background: rgba(217, 184, 93, 0.22);
 }
 
 .reader-contents-backdrop {
@@ -10025,7 +10034,6 @@ html.light .reader-page-bookmark-button.active,
 html.light .reader-page-bookmark-ribbon,
 html.light .reader-clean-mode .reader-page-bookmark-ribbon,
 html.light .reader-clean-mode .reader-actions .reader-page-bookmark-button.active,
-html.light .reader-inline-audio-cue.active,
 html.light .reader-bottom-sensory-button.active,
 html.light .reader-toc-audio-row.active .reader-toc-audio-status,
 html.light .workbook-prompts button.active,
@@ -10430,6 +10438,10 @@ html.dark .reader-clean-mode .reader-text-surface .page-copy {
 
   .book-action-grid {
     grid-template-columns: 1fr;
+  }
+
+  .book-hub-copy {
+    display: none;
   }
 
   .reader-clean-mode .reader-actions .reader-page-bookmark-button,
@@ -11048,6 +11060,33 @@ html.light .volume-control input::-webkit-slider-runnable-track {
   border-radius: 50%;
   background: rgba(255,255,255,.035);
   color: #9a9da4;
+}
+
+.audio-full-ambient-controls {
+  position: absolute;
+  top: 24px;
+  left: 24px;
+  z-index: 2;
+  display: flex;
+  gap: 8px;
+}
+
+.audio-full-ambient-toggle,
+.audio-full-ambient-skip {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 50%;
+  background: rgba(255,255,255,.035);
+  color: #9a9da4;
+}
+
+.audio-full-ambient-toggle.active {
+  border-color: rgba(229,184,94,.52);
+  background: rgba(229,184,94,.14);
+  color: var(--gold);
 }
 
 .audio-full-card {
@@ -14672,8 +14711,6 @@ html.dark .reader-toc-audio-row {
 
 /* True final reader direction polish. */
 :root {
-  --gold:  radial-gradient(circle at 38% 28%, #ffd39d, #cb8f64 58%, #593d2f) !important;
-  --gold-soft: background: radial-gradient(circle at 38% 28%, #fff3bd, #a9713f 58%, #9a7939) !important;
   --accent: #b18a66;
   --opdds-premium-gold: #b18a66;
   --opdds-premium-gold-soft: #d5b891;
@@ -19180,4 +19217,21 @@ html.light .reader-clean-mode.reader-clean-mode .reader-text-surface:not(.reader
 html.dark .reader-clean-mode.reader-clean-mode .reader-text-surface:not(.reader-image-page) .reader-reflow-columns p[data-orphan-fix][data-orphan-fix] {
   break-before: auto !important;
   -webkit-column-break-before: auto !important;
+}
+
+/* Padroniza os botões de "play": a definição original de .player-play (linha
+   ~8102) marca background/color/border como !important com um estilo
+   contornado/transparente, o que sobrepõe a segunda definição (~10982) que já
+   tentava o preenchimento em gradiente dourado igual ao .audio-control-main
+   e ao .home-track-play. Reforça aqui, por cima das duas, o mesmo padrão
+   preenchido usado nos outros botões de play do app. */
+.player-play,
+.compact-audio-player .player-play,
+html.light .player-play,
+html.light .compact-audio-player .player-play {
+  border: 0 !important;
+  background: radial-gradient(circle at 35% 25%, #fff1b9, #a9713f 58%, #98783a) !important;
+  background-color: transparent !important;
+  color: #090909 !important;
+  box-shadow: 0 8px 24px rgba(215, 183, 88, 0.26), inset 0 1px 0 rgba(255, 255, 255, 0.45) !important;
 }
