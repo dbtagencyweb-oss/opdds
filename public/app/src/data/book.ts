@@ -16,6 +16,7 @@ export const accessTokenPlans: Record<string, 'pdf' | 'basic' | 'workbook' | 'ig
   FUNDADOR: 'vip',
 };
 export const pdfUrl = '/media/downloads/o-poder-dos-desacreditados.pdf';
+export const pdfViewerUrl = '/media/downloads/o-poder-dos-desacreditados_comp.pdf';
 export const workbookPdfUrl = '/media/downloads/diario-dos-desacreditados.pdf';
 
 export const onboardingSteps = [

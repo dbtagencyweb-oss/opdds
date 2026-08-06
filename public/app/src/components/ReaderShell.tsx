@@ -635,6 +635,18 @@ export default function ReaderShell({
   const [mode, setMode] = useState<'edition' | 'text'>(initialMode);
   const [contentsOpen, setContentsOpen] = useState(false);
   const contentsDrawerRef = useRef<HTMLElement | null>(null);
+  const [pdfCompactNoticeOpen, setPdfCompactNoticeOpen] = useState(false);
+
+  useEffect(() => {
+    if (mode !== 'edition') return;
+    if (localStorage.getItem('opdds-pdf-compact-notice-seen') === '1') return;
+    setPdfCompactNoticeOpen(true);
+  }, [mode]);
+
+  const dismissPdfCompactNotice = () => {
+    localStorage.setItem('opdds-pdf-compact-notice-seen', '1');
+    setPdfCompactNoticeOpen(false);
+  };
 
   useEffect(() => {
     if (!contentsOpen) return;
@@ -1444,6 +1456,28 @@ export default function ReaderShell({
         document.body,
       )}
 
+      {pdfCompactNoticeOpen && mode === 'edition' && createPortal(
+        <div className="pdf-compact-notice-backdrop" onClick={dismissPdfCompactNotice}>
+          <div className="pdf-compact-notice" onClick={(event) => event.stopPropagation()} role="dialog" aria-modal="true" aria-label="Aviso sobre a versão do PDF">
+            <p>Para melhor experiência, o visualizador usa uma versão compacta do livro. Para a resolução original, faça o download.</p>
+            <div className="pdf-compact-notice-actions">
+              <button
+                type="button"
+                className="pdf-compact-notice-download"
+                onClick={() => {
+                  dismissPdfCompactNotice();
+                  onOpenPdf();
+                }}
+              >
+                Baixar PDF em alta
+              </button>
+              <button type="button" className="pdf-compact-notice-dismiss" onClick={dismissPdfCompactNotice}>Entendi</button>
+            </div>
+          </div>
+        </div>,
+        document.body,
+      )}
+
       {displayCurrentLetterTitle && (
       <div className="reader-quick-tools">
           <button onClick={onOpenCurrentLetter}>
@@ -1564,7 +1598,8 @@ export default function ReaderShell({
             <button onClick={() => setPdfZoom((value) => pdfZoomClamp(value + 0.1))} title="Aumentar zoom"><Plus size={17} /></button>
             <div className="pdf-toolbar-divider" />
             <button onClick={() => setPdfZoom(1)} title="Ajustar à página"><Maximize2 size={17} /></button>
-            <button onClick={() => setPdfRotation((value) => (value + 90) % 360)} title="Girar visualização"><RotateCw size={17} /></button>
+            <button className="pdf-rotate-button" onClick={() => setPdfRotation((value) => (value + 90) % 360)} title="Girar visualização"><RotateCw size={17} /></button>
+            <button className="pdf-rotate-slot-home" onClick={onExitReader} title="Voltar para home"><Home size={17} /></button>
             <div className="pdf-toolbar-spacer" />
             <button className="pdf-app-home-button" onClick={onExitReader} title="Voltar para home"><Home size={18} /></button>
             <button onClick={onOpenPdf} title="Baixar PDF"><DownloadCloud size={18} /></button>

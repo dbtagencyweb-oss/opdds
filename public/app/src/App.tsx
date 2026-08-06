@@ -54,7 +54,7 @@ import {
   Zap,
 } from 'lucide-react';
 import { usePagination } from './hooks/usePagination';
-import { accessTokenPlans, accessTokens, bookChapters, getChapterIndexForPillar, onboardingSteps, pdfUrl, workbookPdfUrl } from './data/book';
+import { accessTokenPlans, accessTokens, bookChapters, getChapterIndexForPillar, onboardingSteps, pdfUrl, pdfViewerUrl, workbookPdfUrl } from './data/book';
 import { bookGroups, pillarLetters } from './data/bookStructure';
 import {
   buildArtifactCanonicalBookChapters,
@@ -4282,7 +4282,7 @@ export function App() {
         }}
         coverImageUrl="/media/imagens/capas/capa.webp"
         audioTracks={selectedChapterAudioTracks}
-        pdfUrl={pdfUrl}
+        pdfUrl={pdfViewerUrl}
         pdfTextPages={mergedPdfTextPages}
         pdfCurrentPage={pdfPage}
         totalPdfPages={totalPdfPages}
