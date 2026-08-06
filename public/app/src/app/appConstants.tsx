@@ -123,6 +123,7 @@ export const defaultSupportAudios: SensoryTrack[] = [
 
 export const defaultReadingTracks: SensoryTrack[] = [
   { id: 'silencio-dourado', title: 'Silêncio dourado', text: 'Trilha instrumental discreta para ler com presença.', audioUrl: '/media/audios/trilhas/silencio-dourado.mp3' },
+  { id: 'sussurro-da-alma', title: 'Sussurro da alma', text: 'Trilha instrumental suave para acompanhar a leitura em silêncio.', audioUrl: '/media/audios/trilhas/sussuro-da-alma.webm' },
 ];
 export const defaultSensoryPlaylist = defaultReadingTracks;
 
