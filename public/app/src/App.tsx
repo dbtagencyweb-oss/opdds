@@ -3620,7 +3620,7 @@ export function App() {
           </div>
         )}
         {selectedReadingTrack && (
-          <div className={`home-reading-track-strip ${ambientAudioState.currentUrl === selectedReadingTrack.audioUrl && ambientAudioState.isPlaying ? 'playing' : ''}`}>
+          <div className={`home-reading-track-strip ${ambientAudioState.currentUrl === selectedReadingTrack.audioUrl && ambientAudioState.isPlaying ? 'playing' : ''} ${readingTracks.length > 1 ? 'has-skip' : ''}`}>
             <button className="home-track-visual" onClick={toggleSelectedSensoryTrack} title="Tocar trilha de leitura">
               <span />
               <span />

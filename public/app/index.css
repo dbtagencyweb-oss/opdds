@@ -3627,7 +3627,7 @@ button:active {
 
 .home-reading-track-strip {
   display: grid;
-  grid-template-columns: 38px minmax(0, 1fr) 38px 34px;
+  grid-template-columns: 38px minmax(0, 1fr) 38px;
   align-items: center;
   gap: 10px;
   width: 100%;
@@ -3653,6 +3653,10 @@ button:active {
   border-radius: 999px;
   background: rgba(169, 113, 63, 0.08);
   color: #a9713f;
+}
+
+.home-reading-track-strip.has-skip {
+  grid-template-columns: 38px minmax(0, 1fr) 38px 34px;
 }
 
 .home-track-skip {
@@ -19246,7 +19250,13 @@ html.dark .reader-clean-mode.reader-clean-mode .reader-text-surface:not(.reader-
 .player-play,
 .compact-audio-player .player-play,
 html.light .player-play,
-html.light .compact-audio-player .player-play {
+html.light .compact-audio-player .player-play,
+.home-track-play,
+html.light .home-track-play,
+.home-resume-strip button,
+html.light .home-resume-strip button {
+  width: 38px !important;
+  height: 38px !important;
   border: 0 !important;
   background: var(--opdds-premium-gold-gradient) !important;
   background-color: transparent !important;
