@@ -3634,6 +3634,11 @@ export function App() {
             <button className="home-track-play" onClick={toggleSelectedSensoryTrack} title={ambientAudioState.isPlaying ? 'Pausar trilha' : 'Tocar trilha'}>
               {ambientAudioState.currentUrl === selectedReadingTrack.audioUrl && ambientAudioState.isPlaying ? <Pause size={15} /> : <Play size={14} fill="currentColor" />}
             </button>
+            {readingTracks.length > 1 && (
+              <button className="home-track-skip" onClick={() => playAdjacentAmbientTrack(1)} title="Trocar trilha">
+                <SkipForward size={14} />
+              </button>
+            )}
           </div>
         )}
       </section>
