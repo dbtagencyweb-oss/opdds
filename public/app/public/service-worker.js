@@ -1,4 +1,4 @@
-const CACHE_NAME = 'opdds-app-v4';
+const CACHE_NAME = 'opdds-app-v5';
 const APP_SHELL = ['/', '/index.html', '/manifest.json'];
 
 self.addEventListener('install', (event) => {
