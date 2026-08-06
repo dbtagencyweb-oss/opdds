@@ -17090,7 +17090,7 @@ html.light .home-reading-track-strip .home-track-play,
 html.light .home-continue-stack .home-resume-strip button,
 html.light .audio-row button:last-child,
 html.light .continue-card button {
-  background: #b17545 !important;
+    background: var(--opdds-premium-gold-gradient) !important;
   border-color: rgba(177, 117, 69, 0.72) !important;
   color: #17130b !important;
 }
