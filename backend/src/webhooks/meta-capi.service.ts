@@ -11,6 +11,7 @@ type PurchaseEventInput = {
   value?: number;
   currency?: string;
   fbc?: string;
+  fbp?: string;
   clientIp?: string;
 };
 
@@ -56,6 +57,7 @@ export class MetaCapiService {
           user_data: {
             em: [sha256(input.email)],
             ...(input.fbc ? { fbc: input.fbc } : {}),
+            ...(input.fbp ? { fbp: input.fbp } : {}),
             ...(input.clientIp ? { client_ip_address: input.clientIp } : {}),
           },
           custom_data: {

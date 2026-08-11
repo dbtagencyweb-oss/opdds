@@ -171,26 +171,24 @@ function extractOrderValue(order: any, commissions: any, data: any): number {
 }
 
 /**
- * Recupera fbc (identificador do clique no anúncio) e o IP do comprador pra
- * melhorar a qualidade de correspondência do evento Purchase no Meta CAPI.
+ * Recupera fbc/fbp (identificadores de clique/navegador do Meta Pixel) e o
+ * IP do comprador pra melhorar a qualidade de correspondência do evento
+ * Purchase no Meta CAPI.
  *
  * O IP vem confirmado de Customer.ip num payload real de webhook (não existe
- * order.customer_ip/order.ip como se poderia supor). Já o fbc é incerto: o
- * TrackingParameters real da Kiwify tem um schema FIXO (s1/s2/s3/sck/src +
- * utm_*), sem um campo livre "fbc" — não dá pra simplesmente inventar um
- * parâmetro novo na URL do checkout e esperar a Kiwify devolver ele verbatim.
- * `sck` ("sub click id") é o candidato mais forte pra carregar esse valor,
- * mas isso PRECISA ser confirmado com uma compra de teste real (checar o
- * body bruto salvo em PurchaseEvent após passar ?sck=teste123 na URL do
- * checkout) antes de confiar nisso pra valer em produção.
+ * order.customer_ip/order.ip como se poderia supor). fbc/fbp são repassados
+ * pela LP via TrackingParameters.sck/src (os únicos campos livres que a
+ * Kiwify de fato aceita e devolve — confirmado com uma compra de teste real
+ * pro fbc/sck; fbp/src ainda não testado, checar antes de confiar 100%).
  */
 function extractTrackingIds(data: any, customer: any) {
   const tracking = data.TrackingParameters ?? data.trackingParameters ?? data.tracking_parameters ?? {};
 
   const fbc = String(valueOf(tracking.fbc, tracking.fbclid, tracking.sck) ?? '').trim() || undefined;
+  const fbp = String(valueOf(tracking.fbp, tracking.src) ?? '').trim() || undefined;
   const ip = String(valueOf(customer.ip, customer.IP) ?? '').trim() || undefined;
 
-  return { fbc, ip };
+  return { fbc, fbp, ip };
 }
 
 function extractData(body: any) {
@@ -328,6 +326,7 @@ export class KiwifyWebhookController {
           value: purchase.value,
           currency: purchase.currency,
           fbc: purchase.tracking.fbc,
+          fbp: purchase.tracking.fbp,
           clientIp: purchase.tracking.ip,
         })
         .catch(() => {});
@@ -372,6 +371,7 @@ export class KiwifyWebhookController {
         value: purchase.value,
         currency: purchase.currency,
         fbc: purchase.tracking.fbc,
+        fbp: purchase.tracking.fbp,
         clientIp: purchase.tracking.ip,
       })
       .catch(() => {});
