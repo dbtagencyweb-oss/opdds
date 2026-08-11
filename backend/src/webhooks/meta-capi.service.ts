@@ -10,6 +10,8 @@ type PurchaseEventInput = {
   orderId?: string | null;
   value?: number;
   currency?: string;
+  fbc?: string;
+  clientIp?: string;
 };
 
 function sha256(value: string): string {
@@ -53,6 +55,8 @@ export class MetaCapiService {
           action_source: 'website',
           user_data: {
             em: [sha256(input.email)],
+            ...(input.fbc ? { fbc: input.fbc } : {}),
+            ...(input.clientIp ? { client_ip_address: input.clientIp } : {}),
           },
           custom_data: {
             currency: input.currency || 'BRL',

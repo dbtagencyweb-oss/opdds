@@ -146,18 +146,51 @@ function verifySignature(rawBody: Buffer, signature = '', secret = '') {
   return timingSafeEqualHex(expected, signature.trim().toLowerCase());
 }
 
-function extractOrderValue(order: any, data: any): number {
-  const raw = valueOf(
+/**
+ * A Kiwify não manda o valor da compra em Order.amount/price como outras
+ * plataformas — ele vem só dentro de Commissions.charge_amount (ou
+ * product_base_price como fallback), sempre em centavos. Sem essa conversão
+ * o Purchase event ia pro Meta CAPI com value: 0 (nenhum dos outros campos
+ * pesquisados existe no payload real) ou, se caísse num payload com Order.*
+ * preenchido por engano, 100x maior que o valor real.
+ */
+function extractOrderValue(order: any, commissions: any, data: any): number {
+  const rawCents = valueOf(
+    commissions.charge_amount,
+    commissions.product_base_price,
     order.amount,
     order.total_price,
     order.charge_amount,
     order.product_price,
     order.price,
     data.amount,
-    data.Commissions?.charge_amount,
   );
-  const value = Number(raw);
-  return Number.isFinite(value) ? value : 0;
+  const cents = Number(rawCents);
+  if (!Number.isFinite(cents) || cents <= 0) return 0;
+  return Math.round(cents) / 100;
+}
+
+/**
+ * Recupera fbc (identificador do clique no anúncio) e o IP do comprador pra
+ * melhorar a qualidade de correspondência do evento Purchase no Meta CAPI.
+ *
+ * O IP vem confirmado de Customer.ip num payload real de webhook (não existe
+ * order.customer_ip/order.ip como se poderia supor). Já o fbc é incerto: o
+ * TrackingParameters real da Kiwify tem um schema FIXO (s1/s2/s3/sck/src +
+ * utm_*), sem um campo livre "fbc" — não dá pra simplesmente inventar um
+ * parâmetro novo na URL do checkout e esperar a Kiwify devolver ele verbatim.
+ * `sck` ("sub click id") é o candidato mais forte pra carregar esse valor,
+ * mas isso PRECISA ser confirmado com uma compra de teste real (checar o
+ * body bruto salvo em PurchaseEvent após passar ?sck=teste123 na URL do
+ * checkout) antes de confiar nisso pra valer em produção.
+ */
+function extractTrackingIds(data: any, customer: any) {
+  const tracking = data.TrackingParameters ?? data.trackingParameters ?? data.tracking_parameters ?? {};
+
+  const fbc = String(valueOf(tracking.fbc, tracking.fbclid, tracking.sck) ?? '').trim() || undefined;
+  const ip = String(valueOf(customer.ip, customer.IP) ?? '').trim() || undefined;
+
+  return { fbc, ip };
 }
 
 function extractData(body: any) {
@@ -165,15 +198,17 @@ function extractData(body: any) {
   const customer = data.Customer ?? data.customer ?? data.buyer ?? {};
   const order = data.Order ?? data.order ?? data;
   const subscription = data.Subscription ?? data.subscription ?? {};
+  const commissions = data.Commissions ?? order.Commissions ?? {};
 
   const email = String(valueOf(customer.email, order.customer_email, order.email, data.customer_email, data.email)).trim().toLowerCase();
   const name = String(valueOf(customer.full_name, customer.name, order.customer_name, data.customer_name, data.name, 'Leitor OPDDS')).trim();
   const orderId = String(valueOf(order.id, order.order_id, order.orderId, data.order_id, data.id, subscription.id)).trim() || null;
   const plan = resolvePlan(body);
-  const value = extractOrderValue(order, data);
-  const currency = String(valueOf(order.currency, data.currency, 'BRL')).trim().toUpperCase();
+  const value = extractOrderValue(order, commissions, data);
+  const currency = String(valueOf(commissions.currency, order.currency, data.currency, 'BRL')).trim().toUpperCase();
+  const tracking = extractTrackingIds(data, customer);
 
-  return { data, customer, order, subscription, email, name, orderId, plan, value, currency, productKeys: PRODUCTS_BY_PLAN[plan] };
+  return { data, customer, order, subscription, commissions, email, name, orderId, plan, value, currency, tracking, productKeys: PRODUCTS_BY_PLAN[plan] };
 }
 
 @Controller('kiwify')
@@ -287,7 +322,14 @@ export class KiwifyWebhookController {
       });
 
       this.metaCapi
-        .sendPurchaseEvent({ email: purchase.email, orderId: purchase.orderId, value: purchase.value, currency: purchase.currency })
+        .sendPurchaseEvent({
+          email: purchase.email,
+          orderId: purchase.orderId,
+          value: purchase.value,
+          currency: purchase.currency,
+          fbc: purchase.tracking.fbc,
+          clientIp: purchase.tracking.ip,
+        })
         .catch(() => {});
 
       return {
@@ -324,7 +366,14 @@ export class KiwifyWebhookController {
     });
 
     this.metaCapi
-      .sendPurchaseEvent({ email: purchase.email, orderId: purchase.orderId, value: purchase.value, currency: purchase.currency })
+      .sendPurchaseEvent({
+        email: purchase.email,
+        orderId: purchase.orderId,
+        value: purchase.value,
+        currency: purchase.currency,
+        fbc: purchase.tracking.fbc,
+        clientIp: purchase.tracking.ip,
+      })
       .catch(() => {});
 
     return {
