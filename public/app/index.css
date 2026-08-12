@@ -11071,6 +11071,7 @@ html.light .volume-control input::-webkit-slider-runnable-track {
   padding: clamp(18px, 4vw, 54px);
   background: rgba(5,6,8,.86);
   backdrop-filter: blur(24px);
+  overflow-y: auto;
 }
 
 .audio-fullscreen-bg {
@@ -11163,6 +11164,11 @@ html.light .volume-control input::-webkit-slider-runnable-track {
   100% { transform: translateX(0) translateY(0) rotate(-2.5deg); }
 }
 
+
+.audio-full-copy {
+  display: grid;
+  justify-items: center;
+}
 
 .audio-full-copy h2 {
   max-width: 720px;
@@ -11275,6 +11281,31 @@ html.light .volume-control input::-webkit-slider-runnable-track {
 .audio-control-volume input {
   width: 110px;
   accent-color: var(--gold);
+}
+
+/* Monitores de desktop mais baixos (ex: notebook 13"-14"): o card inteiro
+   (capa + título grande + espaçamentos) facilmente passa da altura da
+   viewport e empurra os controles de áudio pra fora, sem scroll. Encolhe o
+   suficiente pra caber sem precisar rolar na maioria dos casos; o
+   overflow-y:auto no .audio-fullscreen-player cobre o resto. */
+@media (max-height: 820px) and (min-width: 721px) {
+  .audio-full-card {
+    gap: 14px;
+  }
+
+  .audio-full-cover {
+    width: min(200px, 60vw);
+  }
+
+  .audio-full-copy h2 {
+    max-width: 640px;
+    margin: 4px 0 6px;
+    font-size: clamp(1.25rem, 3vw, 1.9rem);
+  }
+
+  .audio-full-visualizer {
+    height: 72px;
+  }
 }
 
 html.light .audio-fullscreen-player {
