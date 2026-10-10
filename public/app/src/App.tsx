@@ -109,6 +109,7 @@ import { pdfTextPages } from './data/pdfTextPages';
 import Button from './components/Button';
 import OnboardingModal from './components/OnboardingModal';
 import ReaderShell from './components/ReaderShell';
+import TrialCountdown from './components/TrialCountdown';
 import { PRODUCT_KEYS, PRODUCT_LABELS, ProductKey } from './config/products';
 import { runtimeConfig } from './config/runtime';
 import { useTheme } from './theme/ThemeProvider';
@@ -566,13 +567,24 @@ export function App() {
   const hasMindTrial = Boolean(mindTrial && mindAccessInfo?.canChat);
   const mindTrialEnded = Boolean(mindTrial && mindTrial.status === 'expirado' && mindTrial.trialStartedAt);
   const mindTrialDailyLimitReached = Boolean(mindTrial && mindTrial.status === 'ativo' && mindTrial.messagesToday >= mindTrial.dailyLimit);
-  const mindTrialLabel = (() => {
-    if (!hasMindTrial || !mindTrial) return null;
-    if (mindTrial.status === 'disponivel') return 'Degustação de 72h disponível · começa na sua primeira mensagem';
-    const msLeft = mindTrial.trialEndsAt ? new Date(mindTrial.trialEndsAt).getTime() - Date.now() : 0;
-    const hoursLeft = Math.max(0, Math.ceil(msLeft / 3_600_000));
-    return `Degustação: ${hoursLeft} ${hoursLeft === 1 ? 'hora restante' : 'horas restantes'} · ${mindTrial.messagesToday}/${mindTrial.dailyLimit} mensagens hoje`;
-  })();
+  // Quando o contador zera na tela, passa direto para a tela de continuidade.
+  const expireMindTrialLocally = () => setMindAccessInfo((current) => current?.trial
+    ? { ...current, canChat: false, trial: { ...current.trial, status: 'expirado', hoursLeft: 0 } }
+    : current);
+  const mindTrialLabel = !hasMindTrial || !mindTrial
+    ? null
+    : mindTrial.status === 'disponivel'
+      ? 'Degustação de 72h disponível · começa na sua primeira mensagem'
+      : (
+        <>
+          Degustação: <TrialCountdown endsAt={mindTrial.trialEndsAt} format="short" onExpire={expireMindTrialLocally} /> restantes · {mindTrial.messagesToday}/{mindTrial.dailyLimit} mensagens hoje
+        </>
+      );
+  const mindTrialNavBadge = !hasMindTrial || !mindTrial
+    ? null
+    : mindTrial.status === 'disponivel'
+      ? '72h'
+      : <TrialCountdown endsAt={mindTrial.trialEndsAt} format="short" />;
   const nextUpgradeOffer: UpgradeKey | null = hasProductAccess(PRODUCT_KEYS.igentMind90)
     ? null
     : hasProductAccess(PRODUCT_KEYS.igentMind30)
@@ -1920,14 +1932,24 @@ export function App() {
           <h2>Experimente o iGentMIND por 72 horas</h2>
         </div>
       </div>
-      <div className="upgrade-teaser-card">
+      <div className="upgrade-teaser-card trial-highlight">
         <div>
           <p className="kicker">Degustação</p>
           <strong>Mentor iGentMIND</strong>
-          <span>{mindTrialLabel}</span>
+          {mindTrial?.status === 'ativo' ? (
+            <>
+              <TrialCountdown endsAt={mindTrial.trialEndsAt} onExpire={expireMindTrialLocally} />
+              <span>restantes · {mindTrial.messagesToday}/{mindTrial.dailyLimit} mensagens hoje</span>
+            </>
+          ) : (
+            <>
+              <span className="trial-clock">72:00:00</span>
+              <span>O relógio começa na sua primeira mensagem · até {mindTrial?.dailyLimit ?? 15} mensagens por dia</span>
+            </>
+          )}
         </div>
         <Button onClick={() => navigate(ROUTES.IGENT)} variant="secondary">
-          <Brain size={17} /> Abrir iGentMIND
+          <Brain size={17} /> {mindTrial?.status === 'ativo' ? 'Continuar conversa' : 'Abrir iGentMIND'}
         </Button>
       </div>
     </section>
@@ -3374,7 +3396,7 @@ export function App() {
 
   const isRouteLocked = (routeId: Route) => {
     if ([ROUTES.BOOK, ROUTES.LIBRARY, ROUTES.SESSIONS, ROUTES.READER].includes(routeId as any)) return !hasReaderAccess;
-    if (routeId === ROUTES.IGENT) return !hasMindAccess;
+    if (routeId === ROUTES.IGENT) return !hasMindAccess && !hasMindTrial && !mindTrialEnded;
     if (routeId === ROUTES.COMMUNITY) return !hasGroupAccess;
     if (routeId === ROUTES.WORKBOOK) return !hasWorkbookAccess;
     if (routeId === ROUTES.LETTERS) return !hasReaderAccess;
@@ -3550,6 +3572,7 @@ export function App() {
                 <button key={item.id} className={route === item.id ? 'active' : ''} onClick={() => navigate(item.id)}>
                   <Icon size={18} />
                   <span>{item.label}</span>
+                  {item.id === ROUTES.IGENT && mindTrialNavBadge && <em className="nav-trial-badge">{mindTrialNavBadge}</em>}
                 </button>
               );
             })}
@@ -3563,7 +3586,7 @@ export function App() {
     const items = [
       { id: ROUTES.HOME, label: 'Início', icon: Home },
       { id: ROUTES.READER, label: 'Livro', icon: BookOpen },
-      hasMindAccess
+      hasMindAccess || hasMindTrial
         ? { id: ROUTES.IGENT, label: 'iGent', icon: Zap }
         : { id: ROUTES.LIBRARY, label: 'Travessia', icon: Library },
       hasWorkbookAccess
@@ -3586,6 +3609,7 @@ export function App() {
             >
               <Icon size={19} />
               <span>{item.label}</span>
+              {item.id === ROUTES.IGENT && mindTrialNavBadge && <em className="nav-trial-badge">{mindTrialNavBadge}</em>}
             </button>
           );
         })}
