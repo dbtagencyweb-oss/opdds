@@ -155,8 +155,10 @@ import {
   fetchAdminProducts,
   fetchAdminUsers,
   fetchCurrentUser,
+  fetchMindAccess,
   fetchMindStatus,
   fetchReaderJourney,
+  MindAccessInfo,
   fetchPublishedAudioTracks,
   getStoredAuthUser,
   grantAdminPlan,
@@ -174,6 +176,7 @@ import {
   syncReaderJourney,
   updateStoredAuthUser,
 } from './services/auth';
+import { ApiError } from './services/api';
 
 import {
   ROUTES,
@@ -430,6 +433,7 @@ export function App() {
   const [mindSessionId, setMindSessionId] = useState<string | undefined>();
   const [mindLoading, setMindLoading] = useState(false);
   const [mindServiceStatus, setMindServiceStatus] = useState<'openai' | 'gemini' | 'local' | null>(null);
+  const [mindAccessInfo, setMindAccessInfo] = useState<MindAccessInfo | null>(null);
   const [pendingMindPrompt, setPendingMindPrompt] = useState('');
   const [pendingMindSource, setPendingMindSource] = useState<MindSavedPlan['source']>('chat');
   const [mindSavedPlan, setMindSavedPlan] = useState<MindSavedPlan | null>(() => {
@@ -504,6 +508,13 @@ export function App() {
       .catch(() => {
         if (!cancelled) setMindServiceStatus(null);
       });
+    fetchMindAccess()
+      .then((access) => {
+        if (!cancelled) setMindAccessInfo(access);
+      })
+      .catch(() => {
+        if (!cancelled) setMindAccessInfo(null);
+      });
     return () => {
       cancelled = true;
     };
@@ -550,6 +561,18 @@ export function App() {
   const hasWorkbookAccess = hasProductAccess(PRODUCT_KEYS.workbook);
   const hasMindAccess = hasProductAccess(PRODUCT_KEYS.igentMind7) || hasProductAccess(PRODUCT_KEYS.igentMind30) || hasProductAccess(PRODUCT_KEYS.igentMind90) || hasProductAccess(PRODUCT_KEYS.vip);
   const hasGroupAccess = hasProductAccess(PRODUCT_KEYS.group);
+  // Degustação de 72h para quem comprou o produto base; o acesso pago sempre prevalece.
+  const mindTrial = !hasMindAccess && !mindAccessInfo?.paid ? mindAccessInfo?.trial ?? null : null;
+  const hasMindTrial = Boolean(mindTrial && mindAccessInfo?.canChat);
+  const mindTrialEnded = Boolean(mindTrial && mindTrial.status === 'expirado' && mindTrial.trialStartedAt);
+  const mindTrialDailyLimitReached = Boolean(mindTrial && mindTrial.status === 'ativo' && mindTrial.messagesToday >= mindTrial.dailyLimit);
+  const mindTrialLabel = (() => {
+    if (!hasMindTrial || !mindTrial) return null;
+    if (mindTrial.status === 'disponivel') return 'Degustação de 72h disponível · começa na sua primeira mensagem';
+    const msLeft = mindTrial.trialEndsAt ? new Date(mindTrial.trialEndsAt).getTime() - Date.now() : 0;
+    const hoursLeft = Math.max(0, Math.ceil(msLeft / 3_600_000));
+    return `Degustação: ${hoursLeft} ${hoursLeft === 1 ? 'hora restante' : 'horas restantes'} · ${mindTrial.messagesToday}/${mindTrial.dailyLimit} mensagens hoje`;
+  })();
   const nextUpgradeOffer: UpgradeKey | null = hasProductAccess(PRODUCT_KEYS.igentMind90)
     ? null
     : hasProductAccess(PRODUCT_KEYS.igentMind30)
@@ -3156,6 +3179,7 @@ export function App() {
         context: buildMindContext(value, pendingMindSource),
       });
       setMindSessionId(response.sessionId);
+      if (response.trial) setMindAccessInfo((current) => current ? { ...current, trial: response.trial ?? null } : current);
       saveMindPlan(activeMentorTopic, value, response.message, pendingMindSource);
       setMindMessages((current) => [
         ...current,
@@ -3171,6 +3195,18 @@ export function App() {
         },
       ]);
     } catch (error) {
+      if (error instanceof ApiError && (error.code === 'MIND_TRIAL_EXPIRED' || error.code === 'MIND_TRIAL_DAILY_LIMIT')) {
+        const trial = error.payload?.trial ?? null;
+        const expired = error.code === 'MIND_TRIAL_EXPIRED';
+        setMindAccessInfo((current) => current ? { ...current, trial, canChat: !expired } : current);
+        if (!expired) {
+          setMindMessages((current) => [
+            ...current,
+            { id: `agent-${Date.now()}`, from: 'agent', kind: 'plan', text: String(error.payload?.message || 'Você atingiu o limite de mensagens de hoje da degustação.') },
+          ]);
+        }
+        return;
+      }
       const localModeReason = error instanceof Error && error.message.includes('conta online')
         ? 'Você está usando um acesso local. Para conversar com o Gemini, entre com uma conta online que tenha o iGent liberado.'
         : 'A conexão com a IA não respondeu; a conversa continua no modo guiado local.';
@@ -4013,6 +4049,7 @@ export function App() {
               <small>{mindServiceStatus && mindServiceStatus !== 'local'
                 ? `IA conectada: ${mindServiceStatus === 'openai' ? 'OpenAI' : 'Gemini'} · segurança no servidor`
                 : 'Modo guiado local · conecte um provedor de IA no backend para respostas gerativas'}</small>
+              {mindTrialLabel && <small className="mind-trial-badge">{mindTrialLabel}</small>}
             </section>
             <section className="mind-intent-panel" aria-label="Privacidade do contexto">
               <div className="mind-flow-topline">
@@ -4155,6 +4192,7 @@ export function App() {
                   {activeMindEntryIntent === 'reflect' && <span>triagem {triageStepLabel}</span>}
                   {activeTriagePhase && <span>{activeTriagePhase.label}</span>}
                   {activeReaderMindState && <span>{READER_STATE_LABELS[activeReaderMindState.global_state]}</span>}
+                  {mindTrialLabel && <span className="mind-trial-badge">{mindTrialLabel}</span>}
                 </div>
                 <div className="mind-triage-progress" aria-label={`Progresso da triagem ${triageProgress}%`}>
                   <span style={{ width: `${triageProgress}%` }}></span>
@@ -4248,10 +4286,12 @@ export function App() {
               <input
                 value={mindInput}
                 onChange={(event) => setMindInput(event.target.value)}
-                placeholder={mindTriageComplete ? 'Converse com suas palavras...' : 'Ou responda com suas próprias palavras...'}
-                disabled={mindLoading || mindTyping}
+                placeholder={mindTrialDailyLimitReached
+                  ? 'Limite de hoje atingido · volta à meia-noite'
+                  : mindTriageComplete ? 'Converse com suas palavras...' : 'Ou responda com suas próprias palavras...'}
+                disabled={mindLoading || mindTyping || mindTrialDailyLimitReached}
               />
-              <button type="submit" disabled={mindLoading || mindTyping || !mindInput.trim()}>{mindLoading || mindTyping ? 'Lendo...' : 'Enviar'}</button>
+              <button type="submit" disabled={mindLoading || mindTyping || mindTrialDailyLimitReached || !mindInput.trim()}>{mindLoading || mindTyping ? 'Lendo...' : 'Enviar'}</button>
             </form>
           </section>
         )}
@@ -4346,7 +4386,7 @@ export function App() {
     </div>
   );
 
-  const UpgradeRouteView = ({ offerKey, expiredMessage }: { offerKey?: UpgradeKey; expiredMessage?: string } = {}) => {
+  const UpgradeRouteView = ({ offerKey, expiredMessage, eyebrow }: { offerKey?: UpgradeKey; expiredMessage?: string; eyebrow?: string } = {}) => {
     const key = offerKey ?? upgradeRouteOffer;
     const offer = upgradeOffers[key];
     const alreadyActive = hasUpgradeOffer(key);
@@ -4354,7 +4394,7 @@ export function App() {
       <div className="app-page page-enter">
         <section className="locked-panel">
           <div className="mentor-mark"><Zap size={20} /></div>
-          <p className="kicker">{alreadyActive ? 'Módulo ativo' : offer.eyebrow}</p>
+          <p className="kicker">{alreadyActive ? 'Módulo ativo' : eyebrow || offer.eyebrow}</p>
           <h1>{offer.title}</h1>
           <p>{alreadyActive ? 'Este produto já aparece como liberado para sua conta.' : expiredMessage || offer.description}</p>
           <div className="upgrade-includes">
@@ -5587,7 +5627,16 @@ export function App() {
       case ROUTES.SESSIONS: return hasReaderAccess ? SessionsView() : <LockedView title="Áudios bloqueados" offerKey="basic" />;
       case ROUTES.COMMUNITY: return hasGroupAccess ? CommunityView() : <LockedView title="Comunidade bloqueada" offerKey="group" />;
       case ROUTES.IGENT: {
-        if (hasMindAccess) return IGentMindView();
+        if (hasMindAccess || hasMindTrial) return IGentMindView();
+        if (mindTrialEnded) {
+          return (
+            <UpgradeRouteView
+              offerKey="igent30"
+              eyebrow="Degustação encerrada"
+              expiredMessage="Suas 72 horas de degustação do iGentMIND terminaram. Suas conversas ficam guardadas: continue de onde parou com o Diário + iGentMIND por 30 dias."
+            />
+          );
+        }
         if (authUser?.mindAccess?.expired) return <UpgradeRouteView offerKey="igent90" expiredMessage="Seu acesso ao iGentMIND expirou. Renove para continuar a conversa." />;
         return <UpgradeRouteView offerKey="igent30" />;
       }

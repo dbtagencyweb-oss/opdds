@@ -1,5 +1,17 @@
 import { runtimeConfig } from '../config/runtime';
 
+export class ApiError extends Error {
+  constructor(
+    message: string,
+    public readonly status: number,
+    public readonly code?: string,
+    public readonly payload?: any,
+  ) {
+    super(message);
+    this.name = 'ApiError';
+  }
+}
+
 type RequestOptions = RequestInit & {
   token?: string | null;
 };
@@ -34,8 +46,9 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
 
   if (!response.ok) {
     let detail = response.statusText;
+    let payload: any;
     try {
-      const payload = await response.json();
+      payload = await response.json();
       const message = Array.isArray(payload?.message) ? payload.message.join(' ') : payload?.message;
       detail = message || payload?.error || detail;
     } catch {
@@ -45,7 +58,7 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
         // Keep the original status text when the response body is not readable.
       }
     }
-    throw new Error(`API ${response.status}: ${detail}`);
+    throw new ApiError(`API ${response.status}: ${detail}`, response.status, payload?.code, payload);
   }
 
   return response.json() as Promise<T>;

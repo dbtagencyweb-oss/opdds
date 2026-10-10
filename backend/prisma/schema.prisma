@@ -184,3 +184,38 @@ model BookAudioTrackMeta {
   @@unique([chapterId, sectionKey])
   @@index([chapterId, sortOrder])
 }
+
+// Degustação do iGentMIND (72h, 15 msgs/dia) concedida a quem compra o produto
+// base. Chaveada por e-mail porque o webhook pode chegar antes do cadastro.
+// status: disponivel | ativo | expirado | cancelado
+model MindTrial {
+  id                 String           @id @default(cuid())
+  email              String           @unique
+  status             String           @default("disponivel")
+  source             String?
+  externalId         String?
+  purchasedAt        DateTime
+  activationDeadline DateTime
+  trialStartedAt     DateTime?
+  trialEndsAt        DateTime?
+  dailyDate          String?
+  dailyCount         Int              @default(0)
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+  events             MindTrialEvent[]
+
+  @@index([status, trialEndsAt])
+}
+
+// Eventos de e-mail da degustação: trial_ativado | trial_dia2 | trial_expirado.
+// O unique garante um disparo por tipo mesmo com o sweep rodando em paralelo.
+model MindTrialEvent {
+  id          String    @id @default(cuid())
+  trialId     String
+  type        String
+  deliveredAt DateTime?
+  createdAt   DateTime  @default(now())
+  trial       MindTrial @relation(fields: [trialId], references: [id], onDelete: Cascade)
+
+  @@unique([trialId, type])
+}

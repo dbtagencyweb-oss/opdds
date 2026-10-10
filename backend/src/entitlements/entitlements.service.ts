@@ -12,6 +12,19 @@ export const PRODUCT_KEYS = {
   vip: 'opdds_vip',
 } as const;
 
+/** Duração (dias) dos produtos com prazo; os demais são vitalícios (expiresAt null). */
+export const PRODUCT_DURATION_DAYS: Partial<Record<string, number>> = {
+  [PRODUCT_KEYS.igentMind7]: 7,
+  [PRODUCT_KEYS.igentMind30]: 30,
+  [PRODUCT_KEYS.igentMind90]: 90,
+};
+
+export function expiresAtFor(productKey: string, from = new Date()): Date | null {
+  const days = PRODUCT_DURATION_DAYS[productKey];
+  if (!days) return null;
+  return new Date(from.getTime() + days * 24 * 60 * 60 * 1000);
+}
+
 @Injectable()
 export class EntitlementsService {
   constructor(private readonly prisma: PrismaService) {}

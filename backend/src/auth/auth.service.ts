@@ -5,6 +5,7 @@ import * as crypto from 'crypto';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateInviteDto, ForgotPasswordDto, LoginDto, RegisterDto, ResetPasswordDto } from './auth.dto';
 import { MailService } from './mail.service';
+import { expiresAtFor } from '../entitlements/entitlements.service';
 
 type AccessPlan = 'pdf' | 'basic' | 'workbook' | 'igent7' | 'igent30' | 'igent90' | 'group' | 'vip';
 
@@ -236,6 +237,8 @@ export class AuthService {
         },
       });
 
+      // O prazo do iGentMIND conta a partir do cadastro (quando o acesso começa
+      // de fato), igual ao webhook para quem já tem conta.
       for (const productKey of productKeys) {
         const product = await tx.product.findUnique({ where: { key: productKey } });
         await tx.entitlement.create({
@@ -245,6 +248,7 @@ export class AuthService {
             productKey,
             source: 'INVITE',
             status: 'ACTIVE',
+            expiresAt: expiresAtFor(productKey),
           },
         });
       }

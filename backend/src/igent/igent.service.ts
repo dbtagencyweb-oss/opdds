@@ -1,5 +1,6 @@
-import { ForbiddenException, HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
-import { EntitlementsService, PRODUCT_KEYS } from '../entitlements/entitlements.service';
+import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
+import { AuthenticatedUser } from '../auth/auth.types';
+import { MindTrialService } from '../mind-trial/mind-trial.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { WorkbookService, JOURNEY_PROMPT_ID } from '../workbook/workbook.service';
 import { MindChatDto, MindHistoryMessage } from './igent.dto';
@@ -149,7 +150,7 @@ export class IGentService {
 
   constructor(
     private readonly prisma: PrismaService,
-    private readonly entitlements: EntitlementsService,
+    private readonly mindTrial: MindTrialService,
     private readonly workbookService: WorkbookService,
   ) {}
 
@@ -163,10 +164,14 @@ export class IGentService {
     };
   }
 
-  async listSessions(userId: string) {
-    await this.ensureMindAccess(userId);
+  access(user: AuthenticatedUser) {
+    return this.mindTrial.getAccess(user);
+  }
+
+  async listSessions(user: AuthenticatedUser) {
+    await this.mindTrial.ensureAccess(user);
     const sessions = await this.prisma.mindSession.findMany({
-      where: { userId },
+      where: { userId: user.id },
       orderBy: { updatedAt: 'desc' },
       take: 30,
     });
@@ -184,9 +189,11 @@ export class IGentService {
     return { deleted: result.count };
   }
 
-  async chat(userId: string, dto: MindChatDto) {
-    await this.ensureMindAccess(userId);
+  async chat(user: AuthenticatedUser, dto: MindChatDto) {
+    const userId = user.id;
     this.enforceRateLimit(userId);
+    // Pago prevalece; sem pago, ativa/consome a degustação (lança 403/429 quando bloqueado).
+    const access = await this.mindTrial.consumeMessage(user);
 
     const cleanMessage = dto.message.trim();
     const context = this.safeContext(dto.context);
@@ -243,20 +250,8 @@ export class IGentService {
       fallback: answer.fallback,
       provider: answer.provider,
       references: grounding.references,
+      trial: access.trial,
     };
-  }
-
-  private async ensureMindAccess(userId: string) {
-    const [mind7, mind30, mind90, vip] = await Promise.all([
-      this.entitlements.hasProduct(userId, PRODUCT_KEYS.igentMind7),
-      this.entitlements.hasProduct(userId, PRODUCT_KEYS.igentMind30),
-      this.entitlements.hasProduct(userId, PRODUCT_KEYS.igentMind90),
-      this.entitlements.hasProduct(userId, PRODUCT_KEYS.vip),
-    ]);
-
-    if (!mind7 && !mind30 && !mind90 && !vip) {
-      throw new ForbiddenException('iGentMIND não liberado para este usuário.');
-    }
   }
 
   private enforceRateLimit(userId: string) {

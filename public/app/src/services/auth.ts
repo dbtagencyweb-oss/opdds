@@ -111,6 +111,24 @@ export type MindChatResponse = {
     sectionId: string;
     sectionTitle: string;
   }>;
+  trial?: MindTrialInfo | null;
+};
+
+export type MindTrialInfo = {
+  status: 'disponivel' | 'ativo' | 'expirado' | 'cancelado';
+  activationDeadline: string;
+  trialStartedAt: string | null;
+  trialEndsAt: string | null;
+  hoursLeft: number | null;
+  messagesToday: number;
+  dailyLimit: number;
+};
+
+export type MindAccessInfo = {
+  paid: boolean;
+  canChat: boolean;
+  trial: MindTrialInfo | null;
+  checkoutUrl: string;
 };
 
 export type MindServiceStatus = {
@@ -521,6 +539,12 @@ export async function fetchMindStatus() {
   const token = getStoredAuthToken();
   if (!token || isLocalAuthToken(token)) return null;
   return apiRequest<MindServiceStatus>('/api/igent/status', { token });
+}
+
+export async function fetchMindAccess() {
+  const token = getStoredAuthToken();
+  if (!token || isLocalAuthToken(token)) return null;
+  return apiRequest<MindAccessInfo>('/api/igent/access', { token });
 }
 
 export async function fetchReaderJourney() {

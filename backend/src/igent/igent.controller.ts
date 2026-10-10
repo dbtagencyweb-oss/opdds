@@ -16,9 +16,14 @@ export class IGentController {
     return this.igentService.status();
   }
 
+  @Get('access')
+  access(@CurrentUser() user: AuthenticatedUser) {
+    return this.igentService.access(user);
+  }
+
   @Get('sessions')
   sessions(@CurrentUser() user: AuthenticatedUser) {
-    return this.igentService.listSessions(user.id);
+    return this.igentService.listSessions(user);
   }
 
   @Delete('sessions')
@@ -30,6 +35,6 @@ export class IGentController {
   @Throttle({ default: { limit: 15, ttl: 60_000 } })
   @Post('chat')
   chat(@CurrentUser() user: AuthenticatedUser, @Body() body: MindChatDto) {
-    return this.igentService.chat(user.id, body);
+    return this.igentService.chat(user, body);
   }
 }

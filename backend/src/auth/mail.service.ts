@@ -14,6 +14,15 @@ type PurchaseInviteEmailInput = {
   planLabel: string;
 };
 
+type MindTrialEmailInput = {
+  type: 'trial_ativado' | 'trial_dia2' | 'trial_expirado';
+  to: string;
+  name?: string | null;
+  trialEndsAt: Date | null;
+  checkoutUrl: string;
+  appUrl?: string;
+};
+
 type EmailMessage = {
   from: string;
   subject: string;
@@ -164,5 +173,55 @@ export class MailService {
     const result = await this.deliver(input.to, { from, subject, text, html });
     if (!result.delivered) this.logger.warn(`Link de cadastro para ${input.to}: ${input.registerUrl}`);
     return result;
+  }
+
+  async sendMindTrialEmail(input: MindTrialEmailInput) {
+    const from = process.env.MAIL_FROM || 'no-reply@opoderdosdesacreditados.online';
+    const firstName = input.name?.trim()?.split(/\s+/)[0] || 'leitor';
+    const appUrl = input.appUrl || 'https://opoderdosdesacreditados.online';
+    const endsAt = input.trialEndsAt
+      ? new Intl.DateTimeFormat('pt-BR', { timeZone: 'America/Sao_Paulo', dateStyle: 'short', timeStyle: 'short' }).format(input.trialEndsAt)
+      : null;
+
+    const copy = {
+      trial_ativado: {
+        subject: 'Sua degustacao do iGentMIND comecou',
+        title: 'Sua degustacao comecou',
+        lines: [
+          'Voce acabou de abrir sua primeira conversa com o iGentMIND.',
+          `A partir de agora voce tem 72 horas${endsAt ? ` (ate ${endsAt})` : ''} e ate 15 mensagens por dia para conversar com o mentor.`,
+        ],
+        cta: { label: 'Continuar a conversa', url: appUrl },
+      },
+      trial_dia2: {
+        subject: 'Segundo dia da sua degustacao do iGentMIND',
+        title: 'Voce esta no segundo dia',
+        lines: [
+          'Sua degustacao do iGentMIND segue ativa.',
+          `${endsAt ? `Ela termina em ${endsAt}. ` : ''}Se quiser manter o mentor depois disso, o Diario + iGentMIND 30 dias continua de onde voce parou.`,
+        ],
+        cta: { label: 'Voltar ao iGentMIND', url: appUrl },
+      },
+      trial_expirado: {
+        subject: 'Sua degustacao do iGentMIND terminou',
+        title: 'Sua degustacao terminou',
+        lines: [
+          'As 72 horas da sua degustacao do iGentMIND chegaram ao fim.',
+          'Para continuar a conversa, o Diario + iGentMIND 30 dias custa R$ 37 e libera o mentor por 30 dias.',
+        ],
+        cta: { label: 'Continuar com 30 dias', url: input.checkoutUrl },
+      },
+    }[input.type];
+
+    const text = [`Ola, ${firstName}.`, '', ...copy.lines, '', `${copy.cta.label}: ${copy.cta.url}`, '', 'O Poder dos Desacreditados'].join('\n');
+    const html = `
+      <div style="font-family:Arial,sans-serif;line-height:1.6;color:#211f1b">
+        <h2 style="margin:0 0 12px;color:#211f1b">${copy.title}</h2>
+        <p>Ola, ${firstName}.</p>
+        ${copy.lines.map((line) => `<p>${line}</p>`).join('\n        ')}
+        <p><a href="${copy.cta.url}" style="display:inline-block;padding:12px 18px;border-radius:999px;background:#c8a45d;color:#111;text-decoration:none;font-weight:bold">${copy.cta.label}</a></p>
+      </div>
+    `;
+    return this.deliver(input.to, { from, subject: copy.subject, text, html });
   }
 }

@@ -6,6 +6,8 @@ import { AuthService } from '../auth/auth.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { IS_PRODUCTION } from '../config/env';
 import { MetaCapiService } from './meta-capi.service';
+import { MindTrialService } from '../mind-trial/mind-trial.service';
+import { expiresAtFor } from '../entitlements/entitlements.service';
 
 type AccessPlan = 'pdf' | 'basic' | 'workbook' | 'igent7' | 'igent30' | 'igent90' | 'group' | 'vip';
 type RevokeStatus = 'CANCELED' | 'REFUNDED';
@@ -111,18 +113,6 @@ function resolvePlan(payload: any): AccessPlan {
   return 'basic';
 }
 
-const PRODUCT_DURATION_DAYS: Partial<Record<string, number>> = {
-  opdds_igentmind_7d: 7,
-  opdds_igentmind_30d: 30,
-  opdds_igentmind_90d: 90,
-};
-
-function expiresAtFor(productKey: string): Date | null {
-  const days = PRODUCT_DURATION_DAYS[productKey];
-  if (!days) return null;
-  return new Date(Date.now() + days * 24 * 60 * 60 * 1000);
-}
-
 function timingSafeEqualHex(a: string, b: string) {
   const bufA = Buffer.from(a, 'hex');
   const bufB = Buffer.from(b, 'hex');
@@ -215,6 +205,7 @@ export class KiwifyWebhookController {
     private readonly authService: AuthService,
     private readonly prisma: PrismaService,
     private readonly metaCapi: MetaCapiService,
+    private readonly mindTrial: MindTrialService,
   ) {}
 
   @Throttle({ default: { limit: 60, ttl: 60_000 } })
@@ -306,6 +297,13 @@ export class KiwifyWebhookController {
       return { ok: true, duplicate: true, event: eventType || null };
     }
 
+    // Compra do produto base libera a degustação do iGentMIND (72h, ativada na
+    // 1ª mensagem). Chaveada por e-mail, então vale também para quem ainda vai
+    // se cadastrar pelo convite.
+    if (!renewal && purchase.plan === 'basic') {
+      await this.mindTrial.grantFromPurchase({ email: purchase.email, externalId: purchase.orderId });
+    }
+
     const user = await this.prisma.user.findUnique({ where: { email: purchase.email } });
 
     if (!user) {
@@ -388,6 +386,7 @@ export class KiwifyWebhookController {
 
   private async revokeAccess(body: any, purchase: ReturnType<typeof extractData>, eventType: string, status: RevokeStatus) {
     const user = purchase.email ? await this.prisma.user.findUnique({ where: { email: purchase.email } }) : null;
+    if (purchase.plan === 'basic') await this.mindTrial.cancelForEmail(purchase.email);
     const update = user
       ? await this.prisma.entitlement.updateMany({
           where: { userId: user.id, productKey: { in: purchase.productKeys }, status: 'ACTIVE' },
