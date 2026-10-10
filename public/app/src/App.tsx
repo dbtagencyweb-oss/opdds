@@ -579,7 +579,7 @@ export function App() {
       ? 'igent90'
       : hasProductAccess(PRODUCT_KEYS.igentMind7)
         ? 'igent30'
-        : authUser?.mindAccess?.expired
+        : authUser?.mindAccess?.expired || mindAccessInfo?.trial
           ? 'igent30'
           : 'igent7';
   const isAdmin = authUser?.role === 'ADMIN';
@@ -1912,7 +1912,26 @@ export function App() {
     window.open(checkoutUrl.toString(), '_blank', 'noopener,noreferrer');
   };
 
-  const renderUpgradeTeaser = () => (
+  const renderUpgradeTeaser = () => hasMindTrial ? (
+    <section className="upgrade-section">
+      <div className="upgrade-section-head">
+        <div>
+          <p className="kicker">Incluído na sua compra</p>
+          <h2>Experimente o iGentMIND por 72 horas</h2>
+        </div>
+      </div>
+      <div className="upgrade-teaser-card">
+        <div>
+          <p className="kicker">Degustação</p>
+          <strong>Mentor iGentMIND</strong>
+          <span>{mindTrialLabel}</span>
+        </div>
+        <Button onClick={() => navigate(ROUTES.IGENT)} variant="secondary">
+          <Brain size={17} /> Abrir iGentMIND
+        </Button>
+      </div>
+    </section>
+  ) : (
     <section className="upgrade-section">
       <div className="upgrade-section-head">
         <div>
