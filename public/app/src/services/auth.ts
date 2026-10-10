@@ -219,6 +219,11 @@ export function getStoredAuthToken() {
   return localStorage.getItem(TOKEN_KEY);
 }
 
+export function isOnlineSession() {
+  const token = getStoredAuthToken();
+  return Boolean(token && !isLocalAuthToken(token));
+}
+
 export function listLocalUsers(): LocalUserRecord[] {
   return loadLocalUsers();
 }
@@ -237,6 +242,19 @@ export function updateStoredAuthUser(patch: Partial<Pick<AuthUser, 'name' | 'ema
   const nextUsers = users.map((user) => user.id === current.id ? { ...user, ...updated } : user);
   saveLocalUsers(nextUsers);
   return updated;
+}
+
+/** Conta online: salva o nome no servidor. Acesso local: só no navegador. */
+export async function updateAccountProfile(patch: { name: string; email?: string }) {
+  const token = getStoredAuthToken();
+  if (!token || isLocalAuthToken(token)) return updateStoredAuthUser(patch);
+  const response = await apiRequest<AuthResponse>('/api/auth/me', {
+    token,
+    method: 'PATCH',
+    body: JSON.stringify({ name: patch.name }),
+  });
+  persistAuth(response);
+  return response.user;
 }
 
 export async function registerAccount(input: { name: string; email: string; password: string; token: string }) {

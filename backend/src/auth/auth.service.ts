@@ -3,7 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
 import { PrismaService } from '../prisma/prisma.service';
-import { CreateInviteDto, ForgotPasswordDto, LoginDto, RegisterDto, ResetPasswordDto } from './auth.dto';
+import { CreateInviteDto, ForgotPasswordDto, LoginDto, RegisterDto, ResetPasswordDto, UpdateProfileDto } from './auth.dto';
 import { MailService } from './mail.service';
 import { expiresAtFor } from '../entitlements/entitlements.service';
 
@@ -358,6 +358,15 @@ export class AuthService {
       select: { id: true, email: true, name: true, role: true },
     });
     if (!user) throw new UnauthorizedException('Usuário não encontrado.');
+    return this.sign(user);
+  }
+
+  async updateProfile(userId: string, data: UpdateProfileDto) {
+    const user = await this.prisma.user.update({
+      where: { id: userId },
+      data: { name: data.name },
+      select: { id: true, email: true, name: true, role: true },
+    });
     return this.sign(user);
   }
 

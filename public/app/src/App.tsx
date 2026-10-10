@@ -175,7 +175,8 @@ import {
   saveAdminBookAudioOrder,
   sendMindMessage,
   syncReaderJourney,
-  updateStoredAuthUser,
+  updateAccountProfile,
+  isOnlineSession,
 } from './services/auth';
 import { ApiError } from './services/api';
 
@@ -1978,13 +1979,24 @@ export function App() {
     </section>
   );
 
-  const saveAccountProfile = () => {
-    const updated = updateStoredAuthUser({ name: accountName, email: accountEmail });
-    if (updated) {
-      setAuthUser(updated);
-      setAccountMessage('Perfil atualizado nesta sessão.');
-    } else {
-      setAccountMessage('Entre na conta para editar o perfil.');
+  const isOnlineAccount = Boolean(authUser) && isOnlineSession();
+
+  const saveAccountProfile = async () => {
+    if (!accountName.trim()) {
+      setAccountMessage('Informe um nome.');
+      return;
+    }
+    try {
+      const updated = await updateAccountProfile({ name: accountName, email: accountEmail });
+      if (updated) {
+        setAuthUser(updated);
+        setAccountName(updated.name || '');
+        setAccountMessage('Perfil salvo.');
+      } else {
+        setAccountMessage('Entre na conta para editar o perfil.');
+      }
+    } catch {
+      setAccountMessage('Não foi possível salvar agora. Verifique a conexão e tente de novo.');
     }
   };
 
@@ -4976,7 +4988,14 @@ export function App() {
           </label>
           <label>
             <span>E-mail</span>
-            <input value={accountEmail} onChange={(event) => setAccountEmail(event.target.value)} placeholder="voce@email.com" />
+            <input
+              value={accountEmail}
+              onChange={(event) => setAccountEmail(event.target.value)}
+              placeholder="voce@email.com"
+              readOnly={isOnlineAccount}
+              title={isOnlineAccount ? 'O e-mail é o seu login e o vínculo com suas compras.' : undefined}
+            />
+            {isOnlineAccount && <small>O e-mail é o seu login e o vínculo com suas compras. Para trocar, fale com o suporte.</small>}
           </label>
           {accountMessage && <p>{accountMessage}</p>}
           <div className="workbook-actions">

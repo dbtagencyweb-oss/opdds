@@ -1,4 +1,4 @@
-import { IsEmail, IsInt, IsOptional, IsString, Min, MinLength } from 'class-validator';
+import { IsEmail, IsInt, IsOptional, IsString, MaxLength, Min, MinLength } from 'class-validator';
 import { Transform } from 'class-transformer';
 
 export class RegisterDto {
@@ -14,6 +14,14 @@ export class RegisterDto {
 
   @IsString()
   token!: string;
+}
+
+export class UpdateProfileDto {
+  @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
+  @IsString()
+  @MinLength(1)
+  @MaxLength(80)
+  name!: string;
 }
 
 export class LoginDto {
