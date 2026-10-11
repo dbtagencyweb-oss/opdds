@@ -5,6 +5,13 @@ import { PrismaService } from '../prisma/prisma.service';
 export class HealthController {
   constructor(private readonly prisma: PrismaService) {}
 
+  // Para monitores de uptime (UptimeRobot): mantém o Render acordado sem tocar
+  // no banco, para não consumir as horas de compute do plano grátis do Neon.
+  @Get('ping')
+  ping() {
+    return { status: 'online' };
+  }
+
   @Get()
   async health() {
     let database = 'disconnected';
