@@ -1,6 +1,6 @@
 import { accessTokenPlans, accessTokens } from '../data/book';
 import { runtimeConfig } from '../config/runtime';
-import { apiRequest } from './api';
+import { ApiError, apiHealth, apiRequest } from './api';
 import { localEntitlements, LocalPlan } from './entitlements';
 
 export type UserRole = 'MEMBER' | 'ADMIN';
@@ -172,6 +172,48 @@ function withTimeout<T>(promise: Promise<T>, ms = 9000): Promise<T> {
   });
 }
 
+/**
+ * O backend roda no plano grátis do Render (e o banco no Neon), que dormem sem
+ * uso e levam ~30-60s para acordar. Nesse intervalo a requisição falha por
+ * rede/timeout ou volta 502/503/504: tentamos de novo em vez de mostrar erro.
+ * Erros de verdade (senha errada, token inválido = 4xx) voltam na hora.
+ */
+const WAKE_TOTAL_MS = 90_000;
+const WAKE_ATTEMPT_MS = 45_000;
+
+function isTransientApiError(error: unknown) {
+  if (error instanceof ApiError) return [502, 503, 504].includes(error.status);
+  return true;
+}
+
+async function callWithServerWake<T>(request: () => Promise<T>, onRetry?: () => void): Promise<T> {
+  const startedAt = Date.now();
+  for (let attempt = 1; ; attempt += 1) {
+    try {
+      return await withTimeout(request(), WAKE_ATTEMPT_MS);
+    } catch (error) {
+      if (!isTransientApiError(error)) throw error;
+      if (Date.now() - startedAt > WAKE_TOTAL_MS) {
+        throw new Error('O servidor está demorando para responder. Aguarde alguns segundos e tente de novo.');
+      }
+      onRetry?.();
+      await new Promise((resolve) => window.setTimeout(resolve, Math.min(5000, 1500 * attempt)));
+    }
+  }
+}
+
+let wakePromise: Promise<unknown> | null = null;
+
+/** Dispara um ping para o backend começar a acordar enquanto o leitor digita. */
+export function wakeApi() {
+  if (!wakePromise) {
+    wakePromise = apiHealth().catch(() => {
+      wakePromise = null;
+    });
+  }
+  return wakePromise;
+}
+
 const TOKEN_KEY = 'opd_auth_token';
 const USER_KEY = 'opd_auth_user';
 const LOCAL_USERS_KEY = 'opd_local_users';
@@ -258,12 +300,25 @@ export async function updateAccountProfile(patch: { name: string; email?: string
 }
 
 export async function registerAccount(input: { name: string; email: string; password: string; token: string }) {
+  let retried = false;
   try {
-    return persistAuth(await withTimeout(apiRequest<AuthResponse>('/api/auth/register', {
+    return persistAuth(await callWithServerWake(() => apiRequest<AuthResponse>('/api/auth/register', {
       method: 'POST',
       body: JSON.stringify(input),
-    })));
+    }), () => { retried = true; }));
   } catch (error) {
+    // Uma tentativa que caiu por timeout pode ter criado a conta no servidor; aí a
+    // repetição volta "token usado"/"e-mail já cadastrado". Entra com os mesmos dados.
+    if (retried && error instanceof ApiError && (error.status === 400 || error.status === 409)) {
+      try {
+        return persistAuth(await apiRequest<AuthResponse>('/api/auth/login', {
+          method: 'POST',
+          body: JSON.stringify({ email: input.email, password: input.password }),
+        }));
+      } catch {
+        throw error;
+      }
+    }
     if (!runtimeConfig.localMode) throw error;
     const normalizedToken = input.token.trim().toUpperCase();
     const plan = localTokenPlan(normalizedToken);
@@ -291,7 +346,7 @@ export async function registerAccount(input: { name: string; email: string; pass
 
 export async function loginAccount(input: { email: string; password: string }) {
   try {
-    return persistAuth(await withTimeout(apiRequest<AuthResponse>('/api/auth/login', {
+    return persistAuth(await callWithServerWake(() => apiRequest<AuthResponse>('/api/auth/login', {
       method: 'POST',
       body: JSON.stringify(input),
     })));
@@ -306,14 +361,14 @@ export async function loginAccount(input: { email: string; password: string }) {
 }
 
 export async function requestPasswordReset(email: string) {
-  return withTimeout(apiRequest<{ ok: boolean; message: string; resetUrl?: string }>('/api/auth/forgot-password', {
+  return callWithServerWake(() => apiRequest<{ ok: boolean; message: string; resetUrl?: string }>('/api/auth/forgot-password', {
     method: 'POST',
     body: JSON.stringify({ email }),
   }));
 }
 
 export async function resetPassword(input: { token: string; password: string }) {
-  return persistAuth(await withTimeout(apiRequest<AuthResponse>('/api/auth/reset-password', {
+  return persistAuth(await callWithServerWake(() => apiRequest<AuthResponse>('/api/auth/reset-password', {
     method: 'POST',
     body: JSON.stringify(input),
   })));

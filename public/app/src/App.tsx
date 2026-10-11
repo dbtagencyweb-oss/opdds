@@ -110,6 +110,7 @@ import Button from './components/Button';
 import OnboardingModal from './components/OnboardingModal';
 import ReaderShell from './components/ReaderShell';
 import TrialCountdown from './components/TrialCountdown';
+import ServerWaitHint from './components/ServerWaitHint';
 import { PRODUCT_KEYS, PRODUCT_LABELS, ProductKey } from './config/products';
 import { runtimeConfig } from './config/runtime';
 import { useTheme } from './theme/ThemeProvider';
@@ -177,6 +178,7 @@ import {
   syncReaderJourney,
   updateAccountProfile,
   isOnlineSession,
+  wakeApi,
 } from './services/auth';
 import { ApiError } from './services/api';
 
@@ -1213,6 +1215,11 @@ export function App() {
     localStorage.setItem('reading_ambient_enabled', String(isAmbientPlaying));
   }, [ambientAudioState.isPlaying, ambientAudioState.currentUrl, selectedReadingTrack]);
 
+  // Começa a acordar o backend (Render free) assim que o app abre.
+  useEffect(() => {
+    void wakeApi();
+  }, []);
+
   useEffect(() => {
     if (!authUser) return;
     fetchCurrentUser()
@@ -1807,21 +1814,26 @@ export function App() {
   };
 
   const handleForgotPasswordSubmit = async () => {
+    if (authSubmitting) return;
     playClick('primary');
     setAuthMessage('');
     if (!authEmail.trim()) {
       setAuthMessage('Informe seu e-mail para receber o link de redefinição.');
       return;
     }
+    setAuthSubmitting(true);
     try {
       const response = await requestPasswordReset(authEmail);
       setAuthMessage(response.resetUrl ? `${response.message} Link local: ${response.resetUrl}` : response.message || 'Se este e-mail estiver cadastrado, enviaremos um link de redefinição.');
     } catch (error: any) {
       setAuthMessage(error?.message || 'Não foi possível solicitar a redefinição agora.');
+    } finally {
+      setAuthSubmitting(false);
     }
   };
 
   const handleResetPasswordSubmit = async () => {
+    if (authSubmitting) return;
     playClick('primary');
     setAuthMessage('');
     if (authPassword.length < 6) {
@@ -1832,6 +1844,7 @@ export function App() {
       setAuthMessage('As senhas não conferem.');
       return;
     }
+    setAuthSubmitting(true);
     try {
       const response = await resetPassword({ token: passwordResetToken, password: authPassword });
       setPlan(response.user.plan);
@@ -1842,6 +1855,8 @@ export function App() {
       navigate(localStorage.getItem('opd_onboarding_done') ? ROUTES.HOME : ROUTES.ONBOARDING);
     } catch (error: any) {
       setAuthMessage(error?.message || 'Link inválido, expirado ou já utilizado.');
+    } finally {
+      setAuthSubmitting(false);
     }
   };
 
@@ -3459,9 +3474,16 @@ export function App() {
                 </>
               )}
               {authMessage && <p>{authMessage}</p>}
-              <Button onClick={isReset ? handleResetPasswordSubmit : handleForgotPasswordSubmit} className="cover-primary">
-                {isReset ? 'Redefinir senha' : 'Enviar link por e-mail'}
+              <Button
+                onClick={isReset ? handleResetPasswordSubmit : handleForgotPasswordSubmit}
+                className={`cover-primary ${authSubmitting ? 'is-loading' : ''}`}
+                disabled={authSubmitting}
+                aria-busy={authSubmitting}
+              >
+                {authSubmitting && <span className="button-spinner" aria-hidden="true" />}
+                {authSubmitting ? (isReset ? 'Redefinindo...' : 'Enviando...') : (isReset ? 'Redefinir senha' : 'Enviar link por e-mail')}
               </Button>
+              <ServerWaitHint active={authSubmitting} />
               <button className="cover-link" onClick={() => { setAuthMessage(''); setAuthMode('login'); }}>Voltar para login</button>
             </div>
           </section>
@@ -3519,6 +3541,7 @@ export function App() {
             {authSubmitting && <span className="button-spinner" aria-hidden="true" />}
             {authSubmitting ? (authMode === 'register' ? 'Criando acesso...' : 'Entrando...') : (authMode === 'register' ? 'Criar acesso' : 'Entrar')}
           </Button>
+          <ServerWaitHint active={authSubmitting} />
           {authMode === 'register' && <button className="cover-link" onClick={handleTokenSubmit}>Validar token manualmente</button>}
           {authMode === 'login' && <button className="cover-link" onClick={() => { setAuthMessage(''); setAuthMode('forgot'); }}>Esqueci minha senha</button>}
         </div>
