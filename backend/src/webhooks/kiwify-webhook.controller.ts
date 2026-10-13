@@ -1,4 +1,4 @@
-import { Body, Controller, Headers, HttpCode, Post, Query, RawBodyRequest, Req, UnauthorizedException } from '@nestjs/common';
+import { Body, Controller, Headers, HttpCode, Logger, Post, Query, RawBodyRequest, Req, UnauthorizedException } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
 import type { Request } from 'express';
 import * as crypto from 'crypto';
@@ -8,6 +8,7 @@ import { IS_PRODUCTION } from '../config/env';
 import { MetaCapiService } from './meta-capi.service';
 import { MindTrialService } from '../mind-trial/mind-trial.service';
 import { expiresAtFor } from '../entitlements/entitlements.service';
+import { LeadsService } from '../leads/leads.service';
 
 type AccessPlan = 'pdf' | 'basic' | 'workbook' | 'igent7' | 'igent30' | 'igent90' | 'group' | 'vip';
 type RevokeStatus = 'CANCELED' | 'REFUNDED';
@@ -201,11 +202,14 @@ function extractData(body: any) {
 
 @Controller('kiwify')
 export class KiwifyWebhookController {
+  private readonly logger = new Logger(KiwifyWebhookController.name);
+
   constructor(
     private readonly authService: AuthService,
     private readonly prisma: PrismaService,
     private readonly metaCapi: MetaCapiService,
     private readonly mindTrial: MindTrialService,
+    private readonly leads: LeadsService,
   ) {}
 
   @Throttle({ default: { limit: 60, ttl: 60_000 } })
@@ -266,7 +270,25 @@ export class KiwifyWebhookController {
       return { ok: true, ignored: true, event: detectedEvent || null };
     }
 
-    return this.grantAccess(body, purchase, detectedEvent);
+    const result = await this.grantAccess(body, purchase, detectedEvent);
+    this.linkQuizLead(purchase);
+    return result;
+  }
+
+  /**
+   * Compra aprovada → leads do quiz com o mesmo e-mail/WhatsApp viram
+   * `comprou`. Roda depois da liberação e sem await: nunca atrasa nem
+   * derruba o acesso.
+   */
+  private linkQuizLead(purchase: ReturnType<typeof extractData>) {
+    const customer = purchase.customer ?? {};
+    const phone = String(valueOf(customer.mobile, customer.phone, customer.phone_number, customer.cellphone));
+    this.leads
+      .markPurchased({ email: purchase.email, phone })
+      .then((count) => {
+        if (count > 0) this.logger.log(`${count} lead(s) do quiz marcado(s) como comprou (${purchase.orderId || 'sem pedido'}).`);
+      })
+      .catch((error) => this.logger.warn(`Falha ao ligar a compra ${purchase.orderId || ''} aos leads do quiz: ${error?.message || error}`));
   }
 
   private async grantAccess(body: any, purchase: ReturnType<typeof extractData>, eventType: string, renewal = false) {

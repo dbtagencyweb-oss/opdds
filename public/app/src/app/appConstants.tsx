@@ -58,7 +58,7 @@ export const ROUTES = {
 
 export type Route = typeof ROUTES[keyof typeof ROUTES];
 export type Plan = LocalPlan;
-export type AdminSection = 'overview' | 'readers' | 'book' | 'sensory' | 'kiwify' | 'plans' | 'copy';
+export type AdminSection = 'overview' | 'readers' | 'book' | 'sensory' | 'kiwify' | 'leads' | 'plans' | 'copy';
 
 export type AudioState = {
   isPlaying: boolean;

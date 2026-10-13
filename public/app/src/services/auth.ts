@@ -647,3 +647,106 @@ export async function deleteMindSessions() {
   if (!token || isLocalAuthToken(token)) return { deleted: 0 };
   return apiRequest<{ deleted: number }>('/api/igent/sessions', { token, method: 'DELETE' });
 }
+
+// ── Leads do quiz da LP ─────────────────────────────────────────────────────
+
+export type QuizLeadStatus = 'novo' | 'carta_enviada' | 'em_conversa' | 'comprou' | 'descadastrado';
+
+export type QuizLead = {
+  id: string;
+  createdAt: string;
+  nome: string;
+  whatsapp: string;
+  email: string | null;
+  prologo: string | null;
+  pilarResultado: string;
+  pilarNome: string;
+  ato: string;
+  atoNome: string;
+  pontuacoes: number[];
+  cartaUrl: string | null;
+  utmSource: string | null;
+  utmMedium: string | null;
+  utmCampaign: string | null;
+  utmContent: string | null;
+  status: QuizLeadStatus;
+  cartaEnviadaEm: string | null;
+  compradorEm: string | null;
+  observacao: string | null;
+};
+
+export type QuizLeadGroup = { whatsapp: string; lead: QuizLead; anteriores: QuizLead[] };
+
+export type QuizLeadsPage = { page: number; pageSize: number; totalGrupos: number; items: QuizLeadGroup[] };
+
+export type QuizLeadsResumo = {
+  total: number;
+  pessoas: number;
+  compraram: number;
+  taxaCompra: number;
+  porPilar: { codigo: string; nome: string; total: number }[];
+  porAto: { codigo: string; nome: string; total: number }[];
+  porOrigem: { origem: string; total: number }[];
+  porStatus: { status: QuizLeadStatus; total: number }[];
+};
+
+export type QuizLeadFilters = { de?: string; ate?: string; pilar?: string; status?: string; origem?: string; q?: string };
+
+const quizLeadQuery = (filters: Record<string, string | number | undefined>) =>
+  new URLSearchParams(
+    Object.entries(filters)
+      .filter(([, value]) => value !== undefined && value !== null && String(value) !== '')
+      .map(([key, value]) => [key, String(value)]),
+  ).toString();
+
+export async function fetchQuizLeads(filters: QuizLeadFilters & { page?: number } = {}) {
+  const token = getStoredAuthToken();
+  const query = quizLeadQuery(filters);
+  return apiRequest<QuizLeadsPage>(`/api/admin/leads${query ? `?${query}` : ''}`, { token });
+}
+
+export async function fetchQuizLeadsResumo(filters: QuizLeadFilters = {}) {
+  const token = getStoredAuthToken();
+  const query = quizLeadQuery(filters);
+  return apiRequest<QuizLeadsResumo>(`/api/admin/leads/resumo${query ? `?${query}` : ''}`, { token });
+}
+
+export async function updateQuizLead(id: string, input: { status?: QuizLeadStatus; observacao?: string; cartaEnviada?: boolean }) {
+  const token = getStoredAuthToken();
+  return apiRequest<QuizLead>(`/api/admin/leads/${encodeURIComponent(id)}`, {
+    token,
+    method: 'PATCH',
+    body: JSON.stringify(input),
+  });
+}
+
+export async function deleteQuizLead(id: string) {
+  const token = getStoredAuthToken();
+  return apiRequest<{ ok: boolean; removidos: number }>(`/api/admin/leads/${encodeURIComponent(id)}`, { token, method: 'DELETE' });
+}
+
+export async function deleteQuizLeadsByContact(input: { whatsapp?: string; email?: string }) {
+  const token = getStoredAuthToken();
+  const query = quizLeadQuery(input);
+  return apiRequest<{ ok: boolean; removidos: number }>(`/api/admin/leads/por-contato?${query}`, { token, method: 'DELETE' });
+}
+
+/** Baixa o CSV com o token (um link direto não levaria o Authorization). */
+export async function downloadQuizLeadsCsv(filters: QuizLeadFilters = {}) {
+  const token = getStoredAuthToken();
+  const query = quizLeadQuery(filters);
+  const response = await fetch(`${runtimeConfig.apiUrl}/api/admin/leads/export.csv${query ? `?${query}` : ''}`, {
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+    cache: 'no-store',
+  });
+  if (!response.ok) throw new ApiError(`API ${response.status}: não foi possível exportar o CSV.`, response.status);
+
+  const url = URL.createObjectURL(await response.blob());
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `leads-quiz-${new Date().toISOString().slice(0, 10)}.csv`;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}

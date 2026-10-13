@@ -219,3 +219,50 @@ model MindTrialEvent {
 
   @@unique([trialId, type])
 }
+
+enum QuizLeadStatus {
+  novo
+  carta_enviada
+  em_conversa
+  comprou
+  descadastrado
+}
+
+// Leads do quiz "Qual dilema te mantém desacreditado?" da LP. Tabela própria,
+// sem relação com User: quem refaz o quiz gera outro registro (o admin agrupa
+// por WhatsApp) e a exclusão por LGPD apaga de verdade.
+model QuizLead {
+  id              String         @id @default(cuid())
+  createdAt       DateTime       @default(now())
+  nome            String
+  whatsapp        String // só dígitos, sem DDI (DDD + número)
+  email           String?
+  consentimento   Boolean
+  consentimentoEm DateTime
+  prologo         String?
+  pilarResultado  String // pilar_1 … pilar_9
+  pontuacoes      Json
+  cartaUrl        String?
+  utmSource       String?
+  utmMedium       String?
+  utmCampaign     String?
+  utmContent      String?
+  utmTerm         String?
+  gclid           String?
+  eventId         String         @unique
+  fbc             String?
+  fbp             String?
+  pageUrl         String?
+  ip              String?
+  userAgent       String?
+  status          QuizLeadStatus @default(novo)
+  cartaEnviadaEm  DateTime?
+  compradorEm     DateTime?
+  observacao      String?
+
+  @@index([createdAt])
+  @@index([pilarResultado])
+  @@index([status])
+  @@index([whatsapp])
+  @@index([email])
+}

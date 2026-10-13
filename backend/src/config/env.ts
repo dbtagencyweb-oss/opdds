@@ -66,6 +66,44 @@ export function getMetaAdAccountId(): string {
 }
 
 /**
+ * URL da automação (WhatsApp/e-mail) que recebe cada lead do quiz da LP.
+ * Recurso opcional: sem ela, o lead só fica salvo no banco.
+ */
+export function getLeadWebhookUrl(): string {
+  return (process.env.LEAD_WEBHOOK_URL || '').trim();
+}
+
+/**
+ * Links das Cartas de Sustentação por pilar, em JSON:
+ * {"pilar_1":"https://…","pilar_2":"https://…",…}. JSON inválido vira mapa
+ * vazio (e o link enviado pelo próprio quiz é usado no lugar).
+ */
+export function getCartasUrls(): Record<string, string> {
+  const raw = (process.env.CARTAS_URLS || '').trim();
+  if (!raw) return {};
+  try {
+    const parsed = JSON.parse(raw);
+    return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : {};
+  } catch {
+    return {};
+  }
+}
+
+const DEFAULT_LEADS_ORIGINS = ['https://opoderdosdesacreditados.online', 'https://www.opoderdosdesacreditados.online'];
+
+/**
+ * Origens liberadas no CORS das rotas públicas do quiz (/api/leads*). A LP
+ * sempre entra; LEADS_CORS_ORIGINS acrescenta outras (ex.: preview local).
+ */
+export function getLeadsCorsOrigins(): string[] {
+  const extra = (process.env.LEADS_CORS_ORIGINS || '')
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+  return [...DEFAULT_LEADS_ORIGINS, ...extra];
+}
+
+/**
  * Valida a presença das variáveis obrigatórias na inicialização (produção).
  * Chamado a partir do bootstrap para dar um erro claro e único no boot.
  */

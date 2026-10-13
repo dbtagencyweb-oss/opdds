@@ -14,6 +14,7 @@ import {
   CheckCircle2,
   ChevronDown,
   ChevronLeft,
+  ClipboardList,
   Cloud,
   Copy,
   DownloadCloud,
@@ -262,6 +263,7 @@ import {
   mindGuides,
 } from './app/appConstants';
 import { MarketingStudioTabs } from './app/marketingStudio';
+import { QuizLeadsPanel } from './app/quizLeads';
 
 export function App() {
   const { darkMode, toggleTheme } = useTheme();
@@ -5108,6 +5110,7 @@ export function App() {
           { id: 'book', label: 'Livro', icon: BookOpen },
           { id: 'sensory', label: 'Áudios', icon: AudioLines },
           { id: 'kiwify', label: 'Kiwify', icon: Zap },
+          { id: 'leads', label: 'Leads do quiz', icon: ClipboardList },
           { id: 'plans', label: 'Planos', icon: Lock },
           { id: 'copy', label: 'Copys', icon: NotebookPen },
         ].map((item) => {
@@ -5665,6 +5668,8 @@ export function App() {
         </div>
       </section>
       )}
+
+      {adminSection === 'leads' && <QuizLeadsPanel />}
 
       {adminSection === 'copy' && <MarketingStudioTabs />}
     </div>
