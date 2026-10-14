@@ -62,13 +62,19 @@ button:focus-visible,a:focus-visible{outline:2px solid #A77F66;outline-offset:3p
 .env-cta small{font-size:.74rem;color:rgba(245,240,232,.5)}
 
 /* CABEÇALHO */
-header{background:#14141C;padding:20px clamp(20px,5vw,56px);display:flex;justify-content:center;border-bottom:1px solid #C09880}
+header{position:relative;background:#14141C;padding:20px clamp(20px,5vw,56px);display:flex;justify-content:center;border-bottom:1px solid #C09880}
 header img{display:block;height:44px;width:auto}
+.som{position:absolute;right:clamp(12px,4vw,40px);top:50%;width:44px;height:44px;margin-top:-22px;display:grid;place-items:center;border:1px solid rgba(192,152,128,.3);border-radius:50%;background:rgba(203,143,100,.08);color:#C09880;cursor:pointer;transition:background .2s,color .2s}
+.som:hover{background:rgba(203,143,100,.16);color:#ffd39d}
+.som[aria-pressed="false"]{color:rgba(245,240,232,.45)}
+.som .off{display:none}.som[aria-pressed="false"] .on{display:none}.som[aria-pressed="false"] .off{display:block}
 
 main{max-width:640px;margin:0 auto;padding:clamp(48px,9vw,96px) clamp(22px,5vw,32px) 40px}
 .meta{display:flex;flex-direction:column;gap:10px}
 .meta .sub{font-size:.66rem;letter-spacing:.22em;text-transform:uppercase;color:#7A7A8C;padding-left:40px}
 h1{margin:34px 0 0;font-family:'Fraunces',serif;font-weight:400;font-size:clamp(2.1rem,7vw,3.2rem);line-height:1.08;letter-spacing:-.015em;min-height:1.1em}
+@keyframes caret{50%{opacity:0}}
+.typing::after{content:'';display:inline-block;width:.07em;height:.85em;margin-left:.05em;vertical-align:-.06em;background:#cb8f64;animation:caret .8s steps(1) infinite}
 .nm{display:inline-block;-webkit-mask-image:linear-gradient(90deg,#000 40%,transparent 60%);mask-image:linear-gradient(90deg,#000 40%,transparent 60%);-webkit-mask-size:300% 100%;mask-size:300% 100%;animation:nameIn 1.2s cubic-bezier(.2,.7,.2,1) both}
 .prolog{margin:18px 0 0;font-family:'Fraunces',serif;font-style:italic;font-size:1.15rem;line-height:1.6;color:#A77F66;max-height:0;opacity:0;overflow:hidden;transition:max-height .8s ease,opacity .8s ease .2s}
 .prolog.on{max-height:12em;opacity:1}
@@ -77,7 +83,7 @@ h1{margin:34px 0 0;font-family:'Fraunces',serif;font-weight:400;font-size:clamp(
 .player{margin:40px 0 0;display:flex;align-items:center;gap:16px;padding:16px 18px;border-radius:14px;background:#14141C;color:#F5F0E8;box-shadow:0 16px 40px rgba(26,26,36,.18)}
 .play{flex:none;position:relative;width:52px;height:52px;border-radius:50%;border:0;cursor:pointer;display:grid;place-items:center;background:radial-gradient(circle at 38% 28%,#ffd39d,#cb8f64 58%,#926443);background-size:200% 200%;animation:gradientShift 8s ease infinite;border-bottom:2px solid rgb(132 82 56 / 72%)}
 .pl-mid{flex:1;min-width:0;display:flex;flex-direction:column;gap:8px}
-.pl-t{font-size:.6rem;font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:#C09880}
+.pl-t{font-size:.6rem;font-weight:500;letter-spacing:.16em;line-height:1.5;text-transform:uppercase;color:#C09880}
 .wave{display:flex;align-items:center;gap:3px;height:26px;cursor:pointer}
 .wave i{flex:1;height:100%;border-radius:2px;background:rgba(245,240,232,.18);transform:scaleY(.35);transition:background .2s}
 .wave i.on{background:#cb8f64}
@@ -154,7 +160,12 @@ footer a{color:rgba(245,240,232,.75)}
   </div>
 </div>
 
-<header><a href="../../"><img src="../../uploads/logo_opdds_fd_claro.webp" alt="O Poder dos Desacreditados"></a></header>
+<header><a href="../../"><img src="../../uploads/logo_opdds_fd_claro.webp" alt="O Poder dos Desacreditados"></a>
+  <button class="som" id="som" type="button" aria-pressed="true" aria-label="Som da página (máquina de escrever e respiração)" title="Som ligado">
+    <svg class="on" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>
+    <svg class="off" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="m22 9-6 6"/><path d="m16 9 6 6"/></svg>
+  </button>
+</header>
 
 <main>
   <div class="meta">
@@ -169,7 +180,7 @@ footer a{color:rgba(245,240,232,.75)}
       <svg id="icPlay" width="16" height="16" viewBox="0 0 24 24" style="margin-left:2px"><path d="M6 4l14 8-14 8z" fill="#000"></path></svg>
       <svg id="icPause" width="16" height="16" viewBox="0 0 24 24" hidden><path d="M6 4h4v16H6zM14 4h4v16h-4z" fill="#000"></path></svg>
     </button>
-    <div class="pl-mid"><span class="pl-t">Ouça na voz do autor</span><div class="wave" id="wave" aria-hidden="true"></div></div>
+    <div class="pl-mid"><span class="pl-t">Ouça como se eu estivesse lendo pra você</span><div class="wave" id="wave" aria-hidden="true"></div></div>
     <span class="pl-time" id="time">0:00</span>
     <audio id="audio" preload="none"></audio>
   </div>
@@ -222,8 +233,90 @@ function aplicaNome(t,nome){
 window.__testeNome=function(){var c=[['Você sabe, {nome}, que dói.','Você sabe que dói.'],['{nome}, você ficou.','Você ficou.'],['Obrigado, {nome}.','Obrigado.'],['Fica. {nome}, respira.','Fica. Respira.'],['Para {nome} e mais ninguém.','Para e mais ninguém.']];
  return c.map(function(x){var r=aplicaNome(x[0],'');return {in:x[0],out:r,ok:r===x[1]};});};
 
+/* ===== som: máquina de escrever, sopro e trilha (só depois de um toque) =====
+   Teclas, "plim" e sopro são sintetizados (Web Audio). A trilha é um trecho de
+   "Silêncio dourado" servido pela própria LP (../_audio/respiro.mp3). */
+var SOM=(function(){
+  var ctx=null,ligado=true,ruido=null,trilha=null,trilhaGain=null,trilhaTimer=null;
+  try{ligado=localStorage.getItem('opdds_carta_som')!=='0'}catch(e){}
+  function ac(){
+    if(!ligado)return null;
+    var C=window.AudioContext||window.webkitAudioContext;if(!C)return null;
+    try{if(!ctx)ctx=new C();if(ctx.state==='suspended')ctx.resume();}catch(e){return null}
+    return ctx;
+  }
+  function bufRuido(c){
+    if(ruido)return ruido;
+    ruido=c.createBuffer(1,c.sampleRate,c.sampleRate);var d=ruido.getChannelData(0);
+    for(var i=0;i<d.length;i++)d[i]=Math.random()*2-1;return ruido;
+  }
+  function tecla(){
+    var c=ac();if(!c)return;var t=c.currentTime;
+    var n=c.createBufferSource();n.buffer=bufRuido(c);
+    var f=c.createBiquadFilter();f.type='bandpass';f.frequency.value=1700+Math.random()*1300;f.Q.value=1.4;
+    var g=c.createGain();g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(0.22,t+0.004);g.gain.exponentialRampToValueAtTime(0.0001,t+0.05);
+    n.connect(f);f.connect(g);g.connect(c.destination);n.start(t,Math.random()*0.5,0.06);
+    var o=c.createOscillator();o.type='triangle';o.frequency.value=95+Math.random()*30;
+    var og=c.createGain();og.gain.setValueAtTime(0.06,t);og.gain.exponentialRampToValueAtTime(0.0001,t+0.05);
+    o.connect(og);og.connect(c.destination);o.start(t);o.stop(t+0.06);
+  }
+  function plim(){
+    var c=ac();if(!c)return;var t=c.currentTime+0.05;
+    [2093,3136].forEach(function(fr,i){var o=c.createOscillator();o.type='sine';o.frequency.value=fr;
+      var g=c.createGain();g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(i?0.025:0.06,t+0.01);g.gain.exponentialRampToValueAtTime(0.0001,t+1.4);
+      o.connect(g);g.connect(c.destination);o.start(t);o.stop(t+1.5);});
+  }
+  function sopro(dur,inspira){
+    var c=ac();if(!c)return;var t=c.currentTime;
+    var n=c.createBufferSource();n.buffer=bufRuido(c);n.loop=true;
+    var f=c.createBiquadFilter();f.type='lowpass';f.Q.value=0.7;
+    f.frequency.setValueAtTime(inspira?280:1100,t);f.frequency.linearRampToValueAtTime(inspira?1100:280,t+dur);
+    var g=c.createGain();g.gain.setValueAtTime(0.0001,t);g.gain.linearRampToValueAtTime(0.05,t+dur*0.45);g.gain.linearRampToValueAtTime(0.0001,t+dur);
+    n.connect(f);f.connect(g);g.connect(c.destination);n.start(t);n.stop(t+dur+0.05);
+  }
+  function trilhaStart(){
+    var c=ac();if(!c)return;
+    clearTimeout(trilhaTimer);
+    if(!trilha){trilha=new Audio('../_audio/respiro.mp3');trilha.preload='auto';
+      try{var s=c.createMediaElementSource(trilha);trilhaGain=c.createGain();trilhaGain.gain.value=0;s.connect(trilhaGain);trilhaGain.connect(c.destination);}catch(e){trilhaGain=null;}}
+    trilha.currentTime=0;
+    var t=c.currentTime;
+    if(trilhaGain){trilhaGain.gain.cancelScheduledValues(t);trilhaGain.gain.setValueAtTime(0.0001,t);trilhaGain.gain.linearRampToValueAtTime(0.32,t+2.5);}
+    else trilha.volume=0.32;
+    var p=trilha.play();if(p&&p.catch)p.catch(function(){});
+  }
+  function trilhaStop(rapido){
+    if(!trilha||trilha.paused)return;
+    var c=ctx,fade=rapido?0.4:3;
+    if(c&&trilhaGain){var t=c.currentTime;trilhaGain.gain.cancelScheduledValues(t);trilhaGain.gain.setValueAtTime(trilhaGain.gain.value,t);trilhaGain.gain.linearRampToValueAtTime(0.0001,t+fade);}
+    clearTimeout(trilhaTimer);trilhaTimer=setTimeout(function(){trilha.pause()},fade*1000+100);
+  }
+  function set(v){ligado=v;try{localStorage.setItem('opdds_carta_som',v?'1':'0')}catch(e){}if(!v)trilhaStop(true);else ac();}
+  return {ligado:function(){return ligado},estado:function(){return trilha?{tocando:!trilha.paused,t:Math.round(trilha.currentTime)}:null},set:set,desbloqueia:ac,tecla:tecla,plim:plim,sopro:sopro,trilhaStart:trilhaStart,trilhaStop:trilhaStop};
+})();
+
 /* ===== render ===== */
 var $=function(id){return document.getElementById(id)};
+var reduzido=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ===== abertura datilografada (só quando a pessoa abre o envelope) ===== */
+var tipo={timer:null,ativo:false};
+function datilografa(){
+  clearTimeout(tipo.timer);
+  var h=$('h1'),texto=nome?nome+', esta carta é sua.':'Esta carta é sua.';
+  h.textContent='';h.setAttribute('aria-label',texto);
+  var s=document.createElement('span');s.className='gold typing';s.setAttribute('aria-hidden','true');h.appendChild(s);
+  var i=0;tipo.ativo=true;
+  (function passo(){
+    if(i>=texto.length){s.classList.remove('typing');tipo.ativo=false;SOM.plim();return;}
+    var ch=texto.charAt(i++);s.textContent=texto.slice(0,i);if(ch!==' ')SOM.tecla();
+    tipo.timer=setTimeout(passo,ch===','?320:55+Math.random()*75);
+  })();
+}
+
+/* ===== botão de som ===== */
+(function(){var b=$('som');function pinta(){var on=SOM.ligado();b.setAttribute('aria-pressed',String(on));b.title=on?'Som ligado':'Som desligado';}
+  pinta();b.onclick=function(){SOM.set(!SOM.ligado());pinta();};})();
 var nome='';
 function render(){
   var art=$('carta');art.textContent='';
@@ -242,10 +335,13 @@ function observe(){document.querySelectorAll('.carta p,#sign').forEach(function(
 function personaliza(d){
   if(!d||!d.primeiroNome)return;
   nome=String(d.primeiroNome).trim().split(/\s+/)[0].slice(0,40);
-  var h=$('h1');h.textContent='';
-  var n=document.createElement('span');n.className='gold nm';n.textContent=nome+',';
-  h.appendChild(n);h.appendChild(document.createTextNode(' '));
-  var r=document.createElement('span');r.className='gold';r.textContent='esta carta é sua.';h.appendChild(r);
+  if(tipo.ativo){datilografa();}
+  else{
+    var h=$('h1');h.textContent='';h.removeAttribute('aria-label');
+    var n=document.createElement('span');n.className='gold nm';n.textContent=nome+',';
+    h.appendChild(n);h.appendChild(document.createTextNode(' '));
+    var r=document.createElement('span');r.className='gold';r.textContent='esta carta é sua.';h.appendChild(r);
+  }
   if(d.fraseProlog){$('prolog').textContent=d.fraseProlog;$('prolog').classList.add('on');}
   $('signTo').textContent='para '+nome;
   var to=$('envTo');to.textContent='Para '+nome;to.classList.add('on');
@@ -263,7 +359,10 @@ function busca(){
 }
 
 /* ===== envelope ===== */
-function abre(){var e=$('env');if(e.classList.contains('open'))return;e.classList.add('open');document.body.classList.remove('lock');try{sessionStorage.setItem('opdds_carta_aberta_'+CARTA.codigo,'1')}catch(x){}setTimeout(function(){e.hidden=true;observe();},1700);}
+function abre(){var e=$('env');if(e.classList.contains('open'))return;e.classList.add('open');document.body.classList.remove('lock');try{sessionStorage.setItem('opdds_carta_aberta_'+CARTA.codigo,'1')}catch(x){}
+  SOM.desbloqueia();/* dentro do toque: libera o áudio no celular */
+  if(!reduzido)setTimeout(datilografa,1250);
+  setTimeout(function(){e.hidden=true;observe();},1700);}
 $('seal').onclick=abre;$('openBtn').onclick=abre;
 (function(){var skip=false;try{skip=sessionStorage.getItem('opdds_carta_aberta_'+CARTA.codigo)==='1'}catch(e){}
  if(skip||matchMedia('(prefers-reduced-motion: reduce)').matches){$('env').hidden=true;document.body.classList.remove('lock');}})();
@@ -278,7 +377,7 @@ addEventListener('scroll',function(){var a=$('carta').getBoundingClientRect(),h=
   var pl=$('player'),a=$('audio');pl.hidden=false;a.src=CARTA.audioUrl;
   var bars=w.children,fmt=function(s){s=Math.floor(s||0);return Math.floor(s/60)+':'+('0'+s%60).slice(-2)};
   $('play').onclick=function(){a.paused?a.play():a.pause()};
-  a.onplay=function(){pl.classList.add('playing');$('icPlay').hidden=true;$('icPause').hidden=false};
+  a.onplay=function(){SOM.trilhaStop(true);pl.classList.add('playing');$('icPlay').hidden=true;$('icPause').hidden=false};
   a.onpause=a.onended=function(){pl.classList.remove('playing');$('icPlay').hidden=false;$('icPause').hidden=true};
   a.ontimeupdate=function(){var r=a.duration?a.currentTime/a.duration:0;$('time').textContent=fmt(a.currentTime);for(var i=0;i<bars.length;i++)bars[i].classList.toggle('on',i/bars.length<r)};
   w.onclick=function(e){if(!a.duration)return;var r=w.getBoundingClientRect();a.currentTime=a.duration*(e.clientX-r.left)/r.width};
@@ -286,7 +385,12 @@ addEventListener('scroll',function(){var a=$('carta').getBoundingClientRect(),h=
 
 /* ===== respiro ===== */
 $('breathBtn').onclick=function(){var b=$('breath'),t=$('orbT'),n=0;b.classList.remove('go');void b.offsetWidth;b.classList.add('go');this.hidden=true;t.textContent='Inspire';
-  var iv=setInterval(function(){n++;t.textContent=n%2?'Solte':'Inspire';if(n>=6){clearInterval(iv);t.textContent='Pronto.';$('breathBtn').hidden=false;$('breathBtn').textContent='De novo';}},4000);};
+  /* trilha baixinha + sopro no ritmo da esfera (4 s inspira, 4 s solta) */
+  var narr=$('audio');if(narr&&!narr.paused)narr.pause();
+  SOM.trilhaStart();SOM.sopro(3.8,true);
+  var iv=setInterval(function(){n++;t.textContent=n%2?'Solte':'Inspire';
+    if(n>=6){clearInterval(iv);t.textContent='Pronto.';$('breathBtn').hidden=false;$('breathBtn').textContent='De novo';SOM.trilhaStop();return;}
+    SOM.sopro(3.8,n%2===0);},4000);};
 
 /* ===== compra =====
    tracking.js carrega depois (defer), então o link é montado de novo no clique.
