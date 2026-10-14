@@ -72,3 +72,27 @@ export function paginaLinkInvalido() {
 <p>Talvez seus dados já tenham sido excluídos. Se ainda estiver recebendo e-mails, responda qualquer um deles pedindo para sair.</p>`,
   );
 }
+
+// "Enviar carta no WhatsApp" dos avisos: o formulário se envia sozinho (POST
+// marca a carta como enviada e redireciona para o wa.me). Robôs de e-mail só
+// fazem GET, então não marcam nada.
+export const CSP_ENVIAR_CARTA =
+  "default-src 'none'; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src https:; script-src 'unsafe-inline'; form-action 'self' https://wa.me https://api.whatsapp.com; base-uri 'none'";
+
+export function paginaEnviarCarta(primeiroNome: string, pilar: string) {
+  return layout(
+    'Enviar carta',
+    `<h1>Abrindo o WhatsApp…</h1>
+<p>Carta de ${escapeHtml(primeiroNome)} · ${escapeHtml(pilar)}. A mensagem já vai pronta, é só tocar em enviar.</p>
+<form method="post"><button type="submit">Abrir o WhatsApp</button></form>
+<script>document.forms[0].submit()</script>`,
+  ).replace('<span></span>E-mails', '<span></span>Leads do quiz');
+}
+
+export function paginaLinkExpirado() {
+  return layout(
+    'Link expirado',
+    `<h1>Este link expirou ou não é válido.</h1>
+<p>Abra o lead pelo admin (Leads do quiz) e use o botão "Enviar carta".</p>`,
+  ).replace('<span></span>E-mails', '<span></span>Leads do quiz');
+}

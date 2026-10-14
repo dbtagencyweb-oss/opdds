@@ -1,10 +1,20 @@
-import { Body, Controller, ForbiddenException, Get, Header, HttpCode, Post, Query, Req, Res } from '@nestjs/common';
+import { Body, Controller, ForbiddenException, Get, Header, HttpCode, Param, Post, Query, Req, Res } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
 import type { Request, Response } from 'express';
 import { clientIp } from '../common/client-ip';
 import { getLeadsCorsOrigins } from '../config/env';
 import { CreateLeadDto } from './leads.dto';
-import { paginaConfirmarDescadastro, paginaDescadastrado, paginaLinkInvalido } from './descadastro-page';
+import {
+  CSP_ENVIAR_CARTA,
+  paginaConfirmarDescadastro,
+  paginaDescadastrado,
+  paginaEnviarCarta,
+  paginaLinkExpirado,
+  paginaLinkInvalido,
+} from './descadastro-page';
+import { assinaturaValida } from './alerta';
+import { PILARES } from './pilares';
+import { primeiroNome } from './cartas';
 import { LeadsService } from './leads.service';
 
 // Rotas públicas do quiz da LP. O CORS delas é configurado à parte no main.ts.
@@ -60,5 +70,43 @@ export class LeadsController {
       return paginaLinkInvalido();
     }
     return paginaDescadastrado();
+  }
+
+  // Botão "Enviar carta no WhatsApp" dos avisos (e-mail/CallMeBot). O GET só
+  // mostra a página que se envia sozinha; o POST marca e redireciona ao wa.me.
+  @Throttle({ default: { limit: 30, ttl: 600_000 } })
+  @Get(':id/whatsapp')
+  @Header('Content-Type', 'text/html; charset=utf-8')
+  @Header('Cache-Control', 'no-store')
+  async paginaWhatsapp(
+    @Param('id') id: string,
+    @Query('e') expira: string,
+    @Query('s') sig: string,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    res.setHeader('Content-Security-Policy', CSP_ENVIAR_CARTA);
+    const lead = assinaturaValida(id, expira, sig) ? await this.leads.findById(id) : null;
+    if (!lead) {
+      res.status(404);
+      return paginaLinkExpirado();
+    }
+    return paginaEnviarCarta(primeiroNome(lead.nome), PILARES[lead.pilarResultado] ?? lead.pilarResultado);
+  }
+
+  @Throttle({ default: { limit: 30, ttl: 600_000 } })
+  @Post(':id/whatsapp')
+  async enviarWhatsapp(
+    @Param('id') id: string,
+    @Query('e') expira: string,
+    @Query('s') sig: string,
+    @Res() res: Response,
+  ) {
+    const lead = assinaturaValida(id, expira, sig) ? await this.leads.findById(id) : null;
+    if (!lead) {
+      res.status(404).setHeader('Content-Security-Policy', CSP_ENVIAR_CARTA);
+      res.type('html').send(paginaLinkExpirado());
+      return;
+    }
+    res.redirect(303, await this.leads.marcarCartaEnviada(lead));
   }
 }

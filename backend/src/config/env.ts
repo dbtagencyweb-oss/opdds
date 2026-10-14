@@ -96,6 +96,17 @@ export function getLeadAlertEmail(): string {
   return (process.env.LEAD_ALERT_EMAIL || process.env.ADMIN_EMAIL || '').trim();
 }
 
+/**
+ * Aviso de lead novo no WhatsApp do Diego pelo CallMeBot (opcional, gratuito).
+ * CALLMEBOT_PHONE com DDI (ex.: 5551999999999) e a CALLMEBOT_APIKEY recebida na ativação.
+ */
+export function getCallMeBot(): { phone: string; apiKey: string } {
+  return {
+    phone: (process.env.CALLMEBOT_PHONE || '').replace(/\D/g, ''),
+    apiKey: (process.env.CALLMEBOT_APIKEY || '').trim(),
+  };
+}
+
 /** Endereço do app (admin), para o link do aviso de lead novo. */
 export function getAppUrl(): string {
   return (process.env.APP_URL || 'https://app.opoderdosdesacreditados.online').trim().replace(/\/$/, '');

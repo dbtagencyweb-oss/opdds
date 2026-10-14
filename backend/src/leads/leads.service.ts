@@ -3,8 +3,9 @@ import { Prisma, QuizLead } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { MetaCapiService } from '../webhooks/meta-capi.service';
 import { MailService } from '../auth/mail.service';
-import { getApiPublicUrl, getAppUrl, getLeadAlertEmail, getLeadWebhookUrl, isQuizEmailEnabled } from '../config/env';
+import { getApiPublicUrl, getAppUrl, getCallMeBot, getLeadAlertEmail, getLeadWebhookUrl, isQuizEmailEnabled } from '../config/env';
 import { fraseDoPrologo, linkCarta, novoCartaToken, primeiroNome } from './cartas';
+import { linkEnviarCarta, linkWhatsapp } from './alerta';
 import { ATOS, PILARES, atoDoPilar } from './pilares';
 import { normalizeWhatsapp, whatsappVariants } from './phone';
 import { CreateLeadDto, LEAD_STATUSES, LeadStatus, UpdateLeadDto } from './leads.dto';
@@ -194,18 +195,68 @@ export class LeadsService {
     return [lead.utmSource, lead.utmCampaign].filter(Boolean).join(' / ') || 'direto';
   }
 
-  /** Aviso para o Diego (EMAIL_ENABLED=true). Sem WhatsApp nem e-mail do lead. */
+  /**
+   * Aviso para o Diego: e-mail (EMAIL_ENABLED=true) e WhatsApp via CallMeBot
+   * (CALLMEBOT_PHONE + CALLMEBOT_APIKEY). Sem WhatsApp nem e-mail do lead no
+   * texto; o botão de um toque leva um link assinado.
+   */
   private async sendLeadAlert(lead: QuizLead) {
+    const pilar = PILARES[lead.pilarResultado] ?? lead.pilarResultado;
+    const enviarCartaUrl = linkEnviarCarta(lead.id);
     const to = getLeadAlertEmail();
-    if (!isQuizEmailEnabled() || !to) return;
-    await this.mail.sendQuizLeadAlert({
-      to,
-      primeiroNome: primeiroNome(lead.nome),
-      pilar: PILARES[lead.pilarResultado] ?? lead.pilarResultado,
-      origem: this.origemDe(lead),
-      criadoEm: lead.createdAt,
-      adminUrl: `${getAppUrl()}/?admin=leads&lead=${encodeURIComponent(lead.id)}`,
+
+    await Promise.allSettled([
+      isQuizEmailEnabled() && to
+        ? this.mail.sendQuizLeadAlert({
+            to,
+            primeiroNome: primeiroNome(lead.nome),
+            pilar,
+            origem: this.origemDe(lead),
+            criadoEm: lead.createdAt,
+            adminUrl: `${getAppUrl()}/?admin=leads&lead=${encodeURIComponent(lead.id)}`,
+            enviarCartaUrl,
+          })
+        : Promise.resolve(),
+      this.sendCallMeBot(
+        [`🔔 Novo lead do quiz: ${primeiroNome(lead.nome)} · ${pilar}`, `Origem: ${this.origemDe(lead)}`, '', `Enviar a carta: ${enviarCartaUrl}`].join('\n'),
+      ),
+    ]);
+  }
+
+  /** WhatsApp para o próprio Diego pelo CallMeBot (serviço gratuito, opcional). */
+  private async sendCallMeBot(texto: string) {
+    const { phone, apiKey } = getCallMeBot();
+    if (!phone || !apiKey) return;
+    const url = `https://api.callmebot.com/whatsapp.php?phone=${encodeURIComponent(phone)}&text=${encodeURIComponent(texto)}&apikey=${encodeURIComponent(apiKey)}`;
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), WEBHOOK_TIMEOUT_MS);
+    try {
+      const response = await fetch(url, { signal: controller.signal });
+      const body = await response.text().catch(() => '');
+      // Sucesso responde algo como "Message queued"; erro vem com status 200 e texto de erro.
+      if (!response.ok || !/queued|sent/i.test(body)) {
+        this.logger.warn(`CallMeBot respondeu ${response.status}: ${body.replace(/<[^>]+>/g, ' ').slice(0, 200)}`);
+      }
+    } catch (error: any) {
+      this.logger.warn(`Falha ao avisar pelo CallMeBot: ${error?.message || error}`);
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
+  // ── Botão de um toque "Enviar carta no WhatsApp" ──────────────────────────
+
+  async findById(id: string) {
+    return id ? this.prisma.quizLead.findUnique({ where: { id } }) : null;
+  }
+
+  /** Marca a carta como enviada (sem rebaixar status que já andou) e devolve o wa.me. */
+  async marcarCartaEnviada(lead: QuizLead) {
+    await this.prisma.quizLead.update({
+      where: { id: lead.id },
+      data: { cartaEnviadaEm: new Date(), ...(lead.status === 'novo' ? { status: 'carta_enviada' as const } : {}) },
     });
+    return linkWhatsapp(lead);
   }
 
   /** Carta por e-mail para quem informou e-mail e não pediu descadastro. */

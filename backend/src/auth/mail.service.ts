@@ -30,6 +30,8 @@ type QuizLeadAlertInput = {
   origem: string;
   criadoEm: Date;
   adminUrl: string;
+  // Link assinado de um toque: marca a carta como enviada e abre o WhatsApp.
+  enviarCartaUrl: string;
 };
 
 type QuizCartaEmailInput = {
@@ -265,6 +267,7 @@ export class MailService {
       `Pilar: ${input.pilar}`,
       `Origem: ${input.origem}`,
       '',
+      `Enviar a carta no WhatsApp: ${input.enviarCartaUrl}`,
       `Abrir no admin: ${input.adminUrl}`,
     ].join('\n');
     const html = `
@@ -272,7 +275,9 @@ export class MailService {
         <h2 style="margin:0 0 12px;color:#211f1b">Novo lead do quiz</h2>
         <p><strong>${escapeHtml(input.primeiroNome)}</strong> · ${escapeHtml(input.pilar)}</p>
         <p>Horário: ${quando}<br>Origem: ${escapeHtml(input.origem)}</p>
-        <p><a href="${input.adminUrl}" style="display:inline-block;padding:12px 18px;border-radius:999px;background:#c8a45d;color:#111;text-decoration:none;font-weight:bold">Abrir no admin</a></p>
+        <p><a href="${input.enviarCartaUrl}" style="display:inline-block;padding:12px 18px;border-radius:999px;background:#25D366;color:#0b2e17;text-decoration:none;font-weight:bold">Enviar carta no WhatsApp</a></p>
+        <p style="font-size:13px;color:#666">A mensagem abre pronta com o link pessoal da carta, e o lead fica marcado como "carta enviada".</p>
+        <p><a href="${input.adminUrl}" style="color:#7a5236">Abrir no admin</a></p>
       </div>
     `;
     return this.deliver(input.to, { from, subject, text, html });
