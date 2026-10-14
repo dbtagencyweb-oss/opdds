@@ -3,7 +3,7 @@ import { Prisma, QuizLead } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { MetaCapiService } from '../webhooks/meta-capi.service';
 import { MailService } from '../auth/mail.service';
-import { getApiPublicUrl, getAppUrl, getCallMeBot, getLeadAlertEmail, getLeadWebhookUrl, isQuizEmailEnabled } from '../config/env';
+import { getApiPublicUrl, getAppUrl, getCallMeBot, getLeadAlertEmail, getLeadWebhookUrl, getTelegram, isQuizEmailEnabled } from '../config/env';
 import { fraseDoPrologo, linkCarta, novoCartaToken, primeiroNome } from './cartas';
 import { linkEnviarCarta, linkWhatsapp } from './alerta';
 import { ATOS, PILARES, atoDoPilar } from './pilares';
@@ -196,7 +196,8 @@ export class LeadsService {
   }
 
   /**
-   * Aviso para o Diego: e-mail (EMAIL_ENABLED=true) e WhatsApp via CallMeBot
+   * Aviso para o Diego: e-mail (EMAIL_ENABLED=true), Telegram
+   * (TELEGRAM_BOT_TOKEN + TELEGRAM_CHAT_ID) e WhatsApp via CallMeBot
    * (CALLMEBOT_PHONE + CALLMEBOT_APIKEY). Sem WhatsApp nem e-mail do lead no
    * texto; o botão de um toque leva um link assinado.
    */
@@ -217,10 +218,43 @@ export class LeadsService {
             enviarCartaUrl,
           })
         : Promise.resolve(),
+      this.sendTelegram(
+        [`🔔 Novo lead do quiz: ${primeiroNome(lead.nome)} · ${pilar}`, `Origem: ${this.origemDe(lead)}`].join('\n'),
+        enviarCartaUrl,
+      ),
       this.sendCallMeBot(
         [`🔔 Novo lead do quiz: ${primeiroNome(lead.nome)} · ${pilar}`, `Origem: ${this.origemDe(lead)}`, '', `Enviar a carta: ${enviarCartaUrl}`].join('\n'),
       ),
     ]);
+  }
+
+  /** Mensagem do bot de Telegram do Diego, com o botão de um toque embaixo. */
+  private async sendTelegram(texto: string, enviarCartaUrl: string) {
+    const { token, chatId } = getTelegram();
+    if (!token || !chatId) return;
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), WEBHOOK_TIMEOUT_MS);
+    try {
+      const response = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        signal: controller.signal,
+        body: JSON.stringify({
+          chat_id: chatId,
+          text: texto,
+          disable_web_page_preview: true,
+          reply_markup: { inline_keyboard: [[{ text: 'Enviar carta no WhatsApp', url: enviarCartaUrl }]] },
+        }),
+      });
+      if (!response.ok) {
+        const body = await response.text().catch(() => '');
+        this.logger.warn(`Telegram respondeu ${response.status}: ${body.slice(0, 300)}`);
+      }
+    } catch (error: any) {
+      this.logger.warn(`Falha ao avisar pelo Telegram: ${error?.message || error}`);
+    } finally {
+      clearTimeout(timer);
+    }
   }
 
   /** WhatsApp para o próprio Diego pelo CallMeBot (serviço gratuito, opcional). */

@@ -97,6 +97,17 @@ export function getLeadAlertEmail(): string {
 }
 
 /**
+ * Aviso de lead novo no Telegram do Diego: token do bot criado no @BotFather e
+ * o chat_id da conversa com ele (veja getUpdates depois de mandar /start ao bot).
+ */
+export function getTelegram(): { token: string; chatId: string } {
+  return {
+    token: (process.env.TELEGRAM_BOT_TOKEN || '').trim(),
+    chatId: (process.env.TELEGRAM_CHAT_ID || '').trim(),
+  };
+}
+
+/**
  * Aviso de lead novo no WhatsApp do Diego pelo CallMeBot (opcional, gratuito).
  * CALLMEBOT_PHONE com DDI (ex.: 5551999999999) e a CALLMEBOT_APIKEY recebida na ativação.
  */
