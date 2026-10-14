@@ -600,6 +600,16 @@ export function App() {
           ? 'igent30'
           : 'igent7';
   const isAdmin = authUser?.role === 'ADMIN';
+
+  // Link do e-mail de aviso de lead novo: /?admin=leads&lead=<id>. Vale também
+  // se o admin precisar fazer login antes (aplica quando isAdmin vira true).
+  const [quizLeadFocus, setQuizLeadFocus] = useState('');
+  const adminDeepLinkRef = useRef<string | null>(
+    (() => {
+      const params = new URLSearchParams(window.location.search);
+      return params.get('admin') === 'leads' ? params.get('lead') || '' : null;
+    })(),
+  );
   const currentProducts = onlineProducts || Object.values(PRODUCT_KEYS).filter((productKey) => hasLocalEntitlement(plan, productKey as ProductKey));
   const currentGroup = bookGroups.find((group) => group.id === selectedChapter.groupId) ?? bookGroups[0];
   const writtenLettersCount = pillarLetters.filter((letter) => readerLetters[letter.id]?.trim()).length;
@@ -1180,6 +1190,20 @@ export function App() {
       audioAnalysisContextRef.current?.close().catch(() => {});
     };
   }, [authUser?.id]);
+
+  // Declarado depois do efeito acima, que manda para a Home ao restaurar a sessão.
+  useEffect(() => {
+    if (!isAdmin || adminDeepLinkRef.current === null) return;
+    setQuizLeadFocus(adminDeepLinkRef.current);
+    adminDeepLinkRef.current = null;
+    setAdminSection('leads');
+    setRoute(ROUTES.ADMIN);
+    const params = new URLSearchParams(window.location.search);
+    params.delete('admin');
+    params.delete('lead');
+    const query = params.toString();
+    window.history.replaceState({}, document.title, `${window.location.pathname}${query ? `?${query}` : ''}`);
+  }, [isAdmin]);
 
   useEffect(() => {
     const audio = new Audio();
@@ -5669,7 +5693,7 @@ export function App() {
       </section>
       )}
 
-      {adminSection === 'leads' && <QuizLeadsPanel />}
+      {adminSection === 'leads' && <QuizLeadsPanel key={quizLeadFocus || 'todos'} focusLeadId={quizLeadFocus || undefined} />}
 
       {adminSection === 'copy' && <MarketingStudioTabs />}
     </div>

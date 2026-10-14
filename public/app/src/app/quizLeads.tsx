@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { ChevronDown, Download, MessageCircle, NotebookPen, RefreshCw, Search, Trash2 } from 'lucide-react';
+import { ChevronDown, Copy, Download, ExternalLink, MessageCircle, NotebookPen, RefreshCw, Search, Trash2 } from 'lucide-react';
 import Button from '../components/Button';
 import {
   deleteQuizLead,
@@ -73,7 +73,7 @@ function mensagemCarta(lead: QuizLead) {
   return [
     `Oi, ${primeiroNome(lead.nome)}. Aqui é o Diego, autor de O Poder dos Desacreditados.`,
     '',
-    `Seu dilema é o do ${pilarNome(lead)}. Como prometido, aqui está a Carta de Sustentação dele: ${lead.cartaUrl || ''}`,
+    `Seu dilema é o do ${pilarNome(lead)}. Como prometido, aqui está a Carta de Sustentação dele, escrita pra você: ${lead.cartaUrl || ''}`,
     '',
     'Uma sugestão: leia num momento em que você possa parar depois. Ela funciona melhor assim.',
     '',
@@ -89,16 +89,22 @@ function percent(value: number) {
   return `${(value * 100).toLocaleString('pt-BR', { maximumFractionDigits: 1 })}%`;
 }
 
-export function QuizLeadsPanel() {
+/** Link de pré-visualização: abre a carta sem marcar como lida. */
+function previewLink(lead: QuizLead) {
+  return lead.cartaUrl ? `${lead.cartaUrl}&v=admin` : '';
+}
+
+// focusLeadId: vem do link do e-mail de aviso (?admin=leads&lead=<id>).
+export function QuizLeadsPanel({ focusLeadId }: { focusLeadId?: string } = {}) {
   const [draft, setDraft] = useState<QuizLeadFilters>({});
-  const [filters, setFilters] = useState<QuizLeadFilters>({});
+  const [filters, setFilters] = useState<QuizLeadFilters>(() => (focusLeadId ? { leadId: focusLeadId } : {}));
   const [page, setPage] = useState(1);
   const [groups, setGroups] = useState<QuizLeadGroup[]>([]);
   const [totalGrupos, setTotalGrupos] = useState(0);
   const [resumo, setResumo] = useState<QuizLeadsResumo | null>(null);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
-  const [expanded, setExpanded] = useState<Record<string, boolean>>({});
+  const [expanded, setExpanded] = useState<Record<string, boolean>>(() => (focusLeadId ? { [focusLeadId]: true } : {}));
   const [notes, setNotes] = useState<Record<string, string>>({});
   const [lgpdContact, setLgpdContact] = useState('');
 
@@ -153,8 +159,16 @@ export function QuizLeadsPanel() {
     }
   };
 
+  const copiarLink = async (lead: QuizLead) => {
+    try {
+      await navigator.clipboard.writeText(lead.cartaUrl || '');
+      setMessage(`Link pessoal de ${primeiroNome(lead.nome)} copiado.`);
+    } catch {
+      window.prompt('Copie o link pessoal:', lead.cartaUrl || '');
+    }
+  };
+
   const enviarCarta = (lead: QuizLead) => {
-    if (!lead.cartaUrl && !window.confirm('Este pilar ainda não tem link de carta configurado (CARTAS_URLS). Abrir o WhatsApp mesmo assim?')) return;
     // Abre antes de qualquer await para o navegador não bloquear a nova aba.
     window.open(whatsappLink(lead), '_blank', 'noopener');
     void patchLead(lead, { status: lead.status === 'novo' ? 'carta_enviada' : undefined, cartaEnviada: true });
@@ -225,10 +239,20 @@ export function QuizLeadsPanel() {
         <span><b>Ato</b>{lead.atoNome || lead.ato}</span>
         <span><b>Prólogo</b>{lead.prologo || '-'}</span>
         <span><b>Pontuações</b>{Array.isArray(lead.pontuacoes) ? lead.pontuacoes.join(' · ') : '-'}</span>
-        <span><b>Carta enviada</b>{formatDateTime(lead.cartaEnviadaEm)}</span>
+        <span><b>Carta enviada (WhatsApp)</b>{formatDateTime(lead.cartaEnviadaEm)}</span>
+        <span><b>Carta por e-mail</b>{formatDateTime(lead.cartaEmailEnviadoEm)}</span>
+        <span><b>Abriu a carta</b>{formatDateTime(lead.cartaAbertaEm)}</span>
         <span><b>Comprou em</b>{formatDateTime(lead.compradorEm)}</span>
         <span><b>UTM</b>{[lead.utmSource, lead.utmMedium, lead.utmCampaign, lead.utmContent].filter(Boolean).join(' / ') || 'direto'}</span>
-        <span><b>Carta</b>{lead.cartaUrl ? <a href={lead.cartaUrl} target="_blank" rel="noreferrer">abrir link</a> : 'sem link configurado'}</span>
+      </div>
+      <div className="quiz-leads-link">
+        <span><b>Link pessoal da carta</b><code>{lead.cartaUrl}</code></span>
+        <div>
+          <Button variant="ghost" onClick={() => void copiarLink(lead)}><Copy size={15} /> Copiar</Button>
+          <Button variant="ghost" onClick={() => window.open(previewLink(lead), '_blank', 'noopener')} title="Abre a carta sem marcar como lida">
+            <ExternalLink size={15} /> Ver carta
+          </Button>
+        </div>
       </div>
       <label>
         <span>Observação</span>
@@ -252,6 +276,9 @@ export function QuizLeadsPanel() {
         </div>
         <span className="quiz-leads-pilar">{pilarNome(lead)}</span>
         <small className="quiz-leads-origem">{origemLabel(lead)}</small>
+        <small className={`quiz-leads-abriu${lead.cartaAbertaEm ? ' on' : ''}`} title="Abriu o link pessoal da carta">
+          {lead.cartaAbertaEm ? `Abriu ${formatDateTime(lead.cartaAbertaEm)}` : 'Não abriu'}
+        </small>
         <select
           className={`quiz-leads-status ${STATUS_TONE[lead.status]}`}
           value={lead.status}
@@ -329,6 +356,14 @@ export function QuizLeadsPanel() {
               )}
             </select>
           </label>
+          <label>
+            <span>Carta</span>
+            <select value={draft.abriu ?? ''} onChange={(event) => setDraft({ ...draft, abriu: event.target.value as QuizLeadFilters['abriu'] })}>
+              <option value="">Todas</option>
+              <option value="sim">Abriu</option>
+              <option value="nao">Não abriu</option>
+            </select>
+          </label>
           <label className="quiz-leads-search">
             <span>Busca</span>
             <input
@@ -345,6 +380,13 @@ export function QuizLeadsPanel() {
         </form>
       </section>
 
+      {filters.leadId && (
+        <div className="admin-message">
+          Mostrando só o lead do aviso por e-mail.{' '}
+          <button type="button" className="quiz-leads-inline" onClick={clearFilters}>Ver todos</button>
+        </div>
+      )}
+
       {message && <div className="admin-message">{message}</div>}
 
       {resumo && (
@@ -354,6 +396,11 @@ export function QuizLeadsPanel() {
               <p className="kicker">Leads</p>
               <strong>{resumo.total}</strong>
               <span>{resumo.pessoas} pessoa(s) diferentes no período</span>
+            </article>
+            <article className="account-card admin-stat-card">
+              <p className="kicker">Abriram a carta</p>
+              <strong>{resumo.abriram}</strong>
+              <span>Registros com o link pessoal aberto</span>
             </article>
             <article className="account-card admin-stat-card">
               <p className="kicker">Compraram</p>
@@ -395,6 +442,7 @@ export function QuizLeadsPanel() {
           <span>Nome / WhatsApp</span>
           <span>Pilar</span>
           <span>Origem</span>
+          <span>Abriu</span>
           <span>Status</span>
           <span>Ações</span>
           <span />

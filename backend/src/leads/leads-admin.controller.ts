@@ -5,7 +5,16 @@ import { UpdateLeadDto } from './leads.dto';
 import { LeadFilters, LeadsService } from './leads.service';
 
 function filtersFrom(query: Record<string, string | undefined>): LeadFilters {
-  return { de: query.de, ate: query.ate, pilar: query.pilar, status: query.status, origem: query.origem, q: query.q };
+  return {
+    de: query.de,
+    ate: query.ate,
+    pilar: query.pilar,
+    status: query.status,
+    origem: query.origem,
+    q: query.q,
+    abriu: query.abriu,
+    leadId: query.leadId,
+  };
 }
 
 @Controller('admin/leads')

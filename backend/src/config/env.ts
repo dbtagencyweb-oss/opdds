@@ -73,26 +73,38 @@ export function getLeadWebhookUrl(): string {
   return (process.env.LEAD_WEBHOOK_URL || '').trim();
 }
 
+/** Endereço público da LP, base do link pessoal das cartas (/carta/<romano>/). */
+export function getLpUrl(): string {
+  return (process.env.LP_URL || 'https://opoderdosdesacreditados.online').trim().replace(/\/$/, '');
+}
+
+/** Endereço público desta API, usado nos links de descadastro dos e-mails. */
+export function getApiPublicUrl(): string {
+  return (process.env.API_PUBLIC_URL || 'https://opdds-api.onrender.com').trim().replace(/\/$/, '');
+}
+
 /**
- * Links das Cartas de Sustentação por pilar, em JSON:
- * {"pilar_1":"https://…","pilar_2":"https://…",…}. JSON inválido vira mapa
- * vazio (e o link enviado pelo próprio quiz é usado no lugar).
+ * Liga os e-mails automáticos do quiz (aviso de lead novo e carta para o
+ * lead). Desligado por padrão; os demais e-mails do app não dependem disso.
  */
-export function getCartasUrls(): Record<string, string> {
-  const raw = (process.env.CARTAS_URLS || '').trim();
-  if (!raw) return {};
-  try {
-    const parsed = JSON.parse(raw);
-    return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : {};
-  } catch {
-    return {};
-  }
+export function isQuizEmailEnabled(): boolean {
+  return (process.env.EMAIL_ENABLED || '').trim().toLowerCase() === 'true';
+}
+
+/** Quem recebe o aviso de lead novo: LEAD_ALERT_EMAIL, ou o ADMIN_EMAIL. */
+export function getLeadAlertEmail(): string {
+  return (process.env.LEAD_ALERT_EMAIL || process.env.ADMIN_EMAIL || '').trim();
+}
+
+/** Endereço do app (admin), para o link do aviso de lead novo. */
+export function getAppUrl(): string {
+  return (process.env.APP_URL || 'https://app.opoderdosdesacreditados.online').trim().replace(/\/$/, '');
 }
 
 const DEFAULT_LEADS_ORIGINS = ['https://opoderdosdesacreditados.online', 'https://www.opoderdosdesacreditados.online'];
 
 /**
- * Origens liberadas no CORS das rotas públicas do quiz (/api/leads*). A LP
+ * Origens liberadas no CORS das rotas públicas da LP (/api/leads*, /api/cartas*). A LP
  * sempre entra; LEADS_CORS_ORIGINS acrescenta outras (ex.: preview local).
  */
 export function getLeadsCorsOrigins(): string[] {

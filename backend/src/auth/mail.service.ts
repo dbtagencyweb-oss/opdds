@@ -23,6 +23,35 @@ type MindTrialEmailInput = {
   appUrl?: string;
 };
 
+type QuizLeadAlertInput = {
+  to: string;
+  primeiroNome: string;
+  pilar: string;
+  origem: string;
+  criadoEm: Date;
+  adminUrl: string;
+};
+
+type QuizCartaEmailInput = {
+  to: string;
+  primeiroNome: string;
+  pilar: string;
+  fraseProlog: string | null;
+  cartaUrl: string;
+  descadastroUrl: string;
+};
+
+/** Escapa texto digitado pelo lead antes de entrar no HTML do e-mail. */
+function escapeHtml(value: string) {
+  return value.replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char] as string);
+}
+
+/** Só o endereço do MAIL_FROM ("Nome <a@b>" → "a@b"), para trocar o nome do remetente. */
+function mailFromAddress() {
+  const from = process.env.MAIL_FROM || 'no-reply@opoderdosdesacreditados.online';
+  return from.match(/<([^>]+)>/)?.[1] || from.trim();
+}
+
 type EmailMessage = {
   from: string;
   subject: string;
@@ -223,5 +252,66 @@ export class MailService {
       </div>
     `;
     return this.deliver(input.to, { from, subject: copy.subject, text, html });
+  }
+
+  // Aviso interno de lead novo do quiz. Sem WhatsApp nem e-mail do lead.
+  async sendQuizLeadAlert(input: QuizLeadAlertInput) {
+    const from = process.env.MAIL_FROM || 'no-reply@opoderdosdesacreditados.online';
+    const quando = new Intl.DateTimeFormat('pt-BR', { timeZone: 'America/Sao_Paulo', dateStyle: 'short', timeStyle: 'short' }).format(input.criadoEm);
+    const subject = `Novo lead do quiz: ${input.primeiroNome} · ${input.pilar}`;
+    const text = [
+      `Novo lead do quiz em ${quando}.`,
+      '',
+      `Pilar: ${input.pilar}`,
+      `Origem: ${input.origem}`,
+      '',
+      `Abrir no admin: ${input.adminUrl}`,
+    ].join('\n');
+    const html = `
+      <div style="font-family:Arial,sans-serif;line-height:1.6;color:#211f1b">
+        <h2 style="margin:0 0 12px;color:#211f1b">Novo lead do quiz</h2>
+        <p><strong>${escapeHtml(input.primeiroNome)}</strong> · ${escapeHtml(input.pilar)}</p>
+        <p>Horário: ${quando}<br>Origem: ${escapeHtml(input.origem)}</p>
+        <p><a href="${input.adminUrl}" style="display:inline-block;padding:12px 18px;border-radius:999px;background:#c8a45d;color:#111;text-decoration:none;font-weight:bold">Abrir no admin</a></p>
+      </div>
+    `;
+    return this.deliver(input.to, { from, subject, text, html });
+  }
+
+  // Carta de Sustentação para quem deixou e-mail no quiz.
+  async sendQuizCartaEmail(input: QuizCartaEmailInput) {
+    const from = `Diego · O Poder dos Desacreditados <${mailFromAddress()}>`;
+    const subject = `${input.primeiroNome}, a carta do seu dilema`;
+    const intro = 'No livro, cada dilema termina com uma Carta de Sustentação: um texto escrito para quem está no meio da briga, não para quem já saiu dela. A sua está aqui:';
+    const text = [
+      `${input.primeiroNome}, seu resultado foi o dilema do ${input.pilar}.`,
+      ...(input.fraseProlog ? ['', input.fraseProlog] : []),
+      '',
+      intro,
+      '',
+      input.cartaUrl,
+      '',
+      'Não precisa responder nada. Só leia quando puder parar.',
+      '',
+      'Diego',
+      '',
+      '—',
+      `Não quer mais receber e-mails? ${input.descadastroUrl}`,
+    ].join('\n');
+    const p = 'margin:0 0 18px';
+    const html = `
+      <div style="background:#F5F0E8;padding:32px 16px">
+        <div style="max-width:560px;margin:0 auto;font-family:Fraunces,Georgia,'Times New Roman',serif;font-size:17px;line-height:1.75;color:#1A1A24">
+          <p style="${p}">${escapeHtml(input.primeiroNome)}, seu resultado foi o dilema do ${escapeHtml(input.pilar)}.</p>
+          ${input.fraseProlog ? `<p style="${p};font-style:italic;color:#A77F66">${escapeHtml(input.fraseProlog)}</p>` : ''}
+          <p style="${p}">${intro}</p>
+          <p style="${p}"><a href="${input.cartaUrl}" style="color:#A77F66">Ler a minha Carta de Sustentação</a></p>
+          <p style="${p}">Não precisa responder nada. Só leia quando puder parar.</p>
+          <p style="${p}">Diego</p>
+          <p style="margin:32px 0 0;font-family:Arial,sans-serif;font-size:12px;line-height:1.6;color:#7A7A8C">Você recebeu este e-mail porque fez o quiz de O Poder dos Desacreditados e aceitou receber o resultado. Para não receber mais, <span style="color:#7A7A8C">acesse ${input.descadastroUrl}</span></p>
+        </div>
+      </div>
+    `;
+    return this.deliver(input.to, { from, subject, text, html });
   }
 }

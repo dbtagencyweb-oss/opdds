@@ -2,7 +2,9 @@ import { BadRequestException, Injectable, Logger, NotFoundException } from '@nes
 import { Prisma, QuizLead } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { MetaCapiService } from '../webhooks/meta-capi.service';
-import { getCartasUrls, getLeadWebhookUrl } from '../config/env';
+import { MailService } from '../auth/mail.service';
+import { getApiPublicUrl, getAppUrl, getLeadAlertEmail, getLeadWebhookUrl, isQuizEmailEnabled } from '../config/env';
+import { fraseDoPrologo, linkCarta, novoCartaToken, primeiroNome } from './cartas';
 import { ATOS, PILARES, atoDoPilar } from './pilares';
 import { normalizeWhatsapp, whatsappVariants } from './phone';
 import { CreateLeadDto, LEAD_STATUSES, LeadStatus, UpdateLeadDto } from './leads.dto';
@@ -17,6 +19,8 @@ export type LeadFilters = {
   status?: string;
   origem?: string;
   q?: string;
+  abriu?: string;
+  leadId?: string;
 };
 
 type RequestMeta = { ip: string | null; userAgent: string | null };
@@ -68,6 +72,7 @@ export class LeadsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly metaCapi: MetaCapiService,
+    private readonly mail: MailService,
   ) {}
 
   // ── Público (LP) ──────────────────────────────────────────────────────────
@@ -92,7 +97,7 @@ export class LeadsService {
           prologo: dto.prologo ?? null,
           pilarResultado: dto.pilarResultado,
           pontuacoes: dto.pontuacoes,
-          cartaUrl: this.cartaUrlFor(dto.pilarResultado, dto.cartaUrl),
+          cartaToken: novoCartaToken(),
           ...extractUtms(dto.utms, dto.pageUrl),
           eventId: dto.eventId,
           fbc: dto.fbc ?? null,
@@ -116,6 +121,8 @@ export class LeadsService {
     const ato = atoDoPilar(lead.pilarResultado);
     const results = await Promise.allSettled([
       this.sendToAutomation(lead),
+      this.sendLeadAlert(lead),
+      this.sendCartaEmail(lead),
       this.metaCapi.sendLeadEvent({
         eventId: lead.eventId,
         email: lead.email,
@@ -160,7 +167,7 @@ export class LeadsService {
           pilarNome: PILARES[lead.pilarResultado] ?? lead.pilarResultado,
           ato,
           atoNome: ATOS[ato],
-          cartaUrl: lead.cartaUrl,
+          cartaUrl: linkCarta(lead),
           pontuacoes: lead.pontuacoes,
           utmSource: lead.utmSource,
           utmMedium: lead.utmMedium,
@@ -183,11 +190,79 @@ export class LeadsService {
     }
   }
 
-  /** Link da carta: o mapa CARTAS_URLS manda; o link do quiz é o reserva. */
-  private cartaUrlFor(pilar: string, fromQuiz?: string): string | null {
-    const configured = getCartasUrls()[pilar];
-    if (configured) return configured;
-    return fromQuiz && /^https?:\/\//i.test(fromQuiz) ? fromQuiz : null;
+  private origemDe(lead: QuizLead) {
+    return [lead.utmSource, lead.utmCampaign].filter(Boolean).join(' / ') || 'direto';
+  }
+
+  /** Aviso para o Diego (EMAIL_ENABLED=true). Sem WhatsApp nem e-mail do lead. */
+  private async sendLeadAlert(lead: QuizLead) {
+    const to = getLeadAlertEmail();
+    if (!isQuizEmailEnabled() || !to) return;
+    await this.mail.sendQuizLeadAlert({
+      to,
+      primeiroNome: primeiroNome(lead.nome),
+      pilar: PILARES[lead.pilarResultado] ?? lead.pilarResultado,
+      origem: this.origemDe(lead),
+      criadoEm: lead.createdAt,
+      adminUrl: `${getAppUrl()}/?admin=leads&lead=${encodeURIComponent(lead.id)}`,
+    });
+  }
+
+  /** Carta por e-mail para quem informou e-mail e não pediu descadastro. */
+  private async sendCartaEmail(lead: QuizLead) {
+    if (!isQuizEmailEnabled() || !lead.email || !lead.consentimento) return;
+    const descadastrado = await this.prisma.quizLead.count({ where: { email: lead.email, status: 'descadastrado' } });
+    if (descadastrado > 0) return;
+
+    const result = await this.mail.sendQuizCartaEmail({
+      to: lead.email,
+      primeiroNome: primeiroNome(lead.nome),
+      pilar: PILARES[lead.pilarResultado] ?? lead.pilarResultado,
+      fraseProlog: fraseDoPrologo(lead.prologo),
+      cartaUrl: linkCarta(lead),
+      descadastroUrl: `${getApiPublicUrl()}/api/leads/descadastrar?t=${encodeURIComponent(lead.cartaToken)}`,
+    });
+    if (result?.delivered) {
+      await this.prisma.quizLead.update({ where: { id: lead.id }, data: { cartaEmailEnviadoEm: new Date() } });
+    }
+  }
+
+  // ── Página da carta ───────────────────────────────────────────────────────
+
+  /**
+   * Dados mínimos para personalizar a página da carta. `preview` (botão "Ver
+   * carta" do admin) não marca a abertura.
+   */
+  async abrirCarta(token: string, preview: boolean) {
+    const lead = await this.findByToken(token);
+    if (!lead) return null;
+
+    if (!preview && !lead.cartaAbertaEm) {
+      await this.prisma.quizLead.updateMany({ where: { id: lead.id, cartaAbertaEm: null }, data: { cartaAbertaEm: new Date() } });
+    }
+    return {
+      primeiroNome: primeiroNome(lead.nome),
+      fraseProlog: fraseDoPrologo(lead.prologo),
+      codigoPilar: lead.pilarResultado,
+    };
+  }
+
+  // ── Descadastro ───────────────────────────────────────────────────────────
+
+  async findByToken(token: string) {
+    const clean = String(token || '').trim();
+    if (!clean || clean.length > 100) return null;
+    return this.prisma.quizLead.findUnique({ where: { cartaToken: clean } });
+  }
+
+  /** Descadastra todos os registros da mesma pessoa (e-mail ou WhatsApp). */
+  async descadastrar(token: string): Promise<boolean> {
+    const lead = await this.findByToken(token);
+    if (!lead) return false;
+    const or: Prisma.QuizLeadWhereInput[] = [{ id: lead.id }, { whatsapp: { in: whatsappVariants(lead.whatsapp) } }];
+    if (lead.email) or.push({ email: lead.email });
+    await this.prisma.quizLead.updateMany({ where: { OR: or }, data: { status: 'descadastrado' } });
+    return true;
   }
 
   // ── Kiwify ────────────────────────────────────────────────────────────────
@@ -201,10 +276,17 @@ export class LeadsService {
     if (variants.length) or.push({ whatsapp: { in: variants } });
     if (or.length === 0) return 0;
 
-    const result = await this.prisma.quizLead.updateMany({
-      where: { OR: or, status: { not: 'comprou' } },
-      data: { status: 'comprou', compradorEm: new Date() },
-    });
+    // Quem pediu descadastro continua descadastrado; a compra fica em compradorEm.
+    const [result] = await this.prisma.$transaction([
+      this.prisma.quizLead.updateMany({
+        where: { OR: or, status: { notIn: ['comprou', 'descadastrado'] } },
+        data: { status: 'comprou', compradorEm: new Date() },
+      }),
+      this.prisma.quizLead.updateMany({
+        where: { OR: or, compradorEm: null },
+        data: { compradorEm: new Date() },
+      }),
+    ]);
     return result.count;
   }
 
@@ -222,6 +304,9 @@ export class LeadsService {
       and.push({ status: filters.status as LeadStatus });
     }
     if (filters.origem) and.push({ utmSource: filters.origem === SEM_ORIGEM ? null : filters.origem });
+    if (filters.abriu === 'sim') and.push({ cartaAbertaEm: { not: null } });
+    if (filters.abriu === 'nao') and.push({ cartaAbertaEm: null });
+    if (filters.leadId) and.push({ id: filters.leadId });
 
     const q = String(filters.q || '').trim();
     if (q) {
@@ -245,7 +330,7 @@ export class LeadsService {
       pilarNome: PILARES[lead.pilarResultado] ?? lead.pilarResultado,
       ato,
       atoNome: ATOS[ato],
-      cartaUrl: lead.cartaUrl || getCartasUrls()[lead.pilarResultado] || null,
+      cartaUrl: linkCarta(lead),
     };
   }
 
@@ -290,13 +375,14 @@ export class LeadsService {
 
   async resumo(filters: LeadFilters) {
     const where = this.buildWhere(filters);
-    const [total, porPilarRaw, porOrigemRaw, porStatusRaw, pessoas, compradores] = await Promise.all([
+    const [total, porPilarRaw, porOrigemRaw, porStatusRaw, pessoas, compradores, abriram] = await Promise.all([
       this.prisma.quizLead.count({ where }),
       this.prisma.quizLead.groupBy({ by: ['pilarResultado'], where, _count: { _all: true } }),
       this.prisma.quizLead.groupBy({ by: ['utmSource'], where, _count: { _all: true } }),
       this.prisma.quizLead.groupBy({ by: ['status'], where, _count: { _all: true } }),
       this.prisma.quizLead.groupBy({ by: ['whatsapp'], where }),
-      this.prisma.quizLead.groupBy({ by: ['whatsapp'], where: { AND: [where, { status: 'comprou' }] } }),
+      this.prisma.quizLead.groupBy({ by: ['whatsapp'], where: { AND: [where, { compradorEm: { not: null } }] } }),
+      this.prisma.quizLead.count({ where: { AND: [where, { cartaAbertaEm: { not: null } }] } }),
     ]);
 
     const porPilar = Object.keys(PILARES).map((codigo) => ({
@@ -321,6 +407,7 @@ export class LeadsService {
       total,
       pessoas: pessoas.length,
       compraram: compradores.length,
+      abriram,
       // Taxa por pessoa (WhatsApp), para quem refez o quiz não diluir a conta.
       taxaCompra: pessoas.length ? compradores.length / pessoas.length : 0,
       porPilar,
@@ -340,13 +427,13 @@ export class LeadsService {
     const header = [
       'data', 'nome', 'whatsapp', 'email', 'pilar', 'pilar_nome', 'ato', 'status', 'prologo', 'pontuacoes',
       'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'gclid',
-      'carta_enviada_em', 'comprador_em', 'observacao', 'consentimento_em', 'event_id',
+      'carta_enviada_em', 'carta_aberta_em', 'carta_email_em', 'comprador_em', 'observacao', 'consentimento_em', 'event_id',
     ];
     const rows = leads.map((lead) => [
       lead.createdAt, lead.nome, lead.whatsapp, lead.email, lead.pilarResultado, PILARES[lead.pilarResultado] ?? '',
       atoDoPilar(lead.pilarResultado), lead.status, lead.prologo, JSON.stringify(lead.pontuacoes),
       lead.utmSource, lead.utmMedium, lead.utmCampaign, lead.utmContent, lead.utmTerm, lead.gclid,
-      lead.cartaEnviadaEm, lead.compradorEm, lead.observacao, lead.consentimentoEm, lead.eventId,
+      lead.cartaEnviadaEm, lead.cartaAbertaEm, lead.cartaEmailEnviadoEm, lead.compradorEm, lead.observacao, lead.consentimentoEm, lead.eventId,
     ]);
 
     // BOM + ";" para o Excel em português abrir com acentos e colunas certas.

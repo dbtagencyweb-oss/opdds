@@ -14,6 +14,7 @@
     "build": "npm run build:frontend",
     "canonical:generate": "npm --prefix backend run canonical:generate",
     "validate:content": "npm run canonical:generate && tsx scripts/validate-content.ts",
+    "cartas:gerar": "npm run canonical:generate && tsx scripts/gerar-cartas.ts",
     "test:integration": "npm run canonical:generate && vitest run tests/integration",
     "prisma:generate": "npm --prefix backend run prisma:generate",
     "prisma:migrate": "npm --prefix backend run prisma:migrate",

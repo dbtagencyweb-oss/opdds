@@ -1,9 +1,10 @@
-import { Body, Controller, ForbiddenException, Get, Post, Req, Res } from '@nestjs/common';
+import { Body, Controller, ForbiddenException, Get, Header, HttpCode, Post, Query, Req, Res } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
 import type { Request, Response } from 'express';
 import { clientIp } from '../common/client-ip';
 import { getLeadsCorsOrigins } from '../config/env';
 import { CreateLeadDto } from './leads.dto';
+import { paginaConfirmarDescadastro, paginaDescadastrado, paginaLinkInvalido } from './descadastro-page';
 import { LeadsService } from './leads.service';
 
 // Rotas públicas do quiz da LP. O CORS delas é configurado à parte no main.ts.
@@ -33,5 +34,31 @@ export class LeadsController {
 
     if (result.duplicate) res.status(200);
     return { ok: true };
+  }
+
+  // Link do rodapé do e-mail da carta: só mostra a confirmação.
+  @Throttle({ default: { limit: 20, ttl: 600_000 } })
+  @Get('descadastrar')
+  @Header('Content-Type', 'text/html; charset=utf-8')
+  async confirmarDescadastro(@Query('t') token?: string, @Res({ passthrough: true }) res?: Response) {
+    const lead = await this.leads.findByToken(String(token || ''));
+    if (!lead) {
+      res?.status(404);
+      return paginaLinkInvalido();
+    }
+    return paginaConfirmarDescadastro(lead.cartaToken);
+  }
+
+  @Throttle({ default: { limit: 20, ttl: 600_000 } })
+  @Post('descadastrar')
+  @HttpCode(200)
+  @Header('Content-Type', 'text/html; charset=utf-8')
+  async descadastrar(@Body('t') token?: string, @Res({ passthrough: true }) res?: Response) {
+    const ok = await this.leads.descadastrar(String(token || ''));
+    if (!ok) {
+      res?.status(404);
+      return paginaLinkInvalido();
+    }
+    return paginaDescadastrado();
   }
 }

@@ -250,6 +250,10 @@ model QuizLead {
   utmTerm         String?
   gclid           String?
   eventId         String         @unique
+  // Token do link pessoal da carta (/carta/<romano>/?t=…) e do descadastro.
+  cartaToken      String         @unique
+  cartaAbertaEm   DateTime?
+  cartaEmailEnviadoEm DateTime?
   fbc             String?
   fbp             String?
   pageUrl         String?

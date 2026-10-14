@@ -1,0 +1,311 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#14141C">
+<title>Carta de Sustentação · VIII · Escassez — O Poder dos Desacreditados</title>
+<script>
+/* 1) token: ler, guardar e limpar a URL ANTES de qualquer pixel/tag.
+      v=admin (botão "Ver carta" do admin) abre sem marcar a carta como lida. */
+(function(){var q=new URLSearchParams(location.search),t=q.get('t'),v=q.get('v');
+if(t||v){try{if(t)sessionStorage.setItem('opdds_carta_t',t);if(v==='admin')sessionStorage.setItem('opdds_carta_preview','1');}catch(e){}q.delete('t');q.delete('v');var s=q.toString();history.replaceState(null,'',location.pathname+(s?'?'+s:'')+location.hash);}})();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;1,9..144,300;1,9..144,400&family=Inter:wght@300;400;500;600&family=The+Nautigal:wght@400;700&display=swap" rel="stylesheet">
+<style>
+[hidden]{display:none!important}
+*,*::before,*::after{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{background:#14141C}
+body{margin:0;background:#F5F0E8;color:#1A1A24;font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+body.lock{overflow:hidden}
+a{color:#A77F66}a:hover{color:#C09880}
+button{font:inherit}
+button:focus-visible,a:focus-visible{outline:2px solid #A77F66;outline-offset:3px}
+@keyframes goldShift{0%{background-position:0% 50%}100%{background-position:200% 50%}}
+@keyframes gradientShift{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+@keyframes sheen{0%,60%{left:-60%}100%{left:130%}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes sealGlow{0%,100%{box-shadow:0 0 0 0 rgba(203,143,100,.35),0 10px 30px rgba(0,0,0,.45)}50%{box-shadow:0 0 0 14px rgba(203,143,100,0),0 10px 30px rgba(0,0,0,.45)}}
+@keyframes nameIn{0%{-webkit-mask-position:100% 0;mask-position:100% 0;filter:blur(6px);opacity:.2}100%{-webkit-mask-position:0 0;mask-position:0 0;filter:blur(0);opacity:1}}
+@keyframes bar{0%,100%{transform:scaleY(.25)}50%{transform:scaleY(1)}}
+@keyframes breathe{0%,100%{transform:scale(.62)}45%,55%{transform:scale(1)}}
+
+.gold{background:linear-gradient(100deg,#926443 0%,#cb8f64 22%,#ffd39d 45%,#cb8f64 68%,#926443 100%);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;animation:goldShift 6s linear infinite;padding-bottom:.12em}
+.label{display:flex;align-items:center;gap:12px;font-size:.66rem;font-weight:500;letter-spacing:.22em;text-transform:uppercase;color:#A77F66}
+.label::before{content:'';width:28px;height:1px;background:currentColor;opacity:.6}
+
+/* progresso de leitura */
+#prog{position:fixed;top:0;left:0;right:0;height:3px;z-index:50;background:linear-gradient(90deg,#926443,#cb8f64,#ffd39d);transform-origin:0 50%;transform:scaleX(0)}
+
+/* ENVELOPE */
+#env{position:fixed;inset:0;z-index:40;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:34px;padding:24px;background:radial-gradient(circle at 50% 38%,rgba(167,127,102,.22),transparent 60%),#14141C;color:#F5F0E8;transition:transform 1s cubic-bezier(.7,0,.2,1) .55s,opacity .6s ease 1.2s}
+#env.open{transform:translateY(-100%);opacity:0;pointer-events:none}
+.envelope{position:relative;width:min(78vw,360px);aspect-ratio:1.45/1;perspective:1200px}
+.env-back{position:absolute;inset:0;border-radius:6px;background:#EDE6DA;box-shadow:0 30px 70px rgba(0,0,0,.55)}
+.env-paper{position:absolute;left:6%;right:6%;top:8%;bottom:6%;border-radius:3px;background:#F5F0E8;transition:transform .9s cubic-bezier(.2,.7,.2,1) .25s;display:flex;align-items:flex-start;justify-content:center;padding-top:14%}
+.env-paper span{opacity:0;transition:opacity .5s ease .6s;font-family:'Fraunces',serif;font-style:italic;font-size:clamp(1rem,4vw,1.25rem);color:#7A7A8C}
+#env.open .env-paper{transform:translateY(-38%)}#env.open .env-paper span{opacity:1}
+.env-front{position:absolute;inset:0;border-radius:6px;background:linear-gradient(160deg,#F1EADF,#E4DACB);clip-path:polygon(0 0,50% 66%,100% 0,100% 100%,0 100%);z-index:2;box-shadow:inset 0 -1px 0 rgba(0,0,0,.04)}
+.env-flap{position:absolute;left:0;right:0;top:0;height:72%;transform-origin:50% 0;background:linear-gradient(180deg,#E2D7C6,#D2C4AF);filter:drop-shadow(0 2px 3px rgba(0,0,0,.12));clip-path:polygon(0 0,100% 0,50% 92%);z-index:3;transition:transform .7s cubic-bezier(.6,0,.3,1) .1s,z-index 0s .45s}
+#env.open .env-flap{transform:rotateX(180deg);z-index:1}
+.env-to{position:absolute;left:7%;bottom:6%;max-width:32%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;z-index:4;text-align:left;font-family:'Fraunces',serif;font-style:italic;font-size:clamp(.95rem,3.6vw,1.15rem);color:#5a4a40;opacity:0;transition:opacity .6s}
+.env-to.on{opacity:1}
+.seal{position:absolute;left:50%;top:66%;z-index:5;width:72px;height:72px;margin:-36px 0 0 -36px;border:0;padding:0;border-radius:50%;cursor:pointer;background:radial-gradient(circle at 38% 28%,#ffd39d,#cb8f64 58%,#926443);animation:sealGlow 2.6s ease-out infinite;transition:transform .45s cubic-bezier(.5,0,.3,1),opacity .4s}
+.seal b{position:absolute;inset:0;display:grid;place-items:center;font-family:'Fraunces',serif;font-weight:600;font-size:1.35rem;color:#3a2618;letter-spacing:.02em}
+.seal svg{position:absolute;inset:-22px;width:116px;height:116px;animation:spin 18s linear infinite;pointer-events:none}
+#env.open .seal{transform:scale(1.35) rotate(-18deg);opacity:0}
+.env-cta{display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center}
+.env-cta button{position:relative;overflow:hidden;min-height:48px;padding:14px 28px;border-radius:30px;border:1px solid rgba(255,211,157,.45);background:rgba(203,143,100,.12);color:#ffd39d;font-size:.74rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;cursor:pointer}
+.env-cta small{font-size:.74rem;color:rgba(245,240,232,.5)}
+
+/* CABEÇALHO */
+header{background:#14141C;padding:20px clamp(20px,5vw,56px);display:flex;justify-content:center;border-bottom:1px solid #C09880}
+header img{display:block;height:44px;width:auto}
+
+main{max-width:640px;margin:0 auto;padding:clamp(48px,9vw,96px) clamp(22px,5vw,32px) 40px}
+.meta{display:flex;flex-direction:column;gap:10px}
+.meta .sub{font-size:.66rem;letter-spacing:.22em;text-transform:uppercase;color:#7A7A8C;padding-left:40px}
+h1{margin:34px 0 0;font-family:'Fraunces',serif;font-weight:400;font-size:clamp(2.1rem,7vw,3.2rem);line-height:1.08;letter-spacing:-.015em;min-height:1.1em}
+.nm{display:inline-block;-webkit-mask-image:linear-gradient(90deg,#000 40%,transparent 60%);mask-image:linear-gradient(90deg,#000 40%,transparent 60%);-webkit-mask-size:300% 100%;mask-size:300% 100%;animation:nameIn 1.2s cubic-bezier(.2,.7,.2,1) both}
+.prolog{margin:18px 0 0;font-family:'Fraunces',serif;font-style:italic;font-size:1.15rem;line-height:1.6;color:#A77F66;max-height:0;opacity:0;overflow:hidden;transition:max-height .8s ease,opacity .8s ease .2s}
+.prolog.on{max-height:12em;opacity:1}
+
+/* PLAYER */
+.player{margin:40px 0 0;display:flex;align-items:center;gap:16px;padding:16px 18px;border-radius:14px;background:#14141C;color:#F5F0E8;box-shadow:0 16px 40px rgba(26,26,36,.18)}
+.play{flex:none;position:relative;width:52px;height:52px;border-radius:50%;border:0;cursor:pointer;display:grid;place-items:center;background:radial-gradient(circle at 38% 28%,#ffd39d,#cb8f64 58%,#926443);background-size:200% 200%;animation:gradientShift 8s ease infinite;border-bottom:2px solid rgb(132 82 56 / 72%)}
+.pl-mid{flex:1;min-width:0;display:flex;flex-direction:column;gap:8px}
+.pl-t{font-size:.6rem;font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:#C09880}
+.wave{display:flex;align-items:center;gap:3px;height:26px;cursor:pointer}
+.wave i{flex:1;height:100%;border-radius:2px;background:rgba(245,240,232,.18);transform:scaleY(.35);transition:background .2s}
+.wave i.on{background:#cb8f64}
+.player.playing .wave i{animation:bar 1.1s ease-in-out infinite}
+.pl-time{flex:none;font-size:.72rem;font-variant-numeric:tabular-nums;color:rgba(245,240,232,.6)}
+
+/* TEXTO */
+.ctitle{margin:48px 0 0;font-family:'Fraunces',serif;font-style:italic;font-weight:400;font-size:clamp(1.2rem,3.4vw,1.4rem);line-height:1.45;color:#3D3D4E}
+.carta{margin:28px 0 0;font-family:'Fraunces',serif;font-weight:300;font-size:clamp(1.08rem,2.6vw,1.16rem);line-height:1.85;color:#1A1A24}
+.carta p{margin:0 0 1.35em;text-wrap:pretty;opacity:0;transform:translateY(14px);filter:blur(4px);transition:opacity .9s ease,transform .9s cubic-bezier(.2,.7,.2,1),filter .9s ease}
+.carta p.in{opacity:1;transform:none;filter:none}
+.carta p:first-child::first-letter{float:left;font-weight:400;font-size:3.6em;line-height:.82;margin:.06em .1em 0 0;background:linear-gradient(160deg,#926443,#cb8f64 45%,#ffd39d);-webkit-background-clip:text;background-clip:text;color:transparent}
+.carta p.quote{font-style:italic;font-size:1.22em;line-height:1.5;color:#A77F66;padding:.2em 0 .2em 1.1em;border-left:1px solid rgba(167,127,102,.4)}
+.n{color:#926443;font-weight:400}
+
+.sign{margin:56px 0 0;display:flex;flex-direction:column;gap:4px}
+.sign .who{align-self:flex-start;font-family:'The Nautigal',cursive;font-weight:700;font-size:clamp(2.6rem,9vw,3.2rem);line-height:1.15;padding-right:.2em;-webkit-mask-image:linear-gradient(90deg,#000 40%,transparent 60%);mask-image:linear-gradient(90deg,#000 40%,transparent 60%);-webkit-mask-size:300% 100%;mask-size:300% 100%;-webkit-mask-position:100% 0;mask-position:100% 0;transition:-webkit-mask-position 1.6s ease,mask-position 1.6s ease}
+.sign.in .who{-webkit-mask-position:0 0;mask-position:0 0}
+.sign .to{font-size:.85rem;color:#7A7A8C;min-height:1.4em}
+
+/* RESPIRO */
+.breath{margin:80px 0 0;padding:44px 24px;border-radius:14px;background:#EDE6DA;box-shadow:0 10px 30px rgba(26,26,36,.06),inset 0 1px 0 rgba(255,255,255,.5);display:flex;flex-direction:column;align-items:center;gap:22px;text-align:center}
+.orb{position:relative;width:140px;height:140px;display:grid;place-items:center}
+.orb::before{content:'';position:absolute;inset:0;border-radius:50%;border:1px solid rgba(167,127,102,.35)}
+.orb i{position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle at 40% 32%,#ffd39d,#cb8f64 55%,rgba(146,100,67,.85));transform:scale(.62);box-shadow:0 0 40px rgba(203,143,100,.35)}
+.breath.go .orb i{animation:breathe 8s ease-in-out 3}
+.orb b{position:relative;font-family:'Fraunces',serif;font-style:italic;font-weight:400;font-size:1rem;color:#2a1c12}
+.breath p{margin:0;max-width:34ch;font-size:.95rem;line-height:1.7;color:#7A7A8C}
+.ghost{min-height:44px;padding:12px 22px;border-radius:30px;border:1px solid rgba(167,127,102,.3);background:rgba(167,127,102,.10);color:#A77F66;font-size:.72rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;cursor:pointer}
+
+/* FECHO */
+.close{margin:72px 0 0;padding-top:40px;border-top:1px solid rgba(192,152,128,.25);display:flex;flex-direction:column;align-items:center;gap:18px;text-align:center}
+.close p{margin:0;max-width:44ch;font-size:1rem;line-height:1.75;color:#3D3D4E}
+.buy{position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;width:100%;max-width:400px;min-height:56px;padding:16px 22px;border-radius:9px;background:radial-gradient(circle at 38% 28%,#ffd39d,#cb8f64 58%,#926443);background-size:200% 200%;animation:gradientShift 8s ease infinite;color:#000;text-decoration:none;font-weight:600;font-size:.84rem;text-transform:uppercase;letter-spacing:-.01em;border-bottom:3px solid rgb(132 82 56 / 72%);transition:transform .2s}
+.buy:hover{color:#000;transform:translateY(-2px)}
+.buy::after,.env-cta button::after{content:'';position:absolute;top:0;left:-60%;width:40%;height:100%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.5),transparent);transform:skewX(-20deg);animation:sheen 4.5s ease-in-out infinite}
+.keep{min-height:44px;background:none;border:0;padding:8px;color:#7A7A8C;font-size:.8rem;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+
+footer{margin-top:80px;background:#0E0E14;border-top:1px solid #C09880;padding:28px clamp(20px,5vw,56px);text-align:center;font-size:.74rem;line-height:1.8;color:rgba(245,240,232,.55)}
+footer a{color:rgba(245,240,232,.75)}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+  .carta p{opacity:1;transform:none;filter:none}
+  .sign .who{-webkit-mask-position:0 0;mask-position:0 0}
+}
+@media print{
+  #env,#prog,header,.player,.breath,.close,footer{display:none!important}
+  body{background:#fff}.carta p{opacity:1!important;transform:none!important;filter:none!important}
+  main{padding-top:0}
+}
+</style>
+<noscript><style>#env{display:none}.carta p{opacity:1;transform:none;filter:none}body{overflow:auto}</style></noscript>
+</head>
+<body class="lock">
+<div id="prog"></div>
+
+<!-- ENVELOPE -->
+<div id="env" role="dialog" aria-label="Sua carta chegou">
+  <div class="label" style="color:#C09880">Carta de Sustentação · <span id="envPilar">VIII · Escassez</span></div>
+  <div class="envelope">
+    <div class="env-back"></div>
+    <div class="env-paper"><span>Para quem está no meio da briga</span></div>
+    <div class="env-front"></div>
+    <div class="env-flap"></div>
+    <div class="env-to" id="envTo"></div>
+    <button class="seal" id="seal" type="button" aria-label="Abrir a carta">
+      <svg viewBox="0 0 148 148" aria-hidden="true"><defs><path id="ring" d="M74,74 m-64,0 a64,64 0 1,1 128,0 a64,64 0 1,1 -128,0"></path></defs><text fill="#7a5236" style="font-family:Inter,sans-serif;font-size:10.5px;font-weight:600;letter-spacing:2.2px"><textPath href="#ring" textLength="396" lengthAdjust="spacing">CARTA DE SUSTENTAÇÃO • O PODER DOS DESACREDITADOS • </textPath></text></svg>
+      <b id="sealNum">VIII</b>
+    </button>
+  </div>
+  <div class="env-cta">
+    <button type="button" id="openBtn">Abrir minha carta</button>
+    <small>Leia num momento em que você possa parar depois.</small>
+  </div>
+</div>
+
+<header><a href="../../"><img src="../../uploads/logo_opdds_fd_claro.webp" alt="O Poder dos Desacreditados"></a></header>
+
+<main>
+  <div class="meta">
+    <div class="label" id="lbl">Carta de Sustentação · VIII · Escassez</div>
+    <div class="sub" id="sub">Ato III · Tríade da Continuidade</div>
+  </div>
+  <h1 id="h1"><span class="gold">Esta carta é sua.</span></h1>
+  <p class="prolog" id="prolog"></p>
+
+  <div class="player" id="player" hidden>
+    <button class="play" id="play" type="button" aria-label="Ouvir a carta">
+      <svg id="icPlay" width="16" height="16" viewBox="0 0 24 24" style="margin-left:2px"><path d="M6 4l14 8-14 8z" fill="#000"></path></svg>
+      <svg id="icPause" width="16" height="16" viewBox="0 0 24 24" hidden><path d="M6 4h4v16H6zM14 4h4v16h-4z" fill="#000"></path></svg>
+    </button>
+    <div class="pl-mid"><span class="pl-t">Ouça na voz do autor</span><div class="wave" id="wave" aria-hidden="true"></div></div>
+    <span class="pl-time" id="time">0:00</span>
+    <audio id="audio" preload="none"></audio>
+  </div>
+
+  <p class="ctitle" id="ctitle">Para quem aprendeu a se contentar com pouco antes mesmo de tentar pedir mais</p>
+  <article class="carta" id="carta"><p>Se você vive calculando quanto pode desejar, quanto pode descansar, quanto pode pedir — isso não te torna comedido ou maduro. Te torna alguém que aprendeu, cedo demais, que o básico não vinha garantido. Você não precisa continuar racionando sua própria existência para provar que é fácil de sustentar. Precisar de mais do que a vida ofereceu até agora não é ingratidão. É humanidade. E você pode começar, aos poucos, a desejar sem calcular o preço da decepção antes mesmo de tentar.</p></article>
+
+  <div class="sign" id="sign"><span class="who gold">Diego Bock Tavares</span><span class="to" id="signTo"></span></div>
+
+  <section class="breath" id="breath" aria-label="Um respiro antes de fechar">
+    <div class="label">Antes de fechar</div>
+    <div class="orb"><i></i><b id="orbT">Inspire</b></div>
+    <p>Três respirações. Não para resolver nada. Só para ficar um pouco com o que esta carta mexeu.</p>
+    <button class="ghost" type="button" id="breathBtn">Respirar comigo</button>
+  </section>
+
+  <section class="close">
+    <p>Esta é uma das nove cartas do livro. As outras oito, com os dilemas, o áudio e o caderno, estão em <em style="font-family:'Fraunces',serif">O Poder dos Desacreditados</em>.</p>
+    <a class="buy" id="buy" href="https://pay.kiwify.com.br/cJ4T7JR">Conhecer o livro completo — R$ 37</a>
+    <button class="keep" type="button" onclick="window.print()">Guardar esta carta (PDF)</button>
+  </section>
+</main>
+
+<footer>
+  <p style="margin:0 auto;max-width:560px">Este material não substitui acompanhamento profissional. Se você está num momento muito difícil, o CVV atende 24h, de graça, pelo 188.</p>
+  <p style="margin:8px 0 0">© 2026 Diego Bock Tavares · <a href="../../privacidade.html">Privacidade</a></p>
+</footer>
+
+<script>
+/* ===== DADOS (gerado por scripts/gerar-cartas.ts a partir do livro) ===== */
+var CARTA={"pilar":"VIII · Escassez","romano":"VIII","codigo":"pilar_8","ato":"III","triade":"Tríade da Continuidade","audioUrl":"https://app.opoderdosdesacreditados.online/media/audios/livro/8-ato3-continuidade/pilar-08-escacez/p8-carta.wav","blocos":[{"tipo":"p","texto":"Se você vive calculando quanto pode desejar, quanto pode descansar, quanto pode pedir — isso não te torna comedido ou maduro. Te torna alguém que aprendeu, cedo demais, que o básico não vinha garantido. Você não precisa continuar racionando sua própria existência para provar que é fácil de sustentar. Precisar de mais do que a vida ofereceu até agora não é ingratidão. É humanidade. E você pode começar, aos poucos, a desejar sem calcular o preço da decepção antes mesmo de tentar."}]};
+var API='https://opdds-api.onrender.com/api/cartas/abrir';
+
+/* ===== {nome}: com nome substitui; sem nome remove junto com a vírgula vizinha ===== */
+function aplicaNome(t,nome){
+  if(nome)return t.split('{nome}').join(nome);
+  return t
+    .replace(/,\s*\{nome\}\s*,\s*/g,' ')                         // "Você sabe, {nome}, que" → "Você sabe que"
+    .replace(/(^|[.!?…]\s+)\{nome\}\s*,\s*(\S)/g,function(m,a,c){return a+c.toUpperCase();}) // "{nome}, você" → "Você"
+    .replace(/,\s*\{nome\}(?=\s*[.!?…;:]|$)/g,'')                 // "obrigado, {nome}." → "obrigado."
+    .replace(/\s*\{nome\}\s*/g,' ')
+    .replace(/\s{2,}/g,' ').replace(/\s+([,.!?…;:])/g,'$1').trim();
+}
+window.__testeNome=function(){var c=[['Você sabe, {nome}, que dói.','Você sabe que dói.'],['{nome}, você ficou.','Você ficou.'],['Obrigado, {nome}.','Obrigado.'],['Fica. {nome}, respira.','Fica. Respira.'],['Para {nome} e mais ninguém.','Para e mais ninguém.']];
+ return c.map(function(x){var r=aplicaNome(x[0],'');return {in:x[0],out:r,ok:r===x[1]};});};
+
+/* ===== render ===== */
+var $=function(id){return document.getElementById(id)};
+var nome='';
+function render(){
+  var art=$('carta');art.textContent='';
+  CARTA.blocos.forEach(function(b){
+    var p=document.createElement('p');if(b.tipo==='quote')p.className='quote';
+    var parts=b.texto.split('{nome}');
+    if(nome&&parts.length>1){parts.forEach(function(s,i){p.appendChild(document.createTextNode(s));if(i<parts.length-1){var n=document.createElement('span');n.className='n';n.textContent=nome;p.appendChild(n);}});}
+    else p.textContent=aplicaNome(b.texto,'');
+    art.appendChild(p);
+  });
+  observe();
+}
+var io=('IntersectionObserver' in window)?new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}});},{rootMargin:'0px 0px -12% 0px'}):null;
+function observe(){document.querySelectorAll('.carta p,#sign').forEach(function(el){if(io&&!el.classList.contains('in'))io.observe(el);else el.classList.add('in');});}
+
+function personaliza(d){
+  if(!d||!d.primeiroNome)return;
+  nome=String(d.primeiroNome).trim().split(/\s+/)[0].slice(0,40);
+  var h=$('h1');h.textContent='';
+  var n=document.createElement('span');n.className='gold nm';n.textContent=nome+',';
+  h.appendChild(n);h.appendChild(document.createTextNode(' '));
+  var r=document.createElement('span');r.className='gold';r.textContent='esta carta é sua.';h.appendChild(r);
+  if(d.fraseProlog){$('prolog').textContent=d.fraseProlog;$('prolog').classList.add('on');}
+  $('signTo').textContent='para '+nome;
+  var to=$('envTo');to.textContent='Para '+nome;to.classList.add('on');
+  var was=[].map.call(document.querySelectorAll('.carta p'),function(p){return p.classList.contains('in')});
+  render();document.querySelectorAll('.carta p').forEach(function(p,i){if(was[i])p.classList.add('in')});
+}
+
+/* ===== token → API (60s; servidor gratuito pode estar dormindo) ===== */
+function busca(){
+  var t=null,prev=false;try{t=sessionStorage.getItem('opdds_carta_t');prev=sessionStorage.getItem('opdds_carta_preview')==='1'}catch(e){}
+  if(!t)return;
+  var c=window.AbortController?new AbortController():null;var to=setTimeout(function(){c&&c.abort()},60000);
+  fetch(API+'?t='+encodeURIComponent(t)+(prev?'&preview=1':''),{signal:c?c.signal:undefined}).then(function(r){return r.ok?r.json():null}).then(function(d){clearTimeout(to);personaliza(d)}).catch(function(){clearTimeout(to)});
+}
+
+/* ===== envelope ===== */
+function abre(){var e=$('env');if(e.classList.contains('open'))return;e.classList.add('open');document.body.classList.remove('lock');try{sessionStorage.setItem('opdds_carta_aberta_'+CARTA.codigo,'1')}catch(x){}setTimeout(function(){e.hidden=true;observe();},1700);}
+$('seal').onclick=abre;$('openBtn').onclick=abre;
+(function(){var skip=false;try{skip=sessionStorage.getItem('opdds_carta_aberta_'+CARTA.codigo)==='1'}catch(e){}
+ if(skip||matchMedia('(prefers-reduced-motion: reduce)').matches){$('env').hidden=true;document.body.classList.remove('lock');}})();
+
+/* ===== progresso de leitura ===== */
+addEventListener('scroll',function(){var a=$('carta').getBoundingClientRect(),h=innerHeight;var p=Math.min(1,Math.max(0,(h-a.top)/(a.height+h*.4)));$('prog').style.transform='scaleX('+p+')';},{passive:true});
+
+/* ===== player ===== */
+(function(){
+  var w=$('wave');for(var i=0;i<36;i++){var b=document.createElement('i');b.style.animationDelay=(-(i*137)%1100)/1000+'s';b.style.height=(40+((i*53)%60))+'%';w.appendChild(b);}
+  if(!CARTA.audioUrl)return;
+  var pl=$('player'),a=$('audio');pl.hidden=false;a.src=CARTA.audioUrl;
+  var bars=w.children,fmt=function(s){s=Math.floor(s||0);return Math.floor(s/60)+':'+('0'+s%60).slice(-2)};
+  $('play').onclick=function(){a.paused?a.play():a.pause()};
+  a.onplay=function(){pl.classList.add('playing');$('icPlay').hidden=true;$('icPause').hidden=false};
+  a.onpause=a.onended=function(){pl.classList.remove('playing');$('icPlay').hidden=false;$('icPause').hidden=true};
+  a.ontimeupdate=function(){var r=a.duration?a.currentTime/a.duration:0;$('time').textContent=fmt(a.currentTime);for(var i=0;i<bars.length;i++)bars[i].classList.toggle('on',i/bars.length<r)};
+  w.onclick=function(e){if(!a.duration)return;var r=w.getBoundingClientRect();a.currentTime=a.duration*(e.clientX-r.left)/r.width};
+})();
+
+/* ===== respiro ===== */
+$('breathBtn').onclick=function(){var b=$('breath'),t=$('orbT'),n=0;b.classList.remove('go');void b.offsetWidth;b.classList.add('go');this.hidden=true;t.textContent='Inspire';
+  var iv=setInterval(function(){n++;t.textContent=n%2?'Solte':'Inspire';if(n>=6){clearInterval(iv);t.textContent='Pronto.';$('breathBtn').hidden=false;$('breathBtn').textContent='De novo';}},4000);};
+
+/* ===== compra =====
+   tracking.js carrega depois (defer), então o link é montado de novo no clique.
+   Aceita checkoutUrl(base, params) e checkoutUrl(params); sem ele, monta direto. */
+(function(){
+  var base='https://pay.kiwify.com.br/cJ4T7JR',p={utm_source:'carta',utm_medium:'whatsapp',utm_content:CARTA.codigo};
+  function manual(){var u=new URL(base),ck=function(n){var m=document.cookie.match(new RegExp('(?:^|; )'+n+'=([^;]*)'));return m?decodeURIComponent(m[1]):''};
+    for(var k in p)u.searchParams.set(k,p[k]);var fbc=ck('_fbc'),fbp=ck('_fbp');if(fbc){u.searchParams.set('sck',fbc);u.searchParams.set('fbc',fbc)}if(fbp){u.searchParams.set('src',fbp);u.searchParams.set('fbp',fbp)}return u.toString();}
+  function monta(){
+    try{var T=window.OPDDSTracking;if(T&&typeof T.checkoutUrl==='function'){var r=T.checkoutUrl.length>=2?T.checkoutUrl(base,p):T.checkoutUrl(p);
+      if(typeof r==='string'&&r.indexOf('pay.kiwify.com.br')>-1){var u=new URL(r);for(var k in p)if(!u.searchParams.get(k))u.searchParams.set(k,p[k]);return u.toString();}}}catch(e){}
+    return manual();
+  }
+  $('buy').href=monta();
+  $('buy').addEventListener('click',function(){this.href=monta();if(typeof fbq==='function')fbq('track','InitiateCheckout',{value:37,currency:'BRL'})});
+})();
+
+render();busca();
+</script>
+<!-- Pixel + tracking: só nos domínios oficiais, DEPOIS da limpeza da URL -->
+<script>
+if(/^(www\.)?opoderdosdesacreditados\.online$/.test(location.hostname)){
+!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
+fbq('init','1452183630052536');fbq('track','PageView');fbq('trackCustom','CartaAberta',{content_category:CARTA.codigo});
+var s=document.createElement('script');s.src='../../tracking/tracking.js';s.defer=true;document.head.appendChild(s);}
+</script>
+</body>
+</html>

@@ -1,0 +1,241 @@
+{
+  "i": {
+    "pilar": "I · Reconhecimento",
+    "romano": "I",
+    "codigo": "pilar_1",
+    "ato": "I",
+    "triade": "Tríade da Sobrevivência",
+    "titulo": "Para quem passou tempo demais tentando não ser um problema",
+    "blocos": [
+      {
+        "tipo": "p",
+        "texto": "Eu não vou te pedir coragem. Coragem é uma palavra bonita que, às vezes, só coloca mais peso em cima de quem já está pesado. Eu não vou te pedir “força”. Força também vira chicote."
+      },
+      {
+        "tipo": "p",
+        "texto": "Eu vou te dizer o que talvez ninguém tenha dito do jeito certo:"
+      },
+      {
+        "tipo": "p",
+        "texto": "Se você está cansado, isso não prova fracasso. Se você está confuso, isso não prova incapacidade."
+      },
+      {
+        "tipo": "p",
+        "texto": "Se você está duro por dentro, isso não prova frieza. Se você está irritado sem motivo, isso não prova que você é ruim."
+      },
+      {
+        "tipo": "p",
+        "texto": "Se você sente vergonha de existir às vezes, isso não prova que você é menor."
+      },
+      {
+        "tipo": "p",
+        "texto": "Isso prova, muitas vezes, que você passou tempo demais tentando sobreviver sem ser visto. E sobreviver assim deixa marca. Reconhecimento é você parar de se tratar como erro."
+      },
+      {
+        "tipo": "p",
+        "texto": "É você parar de se tratar como algo que precisa ser consertado para merecer paz."
+      },
+      {
+        "tipo": "p",
+        "texto": "Talvez ninguém tenha te reconhecido quando você precisava."
+      },
+      {
+        "tipo": "p",
+        "texto": "Talvez te olharam e te reduziram."
+      },
+      {
+        "tipo": "p",
+        "texto": "Talvez te interpretaram errado. Talvez te deram rótulos em vez de presença."
+      },
+      {
+        "tipo": "p",
+        "texto": "Talvez você tenha sido “o problema” na história de alguém só porque você não coube no controle. Mas eu não estou falando “coitadinho”."
+      },
+      {
+        "tipo": "p",
+        "texto": "Eu estou falando de realidade. E a realidade é: você aprendeu a se esconder. E agora você está tentando voltar."
+      },
+      {
+        "tipo": "p",
+        "texto": "Então volta do jeito que dá. Volta sem teatro. Volta sem promessa. Volta sem meta."
+      },
+      {
+        "tipo": "p",
+        "texto": "Só volta."
+      },
+      {
+        "tipo": "p",
+        "texto": "E se hoje tudo o que você consegue é reconhecer uma coisa — uma só — então reconhece essa:"
+      },
+      {
+        "tipo": "p",
+        "texto": "eu não quero mais me abandonar para caber. E fica em silêncio um pouco depois dessa frase."
+      },
+      {
+        "tipo": "p",
+        "texto": "Deixa-a encostar."
+      }
+    ],
+    "audioUrl": "https://app.opoderdosdesacreditados.online/media/audios/livro/6-ato1-sobrevivencia/pilar-01-reconhecimento/p1-carta.wav"
+  },
+  "ii": {
+    "pilar": "II · Família",
+    "romano": "II",
+    "codigo": "pilar_2",
+    "ato": "I",
+    "triade": "Tríade da Sobrevivência",
+    "titulo": "Para quem ainda sente culpa por existir inteiro",
+    "blocos": [
+      {
+        "tipo": "p",
+        "texto": "Se você leu isso e sentiu um peso familiar, não interprete isso como acusação. Interprete como contato."
+      },
+      {
+        "tipo": "p",
+        "texto": "Você não está errado por sentir o que sente. Você não está quebrado por carregar culpa."
+      },
+      {
+        "tipo": "p",
+        "texto": "Você apenas aprendeu cedo demais que precisava se moldar para pertencer. E isso não é falha moral; é adaptação."
+      },
+      {
+        "tipo": "p",
+        "texto": "Só que agora essa adaptação cobra um preço que talvez você não queira mais pagar."
+      },
+      {
+        "tipo": "p",
+        "texto": "Você não precisa romper com sua família para romper com a lealdade que te diminui."
+      },
+      {
+        "tipo": "p",
+        "texto": "Às vezes, o rompimento mais profundo é interno."
+      },
+      {
+        "tipo": "p",
+        "texto": "É parar de se exigir o mesmo papel."
+      },
+      {
+        "tipo": "p",
+        "texto": "É parar de sustentar a mesma dívida."
+      },
+      {
+        "tipo": "p",
+        "texto": "É permitir que o amor exista sem a obrigação de ser perfeito, estável, disponível o tempo todo."
+      },
+      {
+        "tipo": "p",
+        "texto": "Você pode honrar sua história sem continuar preso a ela. Você pode reconhecer o que foi dado sem negar o que faltou."
+      },
+      {
+        "tipo": "p",
+        "texto": "Essas duas coisas não se anulam. Elas convivem."
+      }
+    ],
+    "audioUrl": "https://app.opoderdosdesacreditados.online/media/audios/livro/6-ato1-sobrevivencia/pilar-02-familia/p2-carta.wav"
+  },
+  "iii": {
+    "pilar": "III · Luto",
+    "romano": "III",
+    "codigo": "pilar_3",
+    "ato": "I",
+    "triade": "Tríade da Sobrevivência",
+    "titulo": "A quem está cansado de provar",
+    "blocos": [
+      {
+        "tipo": "p",
+        "texto": "Se você sente que algo em você ficou para trás, isso não é defeito. É memória viva. Você não precisa “superar” para seguir. Você precisa integrar. Algumas ausências nunca deixam de doer completamente — e isso não te impede de viver. Apenas te torna mais cuidadoso com o que importa. Honrar o luto não é parar; é parar de fugir."
+      }
+    ],
+    "audioUrl": "https://app.opoderdosdesacreditados.online/media/audios/livro/6-ato1-sobrevivencia/pilar-03-luto/p3-carta.wav"
+  },
+  "iv": {
+    "pilar": "IV · Trabalho",
+    "romano": "IV",
+    "codigo": "pilar_4",
+    "ato": "II",
+    "triade": "Tríade da Reconstrução",
+    "titulo": "Para quem só se sente válido quando entrega",
+    "blocos": [
+      {
+        "tipo": "p",
+        "texto": "Se você sente que precisa provar valor o tempo todo, isso não significa que você é ambicioso demais. Significa que, em algum momento, você aprendeu que existir não bastava. E isso dói. Mas não precisa continuar organizando sua vida inteira. O trabalho pode ser importante sem ser o único lugar onde você se reconhece. Você não precisa se desmontar para merecer espaço. Você nunca precisou produzir para merecer existir."
+      }
+    ],
+    "audioUrl": "https://app.opoderdosdesacreditados.online/media/audios/livro/7-ato2-reconstrucao/pilar-04-trabalho/p4-carta.wav"
+  },
+  "v": {
+    "pilar": "V · Dor",
+    "romano": "V",
+    "codigo": "pilar_5",
+    "ato": "II",
+    "triade": "Tríade da Reconstrução",
+    "titulo": "Para quem aprendeu a sobreviver saindo de si",
+    "blocos": [
+      {
+        "tipo": "p",
+        "texto": "Se você foge, não é porque você não quer viver. É porque, em algum ponto, viver doeu demais sem apoio. A anestesia não começou como inimiga; começou como tentativa de proteção. Você não precisa se destruir para parar de fugir. Precisa aprender, aos poucos, a ficar. E ficar é um aprendizado lento para quem passou a vida inteira escapando."
+      }
+    ],
+    "audioUrl": "https://app.opoderdosdesacreditados.online/media/audios/livro/7-ato2-reconstrucao/pilar-05-dor/p5-carta.wav"
+  },
+  "vi": {
+    "pilar": "VI · Desejo",
+    "romano": "VI",
+    "codigo": "pilar_6",
+    "ato": "II",
+    "triade": "Tríade da Reconstrução",
+    "titulo": "A quem aprendeu a não querer",
+    "blocos": [
+      {
+        "tipo": "p",
+        "texto": "Se você sente que ama com medo, isso não significa que você ama errado. Significa que você ama com história. E história pesa. Mas você não precisa colocar esse peso nas costas do outro como se ele fosse responsável por salvar você de si. Amor pode ser lugar de encontro, de companhia, de construção — mas ele não é substituto de reconhecimento, nem de luto, nem de pertencimento interno. Quando você entende isso por dentro, não como conceito, mas como corpo, algo muda: você para de exigir prova e começa a buscar presença. E presença é mais rara, mas é mais real."
+      }
+    ],
+    "audioUrl": "https://app.opoderdosdesacreditados.online/media/audios/livro/7-ato2-reconstrucao/pilar-06-desejo/p6-carta.wav"
+  },
+  "vii": {
+    "pilar": "VII · Fé",
+    "romano": "VII",
+    "codigo": "pilar_7",
+    "ato": "III",
+    "triade": "Tríade da Continuidade",
+    "titulo": "Para quem cansou de acreditar",
+    "blocos": [
+      {
+        "tipo": "p",
+        "texto": "Se você sente que não acredita mais como antes, isso não te torna vazio. Te torna alguém que tentou. E tentou de verdade. Você não precisa voltar a ser quem acreditava sem questionar. Mas também não precisa viver fechado para sempre. Existe um meio possível entre ingenuidade e cinismo. E esse meio não se constrói com discurso — se constrói com presença repetida."
+      }
+    ],
+    "audioUrl": "https://app.opoderdosdesacreditados.online/media/audios/livro/8-ato3-continuidade/pilar-07-fe/p7-carta.wav"
+  },
+  "viii": {
+    "pilar": "VIII · Escassez",
+    "romano": "VIII",
+    "codigo": "pilar_8",
+    "ato": "III",
+    "triade": "Tríade da Continuidade",
+    "titulo": "Para quem aprendeu a se contentar com pouco antes mesmo de tentar pedir mais",
+    "blocos": [
+      {
+        "tipo": "p",
+        "texto": "Se você vive calculando quanto pode desejar, quanto pode descansar, quanto pode pedir — isso não te torna comedido ou maduro. Te torna alguém que aprendeu, cedo demais, que o básico não vinha garantido. Você não precisa continuar racionando sua própria existência para provar que é fácil de sustentar. Precisar de mais do que a vida ofereceu até agora não é ingratidão. É humanidade. E você pode começar, aos poucos, a desejar sem calcular o preço da decepção antes mesmo de tentar."
+      }
+    ],
+    "audioUrl": "https://app.opoderdosdesacreditados.online/media/audios/livro/8-ato3-continuidade/pilar-08-escacez/p8-carta.wav"
+  },
+  "ix": {
+    "pilar": "IX · Vazio",
+    "romano": "IX",
+    "codigo": "pilar_9",
+    "ato": "III",
+    "triade": "Tríade da Continuidade",
+    "titulo": "Para quem chegou até aqui sem virar outra pessoa",
+    "blocos": [
+      {
+        "tipo": "p",
+        "texto": "Se você chegou até aqui esperando sair deste pilar com um propósito recém-descoberto, uma missão clara, uma resposta definitiva sobre o sentido da sua vida, talvez se frustre. O vazio raramente entrega isso. Mas se você chegou até aqui e, no meio do silêncio, ainda reconhece a si mesmo — só que um pouco menos assustado com a própria quietude —, isso já é muito. Você não precisa preencher o vazio para merecer continuar. Precisa apenas atravessálo sem se abandonar dentro dele."
+      }
+    ],
+    "audioUrl": "https://app.opoderdosdesacreditados.online/media/audios/livro/8-ato3-continuidade/pilar-09-vazio/p9-carta.wav"
+  }
+}

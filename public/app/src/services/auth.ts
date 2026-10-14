@@ -671,6 +671,8 @@ export type QuizLead = {
   utmContent: string | null;
   status: QuizLeadStatus;
   cartaEnviadaEm: string | null;
+  cartaAbertaEm: string | null;
+  cartaEmailEnviadoEm: string | null;
   compradorEm: string | null;
   observacao: string | null;
 };
@@ -683,6 +685,7 @@ export type QuizLeadsResumo = {
   total: number;
   pessoas: number;
   compraram: number;
+  abriram: number;
   taxaCompra: number;
   porPilar: { codigo: string; nome: string; total: number }[];
   porAto: { codigo: string; nome: string; total: number }[];
@@ -690,7 +693,16 @@ export type QuizLeadsResumo = {
   porStatus: { status: QuizLeadStatus; total: number }[];
 };
 
-export type QuizLeadFilters = { de?: string; ate?: string; pilar?: string; status?: string; origem?: string; q?: string };
+export type QuizLeadFilters = {
+  de?: string;
+  ate?: string;
+  pilar?: string;
+  status?: string;
+  origem?: string;
+  q?: string;
+  abriu?: '' | 'sim' | 'nao';
+  leadId?: string;
+};
 
 const quizLeadQuery = (filters: Record<string, string | number | undefined>) =>
   new URLSearchParams(

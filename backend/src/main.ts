@@ -29,7 +29,7 @@ async function bootstrap() {
     credentials: true,
     allowedHeaders: ['Content-Type', 'Authorization'],
   };
-  // Rotas públicas do quiz (/api/leads e /api/leads/ping): só a LP, sem credenciais.
+  // Rotas públicas da LP (/api/leads*, /api/cartas*): só a LP, sem credenciais.
   const leadsCors: CorsOptions = {
     origin: getLeadsCorsOrigins(),
     credentials: false,
@@ -39,7 +39,7 @@ async function bootstrap() {
   };
   app.enableCors((req: any, callback: (error: Error | null, options: CorsOptions) => void) => {
     const path = String(req.originalUrl || req.url || '').split('?')[0];
-    const isLeadsRoute = path === '/api/leads' || path.startsWith('/api/leads/');
+    const isLeadsRoute = path === '/api/leads' || path.startsWith('/api/leads/') || path.startsWith('/api/cartas/');
     callback(null, isLeadsRoute ? leadsCors : appCors);
   });
 
