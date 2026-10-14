@@ -232,11 +232,19 @@ window.__testeNome=function(){var c=[['Você sabe, {nome}, que dói.','Você sab
    Teclas, "plim" e sopro são sintetizados (Web Audio). A trilha é um trecho de
    "Silêncio dourado" servido pela própria LP (../_audio/respiro.mp3). */
 var SOM=(function(){
-  var ctx=null,ligado=true,ruido=null,trilha=null,trilhaGain=null,trilhaTimer=null;
+  var ctx=null,ligado=true,ruido=null,trilha=null,trilhaGain=null,trilhaTimer=null,ios=false;
   try{ligado=localStorage.getItem('opdds_carta_som')!=='0'}catch(e){}
+  /* iPhone com a chave de silencioso: o Web Audio fica mudo. Tocar um áudio
+     comum (silêncio) dentro do toque põe a página no modo "mídia", que toca. */
+  function liberaIos(){
+    if(ios)return;ios=true;
+    try{if(navigator.audioSession)navigator.audioSession.type='playback';}catch(e){}
+    try{var s=new Audio('../_audio/silencio.mp3');s.setAttribute('playsinline','');var p=s.play();if(p&&p.catch)p.catch(function(){});}catch(e){}
+  }
   function ac(){
     if(!ligado)return null;
     var C=window.AudioContext||window.webkitAudioContext;if(!C)return null;
+    liberaIos();
     try{if(!ctx)ctx=new C();if(ctx.state==='suspended')ctx.resume();}catch(e){return null}
     return ctx;
   }
