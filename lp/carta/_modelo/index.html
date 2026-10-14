@@ -110,13 +110,15 @@ h1{margin:34px 0 0;font-family:'Fraunces',serif;font-weight:400;font-size:clamp(
 .orb::before{content:'';position:absolute;inset:0;border-radius:50%;border:1px solid rgba(167,127,102,.35)}
 .orb i{position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle at 40% 32%,#ffd39d,#cb8f64 55%,rgba(146,100,67,.85));transform:scale(.62);box-shadow:0 0 40px rgba(203,143,100,.35)}
 .breath.go .orb i{animation:breathe 8s ease-in-out 3}
-.orb b{position:relative;font-family:'Fraunces',serif;font-style:italic;font-weight:400;font-size:1rem;color:#2a1c12}
+.orb b{position:relative;font-family:'Fraunces',serif;font-style:italic;font-weight:400;font-size:1rem;color:#2a1c12;transition:opacity .9s ease,filter .9s ease,transform .9s ease}
+.orb b.out{opacity:0;filter:blur(6px);transform:scale(.94)}
 .breath p{margin:0;max-width:34ch;font-size:.95rem;line-height:1.7;color:#7A7A8C}
 .ghost{min-height:44px;padding:12px 22px;border-radius:30px;border:1px solid rgba(167,127,102,.3);background:rgba(167,127,102,.10);color:#A77F66;font-size:.72rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;cursor:pointer}
 
 /* FECHO */
 .close{margin:72px 0 0;padding-top:40px;border-top:1px solid rgba(192,152,128,.25);display:flex;flex-direction:column;align-items:center;gap:18px;text-align:center}
 .close p{margin:0;max-width:44ch;font-size:1rem;line-height:1.75;color:#3D3D4E}
+.close .livro{font-family:'Fraunces',serif;white-space:nowrap}
 .buy{position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;width:100%;max-width:400px;min-height:56px;padding:16px 22px;border-radius:9px;background:radial-gradient(circle at 38% 28%,#ffd39d,#cb8f64 58%,#926443);background-size:200% 200%;animation:gradientShift 8s ease infinite;color:#000;text-decoration:none;font-weight:600;font-size:.84rem;text-transform:uppercase;letter-spacing:-.01em;border-bottom:3px solid rgb(132 82 56 / 72%);transition:transform .2s}
 .buy:hover{color:#000;transform:translateY(-2px)}
 .buy::after,.env-cta button::after{content:'';position:absolute;top:0;left:-60%;width:40%;height:100%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.5),transparent);transform:skewX(-20deg);animation:sheen 4.5s ease-in-out infinite}
@@ -198,7 +200,7 @@ footer a{color:rgba(245,240,232,.75)}
   </section>
 
   <section class="close">
-    <p>Esta é uma das nove cartas do livro. As outras oito, com os dilemas, o áudio e o caderno, estão em <em style="font-family:'Fraunces',serif">O Poder dos Desacreditados</em>.</p>
+    <p>Esta é uma das nove cartas do livro. As outras oito, com os dilemas, o áudio e o caderno, estão em <em class="livro">O Poder dos Desacreditados</em>.</p>
     <a class="buy" id="buy" href="https://pay.kiwify.com.br/cJ4T7JR">Conhecer o livro completo — R$ 37</a>
     <button class="keep" type="button" onclick="window.print()">Guardar esta carta (PDF)</button>
   </section>
@@ -392,13 +394,16 @@ addEventListener('scroll',function(){var a=$('carta').getBoundingClientRect(),h=
 })();
 
 /* ===== respiro ===== */
-$('breathBtn').onclick=function(){var b=$('breath'),t=$('orbT'),n=0;b.classList.remove('go');void b.offsetWidth;b.classList.add('go');this.hidden=true;t.textContent='Inspire';
+/* troca o texto da esfera com esmaecer + desfoque (sem corte seco) */
+function trocaOrb(txt){var t=$('orbT');if(t.textContent===txt)return;t.classList.add('out');
+  clearTimeout(trocaOrb.timer);trocaOrb.timer=setTimeout(function(){t.textContent=txt;t.classList.remove('out');},reduzido?0:650);}
+$('breathBtn').onclick=function(){var b=$('breath'),n=0;b.classList.remove('go');void b.offsetWidth;b.classList.add('go');this.hidden=true;trocaOrb('Inspire');
   /* trilha baixinha + sopro no ritmo da esfera (4 s inspira, 4 s solta) */
   var narr=$('audio');if(narr&&!narr.paused)narr.pause();
   SOM.trilhaStart();SOM.sopro(3.8,true);
-  var iv=setInterval(function(){n++;t.textContent=n%2?'Solte':'Inspire';
-    if(n>=6){clearInterval(iv);t.textContent='Pronto.';$('breathBtn').hidden=false;$('breathBtn').textContent='De novo';SOM.trilhaStop();return;}
-    SOM.sopro(3.8,n%2===0);},4000);};
+  var iv=setInterval(function(){n++;
+    if(n>=6){clearInterval(iv);trocaOrb('Pronto.');$('breathBtn').hidden=false;$('breathBtn').textContent='De novo';SOM.trilhaStop();return;}
+    trocaOrb(n%2?'Solte':'Inspire');SOM.sopro(3.8,n%2===0);},4000);};
 
 /* ===== compra =====
    tracking.js carrega depois (defer), então o link é montado de novo no clique.
